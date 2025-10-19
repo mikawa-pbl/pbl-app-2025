@@ -1,0 +1,12 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Team Terrace Items</title></head>
+<body>
+  <h1>Team Terrace Items</h1>
+  <ul>
+    {% for it in items %}
+      <li>{{ it.name }} - {{ it.memo }}</li>
+    {% empty %}
+      <li>データがありません</li>
+    {% endfor %}
+  </ul>
+  <p><a href="/team-c/">Team C トップへ</a></p>
+</body></html>

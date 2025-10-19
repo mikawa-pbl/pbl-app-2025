@@ -1,8 +1,9 @@
-# myproject/views.py
 from django.shortcuts import render
 
 def index(request):
     teams = [
-        # {"name": "Team A", "url": "/team-a/"}
+        # データサンプル
+        # {"name": "Team A", "url": "/team_a/"},
+        {"name": "Team Terrace", "url": "/team-terrace/"},  # ← 新チームを追加
     ]
     return render(request, "top.html", {"teams": teams})

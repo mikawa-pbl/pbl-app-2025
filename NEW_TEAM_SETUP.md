@@ -210,27 +210,22 @@ templates/
 
 ---
 
-## 9. 依存関係の追加（必要に応じて）
+## 9 プロジェクトポータルページ（index）にチームリンクを追加
 
-チーム固有の依存が必要な場合は、`pyproject.toml` に追加：
+新チーム用のページができたら、**プロジェクト全体のトップページ (`pbl_project/views.py` の `index`) に新チームをコンテキストとして追加**してください。これにより、全体トップからチームページへ遷移できるようになります。
 
-```bash
-# 例: チーム固有のパッケージを追加
-uv add django-filter --group team_terrace
-```
+### `pbl_project/views.py`
 
-または `pyproject.toml` を直接編集して optional-dependencies に追加：
+```python
+from django.shortcuts import render
 
-```toml
-[project.optional-dependencies]
-team_terrace = ["django-filter>=24.2"]
-```
-
-依存関係をインストール：
-
-```bash
-uv sync
-```
+def index(request):
+    teams = [
+        # データサンプル
+        # {"name": "Team A", "url": "/team_a/"},
+        {"name": "Team Terrace", "url": "/team-terrace/"},  # ← 新チームを追加
+    ]
+    return render(request, "top.html", {"teams": teams})
 
 ---
 

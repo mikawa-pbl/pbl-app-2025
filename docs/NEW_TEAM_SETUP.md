@@ -52,7 +52,31 @@ uv --version
 
 ---
 
-## 1. ブランチを切る
+## 1. リポジトリのクローン（まだクローンしていない場合）
+
+リポジトリをまだクローンしていない場合は、まずクローンしたいディレクトリに移動します：
+
+```bash
+cd ~/Documents  # 例: Documentsフォルダにクローンする場合
+```
+
+次に、以下のコマンドを実行してリポジトリをクローンします：
+
+```bash
+git clone https://github.com/mikawa-pbl/pbl-app-sample.git
+```
+
+クローン後、プロジェクトディレクトリに移動します：
+
+```bash
+cd pbl-app-sample
+```
+
+※ 既にクローン済みの場合は、この章はスキップしてください。
+
+---
+
+## 2. ブランチを切る
 
 ```bash
 git switch -c setup/team_terrace-bootstrap
@@ -60,7 +84,7 @@ git switch -c setup/team_terrace-bootstrap
 
 ---
 
-## 2. アプリを作成（チーム用アプリ）
+## 3. アプリを作成（チーム用アプリ）
 
 例では **team_terrace** とします。`team_terrace`を各チーム名に合わせて修正してください
 
@@ -85,7 +109,7 @@ team_terrace/
 
 ---
 
-## 3. SQLite ファイルを配置（SKIP可能）
+## 4. SQLite ファイルを配置（SKIP可能）
 
 **ファイルがなくてもOK**（マイグレーション時に作成されます）。
 
@@ -95,7 +119,7 @@ team_terrace/db.sqlite3  （ファイルが無くても可）
 
 ---
 
-## 4. `settings.py` にアプリとDBを追加
+## 5. `settings.py` にアプリとDBを追加
 
 `pbl_project/settings.py`:
 
@@ -123,7 +147,7 @@ DATABASES = {
 
 ---
 
-## 5. DBルーターにチームを追加
+## 6. DBルーターにチームを追加
 
 `routers.py` に `team_terrace` を登録：
 
@@ -139,7 +163,7 @@ class TeamPerAppRouter:
 
 ---
 
-## 6. URL を親ルータに追加
+## 7. URL を親ルータに追加
 
 `pbl_project/urls.py`：
 
@@ -154,7 +178,7 @@ urlpatterns = [
 
 ---
 
-## 7. チーム用 URLs / Views / Models を雛形化
+## 8. チーム用 URLs / Views / Models を雛形化
 
 ### `team_terrace/urls.py`（新規ファイルを作成してください）
 
@@ -198,7 +222,7 @@ class Item(models.Model):
 
 ---
 
-## 8. プロジェクト直下テンプレートを用意（**APP_DIRS=False 運用**）
+## 9. プロジェクト直下テンプレートを用意（**APP_DIRS=False 運用**）
 
 ```text
 templates/
@@ -244,7 +268,7 @@ templates/
 
 ---
 
-## 9 プロジェクトポータルページ（index）にチームリンクを追加
+## 10. プロジェクトポータルページ（index）にチームリンクを追加
 
 新チーム用のページができたら、**プロジェクト全体のトップページ (`pbl_project/views.py` の `index`) に新チームをコンテキストとして追加**してください。これにより、全体トップからチームページへ遷移できるようになります。
 
@@ -263,7 +287,7 @@ def index(request):
 
 ---
 
-## 10. マイグレーション
+## 11. マイグレーション
 
 マイグレーションファイル作成：
 
@@ -279,9 +303,9 @@ uv run python manage.py migrate --database=team_terrace
 
 ---
 
-## 11. 動作確認
+## 12. 動作確認
 
-### 11.1 サーバ起動
+### 12.1 サーバ起動
 
 ```bash
 uv run python manage.py runserver
@@ -290,7 +314,7 @@ uv run python manage.py runserver
 - `/team_terrace/` にアクセスして Team Terrace の index が表示されること
 - `/team_terrace/items/` が空一覧で表示されること
 
-### 11.2 データ投入
+### 12.2 データ投入
 
 **dbshell で直接 INSERT**
 
@@ -307,7 +331,7 @@ SELECT * FROM team_terrace_item;
 
 ---
 
-## 12. コミット & プッシュ
+## 13. コミット & プッシュ
 
 ```bash
 git add .

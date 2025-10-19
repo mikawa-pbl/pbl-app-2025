@@ -25,6 +25,31 @@ uv --version
 
 ※ 既にプロジェクトの仮想環境と依存が入っていれば、この章はスキップ可。
 
+### SQLite3 のインストール（Windows のみ）
+
+**macOS / Linux の場合：** SQLite3 はシステムに標準搭載されているため、この章はスキップしてください。
+
+**Windows の場合：** Django の `dbshell` コマンドを使用するために、SQLite3 のコマンドラインツールをインストールします。
+
+#### インストール手順
+
+1. PowerShell を**管理者として実行**します
+
+2. 以下のコマンドを実行します：
+
+   ```powershell
+   winget install --scope machine SQLite.SQLite
+   ```
+
+3. インストール完了後、**PowerShell を再起動**します
+   - VS Code のターミナルを使用している場合は、**VS Code も再起動**してください
+
+4. インストール確認：
+
+   ```powershell
+   sqlite3 --version
+   ```
+
 ---
 
 ## 1. ブランチを切る

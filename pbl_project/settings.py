@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-wjso^p!ll^w%b$!56r)vy5c+m3dd7v74z*l=^nv8edbq9nz#a_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS =['localhost', '127.0.0.1'] + [f'133.15.185.{i}' for i in range(8, 255)] # 学内サーバーIPアドレスとlocalhostを許可
 
 
 # Application definition

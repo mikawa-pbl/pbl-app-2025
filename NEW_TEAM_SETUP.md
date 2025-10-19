@@ -21,23 +21,23 @@
 ## 1. ブランチを切る
 
 ```bash
-git switch -c setup/team-c-bootstrap
+git switch -c setup/team_terrace-bootstrap
 ```
 
 ---
 
 ## 2. アプリを作成（チーム用アプリ）
 
-例では **team_c** とします。
+例では **team_terrace** とします。`team_terrace`を各チーム名に合わせて修正してください
 
 ```bash
-python manage.py startapp team_c
+uv run python manage.py startapp team_terrace
 ```
 
 作成直後の構成（抜粋）:
 
 ```text
-team_c/
+team_terrace/
 ├── __init__.py
 ├── admin.py
 ├── apps.py
@@ -56,19 +56,19 @@ team_c/
 **ファイルがなくてもOK**（マイグレーション時に作成されます）。
 
 ```text
-team_c/db.sqlite3  （ファイルが無くても可）
+team_terrace/db.sqlite3  （ファイルが無くても可）
 ```
 
 ---
 
 ## 4. `settings.py` にアプリとDBを追加
 
-`myproject/settings.py`:
+`pbl_project/settings.py`:
 
 ```python
 INSTALLED_APPS = [
     # ... 既存
-    'team_c',  # ← 追加
+    'team_terrace',  # ← 追加
 ]
 ```
 
@@ -78,9 +78,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 DATABASES = {
     # ... 既存 default, team_a, team_b
-    'team_c': {
+    'team_terrace': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'team_c' / 'db.sqlite3',
+        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
     },
 }
 ```
@@ -91,14 +91,14 @@ DATABASES = {
 
 ## 5. DBルーターにチームを追加
 
-`routers.py` に `team_c` を登録：
+`routers.py` に `team_terrace` を登録：
 
 ```python
 class TeamPerAppRouter:
     app_to_db = {
         'team_a': 'team_a',
         'team_b': 'team_b',
-        'team_c': 'team_c',  # ← 追加
+        'team_terrace': 'team_terrace',  # ← 追加
     }
     # 以降のメソッドは既存のまま（db_for_read/write, allow_relation, allow_migrate）
 ```
@@ -107,14 +107,14 @@ class TeamPerAppRouter:
 
 ## 6. URL を親ルータに追加
 
-`myproject/urls.py`：
+`pbl_project/urls.py`：
 
 ```python
 from django.urls import path, include
 
 urlpatterns = [
     # ... 既存
-    path('team-c/', include('team_c.urls')),  # ← 追加
+    path('team_terrace/', include('team_terrace.urls')),  # ← 追加
 ]
 ```
 
@@ -122,34 +122,34 @@ urlpatterns = [
 
 ## 7. チーム用 URLs / Views / Models を雛形化
 
-### `team_c/urls.py`（新規作成）
+### `team_terrace/urls.py`（新規ファイルを作成してください）
 
 ```python
 from django.urls import path
 from . import views
 
-app_name = "team_c"
+app_name = "team_terrace"
 urlpatterns = [
     path('', views.index, name='index'),
     path('items/', views.items, name='items'),
 ]
 ```
 
-### `team_c/views.py`
+### `team_terrace/views.py`
 
 ```python
 from django.shortcuts import render
 from .models import Item
 
 def index(request):
-    return render(request, 'teams/team_c/index.html')
+    return render(request, 'teams/team_terrace/index.html')
 
 def items(request):
-    qs = Item.objects.using('team_c').all()  # ← team_c DBを明示
-    return render(request, 'teams/team_c/items.html', {'items': qs})
+    qs = Item.objects.using('team_terrace').all()  # ← team_terrace DBを明示
+    return render(request, 'teams/team_terrace/items.html', {'items': qs})
 ```
 
-### `team_c/models.py`（例）
+### `team_terrace/models.py`（例）
 
 ```python
 from django.db import models
@@ -169,27 +169,32 @@ class Item(models.Model):
 ```text
 templates/
 └── teams/
-    └── team_c/
+    └── team_terrace/
         ├── index.html
         └── items.html
 ```
 
-**`templates/teams/team_c/index.html`（例）**
+**`templates/teams/team_terrace/index.html`（例）**
 
 ```html
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Team C</title></head>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Team Terrace</title></head>
 <body>
-  <h1>Team C</h1>
-  <p><a href="/team-c/items/">items 一覧</a></p>
-</body></html>
+<h1>Team Terrace</h1>
+<p><a href="/team-terrace/items/">items 一覧</a></p>
+</body>
+</html>
 ```
 
-**`templates/teams/team_c/items.html`（例）**
+**`templates/teams/team_terrace/items.html`（例）**
 
 ```html
 <!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Team C Items</title></head>
 <body>
-  <h1>Team C Items</h1>
+  <h1>Team Terrace Items</h1>
   <ul>
     {% for it in items %}
       <li>{{ it.name }} - {{ it.memo }}</li>
@@ -197,11 +202,11 @@ templates/
       <li>データがありません</li>
     {% endfor %}
   </ul>
-  <p><a href="/team-c/">Team C トップへ</a></p>
+  <p><a href="/team_terrace/">Team Terrace トップへ</a></p>
 </body></html>
 ```
 
-> 既存のトップ（`templates/index.html`）にも Team C へのリンクを追記推奨。
+> 既存のトップ（`templates/index.html`）にも Team Terrace へのリンクを追記推奨。
 
 ---
 
@@ -211,14 +216,14 @@ templates/
 
 ```bash
 # 例: チーム固有のパッケージを追加
-uv add django-filter --group team_c
+uv add django-filter --group team_terrace
 ```
 
 または `pyproject.toml` を直接編集して optional-dependencies に追加：
 
 ```toml
 [project.optional-dependencies]
-team_c = ["django-filter>=24.2"]
+team_terrace = ["django-filter>=24.2"]
 ```
 
 依存関係をインストール：
@@ -234,13 +239,13 @@ uv sync
 マイグレーションファイル作成：
 
 ```bash
-python manage.py makemigrations
+uv run python manage.py makemigrations
 ```
 
-反映（team_c DB に対して）：
+反映（team_terrace DB に対して）：
 
 ```bash
-python manage.py migrate --database=team_c
+uv run python manage.py migrate --database=team_terrace
 ```
 
 ---
@@ -253,23 +258,23 @@ python manage.py migrate --database=team_c
 uv run python manage.py runserver
 ```
 
-- `/team-c/` にアクセスして Team C の index が表示されること
-- `/team-c/items/` が空一覧で表示されること
+- `/team_terrace/` にアクセスして Team Terrace の index が表示されること
+- `/team_terrace/items/` が空一覧で表示されること
 
 ### 11.2 データ投入
 
 **dbshell で直接 INSERT**
 
 ```bash
-python manage.py dbshell --database=team_c
+uv run python manage.py dbshell --database=team_terrace
 ```
 
 ```sql
-INSERT INTO team_c_item (name, memo) VALUES ('Sample', 'first row');
-SELECT * FROM team_c_item;
+INSERT INTO team_terrace_item (name, memo) VALUES ('Sample', 'first row');
+SELECT * FROM team_terrace_item;
 ```
 
-リロードして `/team-c/items/` にデータが出ればOK。
+リロードして `/team_terrace/items/` にデータが出ればOK。
 
 ---
 
@@ -277,8 +282,8 @@ SELECT * FROM team_c_item;
 
 ```bash
 git add .
-git commit -m "team cのsetupが完了"
-git push origin setup/team-c-bootstrap
+git commit -m "Team Terraceのsetupが完了"
+git push origin setup/team_terrace-bootstrap
 ```
 
 PR を作成し、レビュー依頼。
@@ -287,12 +292,12 @@ PR を作成し、レビュー依頼。
 
 ## よくあるエラー / チェックリスト
 
-- [ ] `routers.py` に新チームのエイリアスを追加したか（`app_to_db` に `team_c`）
-- [ ] `DATABASES['team_c']` の `NAME` パスが `BASE_DIR / 'team_c' / 'db.sqlite3'` になっているか
-- [ ] ビューで `.using('team_c')` を付けているか（付け忘れると `default` に書かれる）
+- [ ] `routers.py` に新チームのエイリアスを追加したか（`app_to_db` に `team_terrace`）
+- [ ] `DATABASES['team_terrace']` の `NAME` パスが `BASE_DIR / 'team_terrace' / 'db.sqlite3'` になっているか
+- [ ] ビューで `.using('team_terrace')` を付けているか（付け忘れると `default` に書かれる）
 - [ ] `APP_DIRS=False` のため、**アプリ配下の `templates/` は参照されない**（必ずプロジェクト直下に配置）
 - [ ] 必要に応じて `pyproject.toml` にチーム固有の依存を追加したか
-- [ ] マイグレーションを **`--database=team_c`** で実行したか
+- [ ] マイグレーションを **`--database=team_terrace`** で実行したか
 
 ---
 
@@ -321,13 +326,13 @@ PR を作成し、レビュー依頼。
   ```
 
   ```python
-  from team_c.models import Item
-  list(Item.objects.using('team_c').all())
+  from team_terrace.models import Item
+  list(Item.objects.using('team_terrace').all())
   ```
 
 ---
 
 ## 完了！
 
-ここまでで、新チーム（例：team_c）のアプリ追加〜DB作成〜URL配線〜テンプレート連携までが完了します。
+ここまでで、新チーム（例：team_terrace）のアプリ追加〜DB作成〜URL配線〜テンプレート連携までが完了します。
 同様の手順で、他の新チームも追加可能です。

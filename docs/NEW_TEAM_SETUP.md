@@ -10,9 +10,18 @@
 
 - Python 3.11+
 - uv（依存解決・仮想環境管理）
-  - macOS / Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
-  - Windows (PowerShell): `irm https://astral.sh/uv/install.ps1 | iex`
 - SQLite3（Windows で `dbshell` を使う場合は `sqlite3.exe` を PATH に通すと便利）
+
+### uv のインストール確認
+
+まず、uv がインストールされているか確認します：
+
+```bash
+uv --version
+```
+
+バージョンが表示されれば OK です（例: `uv 0.x.x`）。
+コマンドが見つからない場合は、[UV_INSTALLATION.md](UV_INSTALLATION.md) を参照してインストールしてください。
 
 ※ 既にプロジェクトの仮想環境と依存が入っていれば、この章はスキップ可。
 

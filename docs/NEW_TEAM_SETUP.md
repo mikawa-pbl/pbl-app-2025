@@ -301,7 +301,7 @@ templates/
 **`templates/teams/team_terrace/items.html`（例）**
 
 ```html
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Team C Items</title></head>
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Team Terrace Items</title></head>
 <body>
   <h1>Team Terrace Items</h1>
   <ul>

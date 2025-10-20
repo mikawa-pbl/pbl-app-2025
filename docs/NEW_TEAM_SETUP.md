@@ -61,13 +61,13 @@ cd ~/Documents  # 例: Documentsフォルダにクローンする場合
 次に、以下のコマンドを実行してリポジトリをクローンします：
 
 ```bash
-git clone https://github.com/mikawa-pbl/pbl-app-sample.git
+git clone https://github.com/mikawa-pbl/pbl-app-2025.git
 ```
 
 クローン後、プロジェクトディレクトリに移動します：
 
 ```bash
-cd pbl-app-sample
+cd pbl-app-2025
 ```
 
 ※ 既にクローン済みの場合は、この章はスキップしてください。

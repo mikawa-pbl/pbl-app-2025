@@ -1,0 +1,12 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Graphic Members</title></head>
+<body>
+  <h1>Graphic Members</h1>
+  <ul>
+    {% for member in members %}
+      <li>{{ member.last_name }} {{ member.first_name }}</li>
+    {% empty %}
+      <li>データがありません</li>
+    {% endfor %}
+  </ul>
+  <p><a href="/graphic/">Graphic トップへ</a></p>
+</body></html>

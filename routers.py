@@ -5,8 +5,7 @@ class TeamPerAppRouter:
     それ以外は default。
     """
     app_to_db = {
-        'team_terrace': 'team_terrace',
-        # 'team_b': 'team_b',
+        'shiokara': 'shiokara',
     }
 
     def db_for_read(self, model, **hints):

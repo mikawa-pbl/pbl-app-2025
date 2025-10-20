@@ -137,26 +137,26 @@ uv sync
 git checkout -b <チーム名>/<作業内容>
 ```
 
-例：チーム名が `team_terrace` で、初期セットアップを行う場合
+例：チーム名が `shiokara` で、初期セットアップを行う場合
 
 ```bash
-git checkout -b team_terrace/setup
+git checkout -b shiokara/setup
 ```
 
 ---
 
 ## 4. アプリを作成（チーム用アプリ）
 
-例では **team_terrace** とします。`team_terrace`を各チーム名に合わせて修正してください
+例では **shiokara** とします。`shiokara`を各チーム名に合わせて修正してください
 
 ```bash
-uv run python manage.py startapp team_terrace
+uv run python manage.py startapp shiokara
 ```
 
 作成直後の構成（抜粋）:
 
 ```text
-team_terrace/
+shiokara/
 ├── __init__.py
 ├── admin.py
 ├── apps.py
@@ -177,7 +177,7 @@ team_terrace/
 ```python
 INSTALLED_APPS = [
     # ... 既存
-    'team_terrace',  # ← 追加
+    'shiokara',  # ← 追加
 ]
 ```
 
@@ -187,9 +187,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 DATABASES = {
     # ... 既存 default, team_a, team_b
-    'team_terrace': {
+    'shiokara': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
+        'NAME': BASE_DIR / 'shiokara' / 'db.sqlite3',
     },
 }
 ```
@@ -200,14 +200,14 @@ DATABASES = {
 
 ## 6. DBルーターにチームを追加
 
-`routers.py` に `team_terrace` を登録：
+`routers.py` に `shiokara` を登録：
 
 ```python
 class TeamPerAppRouter:
     app_to_db = {
         'team_a': 'team_a',
         'team_b': 'team_b',
-        'team_terrace': 'team_terrace',  # ← 追加
+        'shiokara': 'shiokara',  # ← 追加
     }
     # 以降のメソッドは既存のまま（db_for_read/write, allow_relation, allow_migrate）
 ```
@@ -223,7 +223,7 @@ from django.urls import path, include
 
 urlpatterns = [
     # ... 既存
-    path('team_terrace/', include('team_terrace.urls')),  # ← 追加
+    path('shiokara/', include('shiokara.urls')),  # ← 追加
 ]
 ```
 
@@ -231,34 +231,34 @@ urlpatterns = [
 
 ## 8. チーム用 URLs / Views / Models を雛形化
 
-### `team_terrace/urls.py`（新規ファイルを作成してください）
+### `shiokara/urls.py`（新規ファイルを作成してください）
 
 ```python
 from django.urls import path
 from . import views
 
-app_name = "team_terrace"
+app_name = "shiokara"
 urlpatterns = [
     path('', views.index, name='index'),
     path('members/', views.members, name='members'),
 ]
 ```
 
-### `team_terrace/views.py`
+### `shiokara/views.py`
 
 ```python
 from django.shortcuts import render
 from .models import Member
 
 def index(request):
-    return render(request, 'teams/team_terrace/index.html')
+    return render(request, 'teams/shiokara/index.html')
 
 def members(request):
-    qs = Member.objects.using('team_terrace').all()  # ← team_terrace DBを明示
-    return render(request, 'teams/team_terrace/members.html', {'members': qs})
+    qs = Member.objects.using('shiokara').all()  # ← shiokara DBを明示
+    return render(request, 'teams/shiokara/members.html', {'members': qs})
 ```
 
-### `team_terrace/models.py`（例）
+### `shiokara/models.py`（例）
 
 ```python
 from django.db import models
@@ -278,12 +278,12 @@ class Member(models.Model):
 ```text
 templates/
 └── teams/
-    └── team_terrace/
+    └── shiokara/
         ├── index.html
         └── members.html
 ```
 
-**`templates/teams/team_terrace/index.html`（例）**
+**`templates/teams/shiokara/index.html`（例）**
 
 ```html
 <!DOCTYPE html>
@@ -293,12 +293,12 @@ templates/
     <title>Team Terrace</title></head>
 <body>
 <h1>Team Terrace</h1>
-<p><a href="/team_terrace/members/">メンバー一覧</a></p>
+<p><a href="/shiokara/members/">メンバー一覧</a></p>
 </body>
 </html>
 ```
 
-**`templates/teams/team_terrace/members.html`（例）**
+**`templates/teams/shiokara/members.html`（例）**
 
 ```html
 <!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Team Terrace Members</title></head>
@@ -311,7 +311,7 @@ templates/
       <li>データがありません</li>
     {% endfor %}
   </ul>
-  <p><a href="/team_terrace/">Team Terrace トップへ</a></p>
+  <p><a href="/shiokara/">Team Terrace トップへ</a></p>
 </body></html>
 ```
 
@@ -332,7 +332,7 @@ def index(request):
     teams = [
         # データサンプル
         # {"name": "Team A", "url": "/team_a/"},
-        {"name": "Team Terrace", "url": "/team_terrace/"},  # ← 新チームを追加
+        {"name": "Team Terrace", "url": "/shiokara/"},  # ← 新チームを追加
     ]
     return render(request, "top.html", {"teams": teams})
 ```
@@ -347,10 +347,10 @@ def index(request):
 uv run python manage.py makemigrations
 ```
 
-反映（team_terrace DB に対して）：
+反映（shiokara DB に対して）：
 
 ```bash
-uv run python manage.py migrate --database=team_terrace
+uv run python manage.py migrate --database=shiokara
 ```
 
 ---
@@ -363,24 +363,24 @@ uv run python manage.py migrate --database=team_terrace
 uv run python manage.py runserver
 ```
 
-- `/team_terrace/` にアクセスして Team Terrace の index が表示されること
-- `/team_terrace/members/` が空一覧で表示されること
+- `/shiokara/` にアクセスして Team Terrace の index が表示されること
+- `/shiokara/members/` が空一覧で表示されること
 
 ### 12.2 データ投入
 
 **dbshell で直接 INSERT**
 
 ```bash
-uv run python manage.py dbshell --database=team_terrace
+uv run python manage.py dbshell --database=shiokara
 ```
 
 ```sql
-INSERT INTO team_terrace_member (first_name, last_name) VALUES ('太郎', '山田');
-INSERT INTO team_terrace_member (first_name, last_name) VALUES ('花子', '佐藤');
-SELECT * FROM team_terrace_member;
+INSERT INTO shiokara_member (first_name, last_name) VALUES ('太郎', '山田');
+INSERT INTO shiokara_member (first_name, last_name) VALUES ('花子', '佐藤');
+SELECT * FROM shiokara_member;
 ```
 
-リロードして `/team_terrace/members/` にデータが出ればOK。
+リロードして `/shiokara/members/` にデータが出ればOK。
 
 ---
 
@@ -389,7 +389,7 @@ SELECT * FROM team_terrace_member;
 ```bash
 git add .
 git commit -m "Team Terraceのsetupが完了"
-git push origin team_terrace/setup
+git push origin shiokara/setup
 ```
 
 PR を作成し、レビュー依頼。
@@ -398,16 +398,16 @@ PR を作成し、レビュー依頼。
 
 ## よくあるエラー / チェックリスト
 
-- [ ] `routers.py` に新チームのエイリアスを追加したか（`app_to_db` に `team_terrace`）
-- [ ] `DATABASES['team_terrace']` の `NAME` パスが `BASE_DIR / 'team_terrace' / 'db.sqlite3'` になっているか
-- [ ] ビューで `.using('team_terrace')` を付けているか（付け忘れると `default` に書かれる）
+- [ ] `routers.py` に新チームのエイリアスを追加したか（`app_to_db` に `shiokara`）
+- [ ] `DATABASES['shiokara']` の `NAME` パスが `BASE_DIR / 'shiokara' / 'db.sqlite3'` になっているか
+- [ ] ビューで `.using('shiokara')` を付けているか（付け忘れると `default` に書かれる）
 - [ ] `APP_DIRS=False` のため、**アプリ配下の `templates/` は参照されない**（必ずプロジェクト直下に配置）
 - [ ] 必要に応じて `pyproject.toml` にチーム固有の依存を追加したか
-- [ ] マイグレーションを **`--database=team_terrace`** で実行したか
+- [ ] マイグレーションを **`--database=shiokara`** で実行したか
 
 ---
 
 ## 完了！
 
-ここまでで、新チーム（例：team_terrace）のアプリ追加〜DB作成〜URL配線〜テンプレート連携までが完了します。
+ここまでで、新チーム（例：shiokara）のアプリ追加〜DB作成〜URL配線〜テンプレート連携までが完了します。
 同様の手順で、他の新チームも追加可能です。

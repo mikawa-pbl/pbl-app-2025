@@ -1,0 +1,12 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Team Terrace Members</title></head>
+<body>
+  <h1>H34VVY U53RZZ Members</h1>
+  <ul>
+    {% for member in members %}
+      <li>{{ member.last_name }} {{ member.first_name }}</li>
+    {% empty %}
+      <li>データがありません</li>
+    {% endfor %}
+  </ul>
+  <p><a href="/h34vvy_u53rzz/">H34VVY U53RZZ トップへ</a></p>
+</body></html>

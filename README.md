@@ -106,7 +106,9 @@ python manage.py dbshell --database=team_b
     │   ├── tests.py          # テストコード
     │   ├── urls.py
     │   └── views.py
-    ├── NEW_TEAM_SETUP.md     # 新チーム立ち上げ手順書
+    ├── docs/
+    │   ├── NEW_TEAM_SETUP.md # 新チーム立ち上げ手順書
+    │   └── UV_INSTALLATION.md # uvインストール手順書
     ├── pyproject.toml        # パッケージ管理（uv）
     └── uv.lock               # ロックファイル
 ```

@@ -67,7 +67,7 @@ git clone https://github.com/mikawa-pbl/pbl-app-2025.git
 クローン後、プロジェクトディレクトリに移動します：
 
 ```bash
-cd git pbl-app-2025
+cd pbl-app-2025
 ```
 
 ※ 既にクローン済みの場合は、この章はスキップしてください。

@@ -7,7 +7,7 @@
 
 ## 📦 必要な環境
 
-- Python 3.11+ 推奨
+- Python 3.9+ 推奨
 - [uv](https://github.com/astral-sh/uv)（依存解決・仮想環境管理に使用）
 
 ```bash

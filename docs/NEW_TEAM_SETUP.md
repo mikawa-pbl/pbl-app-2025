@@ -240,7 +240,7 @@ from . import views
 app_name = "team_terrace"
 urlpatterns = [
     path('', views.index, name='index'),
-    path('items/', views.items, name='items'),
+    path('members/', views.members, name='members'),
 ]
 ```
 
@@ -248,14 +248,14 @@ urlpatterns = [
 
 ```python
 from django.shortcuts import render
-from .models import Item
+from .models import Member
 
 def index(request):
     return render(request, 'teams/team_terrace/index.html')
 
-def items(request):
-    qs = Item.objects.using('team_terrace').all()  # ← team_terrace DBを明示
-    return render(request, 'teams/team_terrace/items.html', {'items': qs})
+def members(request):
+    qs = Member.objects.using('team_terrace').all()  # ← team_terrace DBを明示
+    return render(request, 'teams/team_terrace/members.html', {'members': qs})
 ```
 
 ### `team_terrace/models.py`（例）
@@ -263,12 +263,12 @@ def items(request):
 ```python
 from django.db import models
 
-class Item(models.Model):
-    name = models.CharField(max_length=100)
-    memo = models.TextField(blank=True, default='')
+class Member(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.name
+        return f"{self.last_name} {self.first_name}"
 ```
 
 ---
@@ -280,7 +280,7 @@ templates/
 └── teams/
     └── team_terrace/
         ├── index.html
-        └── items.html
+        └── members.html
 ```
 
 **`templates/teams/team_terrace/index.html`（例）**
@@ -293,20 +293,20 @@ templates/
     <title>Team Terrace</title></head>
 <body>
 <h1>Team Terrace</h1>
-<p><a href="/team_terrace/items/">items 一覧</a></p>
+<p><a href="/team_terrace/members/">メンバー一覧</a></p>
 </body>
 </html>
 ```
 
-**`templates/teams/team_terrace/items.html`（例）**
+**`templates/teams/team_terrace/members.html`（例）**
 
 ```html
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Team Terrace Items</title></head>
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Team Terrace Members</title></head>
 <body>
-  <h1>Team Terrace Items</h1>
+  <h1>Team Terrace Members</h1>
   <ul>
-    {% for it in items %}
-      <li>{{ it.name }} - {{ it.memo }}</li>
+    {% for member in members %}
+      <li>{{ member.last_name }} {{ member.first_name }}</li>
     {% empty %}
       <li>データがありません</li>
     {% endfor %}
@@ -364,7 +364,7 @@ uv run python manage.py runserver
 ```
 
 - `/team_terrace/` にアクセスして Team Terrace の index が表示されること
-- `/team_terrace/items/` が空一覧で表示されること
+- `/team_terrace/members/` が空一覧で表示されること
 
 ### 12.2 データ投入
 
@@ -375,11 +375,12 @@ uv run python manage.py dbshell --database=team_terrace
 ```
 
 ```sql
-INSERT INTO team_terrace_item (name, memo) VALUES ('Sample', 'first row');
-SELECT * FROM team_terrace_item;
+INSERT INTO team_terrace_member (first_name, last_name) VALUES ('太郎', '山田');
+INSERT INTO team_terrace_member (first_name, last_name) VALUES ('花子', '佐藤');
+SELECT * FROM team_terrace_member;
 ```
 
-リロードして `/team_terrace/items/` にデータが出ればOK。
+リロードして `/team_terrace/members/` にデータが出ればOK。
 
 ---
 

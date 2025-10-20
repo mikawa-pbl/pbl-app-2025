@@ -406,37 +406,6 @@ PR を作成し、レビュー依頼。
 
 ---
 
-## 付録：OS別の補足
-
-### uv のインストール
-
-- macOS / Linux:
-
-  ```bash
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-  ```
-
-- Windows (PowerShell):
-
-  ```powershell
-  irm https://astral.sh/uv/install.ps1 | iex
-  ```
-
-### dbshell（SQLite CLI がない場合）
-
-- Windows で `dbshell` が動かない場合は、Django シェルで代替：
-
-  ```bash
-  python manage.py shell
-  ```
-
-  ```python
-  from team_terrace.models import Item
-  list(Item.objects.using('team_terrace').all())
-  ```
-
----
-
 ## 完了！
 
 ここまでで、新チーム（例：team_terrace）のアプリ追加〜DB作成〜URL配線〜テンプレート連携までが完了します。

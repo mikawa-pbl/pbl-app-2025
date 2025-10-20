@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'team_terrace',
+    #'team_terrace',
+    'katan',
 ]
 
 MIDDLEWARE = [
@@ -79,9 +80,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
-    'team_terrace': {
+    'katan': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
+        'NAME': BASE_DIR / 'katan' / 'db.sqlite3',
     },
 }
 

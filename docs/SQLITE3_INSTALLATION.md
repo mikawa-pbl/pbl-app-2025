@@ -144,7 +144,7 @@ winget が使用できない、または手動でインストールしたい場�
 PowerShell を開いて、以下のコマンドを実行します（**管理者権限は不要**です）：
 
 ```powershell
-setx PATH "$($env:PATH);C:\sqlite"
+setx PATH "$env:PATH;C:\sqlite"
 ```
 
 実行すると「成功: 指定した値は保存されました。」と表示されます。

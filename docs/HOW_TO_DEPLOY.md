@@ -53,8 +53,7 @@ uv sync
 モデル（models.py）に変更を加えた場合など、データベースの構造に変更がある場合は、以下のコマンドを実行してください。
 
 ```bash
-source .venv/bin/activate
-python manage.py migrate --database=チーム名 (例：--database=team_terrace)
+uv run python manage.py migrate --database=チーム名 (例：--database=team_terrace)
 ```
 
 ### 6. データ投入（必要な場合）
@@ -62,7 +61,7 @@ python manage.py migrate --database=チーム名 (例：--database=team_terrace)
 データの投入が必要な場合は、dbshellに入ってデータを投入してください。
 
 ```bash
-python manage.py dbshell --database=チーム名 (例：--database=team_terrace)
+uv run python manage.py dbshell --database=チーム名 (例：--database=team_terrace)
 ```
 dbshell内でSQLコマンドを実行してデータを投入します。
 ```sql

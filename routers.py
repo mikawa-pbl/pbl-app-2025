@@ -6,7 +6,8 @@ class TeamPerAppRouter:
     """
     app_to_db = {
         'team_terrace': 'team_terrace',
-	'team_shouronpou': 'team_shouronpou',
+        'team_cake': 'team_cake',
+        'team_shouronpou': 'team_shouronpou',
         # 'team_b': 'team_b',
         'h34vvy_u53rzz': 'h34vvy_u53rzz',
     }

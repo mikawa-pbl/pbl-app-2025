@@ -37,9 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'team_TMR',
-    'django.contrib.staticfiles'
+    'django.contrib.staticfiles',
     'graphics',
     'team_terrace',
+    'team_TeXTeX',
     'team_cake',
     'team_shouronpou',
     'h34vvy_u53rzz',
@@ -103,6 +104,10 @@ DATABASES = {
     'h34vvy_u53rzz': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'h34vvy_u53rzz' / 'db.sqlite3',
+    },
+    'team_TeXTeX': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_TeXTeX' / 'db.sqlite3',
     },
 }
 

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'team_terrace',
+    'agileca',
 ]
 
 MIDDLEWARE = [
@@ -83,6 +84,11 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
     },
+    'agileca': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'agileca' / 'db.sqlite3',
+    },
+
 }
 
 # app_labelごとにDBを振り分けるルーター

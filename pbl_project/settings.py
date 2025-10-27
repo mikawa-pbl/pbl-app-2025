@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -36,12 +35,15 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'team_TMR',
     'django.contrib.staticfiles'
     'graphics',
     'team_terrace',
     'team_cake',
     'team_shouronpou',
     'h34vvy_u53rzz',
+
 ]
 
 MIDDLEWARE = [
@@ -83,6 +85,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
+    'team_TMR': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_TMR' / 'db.sqlite3',
     'graphics': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'graphics' / 'db.sqlite3',

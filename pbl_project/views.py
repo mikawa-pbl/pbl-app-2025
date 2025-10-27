@@ -4,6 +4,7 @@ def index(request):
     teams = [
         # データサンプル
         # {"name": "Team A", "url": "/team_a/"},
+        {"name": "Team TMR", "url": "/team_TMR/"},  # ← 新チームを追加
         {"name": "Graphics", "url": "/graphics/"},  # ← 新チームを追加
         {"name": "Team Terrace", "url": "/team_terrace/"},  # ← 新チームを追加
         {"name": "Team Cake", "url": "/team_cake/"},

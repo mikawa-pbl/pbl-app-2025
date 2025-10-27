@@ -5,6 +5,9 @@ class TeamPerAppRouter:
     それ以外は default。
     """
     app_to_db = {
+        'team_a': 'team_a',
+        'team_b': 'team_b',
+        'team_TMR': 'team_TMR',  # ← 追加
         'graphics': 'graphics',
         'team_terrace': 'team_terrace',
         'team_cake': 'team_cake',

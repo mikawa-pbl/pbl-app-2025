@@ -7,6 +7,7 @@ class TeamPerAppRouter:
     app_to_db = {
         'team_terrace': 'team_terrace',
         # 'team_b': 'team_b',
+        'takenoko': 'takenoko',
     }
 
     def db_for_read(self, model, **hints):

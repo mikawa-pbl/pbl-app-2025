@@ -8,6 +8,7 @@ class TeamPerAppRouter:
         'team_terrace': 'team_terrace',
 	'team_shouronpou': 'team_shouronpou',
         # 'team_b': 'team_b',
+        'h34vvy_u53rzz': 'h34vvy_u53rzz',
     }
 
     def db_for_read(self, model, **hints):

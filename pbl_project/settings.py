@@ -36,7 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles'
+    'graphics',
     'team_terrace',
     'team_cake',
     'team_shouronpou',
@@ -82,9 +83,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
-    'team_terrace': {
+    'graphics': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
+        'NAME': BASE_DIR / 'graphics' / 'db.sqlite3',
     },
     'team_cake': {
         'ENGINE': 'django.db.backends.sqlite3',

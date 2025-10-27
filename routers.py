@@ -6,7 +6,7 @@ class TeamPerAppRouter:
     """
     app_to_db = {
         'team_terrace': 'team_terrace',
-        # 'team_b': 'team_b',
+        'team_empiricism': 'team_empiricism', # 追加
     }
 
     def db_for_read(self, model, **hints):
@@ -28,3 +28,4 @@ class TeamPerAppRouter:
             return db == target_db
         # チーム外(app_labelが team_a / team_b 以外)は default へ
         return db == 'default'
+    

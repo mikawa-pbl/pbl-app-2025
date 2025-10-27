@@ -23,4 +23,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name="index"),
     path('team_terrace/', include('team_terrace.urls')),
+    path('team_empiricism/', include('team_empiricism.urls')), # 追加
 ]

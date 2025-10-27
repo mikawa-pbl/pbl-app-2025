@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'graphics',
     'team_terrace',
+    'team_akb5',
     'team_TeXTeX',
     'team_cake',
     'team_shouronpou',
@@ -108,6 +109,10 @@ DATABASES = {
     'team_TeXTeX': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_TeXTeX' / 'db.sqlite3',
+    },
+    'team_akb5': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_akb5' / 'db.sqlite3',
     },
 }
 

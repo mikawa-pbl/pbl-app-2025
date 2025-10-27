@@ -1,0 +1,12 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Team Tansaibou Members</title></head>
+<body>
+  <h1>Team Tansaibou Members</h1>
+  <ul>
+    {% for member in members %}
+      <li>{{ member.last_name }} {{ member.first_name }}</li>
+    {% empty %}
+      <li>データがありません</li>
+    {% endfor %}
+  </ul>
+  <p><a href="/team_tansaibou/">Team 単細胞 トップへ</a></p>
+</body></html>

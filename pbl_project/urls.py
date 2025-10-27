@@ -25,4 +25,6 @@ urlpatterns = [
     path('', views.index, name="index"),
     path('team_terrace/', include('team_terrace.urls')),
     path('team_tansaibou/', include('team_tansaibou.urls')), 
+    path('team_shouronpou/', include('team_shouronpou.urls')),
+    path('h34vvy_u53rzz/', include('h34vvy_u53rzz.urls')),
 ]

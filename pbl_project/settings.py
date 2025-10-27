@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'team_terrace',
     'team_tansaibou',
+    'team_shouronpou',
+    'h34vvy_u53rzz',
 ]
 
 MIDDLEWARE = [
@@ -87,6 +89,12 @@ DATABASES = {
     'team_tansaibou': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_tansaibou' / 'db.sqlite3',
+    'team_shouronpou': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_shouronpou' / 'db.sqlite3',
+    'h34vvy_u53rzz': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'h34vvy_u53rzz' / 'db.sqlite3',
     },
 }
 

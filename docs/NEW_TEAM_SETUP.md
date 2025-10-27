@@ -23,30 +23,13 @@ uv --version
 バージョンが表示されれば OK です（例: `uv 0.x.x`）。
 コマンドが見つからない場合は、[UV_INSTALLATION.md](UV_INSTALLATION.md) を参照してインストールしてください。
 
-### SQLite3 のインストール（Windows のみ）
+### SQLite3 のインストール
 
-**macOS / Linux の場合：** SQLite3 はシステムに標準搭載されているため、この章はスキップしてください。
+**macOS / Linux の場合：** SQLite3 はシステムに標準搭載されているため、インストール不要です。
 
-**Windows の場合：** Django の `dbshell` コマンドを使用するために、SQLite3 のコマンドラインツールをインストールします。
+**Windows の場合：** Django の `dbshell` コマンドを使用するために、SQLite3 のコマンドラインツールをインストールする必要があります。
 
-#### インストール手順
-
-1. PowerShell を**管理者として実行**します
-
-2. 以下のコマンドを実行します：
-
-   ```powershell
-   winget install --scope machine SQLite.SQLite
-   ```
-
-3. インストール完了後、**PowerShell を再起動**します
-   - VS Code のターミナルを使用している場合は、**VS Code も再起動**してください
-
-4. インストール確認：
-
-   ```powershell
-   sqlite3 --version
-   ```
+詳しいインストール手順は、[SQLITE3_INSTALLATION.md](SQLITE3_INSTALLATION.md) を参照してください。複数のインストール方法が記載されています。
 
 ---
 

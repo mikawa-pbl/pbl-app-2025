@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'graphic',
+    'graphics',
 ]
 
 MIDDLEWARE = [
@@ -79,9 +79,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
-    'graphic': {
+    'graphics': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'graphic' / 'db.sqlite3',
+        'NAME': BASE_DIR / 'graphics' / 'db.sqlite3',
     },
 }
 

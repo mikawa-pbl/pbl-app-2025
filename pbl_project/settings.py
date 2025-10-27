@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'team_terrace',
+    'team_USL',
 ]
 
 MIDDLEWARE = [
@@ -79,11 +79,13 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
-    'team_terrace': {
+    'team_USL': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
+        'NAME': BASE_DIR / 'team_USL' / 'db.sqlite3',
     },
+    
 }
+
 
 # app_labelごとにDBを振り分けるルーター
 DATABASE_ROUTERS = ['routers.TeamPerAppRouter']

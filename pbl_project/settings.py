@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'team_TMR',
-    'django.contrib.staticfiles',
     'graphics',
     'team_terrace',
     'team_akb5',
@@ -87,9 +86,14 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
+    'team_terrace': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
+    },
     'team_TMR': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_TMR' / 'db.sqlite3',
+    },
     'graphics': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'graphics' / 'db.sqlite3',

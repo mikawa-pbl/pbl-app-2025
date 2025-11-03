@@ -90,6 +90,7 @@ DATABASES = {
     'team_TMR': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_TMR' / 'db.sqlite3',
+    },
     'graphics': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'graphics' / 'db.sqlite3',

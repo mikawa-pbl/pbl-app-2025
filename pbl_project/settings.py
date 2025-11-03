@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'team_TMR',
-    'django.contrib.staticfiles',
     'graphics',
     'team_terrace',
     'team_akb5',

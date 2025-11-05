@@ -31,7 +31,7 @@ uv run python manage.py makemigrations --empty team_terrace -n seed_members_sql
 | `-n seed_members_sql`      | ファイル名に追加される説明ラベルです。          | 実際のファイル名は `0002_seed_members_sql.py` のようになります。 |
 
 ## 2. マイグレーションファイルを編集する
-作成された`<app名>/migrations/0002_seed_members_sql.py` を開いて、以下の内容を貼り付けます。
+作成された`<app名>/migrations/<生成されたファイル名>` (例：`team_terrace/migrations/0002_seed_members_sql.py`)を開いて、以下の内容を貼り付けます。
 
 ```python
 from django.db import migrations

@@ -9,6 +9,25 @@ log() {
   printf '[%s] %s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$*"
 }
 
+retry() {
+  local attempts=${DEPLOY_RETRIES:-3}
+  local delay=${DEPLOY_RETRY_DELAY:-5}
+  local count=0
+  local exit_code=0
+  while (( count < attempts )); do
+    if "$@"; then
+      return 0
+    fi
+    exit_code=$?
+    count=$((count + 1))
+    if (( count < attempts )); then
+      log "Command failed (attempt ${count}/${attempts}); retrying in ${delay}s: $*"
+      sleep "${delay}"
+    fi
+  done
+  return "${exit_code}"
+}
+
 APP_USER="${DEPLOY_USER:-$(id -un)}"
 APP_DIR="${DEPLOY_APP_DIR:-${HOME}/pbl-app-2025}"
 VENV_DIR="${DEPLOY_VENV_DIR:-${APP_DIR}/.venv}"
@@ -53,7 +72,10 @@ else
 fi
 
 log "Fetching latest code"
-git -C "${APP_DIR}" fetch --prune origin "${TARGET_BRANCH}"
+if ! retry git -C "${APP_DIR}" fetch --prune origin "${TARGET_BRANCH}"; then
+  log "ERROR: git fetch failed after retries"
+  exit 1
+fi
 if ! git -C "${APP_DIR}" checkout "${TARGET_BRANCH}" 2>/dev/null; then
   git -C "${APP_DIR}" checkout -b "${TARGET_BRANCH}" "origin/${TARGET_BRANCH}"
 fi

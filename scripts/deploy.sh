@@ -126,6 +126,7 @@ ${SUDO} start-stop-daemon \
   --make-pidfile \
   --pidfile "${PID_FILE}" \
   --chdir "${APP_DIR}" \
+  --chuid "${APP_USER}" \
   --exec "${PYTHON_BIN}" -- \
   "${APP_DIR}/manage.py" runserver 0.0.0.0:80 --noreload
 

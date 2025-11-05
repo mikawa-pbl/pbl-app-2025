@@ -1,0 +1,20 @@
+name: Self-Hosted Deploy (branch testing)
+
+on:
+  push:
+    branches:
+      - setup/cd_by_self_hosted_runner
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run deployment script
+        run: scripts/deploy.sh
+        env:
+          DEPLOY_BRANCH: ${{ github.ref_name }}

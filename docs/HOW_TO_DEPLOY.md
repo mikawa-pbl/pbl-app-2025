@@ -107,6 +107,22 @@ uv run python manage.py migrate --database=<チーム名>
 
 **注意**: 初回セットアップ時は、アプリケーションがまだ起動していないため、停止コマンドは不要です。起動コマンドのみを実行してください。
 
+#### 7-0. （初回のみ）80番ポートを一般ユーザーで利用できるようにする
+
+`runserver 0.0.0.0:80` を一般ユーザー（例: `mikawapbl`）で動かすため、Python バイナリに `cap_net_bind_service` を付与します。`python` がシンボリックリンクの場合があるので、まず実体パスを確認してください。
+
+```bash
+readlink -f ~/pbl-app-2025/.venv/bin/python3
+```
+
+出力されたパス（例: `/home/mikawapbl/.local/share/uv/python/cpython-3.9.24-linux-x86_64-gnu/bin/python3.9`）を指定して `setcap` を実行します。
+
+```bash
+sudo setcap 'cap_net_bind_service=+ep' /home/mikawapbl/.local/share/uv/python/cpython-3.9.24-linux-x86_64-gnu/bin/python3.9
+```
+
+これにより、`sudo` で root のまま `runserver` を動かさなくても 80 番ポートを開けるようになります（※1 度設定すればOK）。
+
 #### アプリケーションの停止
 
 ```bash
@@ -116,7 +132,7 @@ sudo start-stop-daemon --stop --pidfile /run/django-dev.pid --retry=TERM/5/KILL/
 #### アプリケーションの起動
 
 ```bash
-sudo bash -lc 'U=$(logname); start-stop-daemon --start --quiet --background --make-pidfile --pidfile /run/django-dev.pid --chdir /home/$U/pbl-app-2025 --exec /home/$U/pbl-app-2025/.venv/bin/python -- manage.py runserver 0.0.0.0:80 --noreload'
+sudo bash -lc 'U=$(logname); start-stop-daemon --start --quiet --background --make-pidfile --pidfile /run/django-dev.pid --chdir /home/$U/pbl-app-2025 --chuid $U --exec /home/$U/pbl-app-2025/.venv/bin/python -- manage.py runserver 0.0.0.0:80 --noreload'
 ```
 
 ### 8. ブラウザからアクセスして確認

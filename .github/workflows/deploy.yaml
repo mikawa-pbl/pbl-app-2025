@@ -1,9 +1,9 @@
-name: Self-Hosted Deploy (branch testing)
+name: Self-Hosted Deploy
 
 on:
   push:
     branches:
-      - setup/cd_by_self_hosted_runner
+      - main
 
 jobs:
   deploy:

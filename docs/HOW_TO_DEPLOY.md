@@ -52,8 +52,9 @@ git checkout <チームのブランチ名>
 例: `git checkout team_terrace`
 
 #### 3-3. 依存ライブラリのインストール
-[uvインストールガイド](https://github.com/mikawa-pbl/pbl-app-2025/blob/docs/how_to_deploy_dev_VMs/docs/UV_INSTALLATION.md#linux)を参考にしてuvのインストールを行ってください
+1. [uvインストールガイド](https://github.com/mikawa-pbl/pbl-app-2025/blob/docs/how_to_deploy_dev_VMs/docs/UV_INSTALLATION.md#linux)を参考にしてuvのインストールを行ってください（※インストールはVM上で最初の1回だけで構いません。以降は `uv sync` のみでOKです）。
 
+2. 以下のコマンドを実行して依存関係を同期します。
 ```bash
 uv sync
 ```

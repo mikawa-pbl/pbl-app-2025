@@ -52,6 +52,7 @@ git checkout <チームのブランチ名>
 例: `git checkout team_terrace`
 
 #### 3-3. 依存ライブラリのインストール
+[uvインストールガイド](https://github.com/mikawa-pbl/pbl-app-2025/blob/docs/how_to_deploy_dev_VMs/docs/UV_INSTALLATION.md#linux)を参考にしてuvのインストールを行ってください
 
 ```bash
 uv sync

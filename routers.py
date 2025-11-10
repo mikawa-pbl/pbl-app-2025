@@ -10,6 +10,7 @@ class TeamPerAppRouter:
         'team_TMR': 'team_TMR',  # ← 追加
         'graphics': 'graphics',
         'team_terrace': 'team_terrace',
+        'nanakorobiyaoki': 'nanakorobiyaoki',
         'team_akb5': 'team_akb5',
         'team_TeXTeX': 'team_TeXTeX',
         'team_cake': 'team_cake',

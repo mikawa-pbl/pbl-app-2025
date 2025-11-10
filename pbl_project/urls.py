@@ -22,6 +22,7 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name="index"),
+    path('nanakorobiyaoki/', include('nanakorobiyaoki.urls')),  # ← 追加
     path('team_TMR/', include('team_TMR.urls')),
     path('graphics/', include('graphics.urls')),
     path('team_terrace/', include('team_terrace.urls')),

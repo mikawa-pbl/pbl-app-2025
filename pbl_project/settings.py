@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'team_TMR',
     'graphics',
     'team_terrace',
+    'nanakorobiyaoki',
     'team_akb5',
     'team_TeXTeX',
     'team_cake',
@@ -86,9 +87,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
-    'team_terrace': {
+    'nanakorobiyaoki': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
+        'NAME': BASE_DIR / 'nanakorobiyaoki' / 'db.sqlite3',
     },
     'team_TMR': {
         'ENGINE': 'django.db.backends.sqlite3',

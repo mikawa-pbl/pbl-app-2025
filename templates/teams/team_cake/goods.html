@@ -10,7 +10,7 @@
   <h1>Team Cake Goods</h1>
   <ul>
     {% for good in goods %}
-    <li>{{ good.name }} {{ good.price }}</li>
+    <li>{{ good.id }} {{ good.name }} {{ good.price }}</li>
     {% empty %}
     <li>データがありません</li>
     {% endfor %}

@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>部屋検索</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    .layout { display: grid; grid-template-columns: 1fr 360px; gap: 16px; height: 100vh;
+      box-sizing: border-box; padding: 12px; font-family: system-ui, -apple-system, "Segoe UI", Roboto,
+      "Hiragino Sans", "Noto Sans JP", sans-serif; }
+    .left-pane { position: relative; border: 1px solid #ddd; border-radius: 12px; overflow: hidden;
+      display: flex; flex-direction: column; background: #fff; }
+    .image-wrap { position: relative; flex: 1; overflow: auto; background: #fafafa; }
+    .image-inner { position: relative; width: 100%; max-width: 1200px; margin: 0 auto; }
+    .floor-image { display: block; width: 100%; height: auto; user-select: none; pointer-events: none; }
+    .marker { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 2px solid #222;
+      background: rgba(255,255,255,0.9); box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      transform: translate(-50%, -50%); display: none; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; }
+    .marker.active { display: flex; }
+    .right-pane { border: 1px solid #ddd; border-radius: 12px; padding: 12px; background: #fff;
+      display: flex; flex-direction: column; gap: 12px; }
+    .results { border-top: 1px dashed #ddd; padding-top: 8px; overflow: auto; }
+    .room-item { padding: 6px 4px; border-radius: 6px; cursor: pointer; }
+    .room-item:hover { background: #f5f7ff; }
+    .empty { color: #888; font-size: 14px; }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .tag { display: inline-block; font-size: 12px; background: #eef3ff; border: 1px solid #cfe0ff;
+      color: #1d3a8a; padding: 2px 8px; border-radius: 999px; }
+    form .field { margin-bottom: 8px; display: grid; gap: 4px; }
+    form input[type="text"], form select { width: 100%; padding: 8px 10px; border: 1px solid #ccc;
+      border-radius: 8px; font-size: 14px; }
+    form button { width: 100%; padding: 10px 12px; border: 0; border-radius: 8px; background: #1f56e6;
+      color: #fff; font-weight: 700; cursor: pointer; }
+    form button:hover { background: #1a46bb; }
+    .legend { font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="left-pane">
+      <div class="toolbar" style="padding:10px 12px;">
+        <div>
+          <div style="font-weight:700;">{{ selected_floor|default:"フロア未選択" }}</div>
+          {% if selected_room %}
+            <div class="legend">対象部屋: {{ selected_room.room_number }}</div>
+          {% endif %}
+        </div>
+        {% if selected_floor %}
+          <span class="tag">Floor {{ selected_floor.floor }}</span>
+        {% endif %}
+      </div>
+
+      <div class="image-wrap">
+        <div class="image-inner" id="imageContainer">
+          {% if selected_floor %}
+            <img id="floorImage" class="floor-image" src="{{ selected_floor.url }}" alt="floor image">
+          {% else %}
+            <div class="empty" style="padding:16px;">表示可能なフロア画像がありません。</div>
+          {% endif %}
+          <div id="marker" class="marker">●</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-pane">
+      <h2 style="margin:0;">部屋検索</h2>
+      <form method="get">
+        <div class="field">
+          <label>部屋番号</label>
+          {{ form.room_number }}
+        </div>
+        <div class="field">
+          <label>フロア</label>
+          {{ form.floor }}
+        </div>
+        <button type="submit">検索</button>
+      </form>
+
+      <div class="results">
+        <h3 style="margin:6px 0;">検索結果</h3>
+        {% if rooms %}
+          {% for r in rooms %}
+            <div class="room-item"
+                 data-room="{{ r.room_number }}"
+                 data-x="{{ r.x }}"
+                 data-y="{{ r.y }}"
+                 data-floorid="{{ r.floor_fk_id }}">
+              {{ r.room_number }} <span class="legend">（Floor {{ r.floor_fk.floor }}）</span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty">該当する部屋がありません。</div>
+        {% endif %}
+      </div>
+      <div class="legend">※ 座標は画像に対して (x, y) [%] を想定。</div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const marker = document.getElementById('marker');
+      const image = document.getElementById('floorImage');
+      const container = document.getElementById('imageContainer');
+      if (!container) return;
+
+      document.querySelectorAll('.room-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const x = parseFloat(item.dataset.x);
+          const y = parseFloat(item.dataset.y);
+          placeMarker(x, y);
+        });
+      });
+
+      {% if selected_room %}
+        window.addEventListener('load', function() {
+          placeMarker({{ selected_room.x }}, {{ selected_room.y }});
+        });
+      {% endif %}
+
+      // [%]で保存している前提（0〜100）
+      function placeMarker(x, y) {
+        if (!image) return;
+        const rect = image.getBoundingClientRect();
+        let leftPx = rect.left + (rect.width  * (x / 100));
+        let topPx  = rect.top  + (rect.height * (y / 100));
+        leftPx += window.scrollX;
+        topPx  += window.scrollY;
+        marker.style.left = leftPx + 'px';
+        marker.style.top = topPx + 'px';
+        marker.classList.add('active');
+      }
+
+      // ピクセル保存の場合は下を採用
+      // function placeMarker(x_px, y_px) {
+      //   if (!image) return;
+      //   const naturalW = image.naturalWidth;
+      //   const naturalH = image.naturalHeight;
+      //   const rect = image.getBoundingClientRect();
+      //   const scaleX = rect.width / naturalW;
+      //   const scaleY = rect.height / naturalH;
+      //   const leftPx = rect.left + (x_px * scaleX) + window.scrollX;
+      //   const topPx  = rect.top  + (y_px * scaleY) + window.scrollY;
+      //   marker.style.left = leftPx + 'px';
+      //   marker.style.top  = topPx + 'px';
+      //   marker.classList.add('active');
+      // }
+    })();
+  </script>
+</body>
+</html>

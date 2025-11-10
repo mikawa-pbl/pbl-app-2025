@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>メモ</title>
+</head>
+<body>
+    <h1>メモ</h1>
+    <ul>
+        {% for memo in memos %}
+            <li>{{ memo.content }} ({{ memo.created_at }})</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

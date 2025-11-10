@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "team_cake",
     "team_shouronpou",
     "h34vvy_u53rzz",
+    'takenoko',
 ]
 
 MIDDLEWARE = [
@@ -124,6 +125,10 @@ DATABASES = {
     "team_UD": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "team_UD" / "db.sqlite3",
+    },
+    'takenoko': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'takenoko' / 'db.sqlite3',
     },
 }
 

@@ -18,6 +18,7 @@ class TeamPerAppRouter:
         "team_cake": "team_cake",
         "team_shouronpou": "team_shouronpou",
         # 'team_b': 'team_b',
+        'takenoko': 'takenoko',
         "h34vvy_u53rzz": "h34vvy_u53rzz",
     }
 

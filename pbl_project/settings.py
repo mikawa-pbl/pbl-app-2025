@@ -32,12 +32,13 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'djangwo.contrib.messages',
+    'django.contrib.staticfiles',
+    'team_northcliff',
     "team_TMR",
     "graphics",
     "team_terrace",
@@ -134,6 +135,10 @@ DATABASES = {
     'team_giryulink': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_giryulink' / 'db.sqlite3',
+    },
+    'team_northcliff': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_northcliff' / 'db.sqlite3',
     },
 }
 

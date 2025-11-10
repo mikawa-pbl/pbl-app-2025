@@ -5,4 +5,5 @@ app_name = "agileca"
 urlpatterns = [
     path('', views.index, name='index'),
     path('members/', views.members, name='members'),
+    path('gikamap/', views.gikamap, name='gikamap')
 ]

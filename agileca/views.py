@@ -9,3 +9,6 @@ def index(request):
 def members(request):
     qs = Member.objects.using('agileca').all()  # ← team_terrace DBを明示
     return render(request, 'teams/agileca/members.html', {'members': qs})
+
+def gikamap(request):
+    return render(request, "teams/agileca/gikamap.html")

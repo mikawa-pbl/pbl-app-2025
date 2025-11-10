@@ -12,3 +12,6 @@ def members(request):
 
 def gikamap(request):
     return render(request, "teams/agileca/gikamap.html")
+
+def imc(request):
+    return render(request, "teams/agileca/imc.html")

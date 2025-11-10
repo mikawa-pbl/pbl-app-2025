@@ -1,14 +1,223 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>カレンダー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+        }
+        .calendar-header button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .calendar-header button:hover {
+            background: white;
+            color: #667eea;
+        }
+        .calendar-header h2 {
+            font-size: 1.8em;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .calendar-day-header {
+            background: #f0f0f0;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            border-radius: 5px;
+        }
+        .calendar-day {
+            min-height: 100px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 10px;
+            background: white;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .calendar-day:hover {
+            background: #f8f9ff;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        .calendar-day.other-month {
+            background: #fafafa;
+            opacity: 0.5;
+        }
+        .calendar-day.today {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+        .day-number {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .calendar-day.today .day-number {
+            color: white;
+        }
+        .event-item {
+            background: #667eea;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-top: 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .events-list {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+        .events-list h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .event-card {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .event-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .event-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .nav-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .nav-links a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .nav-links a:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
-    <h1>カレンダー</h1>
-    <ul>
-        {% for event in events %}
-            <li>{{ event.title }}: {{ event.start_time }} - {{ event.end_time }}</li>
-        {% endfor %}
-    </ul>
+    <div class="container">
+        <header>
+            <h1>📅 カレンダー</h1>
+        </header>
+
+        <div class="calendar-header">
+            <button onclick="location.href='?month=prev&year={{ year }}&current_month={{ month }}'">← 前月</button>
+            <h2>{{ current_month }}</h2>
+            <button onclick="location.href='?month=next&year={{ year }}&current_month={{ month }}'">次月 →</button>
+        </div>
+
+        <div class="calendar">
+            <div class="calendar-day-header">日</div>
+            <div class="calendar-day-header">月</div>
+            <div class="calendar-day-header">火</div>
+            <div class="calendar-day-header">水</div>
+            <div class="calendar-day-header">木</div>
+            <div class="calendar-day-header">金</div>
+            <div class="calendar-day-header">土</div>
+
+            {% for day in calendar_days %}
+            <div class="calendar-day {% if day.is_other_month %}other-month{% endif %} {% if day.is_today %}today{% endif %}">
+                <div class="day-number">{{ day.day }}</div>
+                {% for event in day.events %}
+                <div class="event-item" title="{{ event.title }}">{{ event.title }}</div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="events-list">
+            <h3>📋 今月のイベント一覧</h3>
+            {% if events %}
+                {% for event in events %}
+                <div class="event-card">
+                    <div class="event-title">{{ event.title }}</div>
+                    <div class="event-time">
+                        🕐 {{ event.start_time|date:"Y年m月d日 H:i" }} - {{ event.end_time|date:"Y年m月d日 H:i" }}
+                    </div>
+                    {% if event.description %}
+                    <div style="margin-top: 8px; color: #555;">{{ event.description }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: #999; text-align: center;">今月のイベントはありません</p>
+            {% endif %}
+        </div>
+
+        <div class="nav-links">
+            <a href="{% url 'team_UD:index' %}">🏠 ホームに戻る</a>
+            <a href="{% url 'team_UD:memo' %}">📝 メモを見る</a>
+        </div>
+    </div>
 </body>
 </html>

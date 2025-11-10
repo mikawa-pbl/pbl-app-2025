@@ -5,9 +5,18 @@ class TeamPerAppRouter:
     それ以外は default。
     """
     app_to_db = {
+        'team_a': 'team_a',
+        'team_b': 'team_b',
+        'team_TMR': 'team_TMR',  # ← 追加
+        'graphics': 'graphics',
         'team_terrace': 'team_terrace',
-        'nanakorobiyaoki': 'nanakorobiyaoki'
+        'nanakorobiyaoki': 'nanakorobiyaoki',
+        'team_akb5': 'team_akb5',
+        'team_TeXTeX': 'team_TeXTeX',
+        'team_cake': 'team_cake',
+        'team_shouronpou': 'team_shouronpou',
         # 'team_b': 'team_b',
+        'h34vvy_u53rzz': 'h34vvy_u53rzz',
     }
 
     def db_for_read(self, model, **hints):

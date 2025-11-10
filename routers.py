@@ -6,6 +6,7 @@ class TeamPerAppRouter:
     """
 
     app_to_db = {
+        'shiokara': 'shiokara',
         'mori_doragon_yuhi_machi': 'mori_doragon_yuhi_machi',
         'team_northcliff': 'team_northcliff',
         "team_a": "team_a",

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Member(models.Model):
@@ -20,9 +21,10 @@ class Event(models.Model):
 
 
 class Memo(models.Model):
+    date = models.DateField(default=timezone.now)  # メモの対象日付（既存データには今日の日付が設定されます）
     content = models.TextField()  # メモの内容
     created_at = models.DateTimeField(auto_now_add=True)  # 作成日時
     updated_at = models.DateTimeField(auto_now=True)  # 更新日時
 
     def __str__(self):
-        return self.content[:50]  # メモの冒頭50文字を表示
+        return f"{self.date}: {self.content[:50]}"  # 日付とメモの冒頭50文字を表示

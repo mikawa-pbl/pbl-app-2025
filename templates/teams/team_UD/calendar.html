@@ -82,6 +82,7 @@
             background: white;
             transition: all 0.3s;
             cursor: pointer;
+            position: relative;
         }
         .calendar-day:hover {
             background: #f8f9ff;
@@ -92,6 +93,7 @@
         .calendar-day.other-month {
             background: #fafafa;
             opacity: 0.5;
+            pointer-events: none;
         }
         .calendar-day.today {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -117,6 +119,155 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        
+        /* メモインジケータ */
+        .memo-indicator {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: #51cf66;
+            color: white;
+            font-size: 0.7em;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        
+        /* モーダルのスタイル */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+        .modal-header h3 {
+            margin: 0;
+            color: #667eea;
+            font-size: 1.5em;
+        }
+        .close-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .close-btn:hover {
+            background: #ee5a52;
+            transform: scale(1.05);
+        }
+        .memo-list {
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .memo-item {
+            background: #f8f9ff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .memo-item-content {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1em;
+            line-height: 1.5;
+        }
+        .memo-item-time {
+            font-size: 0.85em;
+            color: #999;
+        }
+        .memo-delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+        }
+        .memo-delete-btn:hover {
+            background: #ee5a52;
+            transform: scale(1.05);
+        }
+        .memo-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+        .memo-form textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        .memo-form textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .memo-form button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .memo-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
         .events-list {
             margin-top: 30px;
             padding: 20px;
@@ -186,11 +337,14 @@
             <div class="calendar-day-header">土</div>
 
             {% for day in calendar_days %}
-            <div class="calendar-day {% if day.is_other_month %}other-month{% endif %} {% if day.is_today %}today{% endif %}">
+            <div class="calendar-day {% if day.is_other_month %}other-month{% endif %} {% if day.is_today %}today{% endif %}"
+                 data-year="{{ year }}" data-month="{{ month }}" data-day="{{ day.day }}"
+                 onclick="openMemoModal(this)">
                 <div class="day-number">{{ day.day }}</div>
                 {% for event in day.events %}
                 <div class="event-item" title="{{ event.title }}">{{ event.title }}</div>
                 {% endfor %}
+                <div class="memo-indicator" style="display: none;">📝</div>
             </div>
             {% endfor %}
         </div>
@@ -219,5 +373,181 @@
             <a href="{% url 'team_UD:memo' %}">📝 メモを見る</a>
         </div>
     </div>
+
+    <!-- メモ入力モーダル -->
+    <div id="memoModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="modalTitle">メモ</h3>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="memo-list" id="modalMemoList"></div>
+            <div class="memo-form">
+                <textarea id="modalMemoInput" placeholder="メモを入力してください..."></textarea>
+                <button onclick="saveModalMemo()">💾 保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentYear, currentMonth, currentDay;
+
+        // ページ読み込み時に各日付のメモを確認してインジケータを表示
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.calendar-day:not(.other-month)').forEach(function(dayElement) {
+                const year = dayElement.dataset.year;
+                const month = dayElement.dataset.month;
+                const day = dayElement.dataset.day;
+                
+                if (day) {
+                    checkMemoExists(year, month, day, dayElement);
+                }
+            });
+        });
+
+        function checkMemoExists(year, month, day, dayElement) {
+            fetch(`/team_UD/api/memo/${year}/${month}/${day}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.memos && data.memos.length > 0) {
+                        const indicator = dayElement.querySelector('.memo-indicator');
+                        if (indicator) {
+                            indicator.style.display = 'block';
+                        }
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function openMemoModal(element) {
+            currentYear = parseInt(element.dataset.year);
+            currentMonth = parseInt(element.dataset.month);
+            currentDay = parseInt(element.dataset.day);
+
+            if (!currentDay) return;
+
+            // モーダルタイトルを設定
+            document.getElementById('modalTitle').textContent = 
+                `${currentYear}年${currentMonth}月${currentDay}日のメモ`;
+
+            // メモを読み込む
+            loadModalMemos();
+
+            // モーダルを表示
+            document.getElementById('memoModal').classList.add('active');
+        }
+
+        function closeModal(event) {
+            if (event && event.target.id !== 'memoModal') return;
+            
+            document.getElementById('memoModal').classList.remove('active');
+            document.getElementById('modalMemoInput').value = '';
+        }
+
+        function loadModalMemos() {
+            const memoList = document.getElementById('modalMemoList');
+            
+            fetch(`/team_UD/api/memo/${currentYear}/${currentMonth}/${currentDay}/`)
+                .then(response => response.json())
+                .then(data => {
+                    memoList.innerHTML = '';
+                    if (data.memos && data.memos.length > 0) {
+                        data.memos.forEach(memo => {
+                            const memoItem = document.createElement('div');
+                            memoItem.className = 'memo-item';
+                            memoItem.innerHTML = `
+                                <div class="memo-item-content">${escapeHtml(memo.content)}</div>
+                                <div class="memo-item-time">作成: ${memo.created_at}</div>
+                                <button class="memo-delete-btn" onclick="deleteModalMemo(${memo.id})">削除</button>
+                            `;
+                            memoList.appendChild(memoItem);
+                        });
+                    } else {
+                        memoList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">まだメモがありません</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    memoList.innerHTML = '<p style="color: #ff6b6b;">メモの読み込みに失敗しました</p>';
+                });
+        }
+
+        function saveModalMemo() {
+            const textarea = document.getElementById('modalMemoInput');
+            const content = textarea.value.trim();
+
+            if (!content) {
+                alert('メモの内容を入力してください');
+                return;
+            }
+
+            const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
+
+            fetch('/team_UD/api/memo/save/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    date: dateStr,
+                    content: content
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('エラー: ' + data.error);
+                } else {
+                    textarea.value = '';
+                    loadModalMemos();
+                    // インジケータを更新
+                    updateMemoIndicator();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('メモの保存に失敗しました');
+            });
+        }
+
+        function deleteModalMemo(memoId) {
+            if (!confirm('このメモを削除しますか?')) {
+                return;
+            }
+
+            fetch(`/team_UD/api/memo/delete/${memoId}/`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('エラー: ' + data.error);
+                } else {
+                    loadModalMemos();
+                    // インジケータを更新
+                    updateMemoIndicator();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('メモの削除に失敗しました');
+            });
+        }
+
+        function updateMemoIndicator() {
+            const dayElement = document.querySelector(
+                `.calendar-day[data-year="${currentYear}"][data-month="${currentMonth}"][data-day="${currentDay}"]`
+            );
+            if (dayElement) {
+                checkMemoExists(currentYear, currentMonth, currentDay, dayElement);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
 </body>
 </html>

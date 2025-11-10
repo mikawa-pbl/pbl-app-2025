@@ -1,7 +1,10 @@
 from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from .models import Member, Event, Memo
 from datetime import datetime, timedelta
 import calendar
+import json
 
 
 def index(request):
@@ -90,3 +93,78 @@ def calendar_view(request):
 def memo_view(request):
     memos = Memo.objects.using("team_UD").all().order_by("-created_at")
     return render(request, "teams/team_UD/memo.html", {"memos": memos})
+
+
+@csrf_exempt
+def get_memo_by_date(request, year, month, day):
+    """特定の日付のメモを取得するAPI"""
+    if request.method == "GET":
+        try:
+            target_date = datetime(year, month, day).date()
+            memos = Memo.objects.using("team_UD").filter(date=target_date).order_by("-created_at")
+            memo_list = [
+                {
+                    "id": memo.id,
+                    "content": memo.content,
+                    "created_at": memo.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    "updated_at": memo.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+                }
+                for memo in memos
+            ]
+            return JsonResponse({"memos": memo_list}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
+@csrf_exempt
+def save_memo(request):
+    """メモを保存するAPI"""
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            date_str = data.get("date")
+            content = data.get("content")
+            memo_id = data.get("id")
+
+            if not date_str or not content:
+                return JsonResponse({"error": "日付と内容は必須です"}, status=400)
+
+            target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+
+            if memo_id:
+                # 既存のメモを更新
+                memo = Memo.objects.using("team_UD").get(id=memo_id)
+                memo.content = content
+                memo.date = target_date
+                memo.save(using="team_UD")
+            else:
+                # 新しいメモを作成
+                memo = Memo(date=target_date, content=content)
+                memo.save(using="team_UD")
+
+            return JsonResponse(
+                {
+                    "id": memo.id,
+                    "content": memo.content,
+                    "date": memo.date.strftime("%Y-%m-%d"),
+                    "created_at": memo.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    "updated_at": memo.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+                },
+                status=200,
+            )
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
+@csrf_exempt
+def delete_memo(request, memo_id):
+    """メモを削除するAPI"""
+    if request.method == "DELETE":
+        try:
+            memo = Memo.objects.using("team_UD").get(id=memo_id)
+            memo.delete(using="team_UD")
+            return JsonResponse({"message": "削除しました"}, status=200)
+        except Memo.DoesNotExist:
+            return JsonResponse({"error": "メモが見つかりません"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "team_TeXTeX",
     "team_cake",
     "team_shouronpou",
+    'team_giryulink',
     "h34vvy_u53rzz",
     'takenoko',
 ]
@@ -129,6 +130,10 @@ DATABASES = {
     'takenoko': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'takenoko' / 'db.sqlite3',
+    },
+    'team_giryulink': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_giryulink' / 'db.sqlite3',
     },
 }
 

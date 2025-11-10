@@ -32,5 +32,6 @@ urlpatterns = [
     path("team_cake/", include("team_cake.urls")),
     path("team_shouronpou/", include("team_shouronpou.urls")),
     path("h34vvy_u53rzz/", include("h34vvy_u53rzz.urls")),
+    path('team_giryulink/', include('team_giryulink.urls')),
     path('takenoko/', include('takenoko.urls')), 
 ]

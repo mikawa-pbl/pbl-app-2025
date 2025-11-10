@@ -14,8 +14,10 @@ def add_initial_members(apps, schema_editor):
     # メンバーデータを作成
     members = [
         Member(first_name='純也', last_name='本田'),
-        Member(first_name='花子', last_name='佐藤'),
-        Member(first_name='次郎', last_name='田中'),
+        Member(first_name='峻佑', last_name='山北'),
+        Member(first_name='圭吾', last_name='小野崎'),
+        Member(first_name='光希', last_name='蒔田'),
+        Member(first_name='一志', last_name='浦'),
     ]
 
     # バルクインサートで効率的に挿入

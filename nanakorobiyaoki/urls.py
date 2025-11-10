@@ -5,4 +5,5 @@ app_name = "nanakorobiyaoki"
 urlpatterns = [
     path('', views.index, name='index'),
     path('members/', views.members, name='members'),
+    path('mypage/', views.mypage, name='mypage'),
 ]

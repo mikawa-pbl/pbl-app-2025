@@ -6,9 +6,8 @@ from .forms import EntryForm
 def index(request):
     return render(request, 'teams/h34vvy_u53rzz/index.html')
 
-def members(request):
-    qs = Member.objects.using('h34vvy_u53rzz').all()  # ← h34vvy_u53rzz DBを明示
-    return render(request, 'teams/h34vvy_u53rzz/members.html', {'members': qs})
+def help(request):
+    return render(request, 'teams/h34vvy_u53rzz/help.html')
 
 def timeline_view(request):
     if request.method == "POST":

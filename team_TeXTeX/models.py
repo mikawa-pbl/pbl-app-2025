@@ -6,3 +6,9 @@ class Member(models.Model):
 
     def __str__(self):
         return f"{self.last_name} {self.first_name}"
+
+class Main(models.Model):
+    pass
+
+class Temp(models.Model):
+    pass

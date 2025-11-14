@@ -26,6 +26,7 @@ urlpatterns = [
     path('team_USL/', include('team_USL.urls')),
     path('team_kitajaki/', include('team_kitajaki.urls')),
     path('team_terrace/', include('team_terrace.urls')),
+    path('agileca/', include('agileca.urls')),
     path('team_scim/', include('team_scim.urls')),
     path('team_empiricism/', include('team_empiricism.urls')), # 追加
     path('ssk/', include('ssk.urls')),

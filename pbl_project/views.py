@@ -3,8 +3,6 @@ from django.shortcuts import render
 
 def index(request):
     teams = [
-        # データサンプル
-        # {"name": "Team A", "url": "/team_a/"},
         {"name": "Team USL", "url": "/team_USL/"},  # ← 新チームを追加
         {"name": "Team Empiricism", "url": "/team_empiricism/"},  # ← 新チームを追加
         {"name": "Team Kitajaki", "url": "/team_kitajaki/"},  # ← 新チームを追加
@@ -16,6 +14,7 @@ def index(request):
         {"name": "Team TMR", "url": "/team_TMR/"},  # ← 新チームを追加
         {"name": "Graphics", "url": "/graphics/"},  # ← 新チームを追加
         {"name": "Team Terrace", "url": "/team_terrace/"},  # ← 新チームを追加
+        {"name": "Agileca", "url": "/agileca/"},  # ← アジャイルカ(Agileca)を追加
         {"name": "Team SCIM", "url": "/team_scim/"},  # ← 新チームを追加
         {"name": "ssk", "url": "/ssk/"},
         {"name": "Team Tansaibou", "url": "/team_tansaibou/"},

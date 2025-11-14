@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'team_kitajaki',
     'shiokara',
     'team_terrace',
+    'agileca',
     'team_scim',
     'team_empiricism',
     'ssk',
@@ -152,6 +153,10 @@ DATABASES = {
     'team_shouronpou': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_shouronpou' / 'db.sqlite3',
+    },
+    'agileca': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'agileca' / 'db.sqlite3',
     },
     'shiokara': {
         'ENGINE': 'django.db.backends.sqlite3',

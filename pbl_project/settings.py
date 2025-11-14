@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'team_USL',
     'team_kitajaki',
     'shiokara',
     'team_terrace',
@@ -176,11 +177,17 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'ssk' / 'db.sqlite3',
     },
+    'team_USL': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_USL' / 'db.sqlite3',
+    },
     'team_scim': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_scim' / 'db.sqlite3',
     },
+    
 }
+
 
 # app_labelごとにDBを振り分けるルーター
 DATABASE_ROUTERS = ["routers.TeamPerAppRouter"]

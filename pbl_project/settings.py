@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     "team_cake",
     "team_shouronpou",
     'team_giryulink',
-    "h34vvy_u53rzz",
     'takenoko',
 ]
 

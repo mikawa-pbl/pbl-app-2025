@@ -15,6 +15,7 @@ def index(request):
         {"name": "Team TMR", "url": "/team_TMR/"},  # ← 新チームを追加
         {"name": "Graphics", "url": "/graphics/"},  # ← 新チームを追加
         {"name": "Team Terrace", "url": "/team_terrace/"},  # ← 新チームを追加
+        {"name": "Team SCIM", "url": "/team_scim/"},  # ← 新チームを追加
         {"name": "ssk", "url": "/ssk/"},
         {"name": "Team Tansaibou", "url": "/team_tansaibou/"},
         {"name": "mori_doragon_yuhi_machi", "url": "/mori_doragon_yuhi_machi/"},  # ← 新チームを追加

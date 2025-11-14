@@ -23,6 +23,7 @@ class TeamPerAppRouter:
         "team_cake": "team_cake",
         "team_shouronpou": "team_shouronpou",
         # 'team_b': 'team_b',
+        'Catan': 'Catan',
         'takenoko': 'takenoko',
         "h34vvy_u53rzz": "h34vvy_u53rzz",
         'team_giryulink': 'team_giryulink',

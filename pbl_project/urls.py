@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name="index"),
     path('team_terrace/', include('team_terrace.urls')),
+    path('Catan/', include('Catan.urls')),
     path('team_tansaibou/', include('team_tansaibou.urls')), 
     path('shiokara/', include('shiokara.urls')),
     path('mori_doragon_yuhi_machi/', include('mori_doragon_yuhi_machi.urls')),  # ← 追加

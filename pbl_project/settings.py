@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'team_kitajaki',
     'shiokara',
     'team_terrace',
+    'ssk',
     'Catan',
     'team_tansaibou',
     'h34vvy_u53rzz',
@@ -164,6 +165,10 @@ DATABASES = {
     'Catan': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'Catan' / 'db.sqlite3',
+    },
+    'ssk': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'ssk' / 'db.sqlite3',
     },
 }
 

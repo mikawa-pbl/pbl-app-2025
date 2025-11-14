@@ -25,6 +25,7 @@ urlpatterns = [
     path('', views.index, name="index"),
     path('team_kitajaki/', include('team_kitajaki.urls')),
     path('team_terrace/', include('team_terrace.urls')),
+    path('team_empiricism/', include('team_empiricism.urls')), # 追加
     path('ssk/', include('ssk.urls')),
     path('Catan/', include('Catan.urls')),
     path('team_tansaibou/', include('team_tansaibou.urls')), 

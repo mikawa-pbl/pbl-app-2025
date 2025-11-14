@@ -25,6 +25,19 @@ urlpatterns = [
     path('', views.index, name="index"),
     path('team_terrace/', include('team_terrace.urls')),
     path('team_tansaibou/', include('team_tansaibou.urls')), 
-    path('team_shouronpou/', include('team_shouronpou.urls')),
-    path('h34vvy_u53rzz/', include('h34vvy_u53rzz.urls')),
+    path('shiokara/', include('shiokara.urls')),
+    path('mori_doragon_yuhi_machi/', include('mori_doragon_yuhi_machi.urls')),  # ← 追加
+    path('team_northcliff/', include('team_northcliff.urls')),
+    path("nanakorobiyaoki/", include("nanakorobiyaoki.urls")),  # ← 追加
+    path("team_TMR/", include("team_TMR.urls")),
+    path("graphics/", include("graphics.urls")),
+    path("team_terrace/", include("team_terrace.urls")),
+    path("team_UD/", include("team_UD.urls")),
+    path("team_akb5/", include("team_akb5.urls")),
+    path("team_TeXTeX/", include("team_TeXTeX.urls")),
+    path("team_cake/", include("team_cake.urls")),
+    path("team_shouronpou/", include("team_shouronpou.urls")),
+    path("h34vvy_u53rzz/", include("h34vvy_u53rzz.urls")),
+    path('team_giryulink/', include('team_giryulink.urls')),
+    path('takenoko/', include('takenoko.urls')), 
 ]

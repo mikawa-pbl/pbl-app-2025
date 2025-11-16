@@ -8,7 +8,6 @@ class TeamPerAppRouter:
     app_to_db = {
         'team_USL': 'team_USL',
         'team_kitajaki': 'team_kitajaki',
-        'team_terrace': 'team_terrace',
         'agileca': 'agileca',
         'team_scim': 'team_scim',
         'team_empiricism': 'team_empiricism', # 追加

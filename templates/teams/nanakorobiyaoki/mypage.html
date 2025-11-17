@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.name }} のマイページ</title>
+    <style>
+        /* === 基本設定 === */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: #f4f7f6; /* 薄いグレーの背景 */
+            color: #333;
+            margin: 0;
+            padding: 30px;
+            display: grid;
+            place-items: center;
+            min-height: 90vh;
+        }
+
+        /* === プロフィールカード全体 === */
+        .profile-card {
+            width: 100%;
+            max-width: 700px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden; /* 角丸をキレイに見せるため */
+        }
+
+        /* === ヘッダー (アイコンと名前) === */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            padding: 24px 30px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* ユーザーが設定したアイコン画像 */
+        .profile-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%; /* アイコンを丸くする */
+            object-fit: cover; /* 画像が崩れないように */
+            margin-right: 20px;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        /* === 【CSS追加】イニシャルアイコンのスタイル === */
+        .profile-initial-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #007bff; /* 背景色 */
+            color: #ffffff; /* 文字色 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem; /* 文字サイズ (一覧より大きく) */
+            font-weight: bold;
+            margin-right: 20px;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .profile-header h1 {
+            font-size: 2.0rem; /* h1を大きく */
+            margin: 0;
+            font-weight: 700;
+        }
+
+        /* === 詳細 (dlリスト) === */
+        .profile-details {
+            padding: 10px 30px 30px 30px;
+        }
+
+        .profile-details dl {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 項目名 (dt) */
+        .profile-details dt {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #666; /* 項目名は少し薄く */
+            padding-top: 18px;
+            margin-bottom: 4px;
+        }
+        
+        /* 項目内容 (dd) */
+        .profile-details dd {
+            font-size: 1.1rem;
+            margin: 0;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #f0f0f0; /* 薄い区切り線 */
+            word-wrap: break-word; /* 長い文字列も折り返す */
+        }
+
+        /* 「一言」は改行を反映し、線なしに */
+        .profile-details dt.one-word {
+            margin-top: 24px;
+        }
+        .profile-details dd.one-word {
+            border-bottom: none;
+            font-style: italic;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* === フッター (戻るリンク) === */
+        .profile-footer {
+            text-align: center;
+            padding: 20px 30px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #eee;
+        }
+
+        .profile-footer a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: 600;
+        }
+        .profile-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="profile-card">
+        
+        <header class="profile-header">
+            {% if user.icon %}
+                <img src="{{ user.icon.url }}" alt="アイコン" class="profile-icon">
+            {% else %}
+                <span class="profile-initial-icon">
+                    {{ user.name.0|upper }}
+                </span>
+            {% endif %}
+            
+            <h1>{{ user.name }}</h1>
+        </header>
+
+        <main class="profile-details">
+            <dl>
+                <dt>ユーザID</dt>
+                <dd>{{ user.user_id }}</dd>
+
+                <dt>学年学科</dt>
+                <dd>{{ user.grade_department }}</dd>
+
+                <dt>年齢</dt>
+                <dd>{{ user.age }} 歳</dd>
+
+                <dt>性別</dt>
+                <dd>{{ user.gender }}</dd>
+
+                <dt>誕生日</dt>
+                <dd>{{ user.birth_date }}</dd>
+
+                <dt>趣味</dt>
+                <dd>{{ user.hobby|default:"—" }}</dd>
+
+                <dt>出身</dt>
+                <dd>{{ user.birthplace|default:"—" }}</dd>
+
+                <dt>所属サークル</dt>
+                <dd>{{ user.club|default:"—" }}</dd>
+
+                <dt>GitHub</dt>
+                <dd>{{ user.github_account|default:"—" }}</dd>
+
+                <dt>交際ステータス</dt>
+                <dd>{{ user.relationship_status|default:"—" }}</dd>
+                
+                <dt class="one-word">一言</dt>
+                <dd class="one-word">
+                    {{ user.one_word|linebreaksbr|default:"—" }}
+                </dd>
+            </dl>
+        </main>
+
+        
+        <footer class="profile-footer">
+            <a href="{% url 'nanakorobiyaoki:user_profile_edit' user.user_id %}" style="text-decoration: none; color: #007bff; font-weight: 600; margin-right: 20px;">
+                編集する
+            </a>
+            
+            <a href="{% url 'nanakorobiyaoki:users' %}" style="text-decoration: none; color: #6c757d; font-weight: 600;">
+                ユーザ一覧に戻る
+            </a>
+        </footer>
+
+
+    </div>
+
+</body>
+</html>

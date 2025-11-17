@@ -21,10 +21,19 @@ class Event(models.Model):
 
 
 class Memo(models.Model):
-    date = models.DateField(default=timezone.now)  # メモの対象日付（既存データには今日の日付が設定されます）
+    # 就活関連フィールド
+    company_name = models.CharField(max_length=200, default='')  # 会社名
+    interview_stage = models.CharField(max_length=100, default='')  # 面接段階
+    interview_date = models.DateField(null=True, blank=True)  # 面接日
+    status = models.CharField(max_length=100, default='')  # 選考状況
+
+    # メモ内容
     content = models.TextField()  # メモの内容
+
+    # 日時フィールド
+    date = models.DateField(default=timezone.now)  # メモの対象日付(既存データには今日の日付が設定されます)
     created_at = models.DateTimeField(auto_now_add=True)  # 作成日時
     updated_at = models.DateTimeField(auto_now=True)  # 更新日時
 
     def __str__(self):
-        return f"{self.date}: {self.content[:50]}"  # 日付とメモの冒頭50文字を表示
+        return f"{self.company_name} - {self.interview_stage}: {self.content[:30]}"

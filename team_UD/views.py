@@ -105,6 +105,10 @@ def get_memo_by_date(request, year, month, day):
             memo_list = [
                 {
                     "id": memo.id,
+                    "company_name": memo.company_name,
+                    "interview_stage": memo.interview_stage,
+                    "interview_date": memo.interview_date.strftime("%Y-%m-%d") if memo.interview_date else None,
+                    "status": memo.status,
                     "content": memo.content,
                     "created_at": memo.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                     "updated_at": memo.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
@@ -124,6 +128,10 @@ def save_memo(request):
             data = json.loads(request.body)
             date_str = data.get("date")
             content = data.get("content")
+            company_name = data.get("company_name", "")
+            interview_stage = data.get("interview_stage", "")
+            interview_date_str = data.get("interview_date")
+            status = data.get("status", "")
             memo_id = data.get("id")
 
             if not date_str or not content:
@@ -131,21 +139,41 @@ def save_memo(request):
 
             target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
 
+            # 面接日の処理
+            interview_date = None
+            if interview_date_str:
+                interview_date = datetime.strptime(interview_date_str, "%Y-%m-%d").date()
+
             if memo_id:
                 # 既存のメモを更新
                 memo = Memo.objects.using("team_UD").get(id=memo_id)
                 memo.content = content
                 memo.date = target_date
+                memo.company_name = company_name
+                memo.interview_stage = interview_stage
+                memo.interview_date = interview_date
+                memo.status = status
                 memo.save(using="team_UD")
             else:
                 # 新しいメモを作成
-                memo = Memo(date=target_date, content=content)
+                memo = Memo(
+                    date=target_date,
+                    content=content,
+                    company_name=company_name,
+                    interview_stage=interview_stage,
+                    interview_date=interview_date,
+                    status=status,
+                )
                 memo.save(using="team_UD")
 
             return JsonResponse(
                 {
                     "id": memo.id,
                     "content": memo.content,
+                    "company_name": memo.company_name,
+                    "interview_stage": memo.interview_stage,
+                    "interview_date": memo.interview_date.strftime("%Y-%m-%d") if memo.interview_date else None,
+                    "status": memo.status,
                     "date": memo.date.strftime("%Y-%m-%d"),
                     "created_at": memo.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                     "updated_at": memo.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
@@ -154,6 +182,48 @@ def save_memo(request):
             )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+
+
+@csrf_exempt
+def create_memo(request):
+    """就活メモを作成する"""
+    if request.method == "POST":
+        try:
+            # フォームデータを取得
+            company_name = request.POST.get("company_name", "")
+            interview_stage = request.POST.get("interview_stage", "")
+            interview_date_str = request.POST.get("interview_date")
+            status = request.POST.get("status", "")
+            content = request.POST.get("content", "")
+
+            # 必須フィールドのチェック
+            if not company_name or not interview_stage or not status or not content:
+                return JsonResponse({"error": "必須項目を入力してください"}, status=400)
+
+            # 面接日の処理
+            interview_date = None
+            if interview_date_str:
+                interview_date = datetime.strptime(interview_date_str, "%Y-%m-%d").date()
+
+            # メモを作成
+            memo = Memo(
+                company_name=company_name,
+                interview_stage=interview_stage,
+                interview_date=interview_date,
+                status=status,
+                content=content,
+                date=datetime.now().date(),
+            )
+            memo.save(using="team_UD")
+
+            # メモ一覧ページにリダイレクト
+            from django.shortcuts import redirect
+            return redirect("team_UD:memo")
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({"error": "POSTメソッドのみ許可されています"}, status=405)
 
 
 @csrf_exempt

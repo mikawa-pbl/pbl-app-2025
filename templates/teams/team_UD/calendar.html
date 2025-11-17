@@ -201,14 +201,49 @@
             position: relative;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-        .memo-item-content {
+        .memo-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        .memo-item-company {
+            font-size: 1.1em;
+            font-weight: bold;
             color: #333;
+        }
+        .memo-item-badges {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .memo-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+        .memo-badge-interview {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .memo-badge-status {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        .memo-badge-date {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .memo-item-content {
+            color: #555;
             margin-bottom: 8px;
-            font-size: 1em;
+            font-size: 0.95em;
             line-height: 1.5;
         }
         .memo-item-time {
-            font-size: 0.85em;
+            font-size: 0.8em;
             color: #999;
         }
         .memo-delete-btn {
@@ -231,26 +266,48 @@
         .memo-form {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
             padding: 20px;
             background: #f8f9ff;
             border-radius: 10px;
         }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9em;
+        }
+        .memo-form input,
+        .memo-form select,
         .memo-form textarea {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            resize: vertical;
-            min-height: 120px;
+            border-radius: 8px;
             font-family: inherit;
-            font-size: 1em;
+            font-size: 0.95em;
             transition: all 0.3s;
         }
+        .memo-form input:focus,
+        .memo-form select:focus,
         .memo-form textarea:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .memo-form textarea {
+            resize: vertical;
+            min-height: 100px;
+            grid-column: 1 / -1;
         }
         .memo-form button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -378,12 +435,54 @@
     <div id="memoModal" class="modal-overlay" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h3 id="modalTitle">メモ</h3>
+                <h3 id="modalTitle">就活メモ</h3>
                 <button class="close-btn" onclick="closeModal()">✕</button>
             </div>
             <div class="memo-list" id="modalMemoList"></div>
             <div class="memo-form">
-                <textarea id="modalMemoInput" placeholder="メモを入力してください..."></textarea>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modalCompanyName">会社名 *</label>
+                        <input type="text" id="modalCompanyName" placeholder="例: 株式会社〇〇" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalInterviewStage">面接段階 *</label>
+                        <select id="modalInterviewStage" required>
+                            <option value="">選択してください</option>
+                            <option value="説明会">説明会</option>
+                            <option value="ES提出">ES提出</option>
+                            <option value="適性検査">適性検査</option>
+                            <option value="一次面接">一次面接</option>
+                            <option value="二次面接">二次面接</option>
+                            <option value="三次面接">三次面接</option>
+                            <option value="最終面接">最終面接</option>
+                            <option value="内定">内定</option>
+                            <option value="その他">その他</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modalInterviewDate">面接日</label>
+                        <input type="date" id="modalInterviewDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="modalStatus">選考状況 *</label>
+                        <select id="modalStatus" required>
+                            <option value="">選択してください</option>
+                            <option value="応募予定">応募予定</option>
+                            <option value="選考中">選考中</option>
+                            <option value="結果待ち">結果待ち</option>
+                            <option value="通過">通過</option>
+                            <option value="不合格">不合格</option>
+                            <option value="辞退">辞退</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="modalMemoInput">メモ内容 *</label>
+                    <textarea id="modalMemoInput" placeholder="面接の内容、感じたこと、質問された内容などを記録しましょう" required></textarea>
+                </div>
                 <button onclick="saveModalMemo()">💾 保存</button>
             </div>
         </div>
@@ -427,8 +526,12 @@
             if (!currentDay) return;
 
             // モーダルタイトルを設定
-            document.getElementById('modalTitle').textContent = 
+            document.getElementById('modalTitle').textContent =
                 `${currentYear}年${currentMonth}月${currentDay}日のメモ`;
+
+            // 面接日フィールドに選択した日付を自動入力
+            const selectedDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
+            document.getElementById('modalInterviewDate').value = selectedDate;
 
             // メモを読み込む
             loadModalMemos();
@@ -439,14 +542,20 @@
 
         function closeModal(event) {
             if (event && event.target.id !== 'memoModal') return;
-            
+
             document.getElementById('memoModal').classList.remove('active');
+
+            // フォームをクリア
+            document.getElementById('modalCompanyName').value = '';
+            document.getElementById('modalInterviewStage').value = '';
+            document.getElementById('modalInterviewDate').value = '';
+            document.getElementById('modalStatus').value = '';
             document.getElementById('modalMemoInput').value = '';
         }
 
         function loadModalMemos() {
             const memoList = document.getElementById('modalMemoList');
-            
+
             fetch(`/team_UD/api/memo/${currentYear}/${currentMonth}/${currentDay}/`)
                 .then(response => response.json())
                 .then(data => {
@@ -455,7 +564,31 @@
                         data.memos.forEach(memo => {
                             const memoItem = document.createElement('div');
                             memoItem.className = 'memo-item';
+
+                            let badges = '';
+                            if (memo.company_name) {
+                                badges += `<div class="memo-item-company">${escapeHtml(memo.company_name)}</div>`;
+                            }
+
+                            let badgeHtml = '<div class="memo-item-badges">';
+                            if (memo.interview_stage) {
+                                badgeHtml += `<span class="memo-badge memo-badge-interview">${escapeHtml(memo.interview_stage)}</span>`;
+                            }
+                            if (memo.status) {
+                                badgeHtml += `<span class="memo-badge memo-badge-status">${escapeHtml(memo.status)}</span>`;
+                            }
+                            if (memo.interview_date) {
+                                badgeHtml += `<span class="memo-badge memo-badge-date">${memo.interview_date}</span>`;
+                            }
+                            badgeHtml += '</div>';
+
                             memoItem.innerHTML = `
+                                <div class="memo-item-header">
+                                    <div>
+                                        ${badges}
+                                        ${badgeHtml}
+                                    </div>
+                                </div>
                                 <div class="memo-item-content">${escapeHtml(memo.content)}</div>
                                 <div class="memo-item-time">作成: ${memo.created_at}</div>
                                 <button class="memo-delete-btn" onclick="deleteModalMemo(${memo.id})">削除</button>
@@ -473,11 +606,15 @@
         }
 
         function saveModalMemo() {
-            const textarea = document.getElementById('modalMemoInput');
-            const content = textarea.value.trim();
+            const companyName = document.getElementById('modalCompanyName').value.trim();
+            const interviewStage = document.getElementById('modalInterviewStage').value;
+            const interviewDate = document.getElementById('modalInterviewDate').value;
+            const status = document.getElementById('modalStatus').value;
+            const content = document.getElementById('modalMemoInput').value.trim();
 
-            if (!content) {
-                alert('メモの内容を入力してください');
+            // 必須フィールドのチェック
+            if (!companyName || !interviewStage || !status || !content) {
+                alert('必須項目(会社名、面接段階、選考状況、メモ内容)を入力してください');
                 return;
             }
 
@@ -490,6 +627,10 @@
                 },
                 body: JSON.stringify({
                     date: dateStr,
+                    company_name: companyName,
+                    interview_stage: interviewStage,
+                    interview_date: interviewDate || null,
+                    status: status,
                     content: content
                 })
             })
@@ -498,7 +639,13 @@
                 if (data.error) {
                     alert('エラー: ' + data.error);
                 } else {
-                    textarea.value = '';
+                    // フォームをクリア
+                    document.getElementById('modalCompanyName').value = '';
+                    document.getElementById('modalInterviewStage').value = '';
+                    document.getElementById('modalInterviewDate').value = '';
+                    document.getElementById('modalStatus').value = '';
+                    document.getElementById('modalMemoInput').value = '';
+
                     loadModalMemos();
                     // インジケータを更新
                     updateMemoIndicator();

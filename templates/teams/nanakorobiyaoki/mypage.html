@@ -1,11 +1,25 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>nanakorobiyaoki Members</title></head>
 <body>
-  <h1>nanakorobiyaoki Members</h1>
+  <h1>nanakorobiyaoki Mypage</h1>
   <ul>
-    <li>田口凜采</li>
-    <li>峰野侑也</li>
-    <li>前木場舜</li>
-    <li>松宮亘志</li>
+    {% for user in mypage %}
+      <li>{{ user.name }} </li>
+      <li>{{ user.icon }} </li>
+      <li>{{ user.user_id }} </li>
+      <li>{{ user.grade_depart }} </li>
+      <li>{{ user.age }} </li>
+      <li>{{ user.gender }} </li>
+      <li>{{ user.club }} </li>
+      <li>{{ user.one_word }} </li>
+      <li>{{ user.github_account }} </li>
+      <li>{{ user.hobby }} </li>
+      <li>{{ user.birthplace }} </li>
+      <li>{{ user.birth_date }} </li>
+      <li>{{ user.relationship_status }} </li>
+
+    {% empty %}
+      <li>データがありません</li>
+    {% endfor %}
   </ul>
   <p><a href="/nanakorobiyaoki/">nanakorobiyaoki トップへ</a></p>
 </body></html>

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Member
+from .models import Member,MyPage
 
 def index(request):
     return render(request, 'teams/nanakorobiyaoki/index.html')
@@ -11,3 +11,4 @@ def members(request):
 def mypage(request):
     qs = MyPage.objects.using('nanakorobiyaoki').all()
     return render(request, 'teams/nanakorobiyaoki/mypage.html', {'mypage': qs})
+    

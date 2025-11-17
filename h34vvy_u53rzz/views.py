@@ -6,7 +6,13 @@ from .models import Entry
 
 
 def index(request):
-    return render(request, "teams/h34vvy_u53rzz/index.html")
+    return render(
+        request,
+        "teams/h34vvy_u53rzz/index.html",
+        {
+            "nav_active": "index",
+        },
+    )
 
 
 def help(request):
@@ -36,6 +42,7 @@ def help(request):
             "doors": DOORS,
             "form": form,
             "selected_door": selected_door,
+            "nav_active": "help",
         },
     )
 
@@ -56,5 +63,6 @@ def timeline_view(request):
         {
             "form": form,
             "entries": entries,
+            "nav_active": "timeline",
         },
     )

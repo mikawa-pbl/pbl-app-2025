@@ -7,23 +7,43 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Timeline</title>
   </head>
-  <body>
-    <section>
-      <h2>最新の記録</h2>
-      {% if entries %}
-      <ul>
-        {% for e in entries %}
-        <li style="margin-bottom: 12px">
-          <strong>{{ e.created_at|date:"Y-m-d H:i" }}</strong>
-          / <strong>{{ e.door_label }}</strong>
-          <br />
-          <pre style="white-space: pre-wrap; margin: 4px 0 0">{{ e.comment }}</pre>
-        </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p>まだ投稿がありません。</p>
-      {% endif %}
-    </section>
+  <body class="bg-slate-50 px-4 py-6 font-sans text-slate-900">
+    {% include "teams/h34vvy_u53rzz/_nav.html" %}
+    <div class="mx-auto max-w-4xl space-y-6">
+      <header class="space-y-2">
+        <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">
+          Activity
+        </p>
+        <h1 class="text-3xl font-bold text-slate-900">最新の記録</h1>
+        <p class="text-sm text-slate-600">
+          送信されたサポートコメントを新しい順で表示しています。
+        </p>
+      </header>
+
+      <section class="rounded-xl bg-white p-6 shadow">
+        {% if entries %}
+        <ul class="space-y-4">
+          {% for e in entries %}
+          <li class="border-b border-slate-100 pb-4 last:border-b-0 last:pb-0">
+            <div class="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+              <span class="font-semibold text-slate-900">
+                {{ e.created_at|date:"Y-m-d H:i" }}
+              </span>
+              <span class="text-slate-400">/</span>
+              <span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                {{ e.door_label }}
+              </span>
+            </div>
+            <pre class="mt-2 whitespace-pre-wrap text-sm text-slate-800">
+{{ e.comment }}</pre
+            >
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-slate-600">まだ投稿がありません。</p>
+        {% endif %}
+      </section>
+    </div>
   </body>
 </html>

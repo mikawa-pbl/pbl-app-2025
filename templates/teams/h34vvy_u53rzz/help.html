@@ -5,136 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>助けを求める</title>
-    <style>
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        line-height: 1.5;
-        padding: 16px;
-      }
-
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-bottom: 16px;
-      }
-
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-      }
-
-      tr.door-row {
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
-
-      tr.door-row:hover,
-      tr.door-row:focus {
-        background-color: #f0f4ff;
-      }
-
-      textarea {
-        width: 100%;
-        box-sizing: border-box;
-      }
-
-      .is-hidden {
-        display: none;
-      }
-    </style>
   </head>
-  <body>
-    <h1>助けを求める</h1>
-    <p>利用可能なドア一覧から、現在地に最も近いものを選んでください。</p>
+  <body class="bg-slate-50 px-4 py-6 font-sans text-slate-900">
+    {% include "teams/h34vvy_u53rzz/_nav.html" %}
+    <div class="mx-auto max-w-4xl space-y-6">
+      <header>
+        <h1 class="text-2xl font-bold text-slate-900">助けを求める</h1>
+        <p class="mt-2 text-sm text-slate-600">
+          利用可能なドア一覧から、現在地に最も近いものを選んでください。
+        </p>
+      </header>
 
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>名称</th>
-          <th>座標 (x, y)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for door in doors %}
-        <tr
-          class="door-row"
-          tabindex="0"
-          data-door-id="{{ door.id }}"
-          data-door-label="{{ door.label }}"
-        >
-          <td>{{ door.id }}</td>
-          <td>{{ door.label }}</td>
-          <td>{{ door.coordinate.0 }}, {{ door.coordinate.1 }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="3">登録されているドアがありません。</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      <div class="overflow-hidden rounded-lg bg-white shadow">
+        <table class="w-full border-collapse text-sm">
+          <thead class="bg-slate-100 text-left text-xs font-semibold uppercase text-slate-600">
+            <tr>
+              <th class="border border-slate-200 px-4 py-3">ID</th>
+              <th class="border border-slate-200 px-4 py-3">名称</th>
+              <th class="border border-slate-200 px-4 py-3">座標 (x, y)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for door in doors %}
+            <tr
+              class="door-row cursor-pointer border border-slate-200 text-slate-800 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 hover:bg-indigo-50"
+              tabindex="0"
+              data-door-id="{{ door.id }}"
+              data-door-label="{{ door.label }}"
+            >
+              <td class="px-4 py-3">{{ door.id }}</td>
+              <td class="px-4 py-3">{{ door.label }}</td>
+              <td class="px-4 py-3">{{ door.coordinate.0 }}, {{ door.coordinate.1 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td class="px-4 py-3 text-center text-slate-500" colspan="3">
+                登録されているドアがありません。
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-    <p id="commentHint" class="{% if selected_door %}is-hidden{% endif %}">
-      ドアをクリックするとコメント入力欄が現れます。
-    </p>
-
-    <section
-      id="commentSection"
-      class="{% if not selected_door %}is-hidden{% endif %}"
-    >
-      <h2>選択中のドアにコメントを送信</h2>
-      <p>
-        選択中のドア:
-        <strong id="selectedDoorName">
-          {% if selected_door %}
-          {{ selected_door.label }} ({{ selected_door.id }})
-          {% else %}
-          未選択
-          {% endif %}
-        </strong>
+      <p
+        id="commentHint"
+        class="{% if selected_door %}hidden{% endif %} text-sm text-slate-600"
+      >
+        ドアをクリックするとコメント入力欄が現れます。
       </p>
 
-      <form method="post">
-        {% csrf_token %}
-        <input
-          type="hidden"
-          name="door_id"
-          id="selectedDoorInput"
-          value="{% if selected_door %}{{ selected_door.id }}{% endif %}"
-        />
-        {% if form.non_field_errors %}
-        <ul style="color: red">
-          {% for error in form.non_field_errors %}
-          <li>{{ error }}</li>
-          {% endfor %}
-        </ul>
-        {% endif %}
+      <section
+        id="commentSection"
+        class="{% if not selected_door %}hidden{% endif %} rounded-lg bg-white p-6 shadow"
+      >
+        <h2 class="text-xl font-semibold text-slate-900">
+          選択中のドアにコメントを送信
+        </h2>
+        <p class="mt-1 text-sm text-slate-600">
+          選択中のドア:
+          <strong id="selectedDoorName" class="text-slate-900">
+            {% if selected_door %}
+            {{ selected_door.label }} ({{ selected_door.id }})
+            {% else %}
+            未選択
+            {% endif %}
+          </strong>
+        </p>
 
-        <div>
-          {{ form.comment.label_tag }}
-          {{ form.comment }}
-          {% if form.comment.errors %}
-          <ul style="color: red">
-            {% for error in form.comment.errors %}
+        <form method="post" class="mt-4 space-y-4">
+          {% csrf_token %}
+          <input
+            type="hidden"
+            name="door_id"
+            id="selectedDoorInput"
+            value="{% if selected_door %}{{ selected_door.id }}{% endif %}"
+          />
+          {% if form.non_field_errors %}
+          <ul class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+            {% for error in form.non_field_errors %}
             <li>{{ error }}</li>
             {% endfor %}
           </ul>
           {% endif %}
-        </div>
 
-        <button
-          type="submit"
-          id="commentSubmit"
-          {% if not selected_door %}disabled{% endif %}
-        >
-          コメントを送信
-        </button>
-      </form>
-    </section>
+          <div class="space-y-1">
+            {{ form.comment.label_tag }}
+            {{ form.comment }}
+            {% if form.comment.errors %}
+            <ul class="text-sm text-red-600">
+              {% for error in form.comment.errors %}
+              <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+
+          <button
+            type="submit"
+            id="commentSubmit"
+            class="inline-flex items-center rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            {% if not selected_door %}disabled{% endif %}
+          >
+            コメントを送信
+          </button>
+        </form>
+      </section>
+    </div>
 
     <script>
       (function () {
@@ -169,10 +146,10 @@
             doorName.textContent = `${label} (${doorId})`;
           }
           if (section) {
-            section.classList.remove("is-hidden");
+            section.classList.remove("hidden");
           }
           if (hint) {
-            hint.classList.add("is-hidden");
+            hint.classList.add("hidden");
           }
           if (submitButton) {
             submitButton.disabled = false;

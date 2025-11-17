@@ -7,9 +7,54 @@
     <title>H34VVY U53RZZ</title>
   </head>
 
-  <body>
-    <h1>H34VVY U53RZZ</h1>
-    <p><a href="/h34vvy_u53rzz/help/">助けを求める</a></p>
-    <p><a href="/h34vvy_u53rzz/timeline/">タイムライン</a></p>
+  <body class="bg-slate-50 px-4 py-6 font-sans text-slate-900">
+    {% include "teams/h34vvy_u53rzz/_nav.html" %}
+    <div class="mx-auto max-w-4xl space-y-6">
+      <header class="space-y-2">
+        <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">
+          H34VVY U53RZZ
+        </p>
+        <h1 class="text-3xl font-bold text-slate-900">サポートダッシュボード</h1>
+        <p class="text-sm text-slate-600">
+          現場で発生したドア案内の記録とヘルプリクエストを集約した内部向けツールです。
+        </p>
+      </header>
+
+      <section class="grid gap-4 md:grid-cols-2">
+        <a
+          href="{% url 'h34vvy_u53rzz:help' %}"
+          class="group rounded-xl bg-white p-6 shadow transition hover:-translate-y-0.5 hover:shadow-lg"
+        >
+          <div class="mb-2 flex items-center gap-2 text-sm font-medium text-blue-600">
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600"
+              >1</span
+            >
+            助けを求める
+          </div>
+          <h2 class="text-lg font-semibold text-slate-900">ドア位置の共有</h2>
+          <p class="mt-2 text-sm text-slate-600">
+            現地のドアを選んでコメントを送信し、サポート担当に状況を伝えます。
+          </p>
+        </a>
+
+        <a
+          href="{% url 'h34vvy_u53rzz:timeline' %}"
+          class="group rounded-xl bg-white p-6 shadow transition hover:-translate-y-0.5 hover:shadow-lg"
+        >
+          <div class="mb-2 flex items-center gap-2 text-sm font-medium text-green-600">
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-600"
+              >2</span
+            >
+            タイムライン
+          </div>
+          <h2 class="text-lg font-semibold text-slate-900">投稿の履歴を確認</h2>
+          <p class="mt-2 text-sm text-slate-600">
+            送信済みのコメントとタイムスタンプを一覧で追跡できます。
+          </p>
+        </a>
+      </section>
+    </div>
   </body>
 </html>

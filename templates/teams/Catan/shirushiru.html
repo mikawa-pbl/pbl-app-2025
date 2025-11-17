@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>在室状況アプリ</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 360px;
+      background: #fff;
+      border: 2px solid #000;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .header {
+      background: #e3e3e3;
+      padding: 12px;
+      text-align: center;
+      font-size: 20px;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+
+    .status-button {
+      float: right;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    table, th, td {
+      border: 1px solid #aaa;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #777;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">ヘッダー</div>
+
+    <button class="status-button">② 在室状況変更ボタン</button>
+
+    <table>
+      <tr>
+        <th>名前</th>
+        <th>場所</th>
+        <th>コメント</th>
+      </tr>
+      <tr>
+        <td>勝田</td>
+        <td>学内</td>
+        <td>A1です</td>
+      </tr>
+      <tr>
+        <td>よよよ</td>
+        <td>自宅</td>
+        <td>明日は行きます</td>
+      </tr>
+    </table>
+
+    <div class="footer">画面イメージ図</div>
+  </div>
+</body>
+</html>

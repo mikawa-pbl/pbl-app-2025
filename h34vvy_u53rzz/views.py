@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from .doors import DOORS
 from .forms import EntryForm
@@ -30,7 +30,7 @@ def help(request):
             entry = form.save(commit=False)
             entry.door_id = selected_door.id
             entry.save()
-            return redirect("h34vvy_u53rzz:help")
+            return redirect("h34vvy_u53rzz:waiting", entry_id=entry.pk)
     else:
         form = EntryForm()
         selected_door = None
@@ -43,6 +43,18 @@ def help(request):
             "form": form,
             "selected_door": selected_door,
             "nav_active": "help",
+        },
+    )
+
+
+def waiting_view(request, entry_id):
+    entry = get_object_or_404(Entry, pk=entry_id)
+    return render(
+        request,
+        "teams/h34vvy_u53rzz/waiting.html",
+        {
+            "entry": entry,
+            "nav_active": None,
         },
     )
 

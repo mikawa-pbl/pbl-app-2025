@@ -1,0 +1,266 @@
+/* リセットCSS */
+body {
+  margin: 0;
+  font-family: sans-serif;
+  overflow: hidden; 
+}
+
+/* ======================================= */
+/* ★ 7. TeX画像ポップアップのスタイル */
+/* ======================================= */
+#tex-preview-popup {
+    position: absolute;
+    z-index: 200; 
+    border: 1px solid #333;
+    background-color: #fff;
+    padding: 5px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    border-radius: 4px;
+    pointer-events: none; 
+    right: 220px; 
+    top: 0; 
+}
+#tex-preview-image {
+    display: block;
+}
+
+/* ======================================= */
+/* ★ 5. サイドバー開閉関連のスタイル */
+/* ======================================= */
+
+/* チェックボックスを非表示にする */
+#sidebar-toggle {
+  display: none;
+}
+
+/* ハンバーガーアイコン (三本線) のスタイル */
+#sidebar-icon {
+  position: absolute;
+  top: 15px; 
+  right: 15px; 
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  z-index: 100; 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 5px 0;
+}
+
+#sidebar-icon span {
+  display: block;
+  height: 3px;
+  background: white; 
+  border-radius: 3px;
+  transition: all 0.3s;
+  transform-origin: center; 
+}
+
+/* 初期状態（checked）でアイコンを×マークに設定 */
+#sidebar-icon span:nth-child(1) {
+  transform: translateY(10px) rotate(45deg); 
+}
+#sidebar-icon span:nth-child(2) {
+  opacity: 0;
+}
+#sidebar-icon span:nth-child(3) {
+  transform: translateY(-10px) rotate(-45deg);
+}
+
+/* 非チェック状態（閉じる状態）でハンバーガーアイコンに戻す */
+#sidebar-toggle:not(:checked) ~ #sidebar-icon span:nth-child(1) {
+  transform: translateY(0) rotate(0deg); 
+}
+#sidebar-toggle:not(:checked) ~ #sidebar-icon span:nth-child(2) {
+  opacity: 1;
+}
+#sidebar-toggle:not(:checked) ~ #sidebar-icon span:nth-child(3) {
+  transform: translateY(0) rotate(0deg);
+}
+
+/* ======================================= */
+/* 1. ヘッダーのスタイル */
+/* ======================================= */
+#header {
+  background-color: #333; 
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center; 
+  justify-content: center; 
+  height: 50px; 
+}
+
+#header h1 {
+    margin: 0;
+}
+
+
+/* ======================================= */
+/* 2. メインコンテナのスタイル */
+/* ======================================= */
+#container {
+  display: flex; 
+  height: calc(100vh - 50px); 
+}
+
+/* ======================================= */
+/* 3. サイドバーのスタイル */
+/* ======================================= */
+#sidebar {
+  width: 200px; 
+  background-color: #f4f4f4; 
+  padding: 10px 10px 20px 10px; 
+  box-shadow: -2px 0 5px rgba(0,0,0,0.1); 
+  flex-shrink: 0; 
+  order: 2; 
+  transition: transform 0.3s ease-in-out; 
+  overflow-y: auto; 
+  transform: translateX(0); 
+}
+
+/* (中略: sidebar内部のスタイルは省略) */
+#search-form {padding: 0 0 10px 0; border-bottom: 1px solid #ddd; margin-bottom: 10px;}
+#search-box {width: calc(100% - 18px); padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;}
+#sidebar-controls {display: flex; justify-content: space-between; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #ddd;}
+#sidebar-controls button {flex-grow: 1; margin: 0 2px; padding: 5px 0; cursor: pointer; border: 1px solid #ccc; background-color: #fff; border-radius: 3px; font-size: 12px;}
+#sidebar-controls button:hover {background-color: #e0e0e0;}
+#sidebar-content details {margin-bottom: 5px; border-radius: 4px; background-color: #fff; border: 1px solid #e0e0e0;}
+#sidebar-content summary {display: block; cursor: pointer; padding: 8px 10px; font-weight: bold; color: #333; outline: none; position: relative;}
+#sidebar-content summary::before {content: '▶'; font-size: 10px; position: absolute; right: 10px; transition: transform 0.2s;}
+#sidebar-content details[open] > summary::before {content: '▼'; transform: rotate(0deg);}
+#sidebar-content ul {list-style: none; padding: 0; margin: 0; border-top: 1px solid #e0e0e0;}
+#sidebar-content li {position: relative;}
+#sidebar-content li a {display: block; padding: 5px 25px; text-decoration: none; color: #555; font-size: 14px; cursor: pointer;}
+#sidebar-content li a:hover {background-color: #ddd;}
+.copy-checkmark {position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #007bff; font-weight: bold; font-size: 1.0em; animation: fadein 0.3s ease;}
+@keyframes fadein {from { opacity: 0; } to { opacity: 1; }}
+
+
+/* ======================================= */
+/* 4. 主要コンテンツ領域のスタイル (エディタのレイアウト) */
+/* ======================================= */
+#main-content {
+  flex-grow: 1; 
+  padding: 10px 10px 20px 10px; 
+  background-color: #fff; 
+  overflow: hidden; 
+  order: 1; 
+  transition: margin-right 0.3s ease-in-out; 
+  margin-right: 0; 
+  
+  display: flex; 
+  flex-direction: column;
+}
+
+/* エディタヘッダー（h2とボタンのコンテナ）のスタイル */
+.editor-header {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center; 
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee; 
+    margin-bottom: 5px; 
+    width: 100%;
+}
+
+/* エリアの見出しの調整 */
+#editor-area h2, #preview-area h2 {
+    margin: 0; 
+    font-size: 1.2em;
+    padding-bottom: 0; 
+    border-bottom: none; 
+}
+
+/* 更新ボタンのスタイル */
+#preview-button {
+    padding: 5px 10px; 
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px; 
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+#preview-button:hover {
+    background-color: #0056b3;
+}
+
+
+/* エディタとプレビューのFlexコンテナ */
+#editor-interface {
+    flex-grow: 1; 
+    display: flex; 
+    width: 100%;
+}
+
+/* 初期状態を幅50%に設定 */
+#editor-area {
+    flex-grow: 0; 
+    width: calc(50% - 13px); 
+    display: flex;
+    flex-direction: column;
+}
+
+/* 初期状態を幅50%に設定 */
+#preview-area {
+    flex-grow: 0; 
+    width: calc(50% - 13px); 
+    display: flex;
+    flex-direction: column;
+}
+
+/* スプリッターのスタイル */
+#splitter {
+    width: 6px; 
+    cursor: col-resize; 
+    background-color: #ccc;
+    flex-shrink: 0; 
+    margin: 0 10px; 
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+#splitter:hover {
+    background-color: #007bff;
+}
+
+/* テキストエリア */
+#tex-input {
+    flex-grow: 1; 
+    width: 100%;
+    min-height: 0; 
+    padding: 10px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+    font-family: 'Consolas', 'Courier New', monospace; 
+    font-size: 14px;
+    resize: none; 
+}
+
+
+/* プレビュー出力コンテナ */
+#tex-output {
+    flex-grow: 1; 
+    padding: 10px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+    overflow-y: auto; 
+    background-color: #f8f8f8;
+    margin-top: 0; 
+}
+
+
+/* ======================================= */
+/* 6. サイドバーが閉じるときの状態 (非チェック時) */
+/* ======================================= */
+
+#sidebar-toggle:not(:checked) ~ #header + #container #sidebar {
+  transform: translateX(100%); 
+}
+
+#sidebar-toggle:not(:checked) ~ #header + #container #main-content {
+  margin-right: -200px; 
+}

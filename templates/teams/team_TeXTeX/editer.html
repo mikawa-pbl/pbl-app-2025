@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/editer_style.css' %}" />
+  <title>TeXTeX Editer</title>
+  <!-- MathJaxを読み込み、クライアントサイドでTeXをレンダリングする -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+    // MathJaxの設定: インライン($$)とディスプレイ($$$$)の記法を有効化
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+  </script>
+</head>
+<body>
+  
+  <!-- サイドバー開閉用のチェックボックスとアイコン -->
+  <input type="checkbox" id="sidebar-toggle" checked>
+  <label for="sidebar-toggle" id="sidebar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </label>
+  
+  <header id="header">
+    <h1>TeXTeX Editer</h1>
+  </header>
+
+  <!-- メインコンテナの追加 -->
+  <div id="container">
+    <!-- サイドバーの追加 (order: 2 で右寄せ) -->
+    <nav id="sidebar">
+      <!-- 検索フォーム -->
+      <form id="search-form">
+        <input type="search" id="search-box" placeholder="検索...">
+      </form>
+      
+      <!-- 全て開く/閉じるボタン -->
+      <div id="sidebar-controls">
+        <button id="expand-all">全て開く</button>
+        <button id="collapse-all">全て閉じる</button>
+      </div>
+
+      <!-- Djangoテンプレートタグでコンテンツを生成 -->
+      <div id="sidebar-content">
+        {% for group in sidebar_items %}
+        <details {% if group.is_open %}open{% endif %} data-group-title="{{ group.title }}">
+          <summary>{{ group.title }}</summary>
+          <ul>
+            {% for item in group.items %}
+            <li><a href="#" class="tex-item" data-tex-code="{{ item.tex_code }}">{{ item.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </details>
+        {% endfor %}
+      </div>
+      
+    </nav>
+
+    <!-- 主要コンテンツ領域 (order: 1 で左側) -->
+    <main id="main-content">
+      
+      <!-- エディタとプレビューのFlexコンテナ -->
+      <div id="editor-interface">
+        <div id="editor-area">
+          <div class="editor-header">
+            <h2>TeXコード入力</h2>
+            <button id="preview-button">更新</button>
+          </div>
+          <textarea id="tex-input" placeholder="ここにLaTeXコードを入力してください..."></textarea>
+        </div>
+        
+        <!-- リサイズ用スプリッター -->
+        <div id="splitter"></div> 
+        
+        <div id="preview-area">
+          <div class="editor-header">
+            <h2>プレビュー</h2>
+          </div>
+          <div id="tex-output">
+            <p>結果がここに表示されます。</p>
+          </div>
+        </div>
+      </div>
+      
+    </main>
+  </div>
+  
+  <!-- TeX画像ポップアップエリア -->
+  <div id="tex-preview-popup" style="display: none;">
+    <img id="tex-preview-image" src="" alt="LaTeX Preview">
+  </div>
+
+  <!-- JavaScriptファイルを読み込み -->
+  <script src="{% static 'scripts/sidebar_logic.js' %}"></script>
+  <script src="{% static 'scripts/preview_logic.js' %}"></script>
+  
+</body>
+</html>

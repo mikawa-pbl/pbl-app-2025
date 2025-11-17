@@ -10,5 +10,5 @@ class Member(models.Model):
 class Main(models.Model):
     pass
 
-class Temp(models.Model):
+class Editer(models.Model):
     pass

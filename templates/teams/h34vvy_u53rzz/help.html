@@ -1,8 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="{% static "campus-map/dist/campus-map.css" %}" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>助けを求める</title>
   </head>
@@ -15,6 +17,8 @@
           利用可能なドア一覧から、現在地に最も近いものを選んでください。
         </p>
       </header>
+
+      <div id="campus-map" class="w-full h-[400px]"></div>
 
       <div class="overflow-hidden rounded-lg bg-white shadow">
         <table class="w-full border-collapse text-sm">
@@ -112,6 +116,11 @@
         </form>
       </section>
     </div>
+
+    <script type="module">
+      import { createCampusMap } from "{% static "campus-map/dist/campus-map.js" %}"
+      createCampusMap(document.querySelector('#campus-map'));
+    </script>
 
     <script>
       (function () {

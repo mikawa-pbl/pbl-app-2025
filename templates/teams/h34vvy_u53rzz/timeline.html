@@ -24,7 +24,7 @@
         {% if entries %}
         <ul class="space-y-4">
           {% for e in entries %}
-          <li class="border-b border-slate-100 pb-4 last:border-b-0 last:pb-0">
+          <li class="border border-slate-100 p-4 rounded-lg">
             <div class="flex flex-wrap items-center gap-2 text-sm text-slate-500">
               <span class="font-semibold text-slate-900">
                 {{ e.created_at|date:"Y-m-d H:i" }}
@@ -37,6 +37,28 @@
             <pre class="mt-2 whitespace-pre-wrap text-sm text-slate-800">
 {{ e.comment }}</pre
             >
+            <div class="mt-4 flex flex-wrap items-center gap-3 text-sm">
+              {% if e.helper_confirmed_at %}
+              <span class="inline-flex items-center gap-1 rounded bg-green-100 px-3 py-1 text-green-700">
+                <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                対応中（{{ e.helper_confirmed_at|date:"H:i" }}受付）
+              </span>
+              {% else %}
+              <form method="post" class="inline-flex items-center gap-2">
+                {% csrf_token %}
+                <input type="hidden" name="entry_id" value="{{ e.id }}" />
+                <button
+                  type="submit"
+                  class="inline-flex items-center gap-2 rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                >
+                  助けに行く
+                </button>
+                <span class="text-xs text-slate-500">
+                  ドア付近に到着できる場合のみ押してください
+                </span>
+              </form>
+              {% endif %}
+            </div>
           </li>
           {% endfor %}
         </ul>

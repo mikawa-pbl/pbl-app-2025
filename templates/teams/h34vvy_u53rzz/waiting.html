@@ -21,6 +21,30 @@
         </p>
       </header>
 
+      <section
+        id="helperStatusCard"
+        class="rounded-xl border border-blue-100 bg-blue-50/80 p-6 text-center text-sm text-blue-900"
+        data-status-url="{% url 'h34vvy_u53rzz:waiting_status' entry.id %}"
+        data-initial-confirmed="{{ entry.helper_confirmed_at|yesno:'true,false' }}"
+      >
+        <p class="text-base font-semibold text-blue-900" id="helperStatusText">
+          {% if entry.helper_confirmed_at %}
+          近くの学生がヘルプに向かっています。
+          {% else %}
+          まだ応答は届いていません。しばらくお待ちください。
+          {% endif %}
+        </p>
+        <p class="mt-2 text-xs text-blue-800" id="helperStatusSubtext">
+          {% if entry.helper_confirmed_at %}
+          {% if entry.helper_confirmed_at %}
+          {{ entry.helper_confirmed_at|date:"H:i" }} に受け付け済みです。
+          {% endif %}
+          {% else %}
+          このページは数秒ごとに自動更新されます。
+          {% endif %}
+        </p>
+      </section>
+
       <section class="rounded-xl bg-white p-6 shadow">
         <h2 class="text-xl font-semibold text-slate-900">リクエスト内容</h2>
         <dl class="mt-4 space-y-3 text-sm text-slate-700">
@@ -71,4 +95,44 @@
       </section>
     </div>
   </body>
+  <script>
+    (function () {
+      const card = document.getElementById("helperStatusCard");
+      if (!card) return;
+      let confirmed = card.dataset.initialConfirmed === "true";
+      const statusUrl = card.dataset.statusUrl;
+      const textEl = document.getElementById("helperStatusText");
+      const subtextEl = document.getElementById("helperStatusSubtext");
+
+      async function refreshStatus() {
+        try {
+          const response = await fetch(statusUrl, { headers: { Accept: "application/json" } });
+          if (!response.ok) return;
+          const data = await response.json();
+          if (data.helper_confirmed && !confirmed) {
+            confirmed = true;
+            textEl.textContent = "近くの学生がヘルプに向かっています。";
+            if (data.helper_confirmed_at) {
+              const confirmedTime = new Date(data.helper_confirmed_at).toLocaleTimeString("ja-JP", {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              subtextEl.textContent = `${confirmedTime} に受け付け済みです。`;
+            } else {
+              subtextEl.textContent = "ヘルパーが応答しました。到着を待ってください。";
+            }
+            card.classList.remove("border-blue-100", "bg-blue-50/80", "text-blue-900");
+            card.classList.add("border-green-200", "bg-green-50", "text-green-900");
+            textEl.classList.add("text-green-900");
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      if (!confirmed) {
+        setInterval(refreshStatus, 5000);
+      }
+    })();
+  </script>
 </html>

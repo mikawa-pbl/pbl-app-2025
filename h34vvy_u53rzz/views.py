@@ -1,4 +1,6 @@
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from .doors import DOORS
 from .forms import EntryForm
@@ -59,21 +61,32 @@ def waiting_view(request, entry_id):
     )
 
 
+def waiting_status(request, entry_id):
+    entry = get_object_or_404(Entry, pk=entry_id)
+    return JsonResponse(
+        {
+            "helper_confirmed": entry.helper_confirmed_at is not None,
+            "helper_confirmed_at": entry.helper_confirmed_at.isoformat()
+            if entry.helper_confirmed_at
+            else None,
+        }
+    )
+
+
 def timeline_view(request):
     if request.method == "POST":
-        form = EntryForm(request.POST)
-        if form.is_valid():
-            form.save()  # created_at は auto_now_add で自動
-            return redirect(".")  # F5連打での二重投稿防止
-    else:
-        form = EntryForm()
-
+        entry_id = request.POST.get("entry_id")
+        if entry_id:
+            entry = get_object_or_404(Entry, pk=entry_id)
+            if entry.helper_confirmed_at is None:
+                entry.helper_confirmed_at = timezone.now()
+                entry.save(update_fields=["helper_confirmed_at"])
+        return redirect("h34vvy_u53rzz:timeline")
     entries = Entry.objects.all()  # Meta.ordering で新しい順
     return render(
         request,
         "teams/h34vvy_u53rzz/timeline.html",
         {
-            "form": form,
             "entries": entries,
             "nav_active": "timeline",
         },

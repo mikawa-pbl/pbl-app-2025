@@ -122,13 +122,14 @@
         {% if room and room.floor %}
             <div class="floorplan-wrapper">
                 <!-- floor_table の url を使用 -->
-                <img src="{{ room.floor.url }}" alt="フロア画像">
+                <!--img src="{{ room.floor.url }}" alt="フロア画像"-->
                 <!-- x, y は 0〜100 の割合として使用 -->
                 <div class="cursor-dot"
                      style="left: {{ room.x }}%; top: {{ room.y }}%;"></div>
             </div>
         {% else %}
             <div class="no-selection-text">
+                <img src="images/A-3.png" alt="フロア画像">
                 右側で部屋を検索すると、このエリアにフロア図と部屋位置が表示されます。
             </div>
         {% endif %}
@@ -139,7 +140,7 @@
         <h1>部屋検索</h1>
         <form method="get">
             <div class="form-group">
-                <label for="building_id">棟ID</label>
+                <label for="building_id">棟</label>
                 <input type="number"
                        id="building_id"
                        name="building_id"

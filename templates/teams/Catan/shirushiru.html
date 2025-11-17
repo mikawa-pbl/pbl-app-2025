@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,28 +8,34 @@
   <style>
     body {
       font-family: sans-serif;
-      background: #f7f7f7;
       display: flex;
       justify-content: center;
-      padding: 20px;
     }
 
     .container {
       width: 360px;
       background: #fff;
-      border: 2px solid #000;
-      padding: 20px;
-      border-radius: 8px;
     }
 
     .header {
       background: #e3e3e3;
       padding: 12px;
-      text-align: center;
-      font-size: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 18px;
       border: 1px solid #aaa;
       border-radius: 4px;
       margin-bottom: 20px;
+    }
+
+    .title {
+      font-weight: bold;
+    }
+
+    .user-name {
+      font-size: 14px;
+      color: #333;
     }
 
     .status-button {
@@ -42,11 +49,14 @@
       margin-top: 10px;
     }
 
-    table, th, td {
+    table,
+    th,
+    td {
       border: 1px solid #aaa;
     }
 
-    th, td {
+    th,
+    td {
       padding: 8px;
       text-align: center;
       vertical-align: middle;
@@ -130,6 +140,7 @@
     }
   </style>
   <script>
+    const isAuthenticated = {% if user.is_authenticated %}true{% else %} false{% endif %};
     function openDialog() {
       document.getElementById('statusDialog').classList.add('show');
     }
@@ -139,19 +150,29 @@
     }
 
     function saveStatus() {
+      // if (!isAuthenticated) {
+      //   alert('ログインが必要です。ログインしてください。');
+      //   closeDialog();
+      //   return;
+      // }
+
       const location = document.getElementById('locationSelect').value;
       const comment = document.getElementById('commentInput').value;
-      
-      // ここでサーバーにデータを送信する処理を追加できます
-      console.log('場所:', location);
-      console.log('コメント:', comment);
-      
+
+      // クライアント側でテーブルの該当行を更新する（簡易版）
+      const locCell = document.getElementById('user-location-cell');
+      const comCell = document.getElementById('user-comment-cell');
+      if (locCell) locCell.textContent = location;
+      if (comCell) comCell.textContent = comment;
+
+      // ここでサーバーにデータを送信して永続化する処理を追加できます
+
       alert('在室状況を更新しました');
       closeDialog();
     }
 
     // ダイアログ外をクリックしたら閉じる
-    window.onclick = function(event) {
+    window.onclick = function (event) {
       const dialog = document.getElementById('statusDialog');
       if (event.target === dialog) {
         closeDialog();
@@ -159,9 +180,19 @@
     }
   </script>
 </head>
+
 <body>
   <div class="container">
-    <div class="header">ヘッダー</div>
+    <div class="header">
+      <div class="title">在室状況アプリ</div>
+      <div class="user-name">
+        {% if user.is_authenticated %}
+        {{ user.get_full_name|default:user.username }}
+        {% else %}
+        ゲスト
+        {% endif %}
+      </div>
+    </div>
 
     <button class="status-button" onclick="openDialog()">② 在室状況変更ボタン</button>
 
@@ -180,6 +211,13 @@
         <td>よよよ</td>
         <td>自宅</td>
         <td>明日は行きます</td>
+      </tr>
+      <tr id="user-row">
+        <!-- <td id="user-name-cell">{% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% else
+          %}ゲスト{% endif %}</td> -->
+        <td id="user-name-cell">ゲスト</td>
+        <td id="user-location-cell">-</td>
+        <td id="user-comment-cell">-</td>
       </tr>
     </table>
 
@@ -209,4 +247,5 @@
     </div>
   </div>
 </body>
+
 </html>

@@ -1,10 +1,81 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
-    <title>mori_doragon_yuhi_machi</title></head>
+    <title>imadokoda!</title>
+    <style>
+        /* 簡単なスタイル調整 */
+        body {
+            font-family: sans-serif;
+        }
+        .member-list {
+            list-style-type: none; /* リストの・を消す */
+            padding: 0;
+            width: 400px;
+        }
+        .member-list li {
+            display: flex; /* 横並びにする */
+            justify-content: space-between; /* 要素を両端に配置 */
+            align-items: center; /* 上下中央揃え */
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .member-list label {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .member-list select {
+            font-size: 1.1em;
+            padding: 5px;
+        }
+    </style>
+</head>
+
 <body>
-<h1>mori_doragon_yuhi_machi</h1>
-<p><a href="/mori_doragon_yuhi_machi/members/">メンバー一覧</a></p>
+<h1>♨いまどこだ！表 ベジータ版</h1>
+<p>メンバーの現在の居場所です。プルダウンを変更すると即時更新されます。</p>
+
+<hr>
+
+<h2>現在の状況</h2>
+
+<ul class="member-list">
+    
+    {% for member in all_members %}
+    
+    <li>
+        <form action="{% url 'mori_doragon_yuhi_machi:update_location' %}" method="POST">
+            {% csrf_token %}
+            
+            <input type="hidden" name="member_id" value="{{ member.id }}">
+
+            <label for="place-select-{{ member.id }}">
+                {{ member.name }}
+            </label>
+
+            <select name="place_id" id="place-select-{{ member.id }}" onchange="this.form.submit()">
+                
+                <option value="" {% if member.current_place is None %}selected{% endif %}>
+                    （未設定）
+                </option> 
+
+                {% for place in all_places %}
+                    <option 
+                        value="{{ place.id }}" 
+                        {% if member.current_place == place %}selected{% endif %}
+                    >
+                        {{ place.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            
+        </form>
+    </li>
+    
+    {% endfor %}
+</ul>
 </body>
 </html>

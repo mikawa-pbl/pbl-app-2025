@@ -8,8 +8,8 @@
         <div class="col s12 m6 l4">
             <div class="card hoverable">
                 <div class="card-image">
-                    {% if good.image_url %}
-                    <img src="{{ good.image_url }}" alt="{{ good.name }}">
+                    {% if good.image %}
+                    <img src="{{ good.image }}" alt="{{ good.name }}">
                     {% else %}
                     <img src="/static/images/placeholder-400x300.png" alt="placeholder">
                     {% endif %}

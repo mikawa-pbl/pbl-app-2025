@@ -26,10 +26,10 @@ def index(request):
 
 def registration_goods(request):
     if request.method == 'POST':
-        form = GoodsForm(request.POST)
+        form = GoodsForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('team_cake:registration_goods')  # 適切な名前のURLに変更
+            return redirect('team_cake:index')
     else:
         form = GoodsForm()
     return render(request, 'teams/team_cake/registrationGoods.html', {'form': form})

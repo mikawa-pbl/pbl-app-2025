@@ -4,4 +4,5 @@ from .models import Good
 class GoodsForm(forms.ModelForm):
     class Meta:
         model = Good
-        fields = ['name', 'price']
+        # include image and description so uploaded files and text are saved
+        fields = ['name', 'price', 'image', 'description']

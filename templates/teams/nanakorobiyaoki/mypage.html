@@ -184,8 +184,17 @@
             </dl>
         </main>
 
+        
         <footer class="profile-footer">
+            <a href="{% url 'nanakorobiyaoki:user_profile_edit' user.user_id %}" style="text-decoration: none; color: #007bff; font-weight: 600; margin-right: 20px;">
+                編集する
+            </a>
+            
+            <a href="{% url 'nanakorobiyaoki:users' %}" style="text-decoration: none; color: #6c757d; font-weight: 600;">
+                ユーザ一覧に戻る
+            </a>
         </footer>
+
 
     </div>
 

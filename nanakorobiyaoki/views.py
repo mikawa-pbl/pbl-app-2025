@@ -1,5 +1,6 @@
-from django.shortcuts import render, get_object_or_404
-from .models import Member,MyPage
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import MyPage
+from .forms import MyPageEditForm
 
 def index(request):
     return render(request, 'teams/nanakorobiyaoki/index.html')
@@ -36,3 +37,30 @@ def users(request):
         'users': all_users
     }
     return render(request, 'teams/nanakorobiyaoki/users.html', context)
+
+def user_profile_edit(request, user_id):
+    # 編集対象のユーザーデータを取得 (見つからなければ404)
+    user_data = get_object_or_404(MyPage, user_id=user_id)
+    
+    # === POSTリクエスト (フォーム送信時) の処理 ===
+    if request.method == 'POST':
+        # 既存のデータ(instance)を、送信されたデータ(request.POST, FILES)で上書きする
+        form = MyPageEditForm(request.POST, request.FILES, instance=user_data)
+        
+        if form.is_valid():  # データが有効かチェック
+            form.save()      # 有効ならデータベースに保存
+            
+            # 保存後、そのユーザーの詳細ページにリダイレクト
+            return redirect('nanakorobiyaoki:user_profile', user_id=user_data.user_id)
+    
+    # === GETリクエスト (ページ表示時) の処理 ===
+    else:
+        # 既存のデータをフォームにセットして表示
+        form = MyPageEditForm(instance=user_data)
+
+    # 'form' と 'user' をテンプレートに渡す
+    context = {
+        'form': form,
+        'user': user_data  # ページのタイトルなどで使うため
+    }
+    return render(request, 'teams/nanakorobiyaoki/user_profile_edit.html', context)

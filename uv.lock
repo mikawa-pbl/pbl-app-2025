@@ -335,12 +335,22 @@ wheels = [
 ]
 
 [[package]]
+name = "jpholiday"
+version = "1.0.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/82/f9/004e6b1940a8e1db08e21c1e6bed939a25dbe187edcdf28f10e14bd08771/jpholiday-1.0.2.tar.gz", hash = "sha256:a8070e9558427a208eaed36c57f56560023356f5529f1a792bfd85873721f217", size = 18687, upload-time = "2025-04-21T01:58:44.32Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ce/ef/8f00f5af139484424fbd0a6d9d73378d7d370379298e8ddde1b50ca0192e/jpholiday-1.0.2-py3-none-any.whl", hash = "sha256:40ae95057f86198c0949c2b71c04b7c5ba5624af0cbed4e8325bf74d02da2ec5", size = 14093, upload-time = "2025-04-21T01:58:43.168Z" },
+]
+
+[[package]]
 name = "pbl-app-2025"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "django", version = "4.2.25", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "django", version = "5.2.7", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "jpholiday" },
     { name = "pdfminer-six" },
     { name = "pdfplumber" },
     { name = "requests" },
@@ -349,6 +359,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "django", specifier = ">=4.2.25" },
+    { name = "jpholiday" },
     { name = "pdfminer-six" },
     { name = "pdfplumber" },
     { name = "requests" },

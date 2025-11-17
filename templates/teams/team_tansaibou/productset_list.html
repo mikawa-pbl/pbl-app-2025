@@ -84,6 +84,32 @@ h1 {
     background-color: #f8d7da;
     color: #721c24;
 }
+.stock-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    margin-left: 10px;
+}
+.stock-good {
+    background-color: #d4edda;
+    color: #155724;
+}
+.stock-low {
+    background-color: #fff3cd;
+    color: #856404;
+}
+.stock-out {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.component-stock {
+    color: #666;
+    font-size: 12px;
+    margin-left: 5px;
+}
 .actions {
     display: flex;
     gap: 10px;
@@ -128,14 +154,23 @@ h1 {
             {% if product_set.is_active %}販売中{% else %}停止中{% endif %}
         </span>
 
+        {% with stock=product_set.get_stock_status %}
+        <span class="stock-badge {% if stock >= 10 %}stock-good{% elif stock > 0 %}stock-low{% else %}stock-out{% endif %}">
+            セット在庫: {{ stock }}個
+        </span>
+        {% endwith %}
+
         {% if product_set.description %}
         <div class="product-set-description">{{ product_set.description }}</div>
         {% endif %}
 
         <div class="components">
-            <div class="components-title">📦 セット内容</div>
+            <div class="components-title">📦 セット内容と在庫</div>
             {% for item in product_set.items.all %}
-            <div class="component-item">• {{ item.product.name }} x{{ item.quantity }}個</div>
+            <div class="component-item">
+                • {{ item.product.name }} x{{ item.quantity }}個
+                <span class="component-stock">(在庫: {{ item.product.stock }}個)</span>
+            </div>
             {% empty %}
             <div class="component-item">構成商品なし</div>
             {% endfor %}

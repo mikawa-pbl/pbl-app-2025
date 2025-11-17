@@ -1,13 +1,16 @@
-from .models import Member
-from django.shortcuts import render, redirect
-from .models import Entry
+from django.shortcuts import redirect, render
+
 from .forms import EntryForm
+from .models import Entry
+
 
 def index(request):
-    return render(request, 'teams/h34vvy_u53rzz/index.html')
+    return render(request, "teams/h34vvy_u53rzz/index.html")
+
 
 def help(request):
-    return render(request, 'teams/h34vvy_u53rzz/help.html')
+    return render(request, "teams/h34vvy_u53rzz/help.html")
+
 
 def timeline_view(request):
     if request.method == "POST":
@@ -19,7 +22,11 @@ def timeline_view(request):
         form = EntryForm()
 
     entries = Entry.objects.all()  # Meta.ordering で新しい順
-    return render(request, "teams/h34vvy_u53rzz/timeline.html", {
-        "form": form,
-        "entries": entries,
-    })
+    return render(
+        request,
+        "teams/h34vvy_u53rzz/timeline.html",
+        {
+            "form": form,
+            "entries": entries,
+        },
+    )

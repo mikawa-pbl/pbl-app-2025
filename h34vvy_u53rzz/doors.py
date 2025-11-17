@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class Door:
     id: str
     label: str
-    coordinate: Tuple[float, float]
+    coordinate: tuple[float, float]
+
 
 DOORS = [
     Door("A1_1", "A-1棟ドア1", (0, 0)),

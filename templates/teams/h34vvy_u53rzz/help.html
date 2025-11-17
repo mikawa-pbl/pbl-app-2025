@@ -135,26 +135,6 @@
       </form>
     </section>
 
-    <section>
-      <h2>最新の記録</h2>
-      {% if entries %}
-      <ul>
-        {% for entry in entries %}
-        <li style="margin-bottom: 12px">
-          <strong>{{ entry.created_at|date:"Y-m-d H:i" }}</strong> /
-          <code>{{ entry.door_id }}</code>
-          <br />
-          <pre style="white-space: pre-wrap; margin: 4px 0 0">
-{{ entry.comment }}</pre
-          >
-        </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p>まだ記録はありません。</p>
-      {% endif %}
-    </section>
-
     <script>
       (function () {
         const rows = document.querySelectorAll(".door-row");

@@ -1,5 +1,10 @@
 from django.db import models
 
+from .doors import DOORS
+
+
+DOOR_LABEL_MAP = {door.id: door.label for door in DOORS}
+
 
 # 後でなくす
 class Member(models.Model):
@@ -22,3 +27,9 @@ class Entry(models.Model):
         # 管理画面用
         preview = (self.comment or "")[:20]
         return f"{self.created_at:%Y-%m-%d %H:%M:%S} {preview}"
+
+    @property
+    def door_label(self) -> str:
+        if not self.door_id:
+            return "ドア未指定"
+        return DOOR_LABEL_MAP.get(self.door_id, self.door_id)

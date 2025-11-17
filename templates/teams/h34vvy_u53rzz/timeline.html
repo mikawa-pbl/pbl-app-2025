@@ -6,24 +6,22 @@
     <title>Timeline</title>
   </head>
   <body>
-    <h1>タイムライン</h1>
-
-    <form method="post">
-      {% csrf_token %} {{ form.as_p }}
-      <button type="submit">追加</button>
-    </form>
-
-    <hr />
-
-    <ul>
-      {% for e in entries %}
-      <li>
-        <strong>{{ e.created_at|date:"Y-m-d H:i:s" }}</strong><br />
-        <pre style="white-space: pre-wrap; margin: 0">{{ e.comment }}</pre>
-      </li>
-      {% empty %}
-      <li>まだ投稿がありません。</li>
-      {% endfor %}
-    </ul>
+    <section>
+      <h2>最新の記録</h2>
+      {% if entries %}
+      <ul>
+        {% for e in entries %}
+        <li style="margin-bottom: 12px">
+          <strong>{{ e.created_at|date:"Y-m-d H:i" }}</strong>
+          / <strong>{{ e.door_label }}</strong>
+          <br />
+          <pre style="white-space: pre-wrap; margin: 4px 0 0">{{ e.comment }}</pre>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p>まだ投稿がありません。</p>
+      {% endif %}
+    </section>
   </body>
 </html>

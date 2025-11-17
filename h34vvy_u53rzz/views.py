@@ -36,7 +36,6 @@ def help(request):
             "doors": DOORS,
             "form": form,
             "selected_door": selected_door,
-            "entries": Entry.objects.all(),
         },
     )
 

@@ -38,7 +38,6 @@ urlpatterns = [
     path("nanakorobiyaoki/", include("nanakorobiyaoki.urls")),  # ← 追加
     path("team_TMR/", include("team_TMR.urls")),
     path("graphics/", include("graphics.urls")),
-    path("team_terrace/", include("team_terrace.urls")),
     path("team_UD/", include("team_UD.urls")),
     path("team_akb5/", include("team_akb5.urls")),
     path("team_TeXTeX/", include("team_TeXTeX.urls")),
@@ -47,4 +46,5 @@ urlpatterns = [
     path("h34vvy_u53rzz/", include("h34vvy_u53rzz.urls")),
     path('team_giryulink/', include('team_giryulink.urls')),
     path('takenoko/', include('takenoko.urls')), 
+    path('teachers/', include('teachers.urls')),
 ]

@@ -26,5 +26,6 @@ def index(request):
         {"name": "Team Cake", "url": "/team_cake/"},
         {"name": "Team Shouronpou", "url": "/team_shouronpou/"},
         {"name": "H34VVY U53RZZ", "url": "/h34vvy_u53rzz/"},
+        {"name": "Teachers", "url": "/teachers/"},
     ]
     return render(request, "top.html", {"teams": teams})

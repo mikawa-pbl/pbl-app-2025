@@ -29,6 +29,7 @@ class TeamPerAppRouter:
         'takenoko': 'takenoko',
         "h34vvy_u53rzz": "h34vvy_u53rzz",
         'team_giryulink': 'team_giryulink',
+        'teachers': 'teachers',
     }
 
     def db_for_read(self, model, **hints):

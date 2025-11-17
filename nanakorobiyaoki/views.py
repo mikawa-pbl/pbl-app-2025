@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import Member,MyPage
 
 def index(request):
@@ -11,4 +11,17 @@ def members(request):
 def mypage(request):
     qs = MyPage.objects.using('nanakorobiyaoki').all()
     return render(request, 'teams/nanakorobiyaoki/mypage.html', {'mypage': qs})
+
+# 【追加】 詳細ページ用のビュー関数
+def user_profile(request, user_id):
+    # 1. URLから渡された user_id を使って、MyPageモデルからデータを1件取得
+    #    (user_id=user_id は「モデルのuser_idフィールドが、引数のuser_idと一致するもの」)
+    user_data = get_object_or_404(MyPage, user_id=user_id)
     
+    # 2. 取得したデータを 'user' という名前でテンプレートに渡す
+    context = {
+        'user': user_data
+    }
+    
+    # 3. 専用のテンプレート 'user_profile.html' を表示
+    return render(request, 'teams/nanakorobiyaoki/mypage.html', context)

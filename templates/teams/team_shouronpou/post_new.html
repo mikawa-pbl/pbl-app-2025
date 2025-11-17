@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>新規募集の投稿</title>
+</head>
+<body>
+    <h2>新規募集の投稿</h2>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">投稿する</button>
+    </form>
+</body>
+</html>

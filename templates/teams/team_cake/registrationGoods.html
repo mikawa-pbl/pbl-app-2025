@@ -1,23 +1,51 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% include 'teams/team_cake/header.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Team Terrace Goods</title>
-</head>
+<main class="container">
+    <h4 class="section">商品登録</h4>
 
-<body>
-    <h1>Team Cake Goods</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <label for="name">商品名:</label>
-        <input type="text" id="name" name="name" required><br>
+    <div class="row">
+        <div class="col s12 m8 offset-m2">
+            <div class="card">
+                <div class="card-content">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
 
-        <label for="price">価格:</label>
-        <input type="number" id="price" name="price" required><br>
+                        <div class="input-field">
+                            <input id="name" type="text" name="name" required>
+                            <label for="name">商品名</label>
+                        </div>
 
-        <button type="submit">登録</button>
-        <p><a href="/team_cake/">Team Cake トップへ</a></p>
-</body>
+                        <div class="input-field">
+                            <input id="price" type="number" name="price" required min="0" step="1">
+                            <label for="price">価格 (円)</label>
+                        </div>
 
-</html>
+                        <!-- <div class="input-field">
+                            <textarea id="description" class="materialize-textarea" name="description"></textarea>
+                            <label for="description">説明（任意）</label>
+                        </div>
+
+                        <div class="file-field input-field">
+                            <div class="btn">
+                                <span>画像</span>
+                                <input type="file" name="image">
+                            </div>
+                            <div class="file-path-wrapper">
+                                <input class="file-path validate" type="text" placeholder="商品画像を選択（任意）">
+                            </div>
+                        </div> -->
+
+                        <div class="card-action right-align">
+                            <a href="/team_cake/" class="btn-flat">キャンセル</a>
+                            <button type="submit" class="btn waves-effect waves-light teal">登録</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</main>
+
+{% include 'teams/team_cake/footer.html' %}

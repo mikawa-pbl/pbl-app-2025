@@ -5,6 +5,8 @@ import re
 import pdfplumber
 import requests
 
+from typing import Optional
+
 PDF_URL = "https://www.tut.ac.jp/student/studentlife/docs/kissa_menu.pdf"
 
 DAY_CHARS = "月火水木金土日"
@@ -24,7 +26,7 @@ def _load_table():
     return table
 
 
-def build_date_menu_dict(year: int | None = None) -> dict[datetime.date, str]:
+def build_date_menu_dict(year: Optional[int] = None) -> dict[datetime.date, str]:
     """
     テーブルから「日付 → メニュー文字列」の辞書を作る。
     """

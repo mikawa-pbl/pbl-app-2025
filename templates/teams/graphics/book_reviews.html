@@ -92,6 +92,9 @@
             <div class="review-card">
                 <h3>{{ review.subject }}</h3>
                 <div class="review-meta">
+                    <strong>書籍タイトル:</strong> {{ review.title|default:"None" }}<br>
+                    <strong>著者:</strong> {{ review.author|default:"None" }}<br>
+                    <strong>発行日:</strong> {{ review.publication_date|default:"None" }}<br>
                     <strong>ISBN:</strong> {{ review.isbn }} |
                     <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }}
                 </div>

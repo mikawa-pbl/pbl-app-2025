@@ -7,4 +7,5 @@ urlpatterns = [
     path('members/', views.members, name='members'),
     path('main/', views.main, name='main'),
     path('temp/', views.temp, name='temp'),
+    path('main/<str:select>', views.main_select),
 ]

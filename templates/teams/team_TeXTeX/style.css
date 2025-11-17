@@ -19,7 +19,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 250px; /* 任意の幅に調整してください */
+    width: 250px; 
     overflow: hidden;
     border-radius: 3px;
     background-color: #f2f2f2;
@@ -53,3 +53,90 @@
   article{
     display: flex;
   }
+
+  /* 3列レイアウト用のコンテナ */
+.grid-3-columns {
+  display: grid;
+  /* PCなど広い画面では等幅の3列にする */
+  grid-template-columns: repeat(3, 1fr);
+  /* 列と列の間隔 */
+  gap: 1em 2em; 
+  width: 100%;
+}
+
+/* 各項目のスタイル（表の行のように見せる） */
+.grid-item {
+  display: flex;
+  justify-content: space-between; /* 左端と右端に配置 */
+  align-items: center;
+  padding: 0.5em;
+  border-bottom: 1px solid #dee2e6;
+  background-color: #fff;
+}
+
+/* コマンド部分の装飾 */
+.grid-item code {
+  background-color: #e9ecef;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  color: #c7254e;
+  font-family: 'Roboto Mono', monospace;
+  font-weight: bold;
+}
+
+/* 出力部分の装飾 */
+.grid-item .output {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+/* スマホ対応：画面が狭いときは1列に戻す */
+@media (max-width: 768px) {
+  .grid-3-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* クリック可能なコードのスタイル */
+.copy-target {
+  cursor: pointer; /* マウスカーソルを指マークに */
+  position: relative; /* ツールチップの位置基準 */
+  transition: background-color 0.2s;
+}
+
+.copy-target:hover {
+  background-color: #dbe2ef; /* ホバー時に少し濃く */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.copy-target:active {
+  transform: scale(0.95); /* クリックした瞬間に少し凹む演出 */
+}
+
+/* 「Copied!」という吹き出し（ツールチップ） */
+.copy-target::after {
+  content: "Copied!";
+  position: absolute;
+  top: -30px; /* コードの上に表示 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0; /* 最初は隠しておく */
+  visibility: hidden;
+  transition: opacity 0.3s, top 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+  font-family: sans-serif;
+}
+
+/* JavaScriptでこのクラスがつくと吹き出しが表示される */
+.copy-target.copied::after {
+  opacity: 1;
+  visibility: visible;
+  top: -40px; /* ふわっと上に上がるアニメーション */
+}
+

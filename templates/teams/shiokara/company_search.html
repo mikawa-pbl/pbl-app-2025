@@ -1,0 +1,63 @@
+﻿{% extends "teams/shiokara/base.html" %}
+
+{% block content %}
+<h1>企業検索</h1>
+
+<form method="get" action="{% url 'shiokara:company_search' %}">
+    <label>
+        キーワード：
+        <input type="text" name="q" value="{{ query }}" placeholder="企業名・キーワードなど">
+    </label>
+
+    <label>
+        学科：
+        <select name="dept">
+            <option value="">（すべての学科）</option>
+            {% for dept in departments %}
+            <option value="{{ dept.short_name }}" {% if dept.short_name == dept_short %}selected{% endif %}>
+                {{ dept.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <button type="submit">検索</button>
+</form>
+
+<hr>
+
+{% if query or dept_short %}
+<p>
+    検索結果：
+    {% if query %}「{{ query }}」{% endif %}
+    {% if selected_department %}（{{ selected_department.name }}）{% elif dept_short %}（学科指定あり）{% endif %}
+</p>
+{% endif %}
+
+<ul>
+    {% for company in companies %}
+    <li>
+        <strong>{{ company.name }}</strong>
+        {% if company.departments.all %}
+        <br>
+        <small>
+            対象学科：
+            {% for dept in company.departments.all %}
+            {{ dept.name }}{% if not forloop.last %} / {% endif %}
+            {% endfor %}
+        </small>
+        {% endif %}
+        {% if company.url %}
+        <br><a href="{{ company.url }}" target="_blank" rel="noopener">企業サイト</a>
+        {% endif %}
+        {% if company.description %}
+        <br><small>{{ company.description|linebreaksbr }}</small>
+        {% endif %}
+    </li>
+    {% empty %}
+    <li>該当する企業は見つかりませんでした。</li>
+    {% endfor %}
+</ul>
+
+<p><a href="{% url 'shiokara:department_list' %}">← 学科一覧に戻る</a></p>
+{% endblock %}

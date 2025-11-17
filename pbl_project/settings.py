@@ -194,7 +194,6 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
     },
-    
 }
 
 

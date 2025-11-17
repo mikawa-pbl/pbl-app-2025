@@ -1,0 +1,34 @@
+<!-- templates/teams/team_kitajaki/today_menu.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>今日の学食メニュー（team_kitajaki）</title>
+</head>
+<body>
+  <h1>今日の学食メニュー</h1>
+
+  {% if error_message %}
+    <p style="color:red;">{{ error_message }}</p>
+  {% endif %}
+
+  {% if today_date %}
+    <p>
+      今日は {{ today_date|date:"n月j日" }}（{{ weekday_char }}）です。
+    </p>
+  {% endif %}
+
+  {% if menu_lines %}
+    <h2>メニュー</h2>
+    <ul>
+      {% for line in menu_lines %}
+        <li>{{ line }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>本日のメニューはPDFから取得できませんでした。</p>
+  {% endif %}
+
+  <p><a href="{% url 'team_kitajaki:index' %}">トップに戻る</a></p>
+</body>
+</html>

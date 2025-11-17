@@ -8,4 +8,5 @@ dependencies = [
     "django>=4.2.25",
     "requests", #team_kitajaki
     "pdfminer.six", #team_kitajaki
+    "pdfplumber", #team_kitajaki
 ]

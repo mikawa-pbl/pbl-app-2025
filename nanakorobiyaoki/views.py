@@ -25,3 +25,14 @@ def user_profile(request, user_id):
     
     # 3. 専用のテンプレート 'user_profile.html' を表示
     return render(request, 'teams/nanakorobiyaoki/mypage.html', context)
+
+# メンバー一覧ページ用のビュー
+def users(request):
+    # MyPage モデルから全てのオブジェクトを取得する
+    all_users = MyPage.objects.all()
+    
+    # 取得したリストを 'mypage' という名前でテンプレートに渡す
+    context = {
+        'users': all_users
+    }
+    return render(request, 'teams/nanakorobiyaoki/users.html', context)

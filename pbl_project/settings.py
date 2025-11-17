@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'team_terrace',
+    'mori_doragon_yuhi_machi',
 ]
 
 MIDDLEWARE = [
@@ -79,9 +79,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     },
-    'team_terrace': {
+    'mori_doragon_yuhi_machi': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
+        'NAME': BASE_DIR / 'mori_doragon_yuhi_machi' / 'db.sqlite3',
     },
 }
 

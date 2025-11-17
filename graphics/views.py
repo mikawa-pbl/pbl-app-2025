@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Member, BookReview
 from .forms import BookReviewForm
-from .utils import fetch_book_info_from_openbd
+from .utils import fetch_book_info_from_openbd   
 
 
 def index(request):

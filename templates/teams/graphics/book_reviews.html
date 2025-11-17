@@ -1,3 +1,4 @@
+{% load tz %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -87,6 +88,7 @@
 
     <a href="{% url 'graphics:add_book_review' %}" class="add-button">+ 新しいレビューを追加</a>
 
+    {% timezone "Asia/Tokyo" %}
     {% if reviews %}
         {% for review in reviews %}
             <div class="review-card">
@@ -96,7 +98,7 @@
                     <strong>著者:</strong> {{ review.author|default:"None" }}<br>
                     <strong>発行日:</strong> {{ review.publication_date|default:"None" }}<br>
                     <strong>ISBN:</strong> {{ review.isbn }} |
-                    <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }}
+                    <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }} (JST)
                 </div>
                 <div class="review-text">
                     {{ review.review|linebreaks }}
@@ -108,6 +110,7 @@
             まだレビューが投稿されていません。最初のレビューを投稿してください。
         </div>
     {% endif %}
+    {% endtimezone %}
 
     <a href="{% url 'graphics:index' %}" class="back-link">← トップページに戻る</a>
 </body>

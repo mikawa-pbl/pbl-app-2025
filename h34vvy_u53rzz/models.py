@@ -12,11 +12,13 @@ class Member(models.Model):
 
 class Entry(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    body = models.TextField()
+    door_id = models.CharField(max_length=64, blank=True, help_text="対応したドアID")
+    comment = models.TextField(blank=True, help_text="ドアに関する任意コメント")
 
     class Meta:
         ordering = ["-created_at"]  # 新しい順で積み上げ表示
 
     def __str__(self):
         # 管理画面用
-        return f"{self.created_at:%Y-%m-%d %H:%M:%S} {self.body[:20]}"
+        preview = (self.comment or "")[:20]
+        return f"{self.created_at:%Y-%m-%d %H:%M:%S} {preview}"

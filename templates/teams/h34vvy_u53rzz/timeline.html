@@ -19,7 +19,7 @@
       {% for e in entries %}
       <li>
         <strong>{{ e.created_at|date:"Y-m-d H:i:s" }}</strong><br />
-        <pre style="white-space: pre-wrap; margin: 0">{{ e.body }}</pre>
+        <pre style="white-space: pre-wrap; margin: 0">{{ e.comment }}</pre>
       </li>
       {% empty %}
       <li>まだ投稿がありません。</li>

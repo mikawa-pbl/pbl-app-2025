@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>助けを求める</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+        padding: 16px;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 16px;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+
+      tr.door-row {
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      tr.door-row:hover,
+      tr.door-row:focus {
+        background-color: #f0f4ff;
+      }
+
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .is-hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>助けを求める</h1>
+    <p>利用可能なドア一覧から、現在地に最も近いものを選んでください。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>名称</th>
+          <th>座標 (x, y)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for door in doors %}
+        <tr
+          class="door-row"
+          tabindex="0"
+          data-door-id="{{ door.id }}"
+          data-door-label="{{ door.label }}"
+        >
+          <td>{{ door.id }}</td>
+          <td>{{ door.label }}</td>
+          <td>{{ door.coordinate.0 }}, {{ door.coordinate.1 }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="3">登録されているドアがありません。</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <p id="commentHint" class="{% if selected_door %}is-hidden{% endif %}">
+      ドアをクリックするとコメント入力欄が現れます。
+    </p>
+
+    <section
+      id="commentSection"
+      class="{% if not selected_door %}is-hidden{% endif %}"
+    >
+      <h2>選択中のドアにコメントを送信</h2>
+      <p>
+        選択中のドア:
+        <strong id="selectedDoorName">
+          {% if selected_door %}
+          {{ selected_door.label }} ({{ selected_door.id }})
+          {% else %}
+          未選択
+          {% endif %}
+        </strong>
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+        <input
+          type="hidden"
+          name="door_id"
+          id="selectedDoorInput"
+          value="{% if selected_door %}{{ selected_door.id }}{% endif %}"
+        />
+        {% if form.non_field_errors %}
+        <ul style="color: red">
+          {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        <div>
+          {{ form.comment.label_tag }}
+          {{ form.comment }}
+          {% if form.comment.errors %}
+          <ul style="color: red">
+            {% for error in form.comment.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+
+        <button
+          type="submit"
+          id="commentSubmit"
+          {% if not selected_door %}disabled{% endif %}
+        >
+          コメントを送信
+        </button>
+      </form>
+    </section>
+
+    <section>
+      <h2>最新の記録</h2>
+      {% if entries %}
+      <ul>
+        {% for entry in entries %}
+        <li style="margin-bottom: 12px">
+          <strong>{{ entry.created_at|date:"Y-m-d H:i" }}</strong> /
+          <code>{{ entry.door_id }}</code>
+          <br />
+          <pre style="white-space: pre-wrap; margin: 4px 0 0">
+{{ entry.comment }}</pre
+          >
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p>まだ記録はありません。</p>
+      {% endif %}
+    </section>
+
+    <script>
+      (function () {
+        const rows = document.querySelectorAll(".door-row");
+        const section = document.getElementById("commentSection");
+        const hint = document.getElementById("commentHint");
+        const doorInput = document.getElementById("selectedDoorInput");
+        const doorName = document.getElementById("selectedDoorName");
+        const submitButton = document.getElementById("commentSubmit");
+        const commentField = document.getElementById("id_comment");
+
+        rows.forEach((row) => {
+          row.addEventListener("click", () => selectDoor(row));
+          row.addEventListener("keypress", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              selectDoor(row);
+            }
+          });
+        });
+
+        function selectDoor(row) {
+          const doorId = row.dataset.doorId;
+          const label = row.dataset.doorLabel;
+          if (!doorId) {
+            return;
+          }
+          if (doorInput) {
+            doorInput.value = doorId;
+          }
+          if (doorName) {
+            doorName.textContent = `${label} (${doorId})`;
+          }
+          if (section) {
+            section.classList.remove("is-hidden");
+          }
+          if (hint) {
+            hint.classList.add("is-hidden");
+          }
+          if (submitButton) {
+            submitButton.disabled = false;
+          }
+          if (commentField) {
+            commentField.focus();
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>

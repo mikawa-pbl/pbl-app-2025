@@ -15,6 +15,9 @@ urlpatterns = [
     
     # 投稿詳細 (例: /team_shouronpou/board/post/1/)
     path('board/post/<int:pk>/', views.PostDetailView.as_view(), name='post_detail'),
+
+    # 募集人数
+    path('board/post/<int:pk>/apply/', views.apply_for_post, name='post_apply'),
     
     # 投稿編集 (例: /team_shouronpou/board/post/1/edit/)
     path('board/post/<int:pk>/edit/', views.PostUpdateView.as_view(), name='post_edit'),

@@ -12,3 +12,9 @@ class Main(models.Model):
 
 class Editer(models.Model):
     pass
+
+class url(models.Model):
+    pass
+
+class main_select(models.Model):
+    pass

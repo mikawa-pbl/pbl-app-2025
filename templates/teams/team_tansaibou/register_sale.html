@@ -1,238 +1,463 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>販売登録 - Team Tansaibou</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-        h1 {
-            color: #333;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 10px;
-        }
-        .messages {
-            margin: 20px 0;
-        }
-        .message {
-            padding: 10px 15px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        .message.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        form {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #555;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-        textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .nav-links {
-            margin: 20px 0;
-        }
-        .nav-links a {
-            color: #007bff;
-            text-decoration: none;
-            margin-right: 15px;
-        }
-        .nav-links a:hover {
-            text-decoration: underline;
-        }
-        .required {
-            color: red;
-        }
-        .stock-info {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-    </style>
-    <script>
-        // 商品選択時に価格と在庫情報を更新
-        function updateItemInfo() {
-            const itemType = document.getElementById('item_type').value;
-            const itemSelect = document.getElementById('item_id');
-            const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+{% extends 'teams/team_tansaibou/base.html' %}
 
-            if (selectedOption && selectedOption.value) {
-                const price = selectedOption.dataset.price;
-                const stock = selectedOption.dataset.stock;
+{% block title %}レジ - Team Tansaibou{% endblock %}
 
-                let infoText = '';
-                if (price) {
-                    infoText = `価格: ¥${parseInt(price).toLocaleString()}`;
-                }
-                if (stock !== undefined) {
-                    infoText += ` / 在庫: ${stock}`;
-                }
+{% block extra_style %}
+.pos-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
 
-                document.getElementById('stock-info').textContent = infoText;
-            }
-        }
+/* 商品選択エリア */
+.products-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.section-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #555;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 5px;
+}
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+.product-button {
+    background: #f9f9f9;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 15px 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+.product-button:hover {
+    background: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+.product-button:active {
+    transform: translateY(0);
+}
+.product-name {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+.product-price {
+    font-size: 16px;
+    color: #4CAF50;
+    font-weight: bold;
+    margin: 5px 0;
+}
+.product-stock {
+    font-size: 12px;
+    color: #666;
+}
+.product-button:hover .product-price,
+.product-button:hover .product-stock {
+    color: white;
+}
 
-        // 商品タイプ変更時に選択肢を更新
-        function updateItemOptions() {
-            const itemType = document.getElementById('item_type').value;
-            const productSelect = document.getElementById('product_select');
-            const productSetSelect = document.getElementById('product_set_select');
-            const itemIdInput = document.getElementById('item_id');
+/* カートエリア */
+.cart-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.cart-empty {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+}
+.cart-items {
+    margin-bottom: 20px;
+}
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+.cart-item:last-child {
+    border-bottom: none;
+}
+.cart-item-info {
+    flex: 2;
+}
+.cart-item-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.cart-item-price {
+    color: #666;
+    font-size: 14px;
+}
+.cart-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.qty-btn {
+    width: 30px;
+    height: 30px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+}
+.qty-btn:hover {
+    background: #0b7dda;
+}
+.qty-input {
+    width: 50px;
+    text-align: center;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.cart-item-subtotal {
+    font-weight: bold;
+    min-width: 100px;
+    text-align: right;
+}
+.btn-remove {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btn-remove:hover {
+    background: #da190b;
+}
+.cart-total {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+.cart-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+.btn-clear {
+    padding: 10px 20px;
+    background: #999;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btn-clear:hover {
+    background: #888;
+}
 
-            if (itemType === 'product') {
-                productSelect.style.display = 'block';
-                productSetSelect.style.display = 'none';
-                itemIdInput.value = productSelect.querySelector('select').value;
-            } else {
-                productSelect.style.display = 'none';
-                productSetSelect.style.display = 'block';
-                itemIdInput.value = productSetSelect.querySelector('select').value;
-            }
+/* 会計エリア */
+.checkout-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.form-group {
+    margin-bottom: 0;
+}
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #555;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+.checkout-button {
+    width: 100%;
+    padding: 18px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+}
+.checkout-button:hover {
+    background: #45a049;
+}
+.checkout-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+.required {
+    color: red;
+}
+{% endblock %}
 
-            updateItemInfo();
-        }
+{% block content %}
+<div class="pos-container">
+    <h1>💰 POSレジ</h1>
 
-        // ページ読み込み時の初期化
-        window.onload = function() {
-            updateItemOptions();
-        }
-    </script>
-</head>
-<body>
-    <h1>販売登録</h1>
+    <!-- 商品選択 -->
+    <div class="products-section">
+        <div class="section-title">🛍️ 商品選択</div>
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-button" onclick="addToCart('product', {{ product.id }}, '{{ product.name|escapejs }}', {{ product.current_price }}, {{ product.stock }})">
+                <div class="product-name">{{ product.name }}</div>
+                <div class="product-price">¥{{ product.current_price|floatformat:0 }}</div>
+                <div class="product-stock">在庫: {{ product.stock }}</div>
+            </div>
+            {% empty %}
+            <p style="grid-column: 1/-1; text-align: center; color: #999;">商品が登録されていません</p>
+            {% endfor %}
+        </div>
 
-    <div class="nav-links">
-        <a href="/team_tansaibou/">← トップへ</a>
-        <a href="/team_tansaibou/sales/">販売履歴を見る</a>
+        {% if product_sets %}
+        <div class="section-title" style="margin-top: 20px;">🎁 セット商品</div>
+        <div class="product-grid">
+            {% for ps in product_sets %}
+            <div class="product-button" onclick="addToCart('product_set', {{ ps.id }}, '{{ ps.name|escapejs }}', {{ ps.price }}, {{ ps.get_stock_status }})">
+                <div class="product-name">{{ ps.name }}</div>
+                <div class="product-price">¥{{ ps.price|floatformat:0 }}</div>
+                <div class="product-stock">セット在庫: {{ ps.get_stock_status }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
 
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="message {{ message.tags }}">{{ message }}</div>
-        {% endfor %}
+    <!-- カート -->
+    <div class="cart-section">
+        <div class="section-title">🛒 カート</div>
+        <div id="cart-items" class="cart-items">
+            <div class="cart-empty">商品を選択してください</div>
+        </div>
+        <div class="cart-total">
+            <span>合計</span>
+            <span id="cart-total">¥0</span>
+        </div>
+        <div class="cart-actions">
+            <button type="button" class="btn-clear" onclick="clearCart()">カートを空にする</button>
+        </div>
     </div>
-    {% endif %}
 
-    <form method="post">
-        {% csrf_token %}
+    <!-- 会計 -->
+    <div class="checkout-section">
+        <div class="section-title">💳 会計情報</div>
+        <form method="post" id="checkout-form">
+            {% csrf_token %}
+            <input type="hidden" name="cart_items" id="cart_items_input">
 
-        <div class="form-group">
-            <label for="transaction_date">取引日 <span class="required">*</span></label>
-            <input type="date" id="transaction_date" name="transaction_date" value="{{ today }}" required>
-        </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="transaction_date">取引日 <span class="required">*</span></label>
+                    <input type="date" id="transaction_date" name="transaction_date" value="{{ today }}" required>
+                </div>
 
-        <div class="form-group">
-            <label for="recorded_by">担当者 <span class="required">*</span></label>
-            <select id="recorded_by" name="recorded_by" required>
-                <option value="">選択してください</option>
-                {% for member in members %}
-                <option value="{{ member.id }}">{{ member.last_name }} {{ member.first_name }}</option>
-                {% endfor %}
-            </select>
-        </div>
+                <div class="form-group">
+                    <label for="recorded_by">担当者 <span class="required">*</span></label>
+                    <select id="recorded_by" name="recorded_by" required>
+                        <option value="">選択してください</option>
+                        {% for member in members %}
+                        <option value="{{ member.id }}">{{ member.last_name }} {{ member.first_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        <div class="form-group">
-            <label for="item_type">商品タイプ <span class="required">*</span></label>
-            <select id="item_type" name="item_type" onchange="updateItemOptions()" required>
-                <option value="product">通常商品</option>
-                <option value="product_set">セット商品</option>
-            </select>
-        </div>
+                <div class="form-group">
+                    <label for="payment_method">支払方法 <span class="required">*</span></label>
+                    <select id="payment_method" name="payment_method" required>
+                        <option value="">選択してください</option>
+                        {% for value, label in payment_methods %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
 
-        <div class="form-group" id="product_select">
-            <label for="product_id">商品 <span class="required">*</span></label>
-            <select id="product_id" name="product_id_temp" onchange="document.getElementById('item_id').value = this.value; updateItemInfo()">
-                <option value="">選択してください</option>
-                {% for product in products %}
-                <option value="{{ product.id }}" data-price="{{ product.current_price }}" data-stock="{{ product.stock }}">
-                    {{ product.name }} (¥{{ product.current_price|floatformat:0 }})
-                </option>
-                {% endfor %}
-            </select>
-            <div id="stock-info" class="stock-info"></div>
-        </div>
+            <div class="form-group">
+                <label for="notes">備考</label>
+                <textarea id="notes" name="notes" placeholder="特記事項があれば入力してください"></textarea>
+            </div>
 
-        <div class="form-group" id="product_set_select" style="display:none;">
-            <label for="product_set_id">セット商品 <span class="required">*</span></label>
-            <select id="product_set_id" name="product_set_id_temp" onchange="document.getElementById('item_id').value = this.value; updateItemInfo()">
-                <option value="">選択してください</option>
-                {% for product_set in product_sets %}
-                <option value="{{ product_set.id }}" data-price="{{ product_set.price }}">
-                    {{ product_set.name }} (¥{{ product_set.price|floatformat:0 }})
-                </option>
-                {% endfor %}
-            </select>
-        </div>
+            <button type="submit" class="checkout-button" id="checkout-btn" disabled>会計する（¥0）</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
 
-        <input type="hidden" id="item_id" name="item_id" value="">
+{% block extra_script %}
+<script>
+let cart = [];
 
-        <div class="form-group">
-            <label for="quantity">数量 <span class="required">*</span></label>
-            <input type="number" id="quantity" name="quantity" value="1" min="1" required>
-        </div>
+function addToCart(type, id, name, price, stock) {
+    // カート内に同じ商品があるか確認
+    const existingItem = cart.find(item => item.type === type && item.id === id);
 
-        <div class="form-group">
-            <label for="payment_method">支払方法 <span class="required">*</span></label>
-            <select id="payment_method" name="payment_method" required>
-                <option value="">選択してください</option>
-                {% for value, label in payment_methods %}
-                <option value="{{ value }}">{{ label }}</option>
-                {% endfor %}
-            </select>
-        </div>
+    if (existingItem) {
+        // 在庫チェック
+        if (existingItem.quantity < stock) {
+            existingItem.quantity++;
+        } else {
+            alert(`${name}の在庫が不足しています（在庫: ${stock}）`);
+            return;
+        }
+    } else {
+        // 新しい商品を追加
+        if (stock <= 0) {
+            alert(`${name}は在庫がありません`);
+            return;
+        }
+        cart.push({
+            type: type,
+            id: id,
+            name: name,
+            price: parseFloat(price),
+            quantity: 1,
+            stock: stock
+        });
+    }
 
-        <div class="form-group">
-            <label for="notes">備考</label>
-            <textarea id="notes" name="notes" placeholder="特記事項があれば入力してください"></textarea>
-        </div>
+    updateCart();
+}
 
-        <button type="submit">販売を登録</button>
-    </form>
-</body>
-</html>
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCart();
+}
+
+function updateQuantity(index, newQuantity) {
+    const item = cart[index];
+    const qty = parseInt(newQuantity);
+
+    if (qty <= 0) {
+        removeFromCart(index);
+        return;
+    }
+
+    if (qty > item.stock) {
+        alert(`${item.name}の在庫が不足しています（在庫: ${item.stock}）`);
+        document.getElementById(`qty-${index}`).value = item.quantity;
+        return;
+    }
+
+    item.quantity = qty;
+    updateCart();
+}
+
+function clearCart() {
+    if (cart.length > 0 && confirm('カートを空にしてもよろしいですか？')) {
+        cart = [];
+        updateCart();
+    }
+}
+
+function updateCart() {
+    const cartItemsDiv = document.getElementById('cart-items');
+    const cartTotalSpan = document.getElementById('cart-total');
+    const checkoutBtn = document.getElementById('checkout-btn');
+    const cartItemsInput = document.getElementById('cart_items_input');
+
+    if (cart.length === 0) {
+        cartItemsDiv.innerHTML = '<div class="cart-empty">商品を選択してください</div>';
+        cartTotalSpan.textContent = '¥0';
+        checkoutBtn.disabled = true;
+        checkoutBtn.textContent = '会計する（¥0）';
+        cartItemsInput.value = '[]';
+        return;
+    }
+
+    // カートアイテムを表示
+    let html = '';
+    let total = 0;
+
+    cart.forEach((item, index) => {
+        const subtotal = item.price * item.quantity;
+        total += subtotal;
+
+        html += `
+            <div class="cart-item">
+                <div class="cart-item-info">
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-price">¥${item.price.toLocaleString()} × ${item.quantity}</div>
+                </div>
+                <div class="cart-item-controls">
+                    <div class="quantity-control">
+                        <button type="button" class="qty-btn" onclick="updateQuantity(${index}, ${item.quantity - 1})">-</button>
+                        <input type="number" class="qty-input" id="qty-${index}" value="${item.quantity}"
+                               min="1" max="${item.stock}" onchange="updateQuantity(${index}, this.value)">
+                        <button type="button" class="qty-btn" onclick="updateQuantity(${index}, ${item.quantity + 1})">+</button>
+                    </div>
+                    <div class="cart-item-subtotal">¥${subtotal.toLocaleString()}</div>
+                    <button type="button" class="btn-remove" onclick="removeFromCart(${index})">削除</button>
+                </div>
+            </div>
+        `;
+    });
+
+    cartItemsDiv.innerHTML = html;
+    cartTotalSpan.textContent = `¥${total.toLocaleString()}`;
+    checkoutBtn.disabled = false;
+    checkoutBtn.textContent = `会計する（¥${total.toLocaleString()}）`;
+
+    // カートデータをJSONとしてhidden inputに設定
+    cartItemsInput.value = JSON.stringify(cart);
+}
+
+// フォーム送信時にカートが空でないかチェック
+document.getElementById('checkout-form').addEventListener('submit', function(e) {
+    if (cart.length === 0) {
+        e.preventDefault();
+        alert('カートに商品を追加してください');
+    }
+});
+</script>
+{% endblock %}

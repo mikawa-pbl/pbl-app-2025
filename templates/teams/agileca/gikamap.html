@@ -44,6 +44,9 @@
     <main>
         <div class="map-container">
             <img src="{% static 'agileca/img/campus_map.png' %}" alt="技科大の地図の画像" class="map-image">
+            <form action="{% url 'agileca:imc' %}" method="get" class="map-button btn-imc">
+                <button type="submit">imc</button>
+            </form>
             <form action="{% url 'agileca:imc' %}" method="get" class="map-button btn-library">
                 <button type="submit">図書館</button>
             </form>

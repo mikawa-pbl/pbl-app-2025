@@ -5,4 +5,5 @@ app_name = "team_northcliff"
 urlpatterns = [
     path('', views.index, name='index'),
     path('members/', views.members, name='members'),
+    path('ui/', views.ui, name='ui'),
 ]

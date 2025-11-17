@@ -1,15 +1,147 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="ja">
 
 <head>
     <meta charset="UTF-8">
     <title>gikamap</title>
+    <link rel="stylesheet" href="{% static 'agileca/css/gikamap.css' %}">
 </head>
+
 <body>
-    {% load static %}
-    <img src="{% static 'agileca/campus_map.png' %}" alt="技科大の地図の画像">
-    <a href="{% url 'agileca:index' %}">トップに戻る</a>
-    <a href="{% url 'agileca:imc' %}">imcのページ</a>
+    <!-- サイドバーを開くボタン -->
+    <button type="button" class="sidebar-toggle" id="sidebarToggle" onclick="openSidebar()">
+        ☰ メニュー / 検索
+    </button>
+
+    <!-- サイドバー -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>gikamap</h1>
+            <!-- タイトルと同じ行の右端に閉じるボタン -->
+            <button type="button" class="sidebar-close" onclick="closeSidebar()">
+                閉じる
+            </button>
+        </div>
+
+        <form class="search-box" method="get" action="">
+            <label for="search">キャンパス内検索</label>
+            <input type="text" id="search" name="q" placeholder="例: 図書館, IMC など">
+            <button type="submit">検索</button>
+        </form>
+
+        <nav>
+            <a href="{% url 'agileca:index' %}">トップページ</a>
+            <a href="{% url 'agileca:imc' %}">IMC ページ</a>
+        </nav>
+    </aside>
+
+    <!-- 背景オーバーレイ（クリックでサイドバーを閉じる） -->
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- メイン（地図） -->
+    <main>
+        <div class="map-container">
+            <img src="{% static 'agileca/img/campus_map.png' %}" alt="技科大の地図の画像" class="map-image">
+            <form action="{% url 'agileca:imc' %}" method="get" class="map-button btn-library">
+                <button type="submit">図書館</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay').classList.add('show');
+
+            // 「メニュー / 検索」ボタンを非表示
+            document.getElementById('sidebarToggle').classList.add('hidden');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('show');
+
+            // 「メニュー / 検索」ボタンを再表示
+            document.getElementById('sidebarToggle').classList.remove('hidden');
+        }
+    </script>
 </body>
 
 </html>
+
+<!--
+
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>gikamap</title>
+    <style>
+        .map-container {
+            position: relative;
+            display: inline-block;
+            /* 画像のサイズに合わせる */
+        }
+
+        .map-image {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .map-button {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            /* 座標をボタン中心に合わせる用 */
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .btn-imc {
+            top: 75%;
+            left: 62%;
+        }
+
+        .btn-library {
+            top: 75%;
+            left: 67%;
+        }
+
+        .btn-secretariat {
+            top: 80%;
+            left: 80%;
+        }
+    </style>
+</head>
+
+<body>
+    {% load static %}
+
+    <div class="map-container">
+        <img src="{% static 'agileca/campus_map.png' %}" alt="技科大の地図の画像" class="map-image">
+
+        <form action="{% url 'agileca:imc' %}" method="get" class="map-button btn-imc">
+            <button type="submit">imc</button>
+        </form>
+
+        <form action="{% url 'agileca:imc' %}" method="get" class="map-button btn-library">
+            <button type="submit">図書館</button>
+        </form>
+
+        <form action="{% url 'agileca:imc' %}" method="get" class="map-button btn-secretariat">
+            <button type="submit">事務局</button>
+        </form>
+    </div>
+
+    <form action="{% url 'agileca:index' %}" method="get" style="display:inline;">
+        <button type="submit">トップに戻る</button>
+    </form>
+
+</body>
+
+</html>
+
+-->

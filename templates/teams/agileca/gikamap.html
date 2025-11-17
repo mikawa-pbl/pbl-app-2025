@@ -44,14 +44,21 @@
     <main>
         <div class="map-container">
             <img src="{% static 'agileca/img/campus_map.png' %}" alt="技科大の地図の画像" class="map-image">
+            <!--以下ボタン-->
             <form action="{% url 'agileca:imc' %}" method="get" class="map-button btn-imc">
                 <button type="submit">imc</button>
             </form>
-            <form action="{% url 'agileca:imc' %}" method="get" class="map-button btn-library">
+            <form action="{% url 'agileca:library' %}" method="get" class="map-button btn-library">
                 <button type="submit">図書館</button>
             </form>
-            <form action="{% url 'agileca:imc' %}" method="get" class="map-button btn-secretariat">
+            <form action="{% url 'agileca:secretariat' %}" method="get" class="map-button btn-secretariat">
                 <button type="submit">事務局</button>
+            </form>
+            <form action="{% url 'agileca:health' %}" method="get" class="map-button btn-health">
+                <button type="submit">健康支援</button>
+            </form>
+            <form action="{% url 'agileca:welfare' %}" method="get" class="map-button btn-welfare">
+                <button type="submit">福利施設</button>
             </form>
         </div>
     </main>

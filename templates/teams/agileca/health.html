@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>IMC</title>
+  <link rel="stylesheet" href="{% static 'agileca/css/gikamap.css' %}">
+</head>
+
+<body>
+  <h1>健康支援センター</h1>
+  <ul>
+    <li>開館時間 平日8:30～18:00(土日祝日は閉館)</li>
+    <li>用途</li>
+    <ul>
+      <li>情報メディア基盤センターの利用</li>
+      <li>学内の情報システムに関する相談</li>
+      <li>学内の情報システムの利用方法に関する相談</li>
+      <li>学内の情報システムの障害に関する相談</li>
+    </ul>
+    <li><a href="https://imc.tut.ac.jp/contact.html">問い合わせ先</a></li>
+    <li><a href="https://imc.tut.ac.jp/">IMC HP</a></li>
+
+  </ul>
+
+  <!-- IMCマップ -->
+  <div>
+    <img src="{% static 'agileca/img/IMC_floormap_jpn.png' %}" alt="IMCの地図の画像" class="map-image">
+  </div>
+
+  <a href="{% url 'agileca:gikamap' %}">戻る</a>
+  <a href="{% url 'agileca:index' %}">トップに戻る</a>
+</body>
+
+</html>

@@ -2,9 +2,40 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Graphics</title></head>
+    <title>Graphics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .nav-links {
+            list-style-type: none;
+            padding: 0;
+        }
+        .nav-links li {
+            margin: 10px 0;
+        }
+        .nav-links a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
 <body>
 <h1>Graphics</h1>
-<p><a href="/graphics/members/">メンバー一覧</a></p>
+<ul class="nav-links">
+    <li><a href="{% url 'graphics:members' %}">メンバー一覧</a></li>
+    <li><a href="{% url 'graphics:book_reviews' %}">参考書レビュー一覧</a></li>
+    <li><a href="{% url 'graphics:add_book_review' %}">参考書レビュー追加</a></li>
+</ul>
 </body>
 </html>

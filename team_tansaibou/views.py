@@ -190,7 +190,6 @@ def register_sale(request):
     context = {
         'members': Member.objects.using(DB_NAME).all(),
         'products': Product.objects.using(DB_NAME).filter(is_active=True).order_by('name'),
-        'product_sets': ProductSet.objects.using(DB_NAME).filter(is_active=True).order_by('name'),
         'payment_methods': Transaction.PAYMENT_METHOD_CHOICES,
         'today': timezone.now().date().isoformat(),
     }

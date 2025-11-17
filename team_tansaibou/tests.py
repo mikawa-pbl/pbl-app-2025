@@ -15,7 +15,7 @@ from django.utils import timezone
 from decimal import Decimal
 import json
 
-from .models import (
+from team_tansaibou.models import (
     Member,
     Product,
     ProductSet,

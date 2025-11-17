@@ -81,22 +81,37 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
     },
     'team_terrace': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
     },
     'team_tansaibou': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_tansaibou' / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
     },
     'team_shouronpou': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_shouronpou' / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
     },
     'h34vvy_u53rzz': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'h34vvy_u53rzz' / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
     },
 }
 

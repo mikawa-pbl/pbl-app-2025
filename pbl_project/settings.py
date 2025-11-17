@@ -32,22 +32,34 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'team_USL',
+    'team_kitajaki',
+    'shiokara',
+    'team_terrace',
+    'agileca',
+    'team_scim',
+    'team_empiricism',
+    'ssk',
+    'Catan',
+    'team_tansaibou',
+    'h34vvy_u53rzz',
+    'mori_doragon_yuhi_machi',
+    'team_northcliff',
     "team_TMR",
     "graphics",
-    "team_terrace",
     "team_UD",
     "nanakorobiyaoki",
     "team_akb5",
     "team_TeXTeX",
     "team_cake",
     "team_shouronpou",
-    "h34vvy_u53rzz",
+    'team_giryulink',
     'takenoko',
 ]
 
@@ -106,10 +118,6 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "team_cake" / "db.sqlite3",
     },
-    "team_shouronpou": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "team_shouronpou" / "db.sqlite3",
-    },
     "h34vvy_u53rzz": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "h34vvy_u53rzz" / "db.sqlite3",
@@ -130,7 +138,70 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'takenoko' / 'db.sqlite3',
     },
+    'team_giryulink': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_giryulink' / 'db.sqlite3',
+    },
+    'team_northcliff': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_northcliff' / 'db.sqlite3',
+    },
+    'team_tansaibou': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_tansaibou' / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
+    },
+    'team_shouronpou': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_shouronpou' / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
+    },
+    'agileca': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'agileca' / 'db.sqlite3',
+    },
+    'shiokara': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'shiokara' / 'db.sqlite3',
+    },
+    'mori_doragon_yuhi_machi': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'mori_doragon_yuhi_machi' / 'db.sqlite3',
+    },
+    'team_kitajaki': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_kitajaki' / 'db.sqlite3',
+    },
+    'Catan': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'Catan' / 'db.sqlite3',
+    },
+    'team_empiricism': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_empiricism' / 'db.sqlite3',
+    },
+    'ssk': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'ssk' / 'db.sqlite3',
+    },
+    'team_USL': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_USL' / 'db.sqlite3',
+    },
+    'team_scim': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_scim' / 'db.sqlite3',
+    },
+    'team_terrace': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
+    },
 }
+
 
 # app_labelごとにDBを振り分けるルーター
 DATABASE_ROUTERS = ["routers.TeamPerAppRouter"]

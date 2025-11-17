@@ -100,3 +100,37 @@ def get_today_menu() -> dict:
         "weekday_char": weekday_char,
         "menu_lines": menu_lines,
     }
+
+def get_this_week_menu() -> list[dict]:
+    """
+    今週（月〜金）のメニュー一覧を返す。
+
+    返り値の例:
+    [
+      {"date": date(2025, 11, 17), "weekday_char": "月", "menu": "厚旨トンカツ"},
+      {"date": date(2025, 11, 18), "weekday_char": "火", "menu": "○○"},
+      ...
+    ]
+    """
+    today = datetime.date.today()
+    year = today.year
+
+    # 月曜日の日付を求める
+    monday = today - datetime.timedelta(days=today.weekday())
+
+    date_menu = build_date_menu_dict(year)
+
+    week_list: list[dict] = []
+    # 月〜金の5日分
+    for i in range(5):
+        d = monday + datetime.timedelta(days=i)
+        menu = date_menu.get(d)
+        weekday_char = DAY_CHARS[d.weekday()]
+
+        week_list.append({
+            "date": d,
+            "weekday_char": weekday_char,
+            "menu": menu,  # 無い日は None のまま
+        })
+
+    return week_list

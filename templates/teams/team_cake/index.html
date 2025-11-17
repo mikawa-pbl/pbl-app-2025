@@ -1,15 +1,38 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% include 'teams/team_cake/header.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Team Cake</title>
-</head>
+<main class="container">
+    <h3 class="section">Goods</h3>
 
-<body>
-    <h1>Team Cake</h1>
-    <p><a href="/team_cake/goods/">商品一覧</a></p>
-    <p><a href="/team_cake/registration_goods/">商品登録</a></p>
-</body>
+    <div class="row">
+        {% for good in goods %}
+        <div class="col s12 m6 l4">
+            <div class="card hoverable">
+                <div class="card-image">
+                    {% if good.image_url %}
+                    <img src="{{ good.image_url }}" alt="{{ good.name }}">
+                    {% else %}
+                    <img src="/static/images/placeholder-400x300.png" alt="placeholder">
+                    {% endif %}
+                </div>
+                <div class="card-content">
+                    <span class="card-title">{{ good.name }}</span>
+                    <p class="grey-text">{{ good.description|default:"説明なし" }}</p>
+                </div>
+                <div class="card-action">
+                    <span class="teal-text text-darken-2">¥{{ good.price }}</span>
+                    <a href="/team_cake/goods/{{ good.id }}/" class="right">詳細</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col s12">
+            <div class="card-panel yellow lighten-5">
+                データがありません
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 
-</html>
+</main>
+
+{% include 'teams/team_cake/footer.html' %}

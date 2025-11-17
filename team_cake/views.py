@@ -5,14 +5,14 @@ from types import SimpleNamespace
 from django.db import connections
 import uuid
 
-def index(request):
-    return render(request, 'teams/team_cake/index.html')
+# def index(request):
+#     return render(request, 'teams/team_cake/index.html')
 
-def goods(request):
+def index(request):
     try:
         # 通常はORMで取得（UUIDField の変換が走る）
         qs = Good.objects.using('team_cake').all()
-        return render(request, 'teams/team_cake/goods.html', {'goods': qs})
+        return render(request, 'teams/team_cake/index.html', {'goods': qs})
     except ValueError:
         # DB に古い整数 ID 等、UUID として変換できない値が入っている場合のフォールバック。
         # テンプレートは objects の `.name` / `.price` を参照する想定のため SimpleNamespace を作る。
@@ -22,7 +22,7 @@ def goods(request):
             rows = cur.fetchall()
 
         goods = [SimpleNamespace(id=row[0], name=row[1], price=row[2]) for row in rows]
-        return render(request, 'teams/team_cake/goods.html', {'goods': goods})
+        return render(request, 'teams/team_cake/index.html', {'goods': goods})
 
 def registration_goods(request):
     if request.method == 'POST':

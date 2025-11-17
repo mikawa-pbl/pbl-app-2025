@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>実験募集 掲示板 (Team Shouronpou)</title>
+</head>
+<body>
+    <h1>実験募集 掲示板 (Team Shouronpou)</h1>
+    <p><a href="{% url 'team_shouronpou:post_new' %}">新規募集を投稿する</a></p>
+
+    <ul>
+      {% for post in post_list %}
+        <li>
+          <a href="{% url 'team_shouronpou:post_detail' post.pk %}">{{ post.title }}</a>
+          <small>({{ post.created_at }})</small>
+        </li>
+      {% empty %}
+        <li>まだ投稿がありません。</li>
+      {% endfor %}
+    </ul>
+    <p><a href="{% url 'team_shouronpou:index' %}">チームトップへ戻る</a></p>
+</body>
+</html>

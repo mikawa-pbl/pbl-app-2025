@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Team Giryulink - Shopping</title>
+    <style>
+        body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; margin: 0; background: #f6f7fb; color: #222; }
+        .site { max-width: 960px; margin: 0 auto; padding: 24px; }
+        header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        h1 { margin: 0; font-size: 1.6rem; }
+        /* Controls (Add product form) */
+        .controls { margin: 18px 0; display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+        .add-btn { background: #1e88e5; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+        .add-form { display: none; gap: 8px; align-items: center; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        .add-form input { padding: 6px 8px; border-radius: 6px; border: 1px solid #ddd; }
+        .add-form .submit { background: #2e7d32; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+        .add-form .cancel { background: #fff; border: 1px solid #ddd; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+        .products { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px; justify-content: center; }
+        /* card layout: allow delete button to overlap and be clickable */
+        .card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: visible; width: 300px; text-align: left; position: relative; }
+        .delete-btn { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; z-index: 20; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+        /* ensure link doesn't cover the delete button (keeps button clickable) */
+        .card-link { position: relative; z-index: 1; display: block; }
+        .card img { width: 100%; height: 200px; object-fit: cover; display: block; }
+        .card .info { padding: 12px 14px; }
+        .card h2 { margin: 0 0 8px 0; font-size: 1rem; }
+        .price { font-size: 1.2rem; color: #e53935; font-weight: 700; }
+        footer { margin-top: 36px; padding: 14px 0; text-align: center; background: #222; color: #fff; border-radius: 6px; }
+        footer a { color: #ffd; text-decoration: none; }
+        .card img { width: 100%; height: 200px; object-fit: contain; object-position: center; background: #f3f4f6; display: block; }
+        .card-link img { transition: transform 0.18s ease; will-change: transform; object-fit: contain; object-position: center; background: #f3f4f6; }
+        .card-link { text-decoration: none; color: inherit; display: block; }
+        .card-link img { transition: transform 0.18s ease; will-change: transform; }
+        .card-link .info h2 { color: #222; transition: transform 0.12s ease, color 0.12s ease; transform-origin: left center; }
+        .card-link:hover img { transform: scale(1.03); }
+        .card-link:hover .info h2 { transform: translateY(-3px) scale(1.02); color: #1e88e5; }
+        @media (max-width: 640px) { .card { width: 100%; } .card img { height: 180px; } }
+    </style>
+</head>
+<body>
+<div class="site">
+    <header>
+        <h1>Furu-Trade</h1>
+    </header>
+
+    <!-- Controls: Add product button + form (positioned above product list) -->
+    <div class="controls" aria-hidden="false">
+        <button class="add-btn" id="toggleAdd">＋ 新しい商品を追加</button>
+
+        <!-- server-backed form: POSTs to add product view -->
+        <form class="add-form" id="addForm" method="post" action="{% url 'team_giryulink:add_product' %}" aria-label="Add product form" style="display:none;">
+            {% csrf_token %}
+            <input id="pTitle" name="title" type="text" placeholder="商品名" required aria-label="商品名">
+            <input id="pPrice" name="price" type="number" placeholder="価格 (¥)" min="0" required aria-label="価格">
+            <input id="pImage" name="image" type="url" placeholder="画像URL" aria-label="画像URL">
+            <textarea id="pDescription" name="description" placeholder="商品説明" aria-label="商品説明" style="display:block; width:260px; height:72px; padding:6px; border-radius:6px; border:1px solid #ddd;"></textarea>
+            <button class="submit" id="addSubmit" type="submit">追加</button>
+            <button type="button" class="cancel" id="addCancel">キャンセル</button>
+        </form>
+    </div>
+
+    <main>
+        <!-- Products rendered from DB -->
+        <section class="products" aria-label="Products">
+            {% for p in products %}
+            <article class="card">
+                <form method="post" action="{% url 'team_giryulink:delete_product' p.id %}" style="position:absolute; top:8px; right:8px; margin:0;">
+                    {% csrf_token %}
+                    <button class="delete-btn" type="submit" aria-label="削除 {{ p.title }}">削除</button>
+                </form>
+                <a class="card-link" href="{% url 'team_giryulink:product_detail' p.id %}" aria-label="{{ p.title }}">
+                    <img src="{{ p.image|default:'https://via.placeholder.com/600x400?text=No+Image' }}" alt="{{ p.title }}">
+                    <div class="info">
+                        <h2>{{ p.title }}</h2>
+                        <div class="price">{{ p.formatted_price }}</div>
+                    </div>
+                </a>
+            </article>
+            {% endfor %}
+        </section>
+
+        <script>
+            // small behaviour: toggle form and cancel (keeps client UX)
+            const toggleAdd = document.getElementById('toggleAdd');
+            const addForm = document.getElementById('addForm');
+            const addCancel = document.getElementById('addCancel');
+            const pTitle = document.getElementById('pTitle');
+
+            toggleAdd.addEventListener('click', () => {
+                const visible = addForm.style.display === 'flex' || addForm.style.display === 'block';
+                addForm.style.display = visible ? 'none' : 'flex';
+                if (!visible) { addForm.style.display = 'flex'; pTitle.focus(); }
+            });
+            addCancel.addEventListener('click', () => {
+                addForm.style.display = 'none';
+                addForm.reset();
+            });
+
+            // Confirm before submitting any delete form whose action includes "/delete/"
+            document.addEventListener('submit', (e) => {
+                const form = e.target;
+                if (!form || form.tagName !== 'FORM') return;
+                const method = (form.method || '').toLowerCase();
+                if (method === 'post' && (form.action || '').includes('/delete/')) {
+                    if (!confirm('本当にこの商品を削除しますか？')) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        </script>
+    </main>
+
+    <footer>
+        <p><a href="/team_giryulink/members/">メンバー一覧</a></p>
+    </footer>
+</div>
+</body>
+</html>

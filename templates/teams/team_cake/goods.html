@@ -3,14 +3,14 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Team Terrace Members</title>
+  <title>Team Terrace Goods</title>
 </head>
 
 <body>
-  <h1>Team Cake Members</h1>
+  <h1>Team Cake Goods</h1>
   <ul>
-    {% for member in members %}
-    <li>{{ member.last_name }} {{ member.first_name }}</li>
+    {% for good in goods %}
+    <li>{{ good.id }} {{ good.name }} {{ good.price }}</li>
     {% empty %}
     <li>データがありません</li>
     {% endfor %}

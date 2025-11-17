@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ post.title }} - 募集詳細</title>
+</head>
+<body>
+    <h2>{{ post.title }}</h2>
+    <p><strong>投稿日時:</strong> {{ post.created_at }}</p>
+
+    <hr>
+    <h3>募集状況</h3>
+    <div style="border: 2px solid #ddd; padding: 15px; margin: 10px 0; background-color: #f9f9f9;">
+        <p>
+            <strong>募集人数:</strong> 
+            {% if post.max_participants %}
+                {{ post.max_participants }} 名
+            {% else %}
+                無制限
+            {% endif %}
+        </p>
+        <p>
+            <strong>現在の参加者:</strong> {{ post.current_participants }} 名
+        </p>
+
+        {% if post.max_participants %}
+            <p>
+                <strong>残り枠:</strong> 
+                <span style="font-size: 1.5em; font-weight: bold; color: {% if post.remaining_spots == 0 %}red{% else %}blue{% endif %};">
+                    {{ post.remaining_spots }}
+                </span> 名
+            </p>
+
+            {% if post.remaining_spots > 0 %}
+                <form action="{% url 'team_shouronpou:post_apply' post.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" style="font-size: 1.2em; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 5px;">
+                        応募する
+                    </button>
+                </form>
+            {% else %}
+                <p style="color: red; font-weight: bold; font-size: 1.2em;">募集は終了しました（満員）</p>
+            {% endif %}
+
+        {% else %}
+            <form action="{% url 'team_shouronpou:post_apply' post.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" style="font-size: 1.2em; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 5px;">
+                    応募する
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    <hr>
+    <h3>募集要項</h3>
+    <p>
+        <strong>募集期間:</strong> 
+        {% if post.recruitment_start_date or post.recruitment_end_date %}
+            {{ post.recruitment_start_date|date:"Y年n月j日"|default:"指定なし" }}
+            〜 
+            {{ post.recruitment_end_date|date:"Y年n月j日"|default:"指定なし" }}
+        {% else %}
+            特に指定なし
+        {% endif %}
+    </p>
+
+    <hr>
+    <h3>参加条件</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; width: 30%;"><strong>国籍</strong></td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+                {{ post.condition_nationality | default:"特に指定なし" }}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>性別</strong></td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+                {{ post.condition_gender | default:"特に指定なし" }}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>持病の有無</strong></td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+                {{ post.condition_has_disease | default:"特に指定なし" }}
+            </td>
+        </tr>
+    </table>
+
+    <hr>
+    <h3>募集内容</h3>
+    <div style="margin-bottom: 20px;">
+      {{ post.content|urlize|linebreaksbr }}
+    </div>
+    <hr>
+
+    <div style="margin-top: 20px;">
+        <a href="{% url 'team_shouronpou:post_edit' post.pk %}">編集する</a>
+        <span style="margin: 0 10px;">|</span>
+        <a href="{% url 'team_shouronpou:post_delete' post.pk %}" style="color: red;">削除する</a>
+    </div>
+    
+    <p style="margin-top: 30px;">
+        <a href="{% url 'team_shouronpou:post_list' %}">掲示板一覧に戻る</a>
+    </p>
+</body>
+</html>

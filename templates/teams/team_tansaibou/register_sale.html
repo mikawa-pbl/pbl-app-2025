@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>販売登録 - Team Tansaibou</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .messages {
+            margin: 20px 0;
+        }
+        .message {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .nav-links {
+            margin: 20px 0;
+        }
+        .nav-links a {
+            color: #007bff;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .required {
+            color: red;
+        }
+        .stock-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+    <script>
+        // 商品選択時に価格と在庫情報を更新
+        function updateItemInfo() {
+            const itemType = document.getElementById('item_type').value;
+            const itemSelect = document.getElementById('item_id');
+            const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+
+            if (selectedOption && selectedOption.value) {
+                const price = selectedOption.dataset.price;
+                const stock = selectedOption.dataset.stock;
+
+                let infoText = '';
+                if (price) {
+                    infoText = `価格: ¥${parseInt(price).toLocaleString()}`;
+                }
+                if (stock !== undefined) {
+                    infoText += ` / 在庫: ${stock}`;
+                }
+
+                document.getElementById('stock-info').textContent = infoText;
+            }
+        }
+
+        // 商品タイプ変更時に選択肢を更新
+        function updateItemOptions() {
+            const itemType = document.getElementById('item_type').value;
+            const productSelect = document.getElementById('product_select');
+            const productSetSelect = document.getElementById('product_set_select');
+            const itemIdInput = document.getElementById('item_id');
+
+            if (itemType === 'product') {
+                productSelect.style.display = 'block';
+                productSetSelect.style.display = 'none';
+                itemIdInput.value = productSelect.querySelector('select').value;
+            } else {
+                productSelect.style.display = 'none';
+                productSetSelect.style.display = 'block';
+                itemIdInput.value = productSetSelect.querySelector('select').value;
+            }
+
+            updateItemInfo();
+        }
+
+        // ページ読み込み時の初期化
+        window.onload = function() {
+            updateItemOptions();
+        }
+    </script>
+</head>
+<body>
+    <h1>販売登録</h1>
+
+    <div class="nav-links">
+        <a href="/team_tansaibou/">← トップへ</a>
+        <a href="/team_tansaibou/sales/">販売履歴を見る</a>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="transaction_date">取引日 <span class="required">*</span></label>
+            <input type="date" id="transaction_date" name="transaction_date" value="{{ today }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="recorded_by">担当者 <span class="required">*</span></label>
+            <select id="recorded_by" name="recorded_by" required>
+                <option value="">選択してください</option>
+                {% for member in members %}
+                <option value="{{ member.id }}">{{ member.last_name }} {{ member.first_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="item_type">商品タイプ <span class="required">*</span></label>
+            <select id="item_type" name="item_type" onchange="updateItemOptions()" required>
+                <option value="product">通常商品</option>
+                <option value="product_set">セット商品</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="product_select">
+            <label for="product_id">商品 <span class="required">*</span></label>
+            <select id="product_id" name="product_id_temp" onchange="document.getElementById('item_id').value = this.value; updateItemInfo()">
+                <option value="">選択してください</option>
+                {% for product in products %}
+                <option value="{{ product.id }}" data-price="{{ product.current_price }}" data-stock="{{ product.stock }}">
+                    {{ product.name }} (¥{{ product.current_price|floatformat:0 }})
+                </option>
+                {% endfor %}
+            </select>
+            <div id="stock-info" class="stock-info"></div>
+        </div>
+
+        <div class="form-group" id="product_set_select" style="display:none;">
+            <label for="product_set_id">セット商品 <span class="required">*</span></label>
+            <select id="product_set_id" name="product_set_id_temp" onchange="document.getElementById('item_id').value = this.value; updateItemInfo()">
+                <option value="">選択してください</option>
+                {% for product_set in product_sets %}
+                <option value="{{ product_set.id }}" data-price="{{ product_set.price }}">
+                    {{ product_set.name }} (¥{{ product_set.price|floatformat:0 }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <input type="hidden" id="item_id" name="item_id" value="">
+
+        <div class="form-group">
+            <label for="quantity">数量 <span class="required">*</span></label>
+            <input type="number" id="quantity" name="quantity" value="1" min="1" required>
+        </div>
+
+        <div class="form-group">
+            <label for="payment_method">支払方法 <span class="required">*</span></label>
+            <select id="payment_method" name="payment_method" required>
+                <option value="">選択してください</option>
+                {% for value, label in payment_methods %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="notes">備考</label>
+            <textarea id="notes" name="notes" placeholder="特記事項があれば入力してください"></textarea>
+        </div>
+
+        <button type="submit">販売を登録</button>
+    </form>
+</body>
+</html>

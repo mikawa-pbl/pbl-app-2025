@@ -298,8 +298,8 @@ textarea {
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="transaction_date">取引日 <span class="required">*</span></label>
-                    <input type="date" id="transaction_date" name="transaction_date" value="{{ today }}" required>
+                    <label for="transaction_date">取引日時 <span class="required">*</span></label>
+                    <input type="datetime-local" id="transaction_date" name="transaction_date" required>
                 </div>
 
                 <div class="form-group">
@@ -315,9 +315,8 @@ textarea {
                 <div class="form-group">
                     <label for="payment_method">支払方法 <span class="required">*</span></label>
                     <select id="payment_method" name="payment_method" required>
-                        <option value="">選択してください</option>
                         {% for value, label in payment_methods %}
-                        <option value="{{ value }}">{{ label }}</option>
+                        <option value="{{ value }}" {% if value == 'cash' %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -457,6 +456,31 @@ document.getElementById('checkout-form').addEventListener('submit', function(e) 
     if (cart.length === 0) {
         e.preventDefault();
         alert('カートに商品を追加してください');
+    } else {
+        // 担当者をlocalStorageに保存
+        const recordedBy = document.getElementById('recorded_by').value;
+        if (recordedBy) {
+            localStorage.setItem('last_recorded_by', recordedBy);
+        }
+    }
+});
+
+// ページ読み込み時の初期化
+window.addEventListener('DOMContentLoaded', function() {
+    // 現在日時を設定
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const dateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+    document.getElementById('transaction_date').value = dateTimeString;
+
+    // 前回の担当者を復元
+    const lastRecordedBy = localStorage.getItem('last_recorded_by');
+    if (lastRecordedBy) {
+        document.getElementById('recorded_by').value = lastRecordedBy;
     }
 });
 </script>

@@ -4,7 +4,7 @@ from django.db import transaction as db_transaction
 from django.utils import timezone
 from decimal import Decimal
 
-from .models import Member, Product, ProductSet, Transaction, TransactionItem
+from .models import Member, Product, ProductSet, ProductSetItem, Transaction, TransactionItem
 
 
 def index(request):

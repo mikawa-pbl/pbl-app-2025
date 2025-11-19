@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>IMC</title>
+  <link rel="stylesheet" href="{% static 'agileca/css/gikamap.css' %}">
+</head>
+
+<body>
+  <h1>健康支援センター</h1>
+  <div>
+    <img src="{% static 'agileca/img/health/center_image.jpg' %}" alt="健康支援センターの画像" style="margin: 1em; width: 30%;">
+  </div>
+  <ul>
+    <li>開館時間 平日9:00～17:00</li>
+    <li>用途</li>
+    <ul>
+      <li>健康相談</li>
+      <li>カウンセリング</li>
+      <li>定期健診</li>
+      <li>禁煙相談</li>
+      <li>血圧計、体組成計など各種測定器具</li>
+      <li>休養室</li>
+    </ul>
+    <p>※各種相談は随時受付中</p>
+    <li>TEL：0532-44-6632</li>
+    <li>MAIL：kenkou@office.tut.ac.jp</li>
+    <li>外部リンク</li>
+    <ul>
+      <li><a href="https://health.tut.ac.jp/index.html">健康支援センターHP（学内ネットワークのみ）</a></li>
+      <li><a href="https://health.tut.ac.jp/2024.12iryoukikan.pdf">大学周辺の医療機関（学内ネットワークのみ）</a></li>
+    </ul>
+    
+
+  </ul>
+
+  <a href="{% url 'agileca:gikamap' %}">戻る</a>
+  <a href="{% url 'agileca:index' %}">トップに戻る</a>
+</body>
+
+</html>

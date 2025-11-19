@@ -15,3 +15,15 @@ def gikamap(request):
 
 def imc(request):
     return render(request, "teams/agileca/imc.html")
+
+def secretariat(request):
+    return render(request, "teams/agileca/secretariat.html")
+
+def health(request):
+    return render(request, "teams/agileca/health.html")
+
+def welfare(request):
+    return render(request, "teams/agileca/welfare.html")
+
+def library(request):
+    return render(request, "teams/agileca/library.html")

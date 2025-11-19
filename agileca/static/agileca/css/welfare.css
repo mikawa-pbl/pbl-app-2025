@@ -1,0 +1,39 @@
+.img-box {
+    position: relative;
+    display: inline-block;
+}
+
+.img-box img {
+    display: block;
+}
+
+.btn {
+    position: absolute;
+    padding: 8px 12px;
+    background:#007bFF;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.btn_dnn {
+    top: 40%;
+    left: 60%;
+}
+
+.btn_cft {
+    top: 7%;
+    left: 50%;
+}
+
+.btn_shp {
+    top: 78%;
+    left: 50%;
+}
+
+h2 {
+    margin-bottom: 0.5em;
+}
+h3 {
+    margin: 0;
+}

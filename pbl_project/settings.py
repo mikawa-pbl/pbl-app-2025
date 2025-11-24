@@ -196,9 +196,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_scim' / 'db.sqlite3',
     },
-    'mori_doragon_yuhi_machi': {
+    'team_terrace': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'mori_doragon_yuhi_machi' / 'db.sqlite3',
+        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
     },
 }
 

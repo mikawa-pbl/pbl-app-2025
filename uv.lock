@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.9"
 resolution-markers = [
     "python_full_version >= '3.10'",
@@ -353,6 +353,9 @@ dependencies = [
     { name = "jpholiday" },
     { name = "pdfminer-six" },
     { name = "pdfplumber" },
+    { name = "pillow", version = "11.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "pillow", version = "12.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "pytz" },
     { name = "requests" },
 ]
 
@@ -362,6 +365,8 @@ requires-dist = [
     { name = "jpholiday" },
     { name = "pdfminer-six" },
     { name = "pdfplumber" },
+    { name = "pillow", specifier = ">=11.3.0" },
+    { name = "pytz", specifier = ">=2025.2" },
     { name = "requests" },
 ]
 
@@ -637,6 +642,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/cc/87/79b9aa6d7f58959c821fb3d6e679ad288d17773c5ef59c69889bb1d3af53/pypdfium2-5.0.0-py3-none-win32.whl", hash = "sha256:aafb55d57f03c8cf482557ed421d40aed943cd563628a3df8515f301725f8e49", size = 2986180, upload-time = "2025-10-26T13:31:36.633Z" },
     { url = "https://files.pythonhosted.org/packages/21/46/21de463f575a85dc8973fdf89f7a103d09da553e896161536d7cc73950fd/pypdfium2-5.0.0-py3-none-win_amd64.whl", hash = "sha256:de2201d4e9e423779d2e3b2c2368591d6826153a009146eaa105b501a213b299", size = 3094011, upload-time = "2025-10-26T13:31:38.341Z" },
     { url = "https://files.pythonhosted.org/packages/ae/43/2b0607ef7f16d63fbe00de728151a090397ef5b3b9147b4aefe975d17106/pypdfium2-5.0.0-py3-none-win_arm64.whl", hash = "sha256:0a2a473fe95802e7a5f4140f25e5cd036cf17f060f27ee2d28c3977206add763", size = 2939015, upload-time = "2025-10-26T13:31:40.531Z" },
+]
+
+[[package]]
+name = "pytz"
+version = "2025.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/bf/abbd3cdfb8fbc7fb3d4d38d320f2441b1e7cbe29be4f23797b4a2b5d8aac/pytz-2025.2.tar.gz", hash = "sha256:360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3", size = 320884, upload-time = "2025-03-25T02:25:00.538Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/81/c4/34e93fe5f5429d7570ec1fa436f1986fb1f00c3e0f43a589fe2bbcd22c3f/pytz-2025.2-py2.py3-none-any.whl", hash = "sha256:5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00", size = 509225, upload-time = "2025-03-25T02:24:58.468Z" },
 ]
 
 [[package]]

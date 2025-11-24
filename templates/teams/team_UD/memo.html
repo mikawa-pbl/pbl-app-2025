@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>就活メモ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .memo-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .memo-list {
+            margin-top: 30px;
+        }
+
+        .memo-list h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 22px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .memo-item {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .memo-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .memo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .memo-company {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .memo-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-interview {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-status {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .badge-date {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .memo-content {
+            color: #555;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .memo-timestamp {
+            color: #999;
+            font-size: 12px;
+            margin-top: 10px;
+            text-align: right;
+        }
+
+        .no-memos {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 就活メモ</h1>
+
+        <!-- メモ入力フォーム -->
+        <div class="memo-form">
+            <form method="POST" action="{% url 'team_UD:create_memo' %}">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="company_name">会社名 *</label>
+                        <input type="text" id="company_name" name="company_name" required placeholder="例: 株式会社〇〇">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="interview_stage">面接段階 *</label>
+                        <select id="interview_stage" name="interview_stage" required>
+                            <option value="">選択してください</option>
+                            <option value="説明会">説明会</option>
+                            <option value="ES提出">ES提出</option>
+                            <option value="適性検査">適性検査</option>
+                            <option value="一次面接">一次面接</option>
+                            <option value="二次面接">二次面接</option>
+                            <option value="三次面接">三次面接</option>
+                            <option value="最終面接">最終面接</option>
+                            <option value="内定">内定</option>
+                            <option value="その他">その他</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="interview_date">面接日</label>
+                        <input type="date" id="interview_date" name="interview_date">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">選考状況 *</label>
+                        <select id="status" name="status" required>
+                            <option value="">選択してください</option>
+                            <option value="応募予定">応募予定</option>
+                            <option value="選考中">選考中</option>
+                            <option value="結果待ち">結果待ち</option>
+                            <option value="通過">通過</option>
+                            <option value="不合格">不合格</option>
+                            <option value="辞退">辞退</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="content">メモ内容 *</label>
+                    <textarea id="content" name="content" required placeholder="面接の内容、感じたこと、質問された内容などを記録しましょう"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">メモを保存</button>
+            </form>
+        </div>
+
+        <!-- メモ一覧 -->
+        <div class="memo-list">
+            <h2>保存されたメモ</h2>
+            {% if memos %}
+                {% for memo in memos %}
+                <div class="memo-item">
+                    <div class="memo-header">
+                        <div class="memo-company">{{ memo.company_name }}</div>
+                        <div class="memo-badges">
+                            <span class="badge badge-interview">{{ memo.interview_stage }}</span>
+                            <span class="badge badge-status">{{ memo.status }}</span>
+                            {% if memo.interview_date %}
+                            <span class="badge badge-date">{{ memo.interview_date }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="memo-content">{{ memo.content }}</div>
+                    <div class="memo-timestamp">{{ memo.created_at }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-memos">まだメモがありません。上のフォームから就活メモを作成しましょう！</div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

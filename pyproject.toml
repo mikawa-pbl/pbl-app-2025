@@ -10,4 +10,6 @@ dependencies = [
     "pdfminer.six", #team_kitajaki
     "pdfplumber", #team_kitajaki
     "jpholiday", #team_kitajaki
+    "pillow>=11.3.0",
+    "pytz>=2025.2",
 ]

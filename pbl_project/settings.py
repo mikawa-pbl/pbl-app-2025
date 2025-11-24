@@ -15,17 +15,18 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-wjso^p!ll^w%b$!56r)vy5c+m3dd7v74z*l=^nv8edbq9nz#a_'
+SECRET_KEY = "django-insecure-wjso^p!ll^w%b$!56r)vy5c+m3dd7v74z*l=^nv8edbq9nz#a_"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS =['localhost', '127.0.0.1'] + [f'133.15.185.{i}' for i in range(8, 255)] # 学内サーバーIPアドレスとlocalhostを許可
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [
+    f"133.15.185.{i}" for i in range(8, 255)
+]  # 学内サーバーIPアドレスとlocalhostを許可
 
 
 # Application definition
@@ -37,77 +38,189 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'team_USL',
+    'team_kitajaki',
+    'shiokara',
     'team_terrace',
+    'agileca',
     'team_scim',
+    'team_empiricism',
+    'ssk',
+    'Catan',
+    'team_tansaibou',
+    'h34vvy_u53rzz',
+    'mori_doragon_yuhi_machi',
+    'team_northcliff',
+    "team_TMR",
+    "graphics",
+    "team_UD",
+    "nanakorobiyaoki",
+    "team_akb5",
+    "team_TeXTeX",
+    "team_cake",
+    "team_shouronpou",
+    'team_giryulink',
+    'takenoko',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'pbl_project.urls'
+ROOT_URLCONF = "pbl_project.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],
-        'APP_DIRS': False,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": False,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'pbl_project.wsgi.application'
+WSGI_APPLICATION = "pbl_project.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     },
-    'team_terrace': {
+    "nanakorobiyaoki": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "nanakorobiyaoki" / "db.sqlite3",
+    },
+    "team_TMR": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "team_TMR" / "db.sqlite3",
+    },
+    "graphics": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "graphics" / "db.sqlite3",
+    },
+    "team_cake": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "team_cake" / "db.sqlite3",
+    },
+    "h34vvy_u53rzz": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "h34vvy_u53rzz" / "db.sqlite3",
+    },
+    "team_TeXTeX": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "team_TeXTeX" / "db.sqlite3",
+    },
+    "team_akb5": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "team_akb5" / "db.sqlite3",
+    },
+    "team_UD": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "team_UD" / "db.sqlite3",
+    },
+    'takenoko': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
+        'NAME': BASE_DIR / 'takenoko' / 'db.sqlite3',
+    },
+    'team_giryulink': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_giryulink' / 'db.sqlite3',
+    },
+    'team_northcliff': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_northcliff' / 'db.sqlite3',
+    },
+    'team_tansaibou': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_tansaibou' / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
+    },
+    'team_shouronpou': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_shouronpou' / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
+    },
+    'agileca': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'agileca' / 'db.sqlite3',
+    },
+    'shiokara': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'shiokara' / 'db.sqlite3',
+    },
+    'mori_doragon_yuhi_machi': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'mori_doragon_yuhi_machi' / 'db.sqlite3',
+    },
+    'team_kitajaki': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_kitajaki' / 'db.sqlite3',
+    },
+    'Catan': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'Catan' / 'db.sqlite3',
+    },
+    'team_empiricism': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_empiricism' / 'db.sqlite3',
+    },
+    'ssk': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'ssk' / 'db.sqlite3',
+    },
+    'team_USL': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_USL' / 'db.sqlite3',
     },
     'team_scim': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_scim' / 'db.sqlite3',
     },
+    'team_terrace': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
+    },
 }
 
+
 # app_labelごとにDBを振り分けるルーター
-DATABASE_ROUTERS = ['routers.TeamPerAppRouter']
+DATABASE_ROUTERS = ["routers.TeamPerAppRouter"]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -115,9 +228,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -127,9 +240,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

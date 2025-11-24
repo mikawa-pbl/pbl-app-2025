@@ -78,39 +78,53 @@ python manage.py dbshell --database=team_b
 ## 📂 ディレクトリ構造
 
 ```text
-    .
-    ├── .gitignore            # Git除外ファイル設定
-    ├── .python-version       # pyenv用Pythonバージョン指定
-    ├── manage.py
-    ├── myproject/
-    │   ├── __init__.py
-    │   ├── asgi.py           # ASGI設定（非同期対応）
-    │   ├── settings.py       # 複数DB/テンプレート設定
-    │   ├── urls.py           # プロジェクト全体URLルーティング
-    │   ├── views.py          # 全体Indexなど
-    │   └── wsgi.py           # WSGI設定（本番デプロイ用）
-    ├── routers.py            # DBルーター（app→DB割当）
-    ├── templates/            # ★テンプレートはここに集約
-    │   ├── team_a/
-    │   │   └── members.html
-    │   └── top.html          # 全体トップページ
-    ├── team_a/               # Team A専用アプリ
-    │   ├── __init__.py
-    │   ├── admin.py          # Django管理画面設定
-    │   ├── apps.py           # アプリケーション設定
-    │   ├── db.sqlite3        # Team A専用DB
-    │   ├── migrations/       # DBマイグレーションファイル
-    │   │   ├── __init__.py
-    │   │   └── 0001_initial.py
-    │   ├── models.py
-    │   ├── tests.py          # テストコード
-    │   ├── urls.py
-    │   └── views.py
-    ├── docs/
-    │   ├── NEW_TEAM_SETUP.md # 新チーム立ち上げ手順書
-    │   └── UV_INSTALLATION.md # uvインストール手順書
-    ├── pyproject.toml        # パッケージ管理（uv）
-    └── uv.lock               # ロックファイル
+.
+├── .gitignore               # Git除外ファイル設定
+├── .python-version          # 使用するPythonバージョン(pyenv)
+├── README.md
+├── .github/
+│   └── workflows/
+│       └── deploy.yaml      # self-hosted runner 用デプロイワークフロー
+├── manage.py
+├── main.py
+├── db.sqlite3               # default DB
+├── .venv/                   # 仮想環境(必要に応じて)
+├── pbl_project/             # プロジェクト設定モジュール
+│   ├── __init__.py
+│   ├── asgi.py
+│   ├── settings.py          # 複数DB / テンプレート設定
+│   ├── urls.py              # 全体URLルーティング
+│   └── wsgi.py
+├── routers.py               # DBルーター（app→DB割当）
+├── templates/               # ★テンプレートはここに集約
+│   ├── top.html             # 全体トップページ
+│   └── team_a/
+│       └── members.html
+├── docs/                    # ドキュメント類
+│   ├── HOW_TO_DATA_INSERT_BY_MIGRATION.md
+│   ├── HOW_TO_DEPLOY.md
+│   ├── HOW_TO_RESOLVE_CONFLICTS.md
+│   ├── NEW_TEAM_SETUP.md
+│   ├── SQLITE3_INSTALLATION.md
+│   └── UV_INSTALLATION.md
+├── images/                  # 画像リソース
+├── team_a/                  # 各チーム用アプリ（team_a / team_b ...）
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── db.sqlite3
+│   ├── migrations/
+│   │   ├── __init__.py
+│   │   └── 0001_initial.py
+│   ├── models.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── team_b/
+│   └── ...                  # 他チームも同様の構成
+├── pyproject.toml           # パッケージ管理(uv)
+├── uv.lock                  # ロックファイル
+└── work/                    # 補助スクリプト等
 ```
 
 ------------------------------------------------------------------------

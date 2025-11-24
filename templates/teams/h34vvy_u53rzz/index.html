@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>ドア開けてや</title>
+  </head>
+
+  <body class="bg-slate-50 px-4 py-6 font-sans text-slate-900">
+    {% include "teams/h34vvy_u53rzz/_nav.html" %}
+    <div class="mx-auto max-w-4xl space-y-6">
+      <header class="space-y-2">
+        <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">
+          インキー救済システム
+        </p>
+        <h1 class="text-3xl font-bold text-slate-900">ドア開けてや</h1>
+        <p class="text-sm text-slate-600">
+          学生証を忘れてしまい校舎の外から入れなくなった学生が、学内の仲間にドアを開けてもらうためのWebサービスです。
+        </p>
+      </header>
+
+      <section class="grid gap-4 md:grid-cols-2">
+        <a
+          href="{% url 'h34vvy_u53rzz:help' %}"
+          class="group rounded-xl bg-white p-6 shadow transition hover:-translate-y-0.5 hover:shadow-lg"
+        >
+          <div class="mb-2 flex items-center gap-2 text-sm font-medium text-blue-600">
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600"
+              >1</span
+            >
+            ドア開放のリクエスト
+          </div>
+          <h2 class="text-lg font-semibold text-slate-900">
+            助けを求める
+          </h2>
+          <p class="mt-2 text-sm text-slate-600">
+            閉め出されたドアを選び、学内にいる学生へ事情を伝えて開錠をお願いできます。
+          </p>
+        </a>
+
+        <a
+          href="{% url 'h34vvy_u53rzz:timeline' %}"
+          class="group rounded-xl bg-white p-6 shadow transition hover:-translate-y-0.5 hover:shadow-lg"
+        >
+          <div class="mb-2 flex items-center gap-2 text-sm font-medium text-green-600">
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-600"
+              >2</span
+            >
+            タイムライン
+          </div>
+          <h2 class="text-lg font-semibold text-slate-900">
+            助けに応じる
+          </h2>
+          <p class="mt-2 text-sm text-slate-600">
+            学内にいる学生がリアルタイムで助けを必要としている人を確認し、どのドアに向かえばいいか把握できます。
+          </p>
+        </a>
+      </section>
+    </div>
+  </body>
+</html>

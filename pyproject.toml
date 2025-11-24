@@ -6,6 +6,10 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "django>=4.2.25",
+    "requests", #team_kitajaki
+    "pdfminer.six", #team_kitajaki
+    "pdfplumber", #team_kitajaki
+    "jpholiday", #team_kitajaki
     "pillow>=11.3.0",
     "pytz>=2025.2",
 ]

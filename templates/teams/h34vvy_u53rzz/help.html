@@ -24,22 +24,24 @@
         <table class="w-full border-collapse text-sm">
           <thead class="bg-slate-100 text-left text-xs font-semibold uppercase text-slate-600">
             <tr>
-              <th class="border border-slate-200 px-4 py-3">ID</th>
               <th class="border border-slate-200 px-4 py-3">名称</th>
-              <th class="border border-slate-200 px-4 py-3">座標 (x, y)</th>
+              <th class="border border-slate-200 px-4 py-3">現在地からの距離</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="doorTableBody">
             {% for door in doors %}
             <tr
               class="door-row cursor-pointer border border-slate-200 text-slate-800 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 hover:bg-indigo-50"
               tabindex="0"
               data-door-id="{{ door.id }}"
               data-door-label="{{ door.label }}"
+              data-door-lng="{{ door.coordinate.0 }}"
+              data-door-lat="{{ door.coordinate.1 }}"
             >
-              <td class="px-4 py-3">{{ door.id }}</td>
               <td class="px-4 py-3">{{ door.label }}</td>
-              <td class="px-4 py-3">{{ door.coordinate.0 }}, {{ door.coordinate.1 }}</td>
+              <td class="px-4 py-3 text-right text-slate-600" data-distance-cell>
+                未取得
+              </td>
             </tr>
             {% empty %}
             <tr>
@@ -51,6 +53,9 @@
           </tbody>
         </table>
       </div>
+      <p id="geoSortStatus" class="text-xs text-slate-500">
+        位置情報の許可後、現在地に近い順にドアを並び替えます。
+      </p>
 
       <p
         id="commentHint"
@@ -63,14 +68,24 @@
         id="commentSection"
         class="{% if not selected_door %}hidden{% endif %} rounded-lg bg-white p-6 shadow"
       >
-        <h2 class="text-xl font-semibold text-slate-900">
-          選択中のドアにコメントを送信
-        </h2>
+        <div class="flex items-start justify-between gap-4">
+          <h2 class="text-xl font-semibold text-slate-900">
+            選択中のドアにコメントを送信
+          </h2>
+          <button
+            type="button"
+            id="commentClose"
+            class="text-sm font-medium text-slate-500 transition hover:text-slate-800"
+            aria-label="コメントフォームを閉じる"
+          >
+            閉じる
+          </button>
+        </div>
         <p class="mt-1 text-sm text-slate-600">
           選択中のドア:
           <strong id="selectedDoorName" class="text-slate-900">
             {% if selected_door %}
-            {{ selected_door.label }} ({{ selected_door.id }})
+            {{ selected_door.label }}
             {% else %}
             未選択
             {% endif %}
@@ -119,55 +134,366 @@
 
     <script type="module">
       import { createCampusMap } from "{% static "campus-map/dist/campus-map.js" %}"
-      createCampusMap(document.querySelector('#campus-map'));
-    </script>
 
-    <script>
-      (function () {
-        const rows = document.querySelectorAll(".door-row");
-        const section = document.getElementById("commentSection");
-        const hint = document.getElementById("commentHint");
-        const doorInput = document.getElementById("selectedDoorInput");
-        const doorName = document.getElementById("selectedDoorName");
-        const submitButton = document.getElementById("commentSubmit");
-        const commentField = document.getElementById("id_comment");
+      const doors = [
+        {% for door in doors %}
+        {
+          id: "{{ door.id|escapejs }}",
+          label: "{{ door.label|escapejs }}",
+          coordinate: [{{ door.coordinate.0 }}, {{ door.coordinate.1 }}],
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ];
 
-        rows.forEach((row) => {
-          row.addEventListener("click", () => selectDoor(row));
+      const mapContainer = document.querySelector("#campus-map");
+      const map = mapContainer ? createCampusMap(mapContainer) : null;
+      const tableBody = document.getElementById("doorTableBody");
+      const section = document.getElementById("commentSection");
+      const hint = document.getElementById("commentHint");
+      const doorInput = document.getElementById("selectedDoorInput");
+      const doorName = document.getElementById("selectedDoorName");
+      const submitButton = document.getElementById("commentSubmit");
+      const commentField = document.getElementById("id_comment");
+      const closeButton = document.getElementById("commentClose");
+      const geoStatus = document.getElementById("geoSortStatus");
+      const rowEntries = Array.from(document.querySelectorAll(".door-row")).map((row) => ({
+        id: row.dataset.doorId ?? "",
+        label: row.dataset.doorLabel ?? "",
+        lat: Number(row.dataset.doorLat),
+        lng: Number(row.dataset.doorLng),
+        row,
+        distanceCell: row.querySelector("[data-distance-cell]"),
+        distance: Number.POSITIVE_INFINITY,
+      }));
+      const rowsById = new Map(rowEntries.map((entry) => [entry.id, entry]));
+      const state = {
+        activeDoorId: doorInput?.value || null,
+        locked: Boolean(doorInput?.value),
+      };
+
+      setupMapLayers();
+      bindTableInteractions();
+      initGeolocationSorting();
+
+      if (closeButton) {
+        closeButton.addEventListener("click", resetSelection);
+      }
+
+      if (state.locked && state.activeDoorId) {
+        hideOtherRows(state.activeDoorId);
+      }
+
+      function setupMapLayers() {
+        if (!map) {
+          return;
+        }
+        const features = doors
+          .filter(
+            (door) =>
+              Array.isArray(door.coordinate) &&
+              door.coordinate.length === 2 &&
+              door.coordinate.every((value) => Number.isFinite(value)),
+          )
+          .map((door) => ({
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: door.coordinate,
+            },
+            properties: {
+              id: door.id,
+              label: door.label,
+            },
+          }));
+
+        if (features.length === 0) {
+          return;
+        }
+
+        map.on("load", () => {
+          map.addSource("doors", {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features,
+            },
+          });
+
+          map.addLayer({
+            id: "doors-pin",
+            type: "circle",
+            source: "doors",
+            paint: {
+              "circle-color": "#2563EB",
+              "circle-radius": 8,
+              "circle-stroke-color": "#FFFFFF",
+              "circle-stroke-width": 2,
+            },
+          });
+
+          map.addLayer({
+            id: "doors-label",
+            type: "symbol",
+            source: "doors",
+            layout: {
+              "text-field": ["get", "label"],
+              "text-size": 12,
+              "text-offset": [0, 1.2],
+              "text-anchor": "top",
+              "text-allow-overlap": false,
+            },
+            paint: {
+              "text-color": "#0F172A",
+            },
+          });
+
+          map.on("click", "doors-pin", handleDoorFeatureClick);
+          map.on("click", "doors-label", handleDoorFeatureClick);
+
+          fitMapToFeatures(features);
+        });
+      }
+
+      function handleDoorFeatureClick(event) {
+        const feature = event.features?.[0];
+        if (!feature) {
+          return;
+        }
+        focusOnFeature(feature);
+        const doorId = feature.properties?.id;
+        const entry = selectDoor(doorId, { force: true });
+        if (entry) {
+          entry.row.focus();
+        }
+      }
+
+      function focusOnFeature(feature) {
+        if (feature.geometry?.type !== "Point") {
+          return;
+        }
+        const [lng, lat] = feature.geometry.coordinates;
+        focusMapOnCoordinates(lng, lat);
+      }
+
+      function focusMapOnCoordinates(lng, lat) {
+        if (!map || !Number.isFinite(lng) || !Number.isFinite(lat)) {
+          return;
+        }
+        map.easeTo({
+          center: [lng, lat],
+          zoom: Math.max(map.getZoom(), 18),
+          duration: 500,
+        });
+      }
+
+      function fitMapToFeatures(features) {
+        if (!map || features.length === 0) {
+          return;
+        }
+        const bounds = features.reduce(
+          (acc, feature) => {
+            const [lng, lat] = feature.geometry.coordinates;
+            return {
+              minLng: Math.min(acc.minLng, lng),
+              minLat: Math.min(acc.minLat, lat),
+              maxLng: Math.max(acc.maxLng, lng),
+              maxLat: Math.max(acc.maxLat, lat),
+            };
+          },
+          {
+            minLng: Number.POSITIVE_INFINITY,
+            minLat: Number.POSITIVE_INFINITY,
+            maxLng: Number.NEGATIVE_INFINITY,
+            maxLat: Number.NEGATIVE_INFINITY,
+          },
+        );
+
+        if (
+          Number.isFinite(bounds.minLng) &&
+          Number.isFinite(bounds.maxLng) &&
+          Number.isFinite(bounds.minLat) &&
+          Number.isFinite(bounds.maxLat)
+        ) {
+          if (bounds.minLng === bounds.maxLng && bounds.minLat === bounds.maxLat) {
+            map.setCenter([bounds.minLng, bounds.minLat]);
+            map.setZoom(18);
+          } else {
+            map.fitBounds(
+              [
+                [bounds.minLng, bounds.minLat],
+                [bounds.maxLng, bounds.maxLat],
+              ],
+              {
+                padding: 40,
+                maxZoom: 19,
+                duration: 0,
+              },
+            );
+          }
+        }
+      }
+
+      function bindTableInteractions() {
+        rowEntries.forEach(({ row, id }) => {
+          if (!id) {
+            return;
+          }
+          row.addEventListener("click", () => selectDoor(id));
           row.addEventListener("keypress", (event) => {
             if (event.key === "Enter" || event.key === " ") {
               event.preventDefault();
-              selectDoor(row);
+              selectDoor(id);
             }
           });
         });
+      }
 
-        function selectDoor(row) {
-          const doorId = row.dataset.doorId;
-          const label = row.dataset.doorLabel;
-          if (!doorId) {
-            return;
+      function initGeolocationSorting() {
+        if (!navigator.geolocation) {
+          if (geoStatus) {
+            geoStatus.textContent = "この端末では位置情報が利用できません。";
           }
-          if (doorInput) {
-            doorInput.value = doorId;
-          }
-          if (doorName) {
-            doorName.textContent = `${label} (${doorId})`;
-          }
-          if (section) {
-            section.classList.remove("hidden");
-          }
-          if (hint) {
-            hint.classList.add("hidden");
-          }
-          if (submitButton) {
-            submitButton.disabled = false;
-          }
-          if (commentField) {
-            commentField.focus();
-          }
+          return;
         }
-      })();
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            sortRowsByDistance(position);
+            if (geoStatus) {
+              geoStatus.textContent = "現在地に近い順に並び替えました。";
+            }
+          },
+          () => {
+            if (geoStatus) {
+              geoStatus.textContent = "位置情報を利用できませんでした。元の順序で表示しています。";
+            }
+          },
+        );
+      }
+
+      function sortRowsByDistance(position) {
+        if (!tableBody || !position?.coords) {
+          return;
+        }
+        const { latitude, longitude } = position.coords;
+        const sortedEntries = rowEntries
+          .map((entry) => {
+            if (!Number.isFinite(entry.lat) || !Number.isFinite(entry.lng)) {
+              return { entry, distance: Number.POSITIVE_INFINITY };
+            }
+            return {
+              entry,
+              distance: calcDistance(latitude, longitude, entry.lat, entry.lng),
+            };
+          })
+          .sort((a, b) => a.distance - b.distance);
+
+        sortedEntries.forEach(({ entry, distance }) => {
+          entry.distance = distance;
+          updateDistanceCell(entry, distance);
+          tableBody.appendChild(entry.row);
+        });
+      }
+
+      function calcDistance(lat1, lng1, lat2, lng2) {
+        const earthRadius = 6371000;
+        const dLat = toRadians(lat2 - lat1);
+        const dLng = toRadians(lng2 - lng1);
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(toRadians(lat1)) *
+            Math.cos(toRadians(lat2)) *
+            Math.sin(dLng / 2) *
+            Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return earthRadius * c;
+      }
+
+      function toRadians(value) {
+        return (value * Math.PI) / 180;
+      }
+
+      function updateDistanceCell(entry, distance = entry.distance) {
+        if (!entry?.distanceCell) {
+          return;
+        }
+        entry.distanceCell.textContent = formatDistance(distance);
+      }
+
+      function formatDistance(distance) {
+        if (!Number.isFinite(distance)) {
+          return "未取得";
+        }
+        return `${Math.round(distance)} m`;
+      }
+
+      function selectDoor(doorId, options = {}) {
+        const { force = false } = options;
+        if (!doorId) {
+          return null;
+        }
+        const entry = rowsById.get(doorId);
+        if (!entry) {
+          return null;
+        }
+        if (!force && state.locked && state.activeDoorId && doorId !== state.activeDoorId) {
+          return null;
+        }
+        state.activeDoorId = doorId;
+        state.locked = true;
+
+        if (doorInput) {
+          doorInput.value = doorId;
+        }
+        if (doorName) {
+          const label = entry.label || entry.row.dataset.doorLabel || "名称未設定";
+          doorName.textContent = label;
+        }
+        section?.classList.remove("hidden");
+        hint?.classList.add("hidden");
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+        if (commentField) {
+          commentField.focus();
+        }
+        hideOtherRows(doorId);
+        return entry;
+      }
+
+      function resetSelection() {
+        state.activeDoorId = null;
+        state.locked = false;
+        if (doorInput) {
+          doorInput.value = "";
+        }
+        if (doorName) {
+          doorName.textContent = "未選択";
+        }
+        section?.classList.add("hidden");
+        hint?.classList.remove("hidden");
+        if (submitButton) {
+          submitButton.disabled = true;
+        }
+        if (commentField) {
+          commentField.value = "";
+          commentField.blur();
+        }
+        showAllRows();
+      }
+
+      function hideOtherRows(activeId) {
+        rowEntries.forEach(({ id, row }) => {
+          if (id === activeId) {
+            row.classList.remove("hidden");
+          } else {
+            row.classList.add("hidden");
+          }
+        });
+      }
+
+      function showAllRows() {
+        rowEntries.forEach(({ row }) => row.classList.remove("hidden"));
+      }
     </script>
   </body>
 </html>

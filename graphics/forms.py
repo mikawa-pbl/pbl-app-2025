@@ -17,7 +17,7 @@ class BookReviewForm(forms.ModelForm):
             'isbn': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': '例: 9784000000000',
-                'maxlength': '13'
+                'maxlength': '50'
             }),
             'review': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -30,3 +30,27 @@ class BookReviewForm(forms.ModelForm):
             'isbn': 'ISBN',
             'review': 'レビュー',
         }
+
+    def clean_isbn(self):
+        """
+        ISBNコードのバリデーション
+        - ハイフンを除去
+        - 正確に13桁であること
+        - 数字のみであること
+        """
+        isbn = self.cleaned_data.get('isbn')
+
+        if not isbn:
+            raise forms.ValidationError('ISBNコードを入力してください。')
+
+        # ハイフンを除去
+        isbn = isbn.replace('-', '')
+
+        if len(isbn) != 13:
+            print(f'13桁にしてください{isbn, len(isbn)}')
+            raise forms.ValidationError('ISBNコードは13桁で入力してください。')
+
+        if not isbn.isdigit():
+            raise forms.ValidationError('ISBNコードは数字のみで入力してください。')
+
+        return isbn

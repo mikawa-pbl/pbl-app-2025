@@ -228,6 +228,17 @@
             navMenu.classList.toggle('active');
             overlay.classList.toggle('active');
         }
+
+        // ISBNフィールドからハイフンをリアルタイムで除去
+        document.addEventListener('DOMContentLoaded', function() {
+            const isbnInput = document.getElementById('id_isbn');
+            if (isbnInput) {
+                isbnInput.addEventListener('input', function(e) {
+                    // ハイフンのみを除去（他の文字はそのまま残してサーバー側でエラーにする）
+                    e.target.value = e.target.value.replace(/-/g, '');
+                });
+            }
+        });
     </script>
 </body>
 </html>

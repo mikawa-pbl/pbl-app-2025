@@ -44,5 +44,505 @@
       "description": "情報・電気電子どちらの学科も対象の企業です。",
       "departments": [1, 2]
     }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 4,
+    "fields": {
+      "name": "クラウドリンク株式会社",
+      "url": "https://cloudlink.example.jp/",
+      "description": "業務系クラウドシステムの開発・運用を行う企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 5,
+    "fields": {
+      "name": "みらい電機工業株式会社",
+      "url": null,
+      "description": "産業用電源装置や制御盤の設計・製造を手がける電機メーカーです。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 6,
+    "fields": {
+      "name": "インフォテックソリューションズ株式会社",
+      "url": "https://infotech.example.jp/",
+      "description": "業務効率化に向けたWebアプリケーション開発を主力とする情報系企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 7,
+    "fields": {
+      "name": "エレクトロニクス開発機構株式会社",
+      "url": null,
+      "description": "車載機器向け電子回路や組込みソフトの共同開発を行っています。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 8,
+    "fields": {
+      "name": "テクノブリッジ株式会社",
+      "url": "https://technobridge.example.jp/",
+      "description": "情報・電気電子の両分野を対象とした受託開発・技術コンサルティング企業です。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 9,
+    "fields": {
+      "name": "スマートソリューションズ株式会社",
+      "url": null,
+      "description": "スマホアプリや業務システムなどのソフトウェア開発を行う企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 10,
+    "fields": {
+      "name": "グリーンパワーエレクトロニクス株式会社",
+      "url": null,
+      "description": "再生可能エネルギー向けパワーエレクトロニクス機器の設計・開発を行っています。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 11,
+    "fields": {
+      "name": "ユニファイドシステムズ株式会社",
+      "url": "https://unifiedsystems.example.jp/",
+      "description": "クラウド基盤から制御機器まで幅広いシステムインテグレーションを提供する企業です。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 12,
+    "fields": {
+      "name": "アプリケーションラボ株式会社",
+      "url": null,
+      "description": "Webサービスや業務支援ツールの企画・開発を行う少人数精鋭のソフトウェア企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 13,
+    "fields": {
+      "name": "高信頼エレクトロニクス株式会社",
+      "url": null,
+      "description": "インフラ向け高信頼電子機器の設計・評価を行う電気電子系企業です。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 14,
+    "fields": {
+      "name": "システムインテグレーションサービス株式会社",
+      "url": "https://sis.example.jp/",
+      "description": "情報・電気電子の両分野にまたがるシステム開発プロジェクトを多数手掛けています。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 15,
+    "fields": {
+      "name": "フューチャーウェブ株式会社",
+      "url": null,
+      "description": "ECサイトや予約システムなどWeb系ソリューションに強みを持つ企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 16,
+    "fields": {
+      "name": "計測制御テクノロジーズ株式会社",
+      "url": null,
+      "description": "計測機器・制御装置の開発を中心に事業展開する電気電子系メーカーです。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 17,
+    "fields": {
+      "name": "ハイブリッドシステム開発株式会社",
+      "url": "https://hybrid-dev.example.jp/",
+      "description": "ソフトウェアとハードウェアの両面からシステム設計を行う技術開発企業です。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 18,
+    "fields": {
+      "name": "モバイルアプリ開発合同会社",
+      "url": null,
+      "description": "スマートフォン向けアプリケーションの開発と運用支援を行っています。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 19,
+    "fields": {
+      "name": "産業電機システム株式会社",
+      "url": null,
+      "description": "工場設備向けインバータや制御盤の設計・製造を行う企業です。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 20,
+    "fields": {
+      "name": "クロスフィールドテクノロジー株式会社",
+      "url": "https://crossfield.example.jp/",
+      "description": "情報・電気電子分野を横断したシステム開発プロジェクトに携わる企業です。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 21,
+    "fields": {
+      "name": "データソリューションズ株式会社",
+      "url": null,
+      "description": "業務データの可視化や分析基盤の構築を得意とする情報系企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 22,
+    "fields": {
+      "name": "パワーシステム工業株式会社",
+      "url": null,
+      "description": "配電盤・配電システムの設計や保守を行う電力関連企業です。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 23,
+    "fields": {
+      "name": "エンジニアリングソリューション株式会社",
+      "url": "https://engsol.example.jp/",
+      "description": "ソフトウェア・ハードウェア一体のエンジニアリングサービスを提供しています。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 24,
+    "fields": {
+      "name": "フロントエンドワークス株式会社",
+      "url": null,
+      "description": "フロントエンド技術を中心にUI／UXに配慮したWebサイト開発を行う企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 25,
+    "fields": {
+      "name": "エネルギーデバイス工業株式会社",
+      "url": null,
+      "description": "電池・電源モジュールなどエネルギーデバイスの設計・評価を行っています。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 26,
+    "fields": {
+      "name": "インダストリアルIT株式会社",
+      "url": "https://industrial-it.example.jp/",
+      "description": "工場向け情報システム・監視システムの開発を行う企業です。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 27,
+    "fields": {
+      "name": "バックエンドソリューション株式会社",
+      "url": null,
+      "description": "APIサーバや業務システムなどバックエンド開発を中心に展開しています。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 28,
+    "fields": {
+      "name": "デバイスエンジニアリング株式会社",
+      "url": null,
+      "description": "センサやマイコンボードを用いた試作・検証を行う電気電子系企業です。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 29,
+    "fields": {
+      "name": "トータルシステムデザイン株式会社",
+      "url": "https://total-system.example.jp/",
+      "description": "要件定義から設計・実装・評価まで一貫したシステム開発を行っています。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 30,
+    "fields": {
+      "name": "スタートアップウェブ株式会社",
+      "url": null,
+      "description": "スタートアップ向けのプロトタイプ開発やMVP支援を行うWeb系企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 31,
+    "fields": {
+      "name": "産業制御エンジニアリング株式会社",
+      "url": null,
+      "description": "生産ライン向け制御システムの開発・保守を行う企業です。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 32,
+    "fields": {
+      "name": "クロスドメインテクノロジーズ株式会社",
+      "url": "https://crossdomain.example.jp/",
+      "description": "情報系と電気電子系をまたいだクロスドメイン開発案件に取り組む企業です。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 33,
+    "fields": {
+      "name": "クラウドインフラサービス株式会社",
+      "url": null,
+      "description": "クラウド環境の構築や運用自動化を支援するインフラ系企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 34,
+    "fields": {
+      "name": "アナログデバイス研究所株式会社",
+      "url": null,
+      "description": "アナログ回路やセンサ信号処理を専門とする電気電子系企業です。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 35,
+    "fields": {
+      "name": "スマートシステムズ株式会社",
+      "url": "https://smart-systems.example.jp/",
+      "description": "IoT機器とクラウドシステムを組み合わせたスマートソリューションを提供しています。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 36,
+    "fields": {
+      "name": "ビジネスロジック開発株式会社",
+      "url": null,
+      "description": "業務フローに合わせたビジネスロジックの設計・実装を行う情報系企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 37,
+    "fields": {
+      "name": "高周波エレクトロニクス株式会社",
+      "url": null,
+      "description": "高周波回路や無線通信モジュールの設計・評価を行う企業です。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 38,
+    "fields": {
+      "name": "システムアーキテクト株式会社",
+      "url": "https://sys-architect.example.jp/",
+      "description": "大規模システムのアーキテクチャ設計を中心に手掛ける技術集団です。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 39,
+    "fields": {
+      "name": "データベースソリューション株式会社",
+      "url": null,
+      "description": "データベース設計や性能チューニングを得意とする情報系企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 40,
+    "fields": {
+      "name": "エナジーシステム開発株式会社",
+      "url": null,
+      "description": "電力システム監視や制御システムの開発を行う電気電子系企業です。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 41,
+    "fields": {
+      "name": "インテグレーテッドソリューションズ株式会社",
+      "url": "https://integrated-sol.example.jp/",
+      "description": "企業向けにトータルなIT・エレクトロニクスソリューションを提供しています。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 42,
+    "fields": {
+      "name": "UIデザインスタジオ株式会社",
+      "url": null,
+      "description": "Web・モバイル向けユーザインタフェースの設計に特化した情報系企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 43,
+    "fields": {
+      "name": "組込みシステム開発株式会社",
+      "url": null,
+      "description": "マイコンを用いた組込みファームウェア開発を中心に事業展開しています。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 44,
+    "fields": {
+      "name": "スマートデバイスソリューション株式会社",
+      "url": "https://smart-device.example.jp/",
+      "description": "スマートデバイスとクラウドを組み合わせたサービス開発を行う企業です。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 45,
+    "fields": {
+      "name": "業務支援システムズ株式会社",
+      "url": null,
+      "description": "中小企業向け業務支援システムの開発・導入支援を行う情報系企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 46,
+    "fields": {
+      "name": "車載電子システム株式会社",
+      "url": null,
+      "description": "車載機器向け電子制御ユニットの設計・評価を行う電気電子系企業です。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 47,
+    "fields": {
+      "name": "デジタルトランスフォーメーション株式会社",
+      "url": "https://dx-solutions.example.jp/",
+      "description": "製造業のDX推進を支援するシステムインテグレーション企業です。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 48,
+    "fields": {
+      "name": "クラウドネイティブ開発株式会社",
+      "url": null,
+      "description": "クラウドネイティブアーキテクチャに基づくアプリケーション開発を行っています。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 49,
+    "fields": {
+      "name": "センシングテクノロジー株式会社",
+      "url": null,
+      "description": "各種センサを用いたセンシングシステムの開発・評価を行う電気電子系企業です。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 50,
+    "fields": {
+      "name": "マルチドメインソリューション株式会社",
+      "url": "https://multidomain.example.jp/",
+      "description": "情報・電気電子・機械をまたぐマルチドメインシステム開発に取り組む企業です。",
+      "departments": [1, 2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 51,
+    "fields": {
+      "name": "Webサービスデザイン株式会社",
+      "url": null,
+      "description": "ユーザビリティに配慮したWebサービスの企画・開発を行う情報系企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 52,
+    "fields": {
+      "name": "パワーエレクトロニクスソリューション株式会社",
+      "url": null,
+      "description": "モータ制御や電源装置向けパワエレ回路の開発を行う電気電子系企業です。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 53,
+    "fields": {
+      "name": "インテリジェントシステムズ株式会社",
+      "url": "https://intelligent-sys.example.jp/",
+      "description": "AI・センサ・クラウドを組み合わせたインテリジェントシステムの開発を行っています。",
+      "departments": [1, 2]
+    }
   }
 ]

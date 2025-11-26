@@ -1,109 +1,5 @@
-/* リセットCSS */
-body {
-  margin: 0;
-  font-family: sans-serif;
-  overflow: hidden; 
-}
-
-/* ======================================= */
-/* ★ 7. TeX画像ポップアップのスタイル */
-/* ======================================= */
-#tex-preview-popup {
-    position: absolute;
-    z-index: 200; 
-    border: 1px solid #333;
-    background-color: #fff;
-    padding: 5px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    border-radius: 4px;
-    pointer-events: none; 
-    right: 220px; 
-    top: 0; 
-}
-#tex-preview-image {
-    display: block;
-}
-
-/* ======================================= */
-/* ★ 5. サイドバー開閉関連のスタイル */
-/* ======================================= */
-
-/* チェックボックスを非表示にする */
-#sidebar-toggle {
-  display: none;
-}
-
-/* ハンバーガーアイコン (三本線) のスタイル */
-#sidebar-icon {
-  position: absolute;
-  top: 15px; 
-  right: 15px; 
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  z-index: 100; 
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  padding: 5px 0;
-}
-
-#sidebar-icon span {
-  display: block;
-  height: 3px;
-  background: white; 
-  border-radius: 3px;
-  transition: all 0.3s;
-  transform-origin: center; 
-}
-
-/* 初期状態（checked）でアイコンを×マークに設定 */
-#sidebar-icon span:nth-child(1) {
-  transform: translateY(10px) rotate(45deg); 
-}
-#sidebar-icon span:nth-child(2) {
-  opacity: 0;
-}
-#sidebar-icon span:nth-child(3) {
-  transform: translateY(-10px) rotate(-45deg);
-}
-
-/* 非チェック状態（閉じる状態）でハンバーガーアイコンに戻す */
-#sidebar-toggle:not(:checked) ~ #sidebar-icon span:nth-child(1) {
-  transform: translateY(0) rotate(0deg); 
-}
-#sidebar-toggle:not(:checked) ~ #sidebar-icon span:nth-child(2) {
-  opacity: 1;
-}
-#sidebar-toggle:not(:checked) ~ #sidebar-icon span:nth-child(3) {
-  transform: translateY(0) rotate(0deg);
-}
-
-/* ======================================= */
-/* 1. ヘッダーのスタイル */
-/* ======================================= */
-#header {
-  background-color: #333; 
-  color: white;
-  padding: 10px 20px;
-  display: flex;
-  align-items: center; 
-  justify-content: center; 
-  height: 50px; 
-}
-
-#header h1 {
-    margin: 0;
-}
-
-
-/* ======================================= */
-/* 2. メインコンテナのスタイル */
-/* ======================================= */
-#container {
-  display: flex; 
-  height: calc(100vh - 50px); 
-}
+/* styles.cssを継承 */
+@import url("{% static 'css/styles.css' %}"); 
 
 /* ======================================= */
 /* 3. サイドバーのスタイル */
@@ -120,7 +16,7 @@ body {
   transform: translateX(0); 
 }
 
-/* (中略: sidebar内部のスタイルは省略) */
+/* sidebar内部のスタイル */
 #search-form {padding: 0 0 10px 0; border-bottom: 1px solid #ddd; margin-bottom: 10px;}
 #search-box {width: calc(100% - 18px); padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;}
 #sidebar-controls {display: flex; justify-content: space-between; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #ddd;}

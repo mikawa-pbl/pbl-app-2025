@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   {% load static %}
+  <!-- styles.cssとediter_style.cssを参照 -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
   <link rel="stylesheet" type="text/css" href="{% static 'css/editer_style.css' %}" />
   <title>TeXTeX Editer</title>
   <!-- MathJaxを読み込み、クライアントサイドでTeXをレンダリングする -->
@@ -50,12 +52,13 @@
 
       <!-- Djangoテンプレートタグでコンテンツを生成 -->
       <div id="sidebar-content">
-        {% for group in sidebar_items %}
+        {% for group in content %}
         <details {% if group.is_open %}open{% endif %} data-group-title="{{ group.title }}">
           <summary>{{ group.title }}</summary>
           <ul>
             {% for item in group.items %}
-            <li><a href="#" class="tex-item" data-tex-code="{{ item.tex_code }}">{{ item.name }}</a></li>
+            <!-- リンク先をガイド詳細ページに変更。コピー機能のためにdata-tex-codeを維持 -->
+            <li><a href="{% url 'team_TeXTeX:function_template' function_slug=item.slug %}" class="tex-item" data-tex-code="{{ item.tex_code }}">{{ item.name }}</a></li>
             {% endfor %}
           </ul>
         </details>

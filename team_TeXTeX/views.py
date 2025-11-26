@@ -1,5 +1,6 @@
-from django.shortcuts import render
-from .models import Member, Main, Editer, url, main_select
+from django.shortcuts import render, get_object_or_404
+from .models import Member, Main, Editer, url, main_select, Group, Content
+
 
 def index(request):
     return render(request, 'teams/team_TeXTeX/index.html')
@@ -12,55 +13,7 @@ def main(request):
     qs = Main.objects.using('team_TeXTeX').all()
     return render(request, 'teams/team_TeXTeX/main.html', {'main': qs})
 
-def editer(request):
-    qs = Editer.objects.using('team_TeXTeX').all()
-    
-    # サイドバーのデータ構造をPythonで定義
-    sidebar_items = [
-        {
-            "title": "体裁",
-            "is_open": True,
-            "items": [
-                {"name": "タイトル", "tex_code": "\\title{タイトル}"},
-                {"name": "概要", "tex_code": "\\abstract{概要}"},
-                {"name": "目次", "tex_code": "\\tableofcontents"},
-            ]
-        },
-        {
-            "title": "図表",
-            "is_open": True,
-            "items": [
-                {"name": "図の挿入", "tex_code": "\\begin{figure}...\end{figure}"},
-            ]
-        },
-        {
-            "title": "文字",
-            "is_open": True,
-            "items": [
-                {"name": "書体", "tex_code": "\\textbf{太字}"},
-                {"name": "文字サイズ", "tex_code": "\\large{文字サイズ}"},
-                {"name": "文字色", "tex_code": "\\textcolor{red}{文字色}"},
-            ]
-        },
-        {
-            "title": "数式",
-            "is_open": True,
-            "items": [
-                {"name": "平方根", "tex_code": "\\sqrt{x}"},
-                {"name": "絶対値", "tex_code": "|x|"},
-                {"name": "極限", "tex_code": "\\lim_{n \\to \\infty} x_n"},
-            ]
-        },
-    ]
-
-    context = {
-        'editer': qs,            # 既存のクエリセットデータ
-        'sidebar_items': sidebar_items # サイドバーデータを追加
-    }
-    
-    return render(request, 'teams/team_TeXTeX/editer.html', context)
-
-def main_select(request,select):
+def main_select(request, select):
     template_name = f'teams/team_TeXTeX/main/{select}.html'
     return render(request, template_name)
 
@@ -68,4 +21,60 @@ def url(request):
     qs = url.objects.using('team_TeXTeX').all()
     return render(request, 'teams/team_TeXTeX/main/url.html', {'temp': qs})
 
+def editer(request):
+    """
+    エディタメインビュー。SQLiteからサイドバーのデータを取得し、HTMLに渡す
+    """
+    qs = Editer.objects.using('team_TeXTeX').all()
 
+    # データベースからGroupとContentを取得し、テンプレートで扱いやすい辞書リストに変換
+    content = []
+    groups = Group.objects.prefetch_related('items')
+
+    for group in groups:
+        group_data = {
+            "title": group.title,
+            "items": []
+        }
+        
+        # Contentのデータを取得
+        for item in group.items.all():
+            group_data["items"].append({
+                "name": item.name,
+                "tex_code": item.tex_code,
+                "slug": item.function_slug
+            })
+            
+        content.append(group_data)
+
+    context = {
+        'editer': qs,
+        'content': content
+    }
+    
+    return render(request, 'teams/team_TeXTeX/editer.html', context)
+
+def function_template(request, function_slug):
+    """
+    TeX関数の詳細ガイドページをレンダリングするビュー。
+    """
+    # スラッグに基づいてSidebarItemオブジェクトを取得。見つからなければ404エラー
+    item = get_object_or_404(Content, function_slug=function_slug)
+    
+    context = {
+        'item': item,
+    }
+    return render(request, 'teams/team_TeXTeX/function_template.html', context)
+
+def handle_404_not_found(request, unmatched_path=None):
+    """
+    team_TeXTeX/以下のURLで存在しないパスが指定された場合のカスタム404エラーを処理します。
+    """
+    # テンプレートに渡すコンテキスト
+    context = {
+        'message': 'お探しのページは見つかりませんでした。',
+        # キャプチャしたマッチしなかったパスを渡す
+        'unmatched_path': unmatched_path or request.path.lstrip('/team_TeXTeX/')
+    }
+    # custom_404.html をレンダリングし、ステータスコード404を返す
+    return render(request, 'teams/team_TeXTeX/custom_404.html', context, status=404)

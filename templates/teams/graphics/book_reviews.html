@@ -4,16 +4,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>参考書レビュー一覧 - Graphics</title>
+    <title>参考書レビュー一覧 - TUT Review</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        /* ヘッダー */
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        header h1 {
+            font-size: 24px;
+        }
+        /* ハンバーガーメニュー */
+        .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            z-index: 1000;
+        }
+        .hamburger span {
+            width: 30px;
+            height: 3px;
+            background-color: white;
+            transition: all 0.3s;
+        }
+        /* メニュー */
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: #444;
+            transition: right 0.3s ease;
+            z-index: 999;
+            padding-top: 60px;
+        }
+        .nav-menu.active {
+            right: 0;
+        }
+        .nav-menu ul {
+            list-style: none;
+        }
+        .nav-menu li {
+            border-bottom: 1px solid #555;
+        }
+        .nav-menu a {
+            display: block;
+            padding: 20px 30px;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            transition: background-color 0.3s;
+        }
+        .nav-menu a:hover {
+            background-color: #555;
+        }
+        /* オーバーレイ */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+        .overlay.active {
+            display: block;
+        }
+        /* コンテナ */
+        .container {
             max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
         }
-        h1 {
+        h2 {
             color: #333;
+            margin-bottom: 20px;
         }
         .add-button {
             display: inline-block;
@@ -76,7 +164,30 @@
     </style>
 </head>
 <body>
-    <h1>参考書レビュー一覧</h1>
+    <!-- ヘッダー -->
+    <header>
+        <h1>TUT Review - レビュー一覧</h1>
+        <button class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <!-- ナビゲーションメニュー -->
+    <nav class="nav-menu" id="navMenu">
+        <ul>
+            <li><a href="{% url 'graphics:index' %}" onclick="toggleMenu()">ホーム</a></li>
+            <li><a href="{% url 'graphics:book_reviews' %}" onclick="toggleMenu()">レビュー一覧</a></li>
+            <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
+        </ul>
+    </nav>
+
+    <!-- オーバーレイ -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="container">
+    <h2>参考書レビュー一覧</h2>
 
     {% if messages %}
         {% for message in messages %}
@@ -113,5 +224,15 @@
     {% endtimezone %}
 
     <a href="{% url 'graphics:index' %}" class="back-link">← トップページに戻る</a>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const overlay = document.getElementById('overlay');
+            navMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+    </script>
 </body>
 </html>

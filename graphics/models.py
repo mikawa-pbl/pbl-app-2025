@@ -18,7 +18,10 @@ class BookReview(models.Model):
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     subject = models.CharField(max_length=50, verbose_name="科目名")
-    isbn = models.CharField(max_length=13, verbose_name="ISBN")
+    isbn = models.CharField(max_length=50, verbose_name="ISBN")
+    title = models.CharField(max_length=200, verbose_name="書籍タイトル", null=True, blank=True)
+    author = models.CharField(max_length=200, verbose_name="著者", null=True, blank=True)
+    publication_date = models.CharField(max_length=20, verbose_name="発行日", null=True, blank=True)
     review = models.TextField(max_length=200, verbose_name="レビュー")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新日時")

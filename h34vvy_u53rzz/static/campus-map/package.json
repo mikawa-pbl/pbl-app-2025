@@ -1,0 +1,29 @@
+{
+  "name": "campus-map",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "files": [
+    "dist",
+    "index.d.ts"
+  ],
+  "main": "./dist/campus-map.js",
+  "types": "./index.d.ts",
+  "exports": {
+    "types": "./index.d.ts",
+    "import": "./dist/campus-map.js"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "biome": "biome check"
+  },
+  "dependencies": {
+    "maplibre-gl": "^5.13.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.6",
+    "typescript": "~5.9.2",
+    "vite": "^7.1.5"
+  }
+}

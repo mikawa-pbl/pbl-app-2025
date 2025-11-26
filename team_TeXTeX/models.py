@@ -11,6 +11,7 @@ class Main(models.Model):
     pass
 
 class main_select(models.Model):
+class Temp(models.Model):
     pass
 
 class url(models.Model):

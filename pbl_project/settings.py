@@ -150,6 +150,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'mori_doragon_yuhi_machi' / 'db.sqlite3',
     },
 }
+}
 
 # app_labelごとにDBを振り分けるルーター
 DATABASE_ROUTERS = ["routers.TeamPerAppRouter"]

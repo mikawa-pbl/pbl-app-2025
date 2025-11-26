@@ -1,0 +1,6 @@
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+.maplibregl-ctrl-group button {
+  width: 42px;
+  height: 42px;
+}

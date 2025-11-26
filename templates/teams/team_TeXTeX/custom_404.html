@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <title>404 Not Found - TeXTeX</title>
+    <!-- エディタのCSSを読み込み、共通スタイルを継承 -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/editer_style.css' %}" />
+    <style>
+        /* エラーページ専用のシンプルなスタイル */
+        body {
+            background-color: #f8f8f8;
+            color: #333;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            flex-direction: column;
+        }
+        .error-container {
+            padding: 40px;
+            border: 1px solid #ddd;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .error-container h1 {
+            font-size: 5em;
+            color: #dc3545; /* 赤色 */
+            margin-bottom: 10px;
+        }
+        .error-container p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        .error-container a {
+            text-decoration: none;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        .error-container a:hover {
+            background-color: #0056b3;
+        }
+        .path-display {
+            font-family: monospace;
+            background-color: #eee;
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1>404</h1>
+        <p>お探しのページは見つかりませんでした。</p>
+        <p>
+            指定されたパス: <span class="path-display">/team_TeXTeX/{{ unmatched_path }}</span>
+            <br>
+            は存在しません。
+        </p>
+        <!-- editerビューへのリンクを設置 -->
+        <a href="{% url 'editer' %}">エディタホームに戻る</a>
+    </div>
+</body>
+</html>

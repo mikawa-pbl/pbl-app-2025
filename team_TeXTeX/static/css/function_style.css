@@ -1,0 +1,91 @@
+/* styles.cssを継承 */
+@import url("{% static 'css/styles.css' %}"); 
+
+/* ======================================= */
+/* 7. ガイドページ専用のスタイル */
+/* ======================================= */
+
+#guide-content-main {
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: 100vh; 
+}
+
+#guide-card {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.guide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #333;
+}
+#guide-header h1 {
+    color: white;
+    margin: 0;
+}
+
+.back-link {
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid white;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+.back-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.code-box {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px 0 20px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.code-box pre {
+    margin: 0;
+    font-family: 'Consolas', monospace;
+    font-size: 1em;
+    overflow-x: auto;
+    flex-grow: 1;
+}
+
+.copy-guide-btn {
+    background-color: #28a93a;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-left: 15px;
+    flex-shrink: 0;
+    transition: background-color 0.2s;
+}
+
+.copy-guide-btn:hover {
+    background-color: #1e7e34;
+}
+
+.preview-output {
+    min-height: 50px;
+    border: 1px dashed #007bff;
+    padding: 15px;
+    margin-top: 10px;
+    text-align: center;
+    background-color: #e6f0ff;
+    border-radius: 4px;
+}

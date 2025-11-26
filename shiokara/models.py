@@ -22,8 +22,8 @@ class Department(models.Model):
 class Company(models.Model):
     """企業"""
     name = models.CharField("企業名", max_length=100)
-    url = models.URLField("企業サイトURL", blank=True)
-    description = models.TextField("紹介文", blank=True)
+    url = models.URLField("企業サイトURL", blank=True, null=True)
+    description = models.TextField("紹介文", blank=True,null=True)
 
     # 1社が複数学科向けという想定（多対多）
     departments = models.ManyToManyField(

@@ -1,0 +1,48 @@
+[
+  {
+    "model": "shiokara.department",
+    "pk": 1,
+    "fields": {
+      "name": "情報系",
+      "short_name": "cs"
+    }
+  },
+  {
+    "model": "shiokara.department",
+    "pk": 2,
+    "fields": {
+      "name": "電気電子系",
+      "short_name": "ee"
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 1,
+    "fields": {
+      "name": "サンプルソフト株式会社",
+      "url": "https://example.com/",
+      "description": "Webアプリ開発などを行うソフトウェア企業です。",
+      "departments": [1]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 2,
+    "fields": {
+      "name": "でんきでんき株式会社",
+      "url": null,
+      "description": "電気電子系の製造・開発を行う企業です。",
+      "departments": [2]
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 3,
+    "fields": {
+      "name": "オールラウンド株式会社",
+      "url": null,
+      "description": "情報・電気電子どちらの学科も対象の企業です。",
+      "departments": [1, 2]
+    }
+  }
+]

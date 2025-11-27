@@ -37,12 +37,11 @@
 <ul>
     {% for company in companies %}
     <li>
-        <button type="button"
-                data-open-experience-modal
-                data-company-id="{{ company.id }}"
-                data-company-name="{{ company.name }}">
-            {{ company.name }}
-        </button>
+        <strong>
+            <a href="{% url 'shiokara:company_detail' company.pk %}">
+                {{ company.name }}
+            </a>
+        </strong>
         {% if company.departments.all %}
         <br>
         <small>

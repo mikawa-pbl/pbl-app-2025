@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>PBL 就活サイト</title>
+  {% load static %}  {# ← 追加 #}
 </head>
 
 <body>
@@ -69,6 +70,10 @@
       });
     });
   </script>
+
+  <!-- テトリス用の外部JSを読み込む -->
+  <script src="{% static 'js/tetris.js' %}"></script>
+
 </body>
 
 </html>

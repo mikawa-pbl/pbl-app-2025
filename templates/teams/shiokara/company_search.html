@@ -3,10 +3,10 @@
 {% block content %}
 <h1>企業検索</h1>
 
-<form method="get" action="{% url 'shiokara:company_search' %}">
+<form id="company-search-form" method="get" action="{% url 'shiokara:company_search' %}">
     <label>
         キーワード：
-        <input type="text" name="q" value="{{ query }}" placeholder="企業名・キーワードなど">
+        <input id="company-search-q" type="text" name="q" value="{{ query }}" placeholder="企業名・キーワードなど">
     </label>
 
     <label>
@@ -21,20 +21,10 @@
         </select>
     </label>
 
-    <button type="submit" 
-            style="background-color: red; color: white; border: none; padding: 4px 12px; border-radius: 4px;">
-        検索</button>
+    <button type="submit">検索</button>
 </form>
 
-<hr>
-
-{% if query or dept_short %}
-<p>
-    検索結果：
-    {% if query %}「{{ query }}」{% endif %}
-    {% if selected_department %}（{{ selected_department.name }}）{% elif dept_short %}（学科指定あり）{% endif %}
-</p>
-{% endif %}
+<div id="tetris-root"></div>
 
 <ul>
     {% for company in companies %}
@@ -64,7 +54,6 @@
     <li>該当する企業は見つかりませんでした。</li>
     {% endfor %}
 </ul>
-
 
 <p><a href="{% url 'shiokara:department_list' %}">← 学科一覧に戻る</a></p>
 {% endblock %}

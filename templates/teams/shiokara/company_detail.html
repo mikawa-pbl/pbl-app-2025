@@ -1,0 +1,31 @@
+{# templates/teams/shiokara/company_detail.html #}
+{% extends "teams/shiokara/base.html" %}
+
+{% block content %}
+<h1>{{ company.name }}</h1>
+
+<p>ここは {{ company.name }} の体験談・インターン情報などを載せる予定のページです。</p>
+
+<ul>
+    {% if company.url %}
+    <li>
+        公式サイト：
+        <a href="{{ company.url }}" target="_blank" rel="noopener">
+            {{ company.url }}
+        </a>
+    </li>
+    {% endif %}
+
+    {% if company.description %}
+    <li>
+        紹介文：<br>
+        <small>{{ company.description|linebreaksbr }}</small>
+    </li>
+    {% endif %}
+</ul>
+
+<p>
+    <a href="{% url 'shiokara:company_search' %}">← 企業検索に戻る</a>
+</p>
+{% endblock %}
+

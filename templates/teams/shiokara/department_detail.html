@@ -1,4 +1,5 @@
-﻿{% extends "teams/shiokara/base.html" %}
+﻿{# templates/teams/shiokara/department_detail.html #}
+{% extends "teams/shiokara/base.html" %}
 
 {% block content %}
 <h1>{{ department.name }}向け 企業一覧</h1>
@@ -8,15 +9,16 @@
 <ul>
     {% for company in companies %}
     <li>
-        <button type="button"
-                data-open-experience-modal
-                data-company-id="{{ company.id }}"
-                data-company-name="{{ company.name }}">
-            {{ company.name }}
-        </button><br>
+        <strong>
+            <a href="{% url 'shiokara:company_detail' company.pk %}">
+                {{ company.name }}
+            </a>
+        </strong><br>
+
         {% if company.url %}
         <a href="{{ company.url }}" target="_blank" rel="noopener">企業サイト</a><br>
         {% endif %}
+
         {% if company.description %}
         <small>{{ company.description|linebreaksbr }}</small>
         {% endif %}

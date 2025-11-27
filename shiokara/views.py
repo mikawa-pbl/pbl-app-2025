@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q  # ★ 追加：あいまい検索用
 from .models import Department, Company  # ★ Company も使う
+from django.shortcuts import render, get_object_or_404
+
 
 # このアプリが使う DB のエイリアス名
 # settings.DATABASES / routers.py に合わせて変更してください
@@ -79,3 +81,10 @@ def company_search(request):
         "companies": companies,
     }
     return render(request, "teams/shiokara/company_search.html", context)
+
+def company_detail(request, pk):
+    company = get_object_or_404(Company, pk=pk)
+    context = {
+        "company": company,
+    }
+    return render(request, "teams/shiokara/company_detail.html", context)

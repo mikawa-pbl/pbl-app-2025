@@ -1,24 +1,28 @@
-﻿<!-- {# templates/shiokara/department_detail.html #}
-{% extends "teams/shiokara/base.html" %}
+﻿{% extends "teams/shiokara/base.html" %}
 
-{% block content %} -->
+{% block content %}
 <h1>{{ department.name }}向け 企業一覧</h1>
 
 <p><a href="{% url 'shiokara:department_list' %}">← 学科一覧に戻る</a></p>
 
 <ul>
-    <!-- {% for company in companies %} -->
+    {% for company in companies %}
     <li>
-        <strong>{{ company.name }}</strong><br>
-        <!-- {% if company.url %} -->
+        <button type="button"
+                data-open-experience-modal
+                data-company-id="{{ company.id }}"
+                data-company-name="{{ company.name }}">
+            {{ company.name }}
+        </button><br>
+        {% if company.url %}
         <a href="{{ company.url }}" target="_blank" rel="noopener">企業サイト</a><br>
-        <!-- {% endif %}
-        {% if company.description %} -->
+        {% endif %}
+        {% if company.description %}
         <small>{{ company.description|linebreaksbr }}</small>
-        <!-- {% endif %} -->
+        {% endif %}
     </li>
-    <!-- {% empty %} -->
+    {% empty %}
     <li>この学科向けの企業はまだ登録されていません。</li>
-    <!-- {% endfor %} -->
-    <!-- </ul>
-{% endblock %} -->
+    {% endfor %}
+</ul>
+{% endblock %}

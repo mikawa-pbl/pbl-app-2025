@@ -8,6 +8,67 @@
 
 <body>
   {% block content %}{% endblock %}
+
+  <!-- 体験談ポップアップ（共通） -->
+  <div id="experience-modal"
+       style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3);">
+    <div style="background:#fff; max-width:500px; margin:80px auto; padding:16px; border:1px solid #ccc;">
+      <h2>体験談を投稿</h2>
+      <p>企業名：<span id="experience-modal-company-name"></span></p>
+      <p>※ 今は見た目だけで、保存処理はまだ実装していません。</p>
+      <p>
+        <textarea id="experience-modal-text" rows="5" style="width:100%;"></textarea>
+      </p>
+      <p style="text-align:right;">
+        <button type="button" id="experience-modal-close">閉じる</button>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var modal = document.getElementById('experience-modal');
+      var companyNameEl = document.getElementById('experience-modal-company-name');
+      var closeBtn = document.getElementById('experience-modal-close');
+
+      function openModal(companyId, companyName) {
+        companyNameEl.textContent = companyName;
+        // companyId は今は使っていないが、将来POSTするとき用に残しておいてOK
+        modal.style.display = 'block';
+      }
+
+      function closeModal() {
+        modal.style.display = 'none';
+      }
+
+      // 閉じるボタン
+      closeBtn.addEventListener('click', closeModal);
+
+      // 背景クリックでも閉じる
+      modal.addEventListener('click', function (event) {
+        if (event.target === modal) {
+          closeModal();
+        }
+      });
+
+      // Escキーで閉じる
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && modal.style.display === 'block') {
+          closeModal();
+        }
+      });
+
+      // 各ページ内の「体験談ポップアップ起動ボタン」にイベントを付ける
+      var buttons = document.querySelectorAll('[data-open-experience-modal]');
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var companyId = btn.getAttribute('data-company-id');
+          var companyName = btn.getAttribute('data-company-name');
+          openModal(companyId, companyName);
+        });
+      });
+    });
+  </script>
 </body>
 
 </html>

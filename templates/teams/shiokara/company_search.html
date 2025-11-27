@@ -37,7 +37,12 @@
 <ul>
     {% for company in companies %}
     <li>
-        <strong>{{ company.name }}</strong>
+        <button type="button"
+                data-open-experience-modal
+                data-company-id="{{ company.id }}"
+                data-company-name="{{ company.name }}">
+            {{ company.name }}
+        </button>
         {% if company.departments.all %}
         <br>
         <small>
@@ -58,6 +63,7 @@
     <li>該当する企業は見つかりませんでした。</li>
     {% endfor %}
 </ul>
+
 
 <p><a href="{% url 'shiokara:department_list' %}">← 学科一覧に戻る</a></p>
 {% endblock %}

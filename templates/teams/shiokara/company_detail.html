@@ -25,7 +25,12 @@
 </ul>
 
 <p>
+    <a href="{% url 'shiokara:company_experience_post' company.pk %}">
+        この企業の体験談を投稿する
+    </a>
+</p>
+
+<p>
     <a href="{% url 'shiokara:company_search' %}">← 企業検索に戻る</a>
 </p>
 {% endblock %}
-

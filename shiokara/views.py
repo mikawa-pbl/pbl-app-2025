@@ -88,3 +88,12 @@ def company_detail(request, pk):
         "company": company,
     }
     return render(request, "teams/shiokara/company_detail.html", context)
+
+def company_experience_post(request, pk):
+    """会社ごとの体験談投稿ページ（まだ保存はしない、表示だけ）"""
+    company = get_object_or_404(Company, pk=pk)
+
+    context = {
+        "company": company,
+    }
+    return render(request, "teams/shiokara/company_experience_post.html", context)

@@ -1,0 +1,37 @@
+{# templates/teams/shiokara/company_experience_post.html #}
+{% extends "teams/shiokara/base.html" %}
+
+{% block content %}
+<h1>{{ company.name }} の体験談を投稿</h1>
+
+<p>
+  このページでは、{{ company.name }} に関するインターン・選考・説明会などの
+  情報を後輩向けにメモしておく想定です。<br>
+  （今はまだ保存処理は実装していません）
+</p>
+
+<hr>
+
+<form method="post" action="">
+    {# まだ保存しないので csrf_token は付けても付けなくてもどちらでもOK #}
+    {% csrf_token %}
+
+    <p>
+        <label for="id_title">タイトル（任意）:</label><br>
+        <input id="id_title" type="text" name="title" style="width: 100%;">
+    </p>
+
+    <p>
+        <label for="id_body">本文:</label><br>
+        <textarea id="id_body" name="body" rows="10" style="width: 100%;"></textarea>
+    </p>
+
+    <p>
+        <button type="submit">（今後ここで保存する予定）</button>
+    </p>
+</form>
+
+<p>
+  <a href="{% url 'shiokara:company_detail' company.pk %}">← 企業詳細ページに戻る</a>
+</p>
+{% endblock %}

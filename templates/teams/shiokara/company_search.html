@@ -1,59 +1,493 @@
 ﻿{% extends "teams/shiokara/base.html" %}
+{% load static %}
 
 {% block content %}
-<h1>企業検索</h1>
+<div class="company-search-page">
 
-<form id="company-search-form" method="get" action="{% url 'shiokara:company_search' %}">
-    <label>
-        キーワード：
-        <input id="company-search-q" type="text" name="q" value="{{ query }}" placeholder="企業名・キーワードなど">
-    </label>
+    <header class="tut-page-header page-header">
+        <div class="tut-logo-box">
+            <img src="{% static 'image/mark_daigakumei_yoko_high.jpg' %}"
+                 alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
+        </div>
+        <div class="tut-page-title">
+            <h1>企業検索</h1>
+            <p class="tut-page-lead page-lead">
+                キーワードや学科を指定して、インターン受け入れ企業や見学可能な企業を検索できます。
+            </p>
+        </div>
+    </header>
 
-    <label>
-        学科：
-        <select name="dept">
-            <option value="">（すべての学科）</option>
-            {% for dept in departments %}
-            <option value="{{ dept.short_name }}" {% if dept.short_name == dept_short %}selected{% endif %}>
-                {{ dept.name }}
-            </option>
-            {% endfor %}
-        </select>
-    </label>
+    <section class="search-section">
+        <form id="company-search-form" method="get" action="{% url 'shiokara:company_search' %}">
+            <div class="search-form-grid">
 
-    <button type="submit">🔍検索</button>
-</form>
+                <div class="search-field">
+                    <label for="company-search-q">キーワード</label>
+                    <div class="search-input-group">
+                        <span class="search-icon">🔍</span>
+                        <input id="company-search-q"
+                               type="text"
+                               name="q"
+                               value="{{ query }}"
+                               placeholder="企業名・業種・キーワードなど">
+                    </div>
+                    <p class="field-hint">
+                        例：<span class="hint-chip">Web</span>
+                        <span class="hint-chip">製造</span>
+                        <span class="hint-chip">AI</span>
+                    </p>
+                </div>
 
-<div id="tetris-root"></div>
+                <div class="search-field">
+                    <label for="search-dept-select">学科</label>
+                    <div class="select-wrapper">
+                        <select id="search-dept-select" name="dept">
+                            <option value="">（すべての学科）</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.short_name }}"
+                                    {% if dept.short_name == dept_short %}selected{% endif %}>
+                                {{ dept.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
 
-<ul>
-    {% for company in companies %}
-    <li>
-        <strong>
-            <a href="{% url 'shiokara:company_detail' company.pk %}">
-                {{ company.name }}
-            </a>
-        </strong>
-        {% if company.departments.all %}
-        <br>
-        <small>
-            対象学科：
-            {% for dept in company.departments.all %}
-            {{ dept.name }}{% if not forloop.last %} / {% endif %}
-            {% endfor %}
-        </small>
+                <div class="search-actions">
+                    <button type="submit" class="search-button">
+                        検索
+                    </button>
+                    <a href="{% url 'shiokara:company_search' %}" class="reset-link">
+                        条件をリセット
+                    </a>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <section class="result-section">
+        {% if companies %}
+            <p class="result-summary">
+                {{ companies|length }} 件の企業が見つかりました
+                {% if query %}
+                    （キーワード：<strong>{{ query }}</strong>）
+                {% endif %}
+                {% if dept_short %}
+                    {% for dept in departments %}
+                        {% if dept.short_name == dept_short %}
+                            ／ 学科：<strong>{{ dept.name }}</strong>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </p>
+
+            <div class="company-list">
+                {% for company in companies %}
+                <article class="company-card">
+                    <header class="company-card-header">
+                        <h2 class="company-name">
+                            <a href="{% url 'shiokara:company_detail' company.pk %}">
+                                {{ company.name }}
+                            </a>
+                        </h2>
+
+                        {% if company.departments.all %}
+                        <div class="company-depts">
+                            {% for dept in company.departments.all %}
+                                <span class="dept-chip">{{ dept.name }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </header>
+
+                    {% if company.description %}
+                    <p class="company-description">
+                        {{ company.description|linebreaksbr }}
+                    </p>
+                    {% endif %}
+
+                    <footer class="company-card-footer">
+                        <a class="detail-link"
+                           href="{% url 'shiokara:company_detail' company.pk %}">
+                            企業詳細を見る →
+                        </a>
+
+                        {% if company.url %}
+                        <a class="site-link"
+                           href="{{ company.url }}"
+                           target="_blank"
+                           rel="noopener">
+                            公式サイトを開く
+                        </a>
+                        {% endif %}
+                    </footer>
+                </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-result">
+                <p>該当する企業は見つかりませんでした。</p>
+                <ul>
+                    <li>キーワードを短くしてみる</li>
+                    <li>学科の条件を「すべての学科」に戻して検索する</li>
+                    <li>別のキーワードを試してみる</li>
+                </ul>
+            </div>
         {% endif %}
-        {% if company.url %}
-        <br><a href="{{ company.url }}" target="_blank" rel="noopener">企業サイト</a>
-        {% endif %}
-        {% if company.description %}
-        <br><small>{{ company.description|linebreaksbr }}</small>
-        {% endif %}
-    </li>
-    {% empty %}
-    <li>該当する企業は見つかりませんでした。</li>
-    {% endfor %}
-</ul>
+    </section>
 
-<p><a href="{% url 'shiokara:department_list' %}">← 学科一覧に戻る</a></p>
+    <p class="back-link">
+        <a href="{% url 'shiokara:department_list' %}">← 学科一覧に戻る</a>
+    </p>
+</div>
+
+{# ★ 企業検索ページ専用の簡易スタイル（TUT ロゴ色に合わせたヘッダー追加） #}
+<style>
+    :root {
+        --tut-red:   #cb0000;
+        --tut-black: #231816;
+        --tut-gray:  #4a4f4f;
+        --tut-light: #f5f7f7;
+    }
+
+    .company-search-page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 24px 16px 40px;
+        color: var(--tut-gray);
+    }
+
+    /* TUT風ヘッダー */
+    .tut-page-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 12px;
+        border-bottom: 3px solid var(--tut-red);
+        margin-bottom: 18px;
+    }
+
+    .tut-logo-box {
+        flex: 0 0 auto;
+        order: 2;
+        margin-left: auto;
+    }
+
+    .tut-page-title {
+        order: 1;
+    }
+
+    .tut-logo-img {
+        max-height: 56px;
+        width: auto;
+        display: block;
+    }
+
+    .tut-page-title h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--tut-black);
+    }
+
+    .tut-page-lead {
+        margin: 4px 0 0;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #555;
+    }
+
+
+    .page-header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .page-lead {
+        margin: 0 0 1.5rem;
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .search-section {
+        background-color: #f7f7f7;
+        border-radius: 12px;
+        padding: 16px 20px 18px;
+        margin-bottom: 18px;
+    }
+
+    .search-form-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) auto;
+        gap: 12px 16px;
+        align-items: flex-end;
+    }
+
+    .search-field label {
+        display: block;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+        font-weight: 600;
+        color: #444;
+    }
+
+    .search-input-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background-color: #fff;
+        border-radius: 999px;
+        border: 1px solid #ccc;
+        padding: 4px 10px;
+    }
+
+    .search-input-group input[type="text"] {
+        border: none;
+        outline: none;
+        flex: 1;
+        font-size: 0.95rem;
+        padding: 4px 0;
+    }
+
+    .search-icon {
+        font-size: 0.95rem;
+        opacity: 0.8;
+    }
+
+    .field-hint {
+        margin: 4px 0 0;
+        font-size: 0.78rem;
+        color: #777;
+    }
+
+    .hint-chip {
+        display: inline-block;
+        padding: 2px 8px;
+        margin-right: 4px;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid #ddd;
+        font-size: 0.75rem;
+    }
+
+    .select-wrapper select {
+        width: 100%;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid #ccc;
+        font-size: 0.9rem;
+        background-color: #fff;
+    }
+
+    .search-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .search-button {
+        border: none;
+        border-radius: 999px;
+        padding: 8px 22px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        background-color: #e53935;
+        color: #fff;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .search-button:hover {
+        background-color: #c62828;
+    }
+
+    .reset-link {
+        font-size: 0.78rem;
+        color: #666;
+        text-decoration: underline;
+    }
+
+    .tetris-section {
+        margin-bottom: 18px;
+    }
+
+    .tetris-card {
+        border-radius: 12px;
+        border: 1px dashed #ddd;
+        padding: 10px 14px 12px;
+        background: #fafafa;
+    }
+
+    .tetris-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+
+    .tetris-title {
+        font-size: 0.85rem;
+        color: #555;
+    }
+
+    .tetris-tag {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid #e0e0e0;
+        background: #fff;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    #tetris-root {
+        min-height: 120px; /* 実際のゲームがマウントされるまでのプレースホルダー */
+    }
+
+    .result-section {
+        margin-top: 8px;
+    }
+
+    .result-summary {
+        margin: 0 0 8px;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .company-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .company-card {
+        border-radius: 10px;
+        border: 1px solid #eee;
+        background-color: #fff;
+        padding: 12px 14px 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: box-shadow 0.15s ease, transform 0.15s ease;
+    }
+
+    .company-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+    }
+
+    .company-card-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 6px;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+
+    .company-name {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .company-name a {
+        text-decoration: none;
+        color: #222;
+    }
+
+    .company-name a:hover {
+        text-decoration: underline;
+    }
+
+    .company-depts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .dept-chip {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #e3f2fd;
+        border: 1px solid #bbdefb;
+        white-space: nowrap;
+    }
+
+    .company-description {
+        margin: 4px 0 8px;
+        font-size: 0.85rem;
+        color: #555;
+        line-height: 1.5;
+    }
+
+    .company-card-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-end;
+        font-size: 0.82rem;
+    }
+
+    .detail-link,
+    .site-link {
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .detail-link {
+        color: #e53935;
+    }
+
+    .detail-link:hover {
+        text-decoration: underline;
+    }
+
+    .site-link {
+        color: #1565c0;
+    }
+
+    .site-link:hover {
+        text-decoration: underline;
+    }
+
+    .no-result {
+        border-radius: 10px;
+        border: 1px solid #eee;
+        background: #fff8f8;
+        padding: 12px 14px;
+        font-size: 0.9rem;
+    }
+
+    .no-result ul {
+        margin: 6px 0 0 1.2em;
+        padding: 0;
+    }
+
+    .back-link {
+        margin-top: 20px;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 720px) {
+        .company-search-page {
+            padding: 18px 12px 32px;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .search-form-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .search-actions {
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+        }
+    }
+</style>
 {% endblock %}

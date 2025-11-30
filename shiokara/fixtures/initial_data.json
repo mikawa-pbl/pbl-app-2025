@@ -4,14 +4,14 @@
     "pk": 1,
     "fields": {
       "name": "機械工学(1系)",
-      "short_name": "ms"
+      "short_name": "me"
     }
   },
   {
     "model": "shiokara.department",
     "pk": 2,
     "fields": {
-      "name": "電気電子情報(2系)",
+      "name": "電気・電子情報工学(2系)",
       "short_name": "ee"
     }
   },
@@ -19,7 +19,7 @@
     "model": "shiokara.department",
     "pk": 3,
     "fields": {
-      "name": "情報知能(3系)",
+      "name": "情報・知能工学(3系)",
       "short_name": "cs"
     }
   },
@@ -27,7 +27,7 @@
     "model": "shiokara.department",
     "pk": 4,
     "fields": {
-      "name": "応用化学・生命(4系)",
+      "name": "応用化学・生命工学(4系)",
       "short_name": "chem"
     }
   },
@@ -35,7 +35,7 @@
     "model": "shiokara.department",
     "pk": 5,
     "fields": {
-      "name": "建築・都市システム(5系)",
+      "name": "建築・都市システム学(5系)",
       "short_name": "ace"
     }
   },

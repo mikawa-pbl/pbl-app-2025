@@ -1,31 +1,315 @@
 ﻿{# templates/shiokara/department_list.html #}
 {% extends "teams/shiokara/base.html" %}
+{% load static %}
 
 {% block content %}
-<h1>学科別 企業一覧</h1>
+<div class="tut-dept-page">
 
-<p>学科を選択すると、その学科向けの企業一覧が表示されます。</p>
-<p>
-    <a href="{% url 'shiokara:company_search' %}">企業をキーワードで検索する</a>
-</p>
+    <header class="tut-page-header">
+        <div class="tut-logo-box">
+            <img src="{% static 'image/mark_daigakumei_yoko_high.jpg' %}"
+                 alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
+        </div>
+        <div class="tut-page-title">
+            <h1>学科別 企業一覧</h1>
+            <p class="tut-page-lead">
+                学科ごとに、インターン・見学・共同研究などを受け入れている企業を一覧できます。
+            </p>
+        </div>
+    </header>
 
-<form method="get" action="{% url 'shiokara:company_search' %}">
-    <input type="text" name="q" placeholder="企業名・キーワード検索">
-    <button type="submit"
-            style="background-color: red; color: white; border: none; padding: 4px 12px; border-radius: 4px;">
-        🔍検索</button>
-</form>
+    <section class="tut-search-section">
+        <h2>企業をキーワードで探す</h2>
+        <form method="get" action="{% url 'shiokara:company_search' %}">
+            <div class="tut-search-group">
+                <span class="tut-search-icon">🔍</span>
+                <input type="text" name="q" placeholder="企業名・キーワード検索"
+                       aria-label="企業名・キーワード検索">
+                <button type="submit">検索</button>
+            </div>
+            <p class="tut-search-hint">
+                例：<span class="tut-chip">Web</span>
+                <span class="tut-chip">製造</span>
+                <span class="tut-chip">AI</span>
+            </p>
+            <p class="tut-search-link">
+                くわしい条件で探す場合は、
+                <a href="{% url 'shiokara:company_search' %}">
+                    企業検索ページ
+                </a>
+                へ
+            </p>
+        </form>
+    </section>
 
+    <section class="tut-dept-section">
+        <h2>学科から探す</h2>
 
-<ul>
-    {% for dept in departments %}
-    <li>
-        <a href="{% url 'shiokara:department_detail' dept.short_name %}">
-            {{ dept.name }}（{{ dept.companies.count }} 社）
-        </a>
-    </li>
-    {% empty %}
-    <li>学科が登録されていません。</li>
-    {% endfor %}
-</ul>
+        {% if departments %}
+        <div class="tut-dept-grid">
+            {% for dept in departments %}
+            <a class="tut-dept-card"
+               href="{% url 'shiokara:department_detail' dept.short_name %}">
+                <div class="tut-dept-accent">
+                    <span class="bar-red"></span>
+                    <span class="bar-black"></span>
+                </div>
+                <div class="tut-dept-body">
+                    <div class="tut-dept-header">
+                        <span class="tut-dept-name">{{ dept.name }}</span>
+                        <span class="tut-dept-count">{{ dept.companies.count }} 社</span>
+                    </div>
+                    <p class="tut-dept-meta">
+                        学科コード: {{ dept.short_name }}
+                    </p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="tut-empty">学科が登録されていません。</p>
+        {% endif %}
+    </section>
+
+</div>
+
+{# --- 豊橋技科大ロゴの色に合わせた簡易スタイル --- #}
+<style>
+    :root {
+        /* ロゴの色に近い色 */
+        --tut-red:   #cb0000;
+        --tut-black: #231816;
+        --tut-gray:  #4a4f4f;
+        --tut-light: #f5f7f7;
+    }
+
+    .tut-dept-page {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 16px 40px;
+        color: var(--tut-gray);
+    }
+
+    .tut-page-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 16px;
+        padding-bottom: 16px;
+        border-bottom: 3px solid var(--tut-red);
+        margin-bottom: 20px;
+    }
+
+    .tut-logo-box {
+        flex: 0 0 auto;
+        /* ヘッダー内で右側に寄せる */
+        order: 2;
+        margin-left: auto;
+    }
+
+    /* タイトルは先に来るようにしておく */
+    .tut-page-title {
+        order: 1;
+    }
+
+    .tut-logo-img {
+        max-height: 56px;
+        width: auto;
+        display: block;
+    }
+
+    .tut-page-title h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--tut-black);
+    }
+
+    .tut-page-lead {
+        margin: 4px 0 0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .tut-search-section {
+        background-color: var(--tut-light);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+    }
+
+    .tut-search-section h2 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+        color: var(--tut-black);
+    }
+
+    .tut-search-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .tut-search-icon {
+        font-size: 1rem;
+    }
+
+    .tut-search-group input[type="text"] {
+        flex: 1;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid #cfd3d3;
+        font-size: 0.95rem;
+        outline: none;
+    }
+
+    .tut-search-group input[type="text"]:focus {
+        border-color: var(--tut-red);
+        box-shadow: 0 0 0 1px rgba(203, 0, 0, 0.2);
+    }
+
+    .tut-search-group button {
+        border: none;
+        border-radius: 999px;
+        padding: 8px 18px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        background-color: var(--tut-red);
+        color: #fff;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .tut-search-group button:hover {
+        background-color: #a50000;
+    }
+
+    .tut-search-hint {
+        margin: 8px 0 0;
+        font-size: 0.8rem;
+    }
+
+    .tut-chip {
+        display: inline-block;
+        padding: 2px 8px;
+        margin-right: 4px;
+        border-radius: 999px;
+        border: 1px solid #d3d6d6;
+        background-color: #fff;
+        font-size: 0.75rem;
+    }
+
+    .tut-search-link {
+        margin: 4px 0 0;
+        font-size: 0.8rem;
+    }
+
+    .tut-dept-section h2 {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+        color: var(--tut-black);
+    }
+
+    .tut-dept-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    .tut-dept-card {
+        position: relative;
+        display: flex;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 10px;
+        border: 1px solid #e3e5e5;
+        background-color: #fff;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        transition:
+            transform 0.15s ease,
+            box-shadow 0.15s ease,
+            border-color 0.15s ease;
+    }
+
+    .tut-dept-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        border-color: var(--tut-red);
+    }
+
+    /* ロゴの T っぽいアクセント */
+    .tut-dept-accent {
+        display: flex;
+        flex-direction: column;
+        width: 10px;
+        flex-shrink: 0;
+    }
+
+    .tut-dept-accent .bar-red {
+        flex: 1;
+        background-color: var(--tut-red);
+    }
+
+    .tut-dept-accent .bar-black {
+        flex: 1;
+        background-color: var(--tut-black);
+    }
+
+    .tut-dept-body {
+        padding: 12px 14px;
+        flex: 1;
+    }
+
+    .tut-dept-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+
+    .tut-dept-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .tut-dept-count {
+        font-size: 0.8rem;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background-color: #fbe9e9;
+        color: var(--tut-red);
+    }
+
+    .tut-dept-meta {
+        margin: 0;
+        margin-top: 4px;
+        font-size: 0.8rem;
+        color: #757b7b;
+    }
+
+    .tut-empty {
+        margin-top: 8px;
+        color: #777;
+    }
+
+    @media (max-width: 640px) {
+        .tut-dept-page {
+            padding: 16px 12px 32px;
+        }
+        .tut-page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .tut-logo-img {
+            max-height: 44px;
+        }
+        .tut-page-title h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
 {% endblock %}

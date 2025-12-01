@@ -1,4 +1,4 @@
-// shiokara/static/shiokara/js/tetris.js
+// shiokara/static/js/tetris.js
 document.addEventListener("DOMContentLoaded", function () {
   var form = document.getElementById("company-search-form");
   if (!form) {
@@ -32,12 +32,16 @@ document.addEventListener("DOMContentLoaded", function () {
     var container = document.createElement("div");
 
     var title = document.createElement("h2");
-    title.textContent = "ミニテトリス（矢印キーで操作）";
+    title.textContent = "ミニテトリス（矢印キー / C: ホールド）";
     container.appendChild(title);
 
     var info = document.createElement("p");
-    info.textContent = "← → : 移動 / ↑ : 回転 / ↓ : 落下加速";
+    info.textContent = "← → : 移動 / ↑ : 回転 / ↓ : 落下加速 / C : ホールド";
     container.appendChild(info);
+
+    // ホールド情報表示
+    var holdInfo = document.createElement("p");
+    container.appendChild(holdInfo);
 
     var canvas = document.createElement("canvas");
     canvas.id = "tetris-canvas";
@@ -81,25 +85,76 @@ document.addEventListener("DOMContentLoaded", function () {
       "#0000f0", "#f0a000", "#00f000", "#f00000"
     ];
 
+    var PIECE_NAMES = ["I", "O", "T", "J", "L", "S", "Z"];
+
+    // 7-BAG ランダマイザ用
+    var bag = [];
+    function refillBag() {
+      bag = [0, 1, 2, 3, 4, 5, 6];
+      // フィッシャー–イェーツのシャッフル
+      for (var i = bag.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = bag[i];
+        bag[i] = bag[j];
+        bag[j] = tmp;
+      }
+    }
+    function nextRandomIndex() {
+      if (bag.length === 0) {
+        refillBag();
+      }
+      return bag.shift();
+    }
+
+    // 現在のピース・ホールド・ゲーム状態
     var current = null;
+    var holdIndex = null;   // ホールド中のピース（型）インデックス
+    var canHold = true;     // このターンでホールドできるか（1ターン1回制限）
     var dropInterval = 500; // ms
     var lastTime = 0;
     var dropCounter = 0;
     var animationId = null;
+    var gameOver = false;
 
-    function newPiece() {
-      var idx = Math.floor(Math.random() * SHAPES.length);
+    function updateHoldInfo() {
+      var text = "ホールド: ";
+      if (holdIndex === null) {
+        text += "なし";
+      } else {
+        text += PIECE_NAMES[holdIndex];
+      }
+      text += "（Cキーでホールド）";
+      holdInfo.textContent = text;
+    }
+
+    function createPiece(idx) {
       var shape = SHAPES[idx];
-      current = {
+      // shape はそのまま参照でOK（回転時は新しい配列を生成）
+      return {
         row: 0,
         col: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2),
         shape: shape,
-        colorIndex: idx
+        colorIndex: idx,
+        typeIndex: idx
       };
+    }
+
+    function spawnPiece(idx) {
+      current = createPiece(idx);
+      canHold = true; // 新しいピースが出たターンではまたホールドできる
+
+      // 出現時にすでに衝突していたらゲームオーバー
       if (collides(current, 0, 0)) {
+        gameOver = true;
         cancelAnimationFrame(animationId);
+        draw(); // 最後の状態を描画
         alert("ゲームオーバー");
       }
+    }
+
+    function newPiece() {
+      var idx = nextRandomIndex();
+      spawnPiece(idx);
     }
 
     function rotate(shape) {
@@ -168,13 +223,84 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
+    // ゴーストピース（着地位置）を求める
+    function getGhostPiece(piece) {
+      if (!piece) return null;
+
+      // コピーを作って下に落としていく
+      var ghost = {
+        row: piece.row,
+        col: piece.col,
+        shape: piece.shape,
+        colorIndex: piece.colorIndex,
+        typeIndex: piece.typeIndex
+      };
+
+      while (!collides(ghost, 1, 0)) {
+        ghost.row++;
+      }
+      return ghost;
+    }
+
+    // ホールド処理（Cキー）
+    function handleHold() {
+      if (!current || gameOver || !canHold) return;
+
+      var currentIndex = current.typeIndex;
+
+      if (holdIndex === null) {
+        // 初回ホールド：今のピースをホールドして、新しいピースをランダム出現
+        holdIndex = currentIndex;
+        newPiece();
+      } else {
+        // 2回目以降：ホールドピースと今のピースを交換
+        var temp = holdIndex;
+        holdIndex = currentIndex;
+        spawnPiece(temp);
+      }
+
+      canHold = false; // このターンではもうホールドできない
+      updateHoldInfo();
+    }
+
     function drawCell(x, y, color) {
       ctx.fillStyle = color;
       ctx.fillRect(x * BLOCK, y * BLOCK, BLOCK - 1, BLOCK - 1);
     }
 
+    function drawGrid() {
+      // 背景（設置可能エリアをはっきりさせるため、青みのある色に）
+      ctx.fillStyle = "#e0f7fa";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // グリッド線
+      ctx.strokeStyle = "#b0bec5";
+      ctx.lineWidth = 1;
+
+      // 縦線
+      for (var x = 0; x <= COLS; x++) {
+        ctx.beginPath();
+        ctx.moveTo(x * BLOCK + 0.5, 0);
+        ctx.lineTo(x * BLOCK + 0.5, ROWS * BLOCK);
+        ctx.stroke();
+      }
+      // 横線
+      for (var y = 0; y <= ROWS; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, y * BLOCK + 0.5);
+        ctx.lineTo(COLS * BLOCK, y * BLOCK + 0.5);
+        ctx.stroke();
+      }
+
+      // 枠線（プレイエリアの境界を強調）
+      ctx.strokeStyle = "#455a64";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0.5, 0.5, COLS * BLOCK - 1, ROWS * BLOCK - 1);
+    }
+
     function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // まずプレイエリア（グリッド）を描画
+      drawGrid();
 
       // 固定ブロック
       for (var r = 0; r < ROWS; r++) {
@@ -186,7 +312,29 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
 
-      // 落下中ブロック
+      // ゴーストピース（現在のピースが着地する位置）
+      if (current) {
+        var ghost = getGhostPiece(current);
+        if (ghost) {
+          var gShape = ghost.shape;
+
+          // ゴーストは「枠線だけ」で描画（着地位置のガイド）
+          ctx.strokeStyle = "#78909c";
+          ctx.lineWidth = 1.5;
+
+          for (var gr = 0; gr < gShape.length; gr++) {
+            for (var gc = 0; gc < gShape[gr].length; gc++) {
+              if (gShape[gr][gc]) {
+                var gx = (ghost.col + gc) * BLOCK;
+                var gy = (ghost.row + gr) * BLOCK;
+                ctx.strokeRect(gx + 0.5, gy + 0.5, BLOCK - 1, BLOCK - 1);
+              }
+            }
+          }
+        }
+      }
+
+      // 落下中ブロック本体
       if (current) {
         var shape = current.shape;
         for (var r2 = 0; r2 < shape.length; r2++) {
@@ -204,6 +352,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function update(time) {
+      if (gameOver) return;
+
       if (!lastTime) lastTime = time;
       var delta = time - lastTime;
       lastTime = time;
@@ -217,6 +367,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (!collides(current, 1, 0)) {
             current.row++;
           } else {
+            // 固定して次のピースへ
             merge(current);
             clearLines();
             newPiece();
@@ -230,7 +381,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // キー入力
     document.addEventListener("keydown", function (event) {
-      if (!current) return;
+      if (!current || gameOver) return;
+
       if (event.key === "ArrowLeft") {
         if (!collides(current, 0, -1)) {
           current.col--;
@@ -248,9 +400,15 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!collides(current, 0, 0, rotated)) {
           current.shape = rotated;
         }
+      } else if (event.key === "c" || event.key === "C") {
+        // ホールド
+        handleHold();
       }
     });
 
+    // 初期状態
+    holdIndex = null;
+    updateHoldInfo();
     newPiece();
     animationId = requestAnimationFrame(update);
   }

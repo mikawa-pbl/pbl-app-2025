@@ -32,11 +32,11 @@ document.addEventListener("DOMContentLoaded", function () {
     var container = document.createElement("div");
 
     var title = document.createElement("h2");
-    title.textContent = "ミニテトリス（矢印キー / C: ホールド）";
+    title.textContent = "ミニテトリス（矢印キー / C: ホールド）あああああああああああああああああああああああああ";
     container.appendChild(title);
 
     var info = document.createElement("p");
-    info.textContent = "← → : 移動 / ↑ : 回転 / ↓ : 落下加速 / C : ホールド";
+    info.textContent = "← → : 移動 / ↑ : 回転 / ↓ : 落下加速 / C : ホールドああああああああああああああああ";
     container.appendChild(info);
 
     // ホールド情報表示

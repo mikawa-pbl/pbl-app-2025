@@ -25,13 +25,12 @@ urlpatterns = [
     path('', views.index, name="index"),
     path('team_USL/', include('team_USL.urls')),
     path('team_kitajaki/', include('team_kitajaki.urls')),
-    path('team_terrace/', include('team_terrace.urls')),
     path('agileca/', include('agileca.urls')),
     path('team_scim/', include('team_scim.urls')),
     path('team_empiricism/', include('team_empiricism.urls')), # 追加
     path('ssk/', include('ssk.urls')),
     path('Catan/', include('Catan.urls')),
-    path('team_tansaibou/', include('team_tansaibou.urls')), 
+    path('team_tansaibou/', include('team_tansaibou.urls')),
     path('shiokara/', include('shiokara.urls')),
     path('mori_doragon_yuhi_machi/', include('mori_doragon_yuhi_machi.urls')),  # ← 追加
     path('team_northcliff/', include('team_northcliff.urls')),

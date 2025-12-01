@@ -1,0 +1,29 @@
+﻿{# templates/shiokara/department_list.html #}
+{% extends "teams/shiokara/base.html" %}
+
+{% block content %}
+<h1>学科別 企業一覧</h1>
+
+<p>学科を選択すると、その学科向けの企業一覧が表示されます。</p>
+<p>
+    <a href="{% url 'shiokara:company_search' %}">企業をキーワードで検索する</a>
+</p>
+
+<form method="get" action="{% url 'shiokara:company_search' %}">
+    <input type="text" name="q" placeholder="企業名・キーワード検索">
+    <button type="submit">検索</button>
+</form>
+
+
+<ul>
+    {% for dept in departments %}
+    <li>
+        <a href="{% url 'shiokara:department_detail' dept.short_name %}">
+            {{ dept.name }}（{{ dept.companies.count }} 社）
+        </a>
+    </li>
+    {% empty %}
+    <li>学科が登録されていません。</li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -150,10 +150,16 @@ DATABASES = {
     'team_tansaibou': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_tansaibou' / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
     },
     'team_shouronpou': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_shouronpou' / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
     },
     'agileca': {
         'ENGINE': 'django.db.backends.sqlite3',

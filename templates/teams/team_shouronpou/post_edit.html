@@ -5,11 +5,63 @@
     <title>募集内容の編集</title>
 </head>
 <body>
-    <h2>募集内容の編集</h2>
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit">更新する</button>
-    </form>
+	<h2>新規募集の投稿</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    {{ form.non_field_errors }}
+
+    <p>
+        <label for="{{ form.title.id_for_label }}">タイトル:</label>
+        {{ form.title }}
+    </p>
+    <p>
+        <label for="{{ form.content.id_for_label }}">内容:</label>
+        {{ form.content }}
+    </p>
+
+    <p>{{ form.recruitment_start_date.label_tag }} {{ form.recruitment_start_date }}</p>
+    <p>{{ form.recruitment_end_date.label_tag }} {{ form.recruitment_end_date }}</p>
+
+    <hr>
+    <p>
+        <label for="id_participants_selector">募集人数:</label>
+        {{ form.participants_selector }}
+    </p>
+    <p id="custom_input_container">
+        {{ form.custom_participants }}
+    </p>
+    <hr>
+
+    <p>{{ form.condition_nationality.label_tag }} {{ form.condition_nationality }}</p>
+    <p>{{ form.condition_gender.label_tag }} {{ form.condition_gender }}</p>
+    <p>{{ form.condition_has_disease.label_tag }} {{ form.condition_has_disease }}</p>
+
+    <button type="submit">更新する</button>
+  </form>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selector = document.getElementById('id_participants_selector');
+        const customInput = document.getElementById('id_custom_participants');
+
+        function toggleCustomInput() {
+            if (selector.value === 'custom') {
+                customInput.style.display = 'inline-block';
+                customInput.required = true; // 入力を必須にする
+            } else {
+                customInput.style.display = 'none';
+                customInput.required = false;
+            }
+        }
+
+        // 初期表示時の実行
+        toggleCustomInput();
+
+        // 変更時の実行
+        selector.addEventListener('change', toggleCustomInput);
+    });
+  </script>
 </body>
 </html>

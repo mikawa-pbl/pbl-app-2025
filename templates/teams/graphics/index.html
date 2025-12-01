@@ -2,9 +2,244 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Graphics</title></head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TUT Review - Graphics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        /* ヘッダー */
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            font-size: 28px;
+        }
+        /* ハンバーガーメニュー */
+        .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            z-index: 1000;
+        }
+        .hamburger span {
+            width: 30px;
+            height: 3px;
+            background-color: white;
+            transition: all 0.3s;
+        }
+        /* メニュー */
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: #444;
+            transition: right 0.3s ease;
+            z-index: 999;
+            padding-top: 60px;
+        }
+        .nav-menu.active {
+            right: 0;
+        }
+        .nav-menu ul {
+            list-style: none;
+        }
+        .nav-menu li {
+            border-bottom: 1px solid #555;
+        }
+        .nav-menu a {
+            display: block;
+            padding: 20px 30px;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            transition: background-color 0.3s;
+        }
+        .nav-menu a:hover {
+            background-color: #555;
+        }
+        /* オーバーレイ */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+        .overlay.active {
+            display: block;
+        }
+        /* メインコンテンツ */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .welcome-section h2 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .description {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .description h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        .description p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .feature-card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .feature-card h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        .feature-card p {
+            color: #666;
+            font-size: 14px;
+        }
+        .cta-section {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 18px;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        .cta-button:hover {
+            background-color: #45a049;
+        }
+        .secondary-button {
+            background-color: #007bff;
+        }
+        .secondary-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
 <body>
-<h1>Graphics</h1>
-<p><a href="/graphics/members/">メンバー一覧</a></p>
+    <!-- ヘッダー -->
+    <header>
+        <h1>TUT Review</h1>
+        <button class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <!-- ナビゲーションメニュー -->
+    <nav class="nav-menu" id="navMenu">
+        <ul>
+            <li><a href="{% url 'graphics:index' %}" onclick="toggleMenu()">ホーム</a></li>
+            <li><a href="{% url 'graphics:book_reviews' %}" onclick="toggleMenu()">レビュー一覧</a></li>
+            <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
+        </ul>
+    </nav>
+
+    <!-- オーバーレイ -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <!-- メインコンテンツ -->
+    <div class="container">
+        <section class="welcome-section">
+            <h2>豊橋技術科学大学 参考書レビューシステムへようこそ</h2>
+        </section>
+
+        <section class="description">
+            <h3>TUT Reviewとは？</h3>
+            <p>
+                TUT Reviewは、豊橋技術科学大学の学生のために作られた参考書レビュー共有プラットフォームです。
+                このアプリでは、科目ごとにおすすめの参考書をアプリユーザが投稿し、共有することができます。
+            </p>
+            <p>
+                履修する科目に最適な参考書を見つけたり、自分が使ってよかった参考書を他の学生に紹介したりすることで、
+                より効率的な学習をサポートします。
+            </p>
+
+            <div class="features">
+                <div class="feature-card">
+                    <h4>📚 科目別レビュー</h4>
+                    <p>各科目に特化した参考書情報を簡単に検索・閲覧できます</p>
+                </div>
+                <div class="feature-card">
+                    <h4>✍️ レビュー投稿</h4>
+                    <p>実際に使った参考書のレビューを投稿して他の学生を支援</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📖 書籍情報自動取得</h4>
+                    <p>ISBNコードから書籍情報を自動で取得します</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <a href="{% url 'graphics:book_reviews' %}" class="cta-button">レビューを見る</a>
+            <a href="{% url 'graphics:add_book_review' %}" class="cta-button secondary-button">レビューを投稿する</a>
+        </section>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const overlay = document.getElementById('overlay');
+            navMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+    </script>
 </body>
 </html>

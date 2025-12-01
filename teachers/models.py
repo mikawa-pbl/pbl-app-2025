@@ -7,3 +7,14 @@ class Member(models.Model):
 
     def __str__(self):
         return f"{self.last_name} {self.first_name}"
+
+class Papers(models.Model):
+    title = models.CharField(max_length=200)
+    authors = models.CharField(max_length=200)
+    year = models.IntegerField()
+    booktitle = models.CharField(max_length=200)
+    url = models.URLField()
+    doi = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.title} {self.authors} {self.year}"

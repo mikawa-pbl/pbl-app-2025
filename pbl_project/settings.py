@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "team_shouronpou",
     'team_giryulink',
     'takenoko',
+    'teachers',
 ]
 
 MIDDLEWARE = [
@@ -200,7 +201,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
     },
+    'teachers': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'teachers' / 'db.sqlite3',
+    },
 }
+
 
 
 # app_labelごとにDBを振り分けるルーター

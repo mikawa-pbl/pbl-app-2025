@@ -32,6 +32,21 @@
   <p>平均評価：★{{ avg_rating|floatformat:1 }} / 5</p>
 {% endif %}
 
+{# ★ 並び替えフォーム #}
+<form method="get" style="margin-bottom: 8px;">
+  <label>
+    並び替え:
+    <select name="sort" onchange="this.form.submit()">
+      <option value="new" {% if sort == "new" %}selected{% endif %}>新着順</option>
+      <option value="rating" {% if sort == "rating" %}selected{% endif %}>評価が高い順</option>
+    </select>
+  </label>
+</form>
+
+{% if avg_rating %}
+  <p>平均評価：★{{ avg_rating|floatformat:1 }} / 5</p>
+{% endif %}
+
 {% if reviews %}
   <ul>
     {% for review in reviews %}

@@ -87,15 +87,28 @@ def company_search(request):
     return render(request, "teams/shiokara/company_search.html", context)
 
 def company_detail(request, pk):
-    company = get_object_or_404(Company, pk=pk)
+    company = get_object_or_404(Company.objects.using("shiokara"), pk=pk)
 
-    reviews = company.reviews.all()  # related_name="reviews"
-    avg_rating = reviews.aggregate(avg=Avg("rating"))["avg"]
+    # ★ sort パラメータ取得（?sort=new / ?sort=rating）
+    sort = request.GET.get("sort", "new")
+
+    qs = CompanyReview.objects.using("shiokara").filter(company=company)
+
+    if sort == "rating":
+        # 評価が高い順（同じ評価なら新しい順）
+        reviews = qs.order_by("-rating", "-created_at")
+    else:
+        # デフォルト：新着順
+        sort = "new"
+        reviews = qs.order_by("-created_at")
+
+    avg_rating = qs.aggregate(avg=Avg("rating"))["avg"]
 
     context = {
         "company": company,
         "reviews": reviews,
         "avg_rating": avg_rating,
+        "sort": sort,  # ★ テンプレで選択状態に使う
     }
     return render(request, "teams/shiokara/company_detail.html", context)
 

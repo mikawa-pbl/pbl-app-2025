@@ -1,0 +1,77 @@
+[
+  {
+    "model": "shiokara.companyreview",
+    "pk": 1,
+    "fields": {
+      "company": 4,
+      "grade": "ふぇｆ",
+      "department_name": "ふぇｆ",
+      "lab_field": "ふぇふぇ",
+      "gender": "no_answer",
+      "high_school": "ふぇふぇ",
+      "comment": "ふぇｆ",
+      "rating": 2,
+      "created_at": "2025-12-03T07:03:50.731Z"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 2,
+    "fields": {
+      "company": 4,
+      "grade": "ふぇｆ",
+      "department_name": "ふぇｆ",
+      "lab_field": "ふぇｆ",
+      "gender": "female",
+      "high_school": "ふぇｆ",
+      "comment": "ふぇふぇｆ",
+      "rating": 2,
+      "created_at": "2025-12-03T07:05:35.862Z"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 4,
+    "fields": {
+      "company": 4,
+      "grade": "あｓAS",
+      "department_name": "っｓ",
+      "lab_field": "ＳSさＳQSA",
+      "gender": "male",
+      "high_school": "ＱＳｑSＱＳ",
+      "comment": "ｓQQSあＳas",
+      "rating": 5,
+      "created_at": "2025-12-03T08:00:53.913556+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 5,
+    "fields": {
+      "company": 4,
+      "grade": "DあＳＤＳＤASD",
+      "department_name": "dＷＤADasだD",
+      "lab_field": "dwあだSDaＤADSあＤ",
+      "gender": "female",
+      "high_school": "AQWEDdＤDS",
+      "comment": "ＤQWDaＳＤASDあＤ",
+      "rating": 4,
+      "created_at": "2025-12-03T08:01:24.173532+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 6,
+    "fields": {
+      "company": 4,
+      "grade": "ＤＳふぁうぇふぁＳＤふぁＳＦ",
+      "department_name": "えわＦＳＤふぁＳＤふぁＳＦ",
+      "lab_field": "えふぁＳＦだＲふぇあふぁＳ",
+      "gender": "female",
+      "high_school": "えふぁＦＳだＳＤふぁ",
+      "comment": "えふぁＳＷふぁふぁＺせふぁ",
+      "rating": 3,
+      "created_at": "2025-12-03T08:01:47.454458+00:00"
+    }
+  }
+]

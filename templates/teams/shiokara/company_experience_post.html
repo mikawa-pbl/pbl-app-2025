@@ -2,32 +2,85 @@
 {% extends "teams/shiokara/base.html" %}
 
 {% block content %}
-<h1>{{ company.name }} の体験談を投稿</h1>
+<h1>{{ company.name }} の口コミを投稿</h1>
 
 <p>
-  このページでは、{{ company.name }} に関するインターン・選考・説明会などの
-  情報を後輩向けにメモしておく想定です。<br>
-  （今はまだ保存処理は実装していません）
+  このページでは、{{ company.name }} に関する就活・インターン・アルバイトなどの
+  体験を、後輩向けの口コミとして共有することを想定しています。
 </p>
+
+{% if error %}
+  <p style="color:red;">{{ error }}</p>
+{% endif %}
 
 <hr>
 
 <form method="post" action="">
-    {# まだ保存しないので csrf_token は付けても付けなくてもどちらでもOK #}
     {% csrf_token %}
 
     <p>
-        <label for="id_title">タイトル（任意）:</label><br>
-        <input id="id_title" type="text" name="title" style="width: 100%;">
+        <label for="id_grade">学年:</label><br>
+        <input id="id_grade" type="text" name="grade" style="width: 100%;"
+               value="{{ grade }}">
+        <small>例: B3, M1 など</small>
     </p>
 
     <p>
-        <label for="id_body">本文:</label><br>
-        <textarea id="id_body" name="body" rows="10" style="width: 100%;"></textarea>
+        <label for="id_department_name">学科:</label><br>
+        <input id="id_department_name" type="text" name="department_name" style="width: 100%;"
+               value="{{ department_name }}">
     </p>
 
     <p>
-        <button type="submit">（今後ここで保存する予定）</button>
+        <label for="id_lab_field">分野（研究室）:</label><br>
+        <input id="id_lab_field" type="text" name="lab_field" style="width: 100%;"
+               value="{{ lab_field }}">
+    </p>
+
+    <p>
+        <label>性別:</label><br>
+        <label>
+          <input type="radio" name="gender" value="male"
+                 {% if gender == "male" %}checked{% endif %}> 男性
+        </label>
+        <label>
+          <input type="radio" name="gender" value="female"
+                 {% if gender == "female" %}checked{% endif %}> 女性
+        </label>
+        <label>
+          <input type="radio" name="gender" value="other"
+                 {% if gender == "other" %}checked{% endif %}> その他
+        </label>
+        <label>
+          <input type="radio" name="gender" value="no_answer"
+                 {% if gender == "no_answer" or not gender %}checked{% endif %}> 回答しない
+        </label>
+    </p>
+
+    <p>
+        <label for="id_high_school">高校名:</label><br>
+        <input id="id_high_school" type="text" name="high_school" style="width: 100%;"
+               value="{{ high_school }}">
+    </p>
+
+    <p>
+        <label for="id_comment">自由記述欄:</label><br>
+        <textarea id="id_comment" name="comment" rows="8" style="width: 100%;">{{ comment }}</textarea>
+    </p>
+
+    <p>
+        <label>評価（★1〜5）:</label><br>
+        {% for i in "12345"|make_list %}
+          <label style="margin-right: 8px;">
+            <input type="radio" name="rating" value="{{ i }}"
+                   {% if rating == i %}checked{% endif %}>
+            ★{{ i }}
+          </label>
+        {% endfor %}
+    </p>
+
+    <p>
+        <button type="submit">口コミを投稿する</button>
     </p>
 </form>
 

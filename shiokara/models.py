@@ -38,3 +38,49 @@ class Company(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+class CompanyReview(models.Model):
+    """企業ごとの口コミ"""
+
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name="reviews",
+        verbose_name="企業",
+    )
+
+    grade = models.CharField("学年", max_length=20, blank=True)
+    department_name = models.CharField("学科", max_length=50, blank=True)
+    lab_field = models.CharField("分野（研究室）", max_length=100, blank=True)
+
+    GENDER_CHOICES = [
+        ("male", "男性"),
+        ("female", "女性"),
+        ("other", "その他"),
+        ("no_answer", "回答しない"),
+    ]
+    gender = models.CharField(
+        "性別",
+        max_length=20,
+        choices=GENDER_CHOICES,
+        blank=True,
+    )
+
+    high_school = models.CharField("高校名", max_length=100, blank=True)
+    comment = models.TextField("自由記述欄", blank=True)
+
+    RATING_CHOICES = [(i, f"{i}") for i in range(1, 6)]
+    rating = models.PositiveSmallIntegerField(
+        "評価（★1〜5）",
+        choices=RATING_CHOICES,
+    )
+
+    created_at = models.DateTimeField("作成日時", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "企業口コミ"
+        verbose_name_plural = "企業口コミ"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.company.name} の口コミ（★{self.rating}）"

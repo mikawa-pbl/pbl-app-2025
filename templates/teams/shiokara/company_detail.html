@@ -24,10 +24,43 @@
     {% endif %}
 </ul>
 
+<hr>
+
+<h2>口コミ</h2>
+
+{% if avg_rating %}
+  <p>平均評価：★{{ avg_rating|floatformat:1 }} / 5</p>
+{% endif %}
+
+{% if reviews %}
+  <ul>
+    {% for review in reviews %}
+      <li style="margin-bottom:1.2em;">
+        <strong>★{{ review.rating }}</strong><br>
+        <small>
+          {{ review.grade }} /
+          {{ review.department_name }} /
+          {{ review.lab_field }}<br>
+          性別: 
+          {% if review.gender == "male" %}男性{% elif review.gender == "female" %}女性
+          {% elif review.gender == "other" %}その他{% else %}回答しない{% endif %}
+          {% if review.high_school %}
+            / 高校: {{ review.high_school }}
+          {% endif %}
+          / {{ review.created_at|date:"Y-m-d" }}
+        </small><br>
+        {{ review.comment|linebreaksbr }}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>まだ口コミは投稿されていません。</p>
+{% endif %}
+
 <p>
-    <a href="{% url 'shiokara:company_experience_post' company.pk %}">
-        この企業の体験談を投稿する
-    </a>
+  <a href="{% url 'shiokara:company_experience_post' company.pk %}">
+    この企業の口コミを投稿する
+  </a>
 </p>
 
 <p>

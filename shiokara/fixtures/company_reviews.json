@@ -73,5 +73,505 @@
       "rating": 3,
       "created_at": "2025-12-03T08:01:47.454458+00:00"
     }
-  }
+  },
+
+  { "model": "shiokara.companyreview", "pk": 7, "fields": {
+      "company": 1,
+      "grade": "B3",
+      "department_name": "情報・知能工学",
+      "lab_field": "画像処理",
+      "gender": "male",
+      "high_school": "A高校",
+      "comment": "ダミー 1-1: 開発環境や先輩社員の雰囲気を知ることができた。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:00:01Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 8, "fields": {
+      "company": 1,
+      "grade": "B4",
+      "department_name": "情報・知能工学",
+      "lab_field": "ロボット制御",
+      "gender": "female",
+      "high_school": "B高校",
+      "comment": "ダミー 1-2: 課題ベースでチーム開発を体験できた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:00:02Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 9, "fields": {
+      "company": 1,
+      "grade": "M1",
+      "department_name": "情報・知能工学",
+      "lab_field": "機械学習",
+      "gender": "no_answer",
+      "high_school": "C高校",
+      "comment": "ダミー 1-3: 研究内容に近いテーマでインターンができた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:00:03Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 10, "fields": {
+      "company": 1,
+      "grade": "M2",
+      "department_name": "情報・知能工学",
+      "lab_field": "自然言語処理",
+      "gender": "other",
+      "high_school": "D高校",
+      "comment": "ダミー 1-4: 社員との座談会でキャリアのイメージが湧いた。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:00:04Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 11, "fields": {
+      "company": 1,
+      "grade": "B3",
+      "department_name": "情報・知能工学",
+      "lab_field": "ネットワーク",
+      "gender": "male",
+      "high_school": "E高校",
+      "comment": "ダミー 1-5: 課題は難しめだがメンターのフォローが手厚かった。",
+      "rating": 3,
+      "created_at": "2025-12-04T00:00:05Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 12, "fields": {
+      "company": 1,
+      "grade": "B4",
+      "department_name": "情報・知能工学",
+      "lab_field": "ヒューマンインタフェース",
+      "gender": "female",
+      "high_school": "F高校",
+      "comment": "ダミー 1-6: 働き方や評価制度について詳しく説明してもらえた。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:00:06Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 13, "fields": {
+      "company": 1,
+      "grade": "M1",
+      "department_name": "情報・知能工学",
+      "lab_field": "深層学習",
+      "gender": "male",
+      "high_school": "G高校",
+      "comment": "ダミー 1-7: 研究成果の発表機会も用意されていてやりがいがあった。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:00:07Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 14, "fields": {
+      "company": 1,
+      "grade": "M2",
+      "department_name": "情報・知能工学",
+      "lab_field": "最適化",
+      "gender": "no_answer",
+      "high_school": "H高校",
+      "comment": "ダミー 1-8: 事業内容の説明が丁寧で会社理解が深まった。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:00:08Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 15, "fields": {
+      "company": 1,
+      "grade": "B3",
+      "department_name": "情報・知能工学",
+      "lab_field": "組み込み",
+      "gender": "female",
+      "high_school": "I高校",
+      "comment": "ダミー 1-9: 開発現場の雰囲気を間近で見られて参考になった。",
+      "rating": 3,
+      "created_at": "2025-12-04T00:00:09Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 16, "fields": {
+      "company": 1,
+      "grade": "M1",
+      "department_name": "情報・知能工学",
+      "lab_field": "ロボティクス",
+      "gender": "other",
+      "high_school": "J高校",
+      "comment": "ダミー 1-10: 先輩社員との1on1で具体的な働き方を聞けた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:00:10Z"
+  }},
+
+  { "model": "shiokara.companyreview", "pk": 17, "fields": {
+      "company": 2,
+      "grade": "B3",
+      "department_name": "電気電子情報系",
+      "lab_field": "電力システム",
+      "gender": "male",
+      "high_school": "K高校",
+      "comment": "ダミー 2-1: 現場見学を通じて設備のスケール感を体験できた。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:01:01Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 18, "fields": {
+      "company": 2,
+      "grade": "B4",
+      "department_name": "電気電子情報系",
+      "lab_field": "パワーエレクトロニクス",
+      "gender": "female",
+      "high_school": "L高校",
+      "comment": "ダミー 2-2: 若手社員の発表が多く、成長イメージが湧いた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:01:02Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 19, "fields": {
+      "company": 2,
+      "grade": "M1",
+      "department_name": "電気電子情報系",
+      "lab_field": "通信工学",
+      "gender": "no_answer",
+      "high_school": "M高校",
+      "comment": "ダミー 2-3: 事業領域の説明が丁寧で、社会インフラへの貢献を感じた。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:01:03Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 20, "fields": {
+      "company": 2,
+      "grade": "M2",
+      "department_name": "電気電子情報系",
+      "lab_field": "電子デバイス",
+      "gender": "male",
+      "high_school": "N高校",
+      "comment": "ダミー 2-4: 実験設備を使った実習があり、業務イメージを掴めた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:01:04Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 21, "fields": {
+      "company": 2,
+      "grade": "B3",
+      "department_name": "電気電子情報系",
+      "lab_field": "制御工学",
+      "gender": "female",
+      "high_school": "O高校",
+      "comment": "ダミー 2-5: チームワークを重視する文化が伝わってきた。",
+      "rating": 3,
+      "created_at": "2025-12-04T00:01:05Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 22, "fields": {
+      "company": 2,
+      "grade": "B4",
+      "department_name": "電気電子情報系",
+      "lab_field": "EMC",
+      "gender": "other",
+      "high_school": "P高校",
+      "comment": "ダミー 2-6: インターン中もフィードバック面談があり、学びが多かった。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:01:06Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 23, "fields": {
+      "company": 2,
+      "grade": "M1",
+      "department_name": "電気電子情報系",
+      "lab_field": "信号処理",
+      "gender": "male",
+      "high_school": "Q高校",
+      "comment": "ダミー 2-7: 研究テーマとの関連性も高く、有意義だった。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:01:07Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 24, "fields": {
+      "company": 2,
+      "grade": "M2",
+      "department_name": "電気電子情報系",
+      "lab_field": "高周波回路",
+      "gender": "female",
+      "high_school": "R高校",
+      "comment": "ダミー 2-8: 社宅制度や福利厚生についても詳しく教えてもらえた。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:01:08Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 25, "fields": {
+      "company": 2,
+      "grade": "B3",
+      "department_name": "電気電子情報系",
+      "lab_field": "計測工学",
+      "gender": "no_answer",
+      "high_school": "S高校",
+      "comment": "ダミー 2-9: 座談会で人柄がよく分かり、志望度が上がった。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:01:09Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 26, "fields": {
+      "company": 2,
+      "grade": "M1",
+      "department_name": "電気電子情報系",
+      "lab_field": "電磁気学",
+      "gender": "male",
+      "high_school": "T高校",
+      "comment": "ダミー 2-10: コードレビューも受けられてスキルアップにつながった。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:01:10Z"
+  }},
+
+  { "model": "shiokara.companyreview", "pk": 27, "fields": {
+      "company": 3,
+      "grade": "B3",
+      "department_name": "機械工学系",
+      "lab_field": "設計工学",
+      "gender": "male",
+      "high_school": "U高校",
+      "comment": "ダミー 3-1: CAD を用いた設計演習があり、実務に近い内容だった。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:02:01Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 28, "fields": {
+      "company": 3,
+      "grade": "B4",
+      "department_name": "機械工学系",
+      "lab_field": "材料力学",
+      "gender": "female",
+      "high_school": "V高校",
+      "comment": "ダミー 3-2: 工場見学を通じて製造プロセスを学べた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:02:02Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 29, "fields": {
+      "company": 3,
+      "grade": "M1",
+      "department_name": "機械工学系",
+      "lab_field": "流体工学",
+      "gender": "no_answer",
+      "high_school": "W高校",
+      "comment": "ダミー 3-3: 実験データの解析まで任せてもらえてやりがいがあった。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:02:03Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 30, "fields": {
+      "company": 3,
+      "grade": "M2",
+      "department_name": "機械工学系",
+      "lab_field": "熱工学",
+      "gender": "male",
+      "high_school": "X高校",
+      "comment": "ダミー 3-4: 実務担当者からのフィードバックがとても具体的だった。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:02:04Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 31, "fields": {
+      "company": 3,
+      "grade": "B3",
+      "department_name": "機械工学系",
+      "lab_field": "振動工学",
+      "gender": "female",
+      "high_school": "Y高校",
+      "comment": "ダミー 3-5: グループワークを通じて課題解決のプロセスを学べた。",
+      "rating": 3,
+      "created_at": "2025-12-04T00:02:05Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 32, "fields": {
+      "company": 3,
+      "grade": "B4",
+      "department_name": "機械工学系",
+      "lab_field": "加工学",
+      "gender": "other",
+      "high_school": "Z高校",
+      "comment": "ダミー 3-6: 若手社員との座談会がフランクで質問しやすかった。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:02:06Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 33, "fields": {
+      "company": 3,
+      "grade": "M1",
+      "department_name": "機械工学系",
+      "lab_field": "ロボティクス",
+      "gender": "male",
+      "high_school": "AA高校",
+      "comment": "ダミー 3-7: ロボット開発プロジェクトの一部を任せてもらえた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:02:07Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 34, "fields": {
+      "company": 3,
+      "grade": "M2",
+      "department_name": "機械工学系",
+      "lab_field": "CAE",
+      "gender": "female",
+      "high_school": "AB高校",
+      "comment": "ダミー 3-8: 働き方改革の取り組みも詳しく聞くことができた。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:02:08Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 35, "fields": {
+      "company": 3,
+      "grade": "B3",
+      "department_name": "機械工学系",
+      "lab_field": "ダイナミクス",
+      "gender": "no_answer",
+      "high_school": "AC高校",
+      "comment": "ダミー 3-9: フィードバックが丁寧で今後の就活の参考になった。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:02:09Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 36, "fields": {
+      "company": 3,
+      "grade": "M1",
+      "department_name": "機械工学系",
+      "lab_field": "設計最適化",
+      "gender": "male",
+      "high_school": "AD高校",
+      "comment": "ダミー 3-10: 自分のアイデアを反映した設計提案ができた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:02:10Z"
+  }},
+
+  { "model": "shiokara.companyreview", "pk": 37, "fields": {
+      "company": 4,
+      "grade": "B3",
+      "department_name": "情報・知能工学",
+      "lab_field": "ソフトウェア工学",
+      "gender": "male",
+      "high_school": "AE高校",
+      "comment": "ダミー 4-6: コードレビュー文化がしっかりしていて勉強になった。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:03:01Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 38, "fields": {
+      "company": 4,
+      "grade": "B4",
+      "department_name": "情報・知能工学",
+      "lab_field": "クラウドコンピューティング",
+      "gender": "female",
+      "high_school": "AF高校",
+      "comment": "ダミー 4-7: インフラ系の技術スタックも丁寧に教えてもらえた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:03:02Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 39, "fields": {
+      "company": 4,
+      "grade": "M1",
+      "department_name": "情報・知能工学",
+      "lab_field": "バックエンド開発",
+      "gender": "no_answer",
+      "high_school": "AG高校",
+      "comment": "ダミー 4-8: 実際のプロダクトの一部機能を実装させてもらえた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:03:03Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 40, "fields": {
+      "company": 4,
+      "grade": "M2",
+      "department_name": "情報・知能工学",
+      "lab_field": "フロントエンド",
+      "gender": "male",
+      "high_school": "AH高校",
+      "comment": "ダミー 4-9: UI/UX のレビューも受けられて視野が広がった。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:03:04Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 41, "fields": {
+      "company": 4,
+      "grade": "B3",
+      "department_name": "情報・知能工学",
+      "lab_field": "DevOps",
+      "gender": "female",
+      "high_school": "AI高校",
+      "comment": "ダミー 4-10: CI/CD の仕組みを実際に触ることができた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:03:05Z"
+  }},
+
+  { "model": "shiokara.companyreview", "pk": 42, "fields": {
+      "company": 5,
+      "grade": "B3",
+      "department_name": "応用化学系",
+      "lab_field": "有機化学",
+      "gender": "male",
+      "high_school": "AJ高校",
+      "comment": "ダミー 5-1: 研究所の実験設備を見学できてワクワクした。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:04:01Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 43, "fields": {
+      "company": 5,
+      "grade": "B4",
+      "department_name": "応用化学系",
+      "lab_field": "材料化学",
+      "gender": "female",
+      "high_school": "AK高校",
+      "comment": "ダミー 5-2: 実験データの解析も任せてもらえて勉強になった。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:04:02Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 44, "fields": {
+      "company": 5,
+      "grade": "M1",
+      "department_name": "応用化学系",
+      "lab_field": "高分子化学",
+      "gender": "no_answer",
+      "high_school": "AL高校",
+      "comment": "ダミー 5-3: 実務に近いテーマで研究開発を体験できた。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:04:03Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 45, "fields": {
+      "company": 5,
+      "grade": "M2",
+      "department_name": "応用化学系",
+      "lab_field": "無機材料",
+      "gender": "male",
+      "high_school": "AM高校",
+      "comment": "ダミー 5-4: 製品化までのプロセスを詳しく教えてもらえた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:04:04Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 46, "fields": {
+      "company": 5,
+      "grade": "B3",
+      "department_name": "応用化学系",
+      "lab_field": "分析化学",
+      "gender": "female",
+      "high_school": "AN高校",
+      "comment": "ダミー 5-5: 実験の安全教育もしっかりしていて安心だった。",
+      "rating": 3,
+      "created_at": "2025-12-04T00:04:05Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 47, "fields": {
+      "company": 5,
+      "grade": "B4",
+      "department_name": "応用化学系",
+      "lab_field": "界面化学",
+      "gender": "other",
+      "high_school": "AO高校",
+      "comment": "ダミー 5-6: 社員との距離が近く、質問しやすい雰囲気だった。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:04:06Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 48, "fields": {
+      "company": 5,
+      "grade": "M1",
+      "department_name": "応用化学系",
+      "lab_field": "電池材料",
+      "gender": "male",
+      "high_school": "AP高校",
+      "comment": "ダミー 5-7: 研究テーマと事業のつながりがよく分かった。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:04:07Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 49, "fields": {
+      "company": 5,
+      "grade": "M2",
+      "department_name": "応用化学系",
+      "lab_field": "触媒化学",
+      "gender": "female",
+      "high_school": "AQ高校",
+      "comment": "ダミー 5-8: 働き方や部署異動の仕組みも率直に教えてもらえた。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:04:08Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 50, "fields": {
+      "company": 5,
+      "grade": "B3",
+      "department_name": "応用化学系",
+      "lab_field": "化学工学",
+      "gender": "no_answer",
+      "high_school": "AR高校",
+      "comment": "ダミー 5-9: 工場見学でスケールの大きさを実感できた。",
+      "rating": 4,
+      "created_at": "2025-12-04T00:04:09Z"
+  }},
+  { "model": "shiokara.companyreview", "pk": 51, "fields": {
+      "company": 5,
+      "grade": "M1",
+      "department_name": "応用化学系",
+      "lab_field": "プロセス設計",
+      "gender": "male",
+      "high_school": "AS高校",
+      "comment": "ダミー 5-10: 自分のアイデアに対しても真剣にフィードバックをくれた。",
+      "rating": 5,
+      "created_at": "2025-12-04T00:04:10Z"
+  }}
 ]

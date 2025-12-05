@@ -1,0 +1,23 @@
+{% extends "teams/shiokara/base.html" %}
+
+{% block title %}マイページ - 就活支援サービス{% endblock %}
+
+{% block content %}
+  <h1>マイページ</h1>
+
+  {% if person %}
+    <p>{{ person.student_id }} さんの登録情報</p>
+    <ul>
+      <li>学籍番号: {{ person.student_id }}</li>
+      <li>課程: {{ person.course }}</li>
+      <li>学年: {{ person.grade }} 年</li>
+      <li>学科・専攻: {{ person.department_name }}</li>
+      <li>研究分野: {{ person.lab_field }}</li>
+      <li>登録日時: {{ person.created_at|date:"Y/m/d H:i" }}</li>
+    </ul>
+  {% else %}
+    <p>ログイン情報が見つかりませんでした。</p>
+  {% endif %}
+
+  <p>※ 将来的にここに「お気に入り企業」や「カレンダー」を追加する想定です。</p>
+{% endblock %}

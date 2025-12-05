@@ -95,3 +95,27 @@ class CompanyReview(models.Model):
 
     def __str__(self):
         return f"{self.company.name} の口コミ（★{self.rating}）"
+    
+# ★ ここから追加：ログイン用の Person モデル
+class Person(models.Model):
+    COURSE_CHOICES = [
+        ("B", "学部"),
+        ("M", "修士"),
+        ("D", "博士"),
+    ]
+
+    student_id = models.CharField("学籍番号", max_length=20, unique=True)
+    course = models.CharField("課程", max_length=1, choices=COURSE_CHOICES)
+    grade = models.PositiveSmallIntegerField("学年")  # 1,2,3,...
+    department_name = models.CharField("学科・専攻", max_length=50)  # 1系,2系... でもOK
+    lab_field = models.CharField("研究分野", max_length=100)
+    password = models.CharField("パスワード", max_length=128)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "学生"
+        verbose_name_plural = "学生"
+
+    def __str__(self):
+        return f"{self.student_id} ({self.get_course_display()}{self.grade}年)"

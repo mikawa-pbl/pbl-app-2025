@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>ログイン / 学生情報登録</title>
+</head>
+<body>
+  <h1>ログイン / 学生情報登録</h1>
+  <p>ログイン方法を選択してください。</p>
+
+  <div style="text-align:center; margin-top: 40px;">
+    <a href="{% url 'shiokara:login_form' %}">
+      <button type="button" style="margin-right: 16px;">ログイン</button>
+    </a>
+
+    <a href="{% url 'shiokara:register' %}">
+      <button type="button">新規登録</button>
+    </a>
+  </div>
+</body>
+</html>

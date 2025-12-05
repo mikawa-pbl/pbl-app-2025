@@ -74,8 +74,10 @@
       "created_at": "2025-12-03T08:01:47.454458+00:00"
     }
   },
-
-  { "model": "shiokara.companyreview", "pk": 7, "fields": {
+  {
+    "model": "shiokara.companyreview",
+    "pk": 7,
+    "fields": {
       "company": 1,
       "grade": "B3",
       "department_name": "情報・知能工学",
@@ -85,8 +87,12 @@
       "comment": "ダミー 1-1: 開発環境や先輩社員の雰囲気を知ることができた。",
       "rating": 4,
       "created_at": "2025-12-04T00:00:01Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 8, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 8,
+    "fields": {
       "company": 1,
       "grade": "B4",
       "department_name": "情報・知能工学",
@@ -96,8 +102,12 @@
       "comment": "ダミー 1-2: 課題ベースでチーム開発を体験できた。",
       "rating": 5,
       "created_at": "2025-12-04T00:00:02Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 9, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 9,
+    "fields": {
       "company": 1,
       "grade": "M1",
       "department_name": "情報・知能工学",
@@ -107,8 +117,12 @@
       "comment": "ダミー 1-3: 研究内容に近いテーマでインターンができた。",
       "rating": 5,
       "created_at": "2025-12-04T00:00:03Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 10, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 10,
+    "fields": {
       "company": 1,
       "grade": "M2",
       "department_name": "情報・知能工学",
@@ -118,8 +132,12 @@
       "comment": "ダミー 1-4: 社員との座談会でキャリアのイメージが湧いた。",
       "rating": 4,
       "created_at": "2025-12-04T00:00:04Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 11, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 11,
+    "fields": {
       "company": 1,
       "grade": "B3",
       "department_name": "情報・知能工学",
@@ -129,8 +147,12 @@
       "comment": "ダミー 1-5: 課題は難しめだがメンターのフォローが手厚かった。",
       "rating": 3,
       "created_at": "2025-12-04T00:00:05Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 12, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 12,
+    "fields": {
       "company": 1,
       "grade": "B4",
       "department_name": "情報・知能工学",
@@ -140,8 +162,12 @@
       "comment": "ダミー 1-6: 働き方や評価制度について詳しく説明してもらえた。",
       "rating": 4,
       "created_at": "2025-12-04T00:00:06Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 13, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 13,
+    "fields": {
       "company": 1,
       "grade": "M1",
       "department_name": "情報・知能工学",
@@ -151,8 +177,12 @@
       "comment": "ダミー 1-7: 研究成果の発表機会も用意されていてやりがいがあった。",
       "rating": 5,
       "created_at": "2025-12-04T00:00:07Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 14, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 14,
+    "fields": {
       "company": 1,
       "grade": "M2",
       "department_name": "情報・知能工学",
@@ -162,8 +192,12 @@
       "comment": "ダミー 1-8: 事業内容の説明が丁寧で会社理解が深まった。",
       "rating": 4,
       "created_at": "2025-12-04T00:00:08Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 15, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 15,
+    "fields": {
       "company": 1,
       "grade": "B3",
       "department_name": "情報・知能工学",
@@ -173,8 +207,12 @@
       "comment": "ダミー 1-9: 開発現場の雰囲気を間近で見られて参考になった。",
       "rating": 3,
       "created_at": "2025-12-04T00:00:09Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 16, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 16,
+    "fields": {
       "company": 1,
       "grade": "M1",
       "department_name": "情報・知能工学",
@@ -184,9 +222,12 @@
       "comment": "ダミー 1-10: 先輩社員との1on1で具体的な働き方を聞けた。",
       "rating": 5,
       "created_at": "2025-12-04T00:00:10Z"
-  }},
-
-  { "model": "shiokara.companyreview", "pk": 17, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 17,
+    "fields": {
       "company": 2,
       "grade": "B3",
       "department_name": "電気電子情報系",
@@ -196,8 +237,12 @@
       "comment": "ダミー 2-1: 現場見学を通じて設備のスケール感を体験できた。",
       "rating": 4,
       "created_at": "2025-12-04T00:01:01Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 18, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 18,
+    "fields": {
       "company": 2,
       "grade": "B4",
       "department_name": "電気電子情報系",
@@ -207,8 +252,12 @@
       "comment": "ダミー 2-2: 若手社員の発表が多く、成長イメージが湧いた。",
       "rating": 5,
       "created_at": "2025-12-04T00:01:02Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 19, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 19,
+    "fields": {
       "company": 2,
       "grade": "M1",
       "department_name": "電気電子情報系",
@@ -218,8 +267,12 @@
       "comment": "ダミー 2-3: 事業領域の説明が丁寧で、社会インフラへの貢献を感じた。",
       "rating": 4,
       "created_at": "2025-12-04T00:01:03Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 20, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 20,
+    "fields": {
       "company": 2,
       "grade": "M2",
       "department_name": "電気電子情報系",
@@ -229,8 +282,12 @@
       "comment": "ダミー 2-4: 実験設備を使った実習があり、業務イメージを掴めた。",
       "rating": 5,
       "created_at": "2025-12-04T00:01:04Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 21, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 21,
+    "fields": {
       "company": 2,
       "grade": "B3",
       "department_name": "電気電子情報系",
@@ -240,8 +297,12 @@
       "comment": "ダミー 2-5: チームワークを重視する文化が伝わってきた。",
       "rating": 3,
       "created_at": "2025-12-04T00:01:05Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 22, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 22,
+    "fields": {
       "company": 2,
       "grade": "B4",
       "department_name": "電気電子情報系",
@@ -251,8 +312,12 @@
       "comment": "ダミー 2-6: インターン中もフィードバック面談があり、学びが多かった。",
       "rating": 4,
       "created_at": "2025-12-04T00:01:06Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 23, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 23,
+    "fields": {
       "company": 2,
       "grade": "M1",
       "department_name": "電気電子情報系",
@@ -262,8 +327,12 @@
       "comment": "ダミー 2-7: 研究テーマとの関連性も高く、有意義だった。",
       "rating": 5,
       "created_at": "2025-12-04T00:01:07Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 24, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 24,
+    "fields": {
       "company": 2,
       "grade": "M2",
       "department_name": "電気電子情報系",
@@ -273,8 +342,12 @@
       "comment": "ダミー 2-8: 社宅制度や福利厚生についても詳しく教えてもらえた。",
       "rating": 4,
       "created_at": "2025-12-04T00:01:08Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 25, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 25,
+    "fields": {
       "company": 2,
       "grade": "B3",
       "department_name": "電気電子情報系",
@@ -284,8 +357,12 @@
       "comment": "ダミー 2-9: 座談会で人柄がよく分かり、志望度が上がった。",
       "rating": 4,
       "created_at": "2025-12-04T00:01:09Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 26, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 26,
+    "fields": {
       "company": 2,
       "grade": "M1",
       "department_name": "電気電子情報系",
@@ -295,9 +372,12 @@
       "comment": "ダミー 2-10: コードレビューも受けられてスキルアップにつながった。",
       "rating": 5,
       "created_at": "2025-12-04T00:01:10Z"
-  }},
-
-  { "model": "shiokara.companyreview", "pk": 27, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 27,
+    "fields": {
       "company": 3,
       "grade": "B3",
       "department_name": "機械工学系",
@@ -307,8 +387,12 @@
       "comment": "ダミー 3-1: CAD を用いた設計演習があり、実務に近い内容だった。",
       "rating": 4,
       "created_at": "2025-12-04T00:02:01Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 28, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 28,
+    "fields": {
       "company": 3,
       "grade": "B4",
       "department_name": "機械工学系",
@@ -318,8 +402,12 @@
       "comment": "ダミー 3-2: 工場見学を通じて製造プロセスを学べた。",
       "rating": 5,
       "created_at": "2025-12-04T00:02:02Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 29, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 29,
+    "fields": {
       "company": 3,
       "grade": "M1",
       "department_name": "機械工学系",
@@ -329,8 +417,12 @@
       "comment": "ダミー 3-3: 実験データの解析まで任せてもらえてやりがいがあった。",
       "rating": 4,
       "created_at": "2025-12-04T00:02:03Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 30, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 30,
+    "fields": {
       "company": 3,
       "grade": "M2",
       "department_name": "機械工学系",
@@ -340,8 +432,12 @@
       "comment": "ダミー 3-4: 実務担当者からのフィードバックがとても具体的だった。",
       "rating": 5,
       "created_at": "2025-12-04T00:02:04Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 31, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 31,
+    "fields": {
       "company": 3,
       "grade": "B3",
       "department_name": "機械工学系",
@@ -351,8 +447,12 @@
       "comment": "ダミー 3-5: グループワークを通じて課題解決のプロセスを学べた。",
       "rating": 3,
       "created_at": "2025-12-04T00:02:05Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 32, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 32,
+    "fields": {
       "company": 3,
       "grade": "B4",
       "department_name": "機械工学系",
@@ -362,8 +462,12 @@
       "comment": "ダミー 3-6: 若手社員との座談会がフランクで質問しやすかった。",
       "rating": 4,
       "created_at": "2025-12-04T00:02:06Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 33, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 33,
+    "fields": {
       "company": 3,
       "grade": "M1",
       "department_name": "機械工学系",
@@ -373,8 +477,12 @@
       "comment": "ダミー 3-7: ロボット開発プロジェクトの一部を任せてもらえた。",
       "rating": 5,
       "created_at": "2025-12-04T00:02:07Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 34, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 34,
+    "fields": {
       "company": 3,
       "grade": "M2",
       "department_name": "機械工学系",
@@ -384,8 +492,12 @@
       "comment": "ダミー 3-8: 働き方改革の取り組みも詳しく聞くことができた。",
       "rating": 4,
       "created_at": "2025-12-04T00:02:08Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 35, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 35,
+    "fields": {
       "company": 3,
       "grade": "B3",
       "department_name": "機械工学系",
@@ -395,8 +507,12 @@
       "comment": "ダミー 3-9: フィードバックが丁寧で今後の就活の参考になった。",
       "rating": 4,
       "created_at": "2025-12-04T00:02:09Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 36, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 36,
+    "fields": {
       "company": 3,
       "grade": "M1",
       "department_name": "機械工学系",
@@ -406,9 +522,12 @@
       "comment": "ダミー 3-10: 自分のアイデアを反映した設計提案ができた。",
       "rating": 5,
       "created_at": "2025-12-04T00:02:10Z"
-  }},
-
-  { "model": "shiokara.companyreview", "pk": 37, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 37,
+    "fields": {
       "company": 4,
       "grade": "B3",
       "department_name": "情報・知能工学",
@@ -418,8 +537,12 @@
       "comment": "ダミー 4-6: コードレビュー文化がしっかりしていて勉強になった。",
       "rating": 4,
       "created_at": "2025-12-04T00:03:01Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 38, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 38,
+    "fields": {
       "company": 4,
       "grade": "B4",
       "department_name": "情報・知能工学",
@@ -429,8 +552,12 @@
       "comment": "ダミー 4-7: インフラ系の技術スタックも丁寧に教えてもらえた。",
       "rating": 5,
       "created_at": "2025-12-04T00:03:02Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 39, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 39,
+    "fields": {
       "company": 4,
       "grade": "M1",
       "department_name": "情報・知能工学",
@@ -440,8 +567,12 @@
       "comment": "ダミー 4-8: 実際のプロダクトの一部機能を実装させてもらえた。",
       "rating": 5,
       "created_at": "2025-12-04T00:03:03Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 40, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 40,
+    "fields": {
       "company": 4,
       "grade": "M2",
       "department_name": "情報・知能工学",
@@ -451,8 +582,12 @@
       "comment": "ダミー 4-9: UI/UX のレビューも受けられて視野が広がった。",
       "rating": 4,
       "created_at": "2025-12-04T00:03:04Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 41, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 41,
+    "fields": {
       "company": 4,
       "grade": "B3",
       "department_name": "情報・知能工学",
@@ -462,9 +597,12 @@
       "comment": "ダミー 4-10: CI/CD の仕組みを実際に触ることができた。",
       "rating": 5,
       "created_at": "2025-12-04T00:03:05Z"
-  }},
-
-  { "model": "shiokara.companyreview", "pk": 42, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 42,
+    "fields": {
       "company": 5,
       "grade": "B3",
       "department_name": "応用化学系",
@@ -474,8 +612,12 @@
       "comment": "ダミー 5-1: 研究所の実験設備を見学できてワクワクした。",
       "rating": 4,
       "created_at": "2025-12-04T00:04:01Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 43, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 43,
+    "fields": {
       "company": 5,
       "grade": "B4",
       "department_name": "応用化学系",
@@ -485,8 +627,12 @@
       "comment": "ダミー 5-2: 実験データの解析も任せてもらえて勉強になった。",
       "rating": 5,
       "created_at": "2025-12-04T00:04:02Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 44, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 44,
+    "fields": {
       "company": 5,
       "grade": "M1",
       "department_name": "応用化学系",
@@ -496,8 +642,12 @@
       "comment": "ダミー 5-3: 実務に近いテーマで研究開発を体験できた。",
       "rating": 4,
       "created_at": "2025-12-04T00:04:03Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 45, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 45,
+    "fields": {
       "company": 5,
       "grade": "M2",
       "department_name": "応用化学系",
@@ -507,8 +657,12 @@
       "comment": "ダミー 5-4: 製品化までのプロセスを詳しく教えてもらえた。",
       "rating": 5,
       "created_at": "2025-12-04T00:04:04Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 46, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 46,
+    "fields": {
       "company": 5,
       "grade": "B3",
       "department_name": "応用化学系",
@@ -518,8 +672,12 @@
       "comment": "ダミー 5-5: 実験の安全教育もしっかりしていて安心だった。",
       "rating": 3,
       "created_at": "2025-12-04T00:04:05Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 47, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 47,
+    "fields": {
       "company": 5,
       "grade": "B4",
       "department_name": "応用化学系",
@@ -529,8 +687,12 @@
       "comment": "ダミー 5-6: 社員との距離が近く、質問しやすい雰囲気だった。",
       "rating": 4,
       "created_at": "2025-12-04T00:04:06Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 48, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 48,
+    "fields": {
       "company": 5,
       "grade": "M1",
       "department_name": "応用化学系",
@@ -540,8 +702,12 @@
       "comment": "ダミー 5-7: 研究テーマと事業のつながりがよく分かった。",
       "rating": 5,
       "created_at": "2025-12-04T00:04:07Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 49, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 49,
+    "fields": {
       "company": 5,
       "grade": "M2",
       "department_name": "応用化学系",
@@ -551,8 +717,12 @@
       "comment": "ダミー 5-8: 働き方や部署異動の仕組みも率直に教えてもらえた。",
       "rating": 4,
       "created_at": "2025-12-04T00:04:08Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 50, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 50,
+    "fields": {
       "company": 5,
       "grade": "B3",
       "department_name": "応用化学系",
@@ -562,8 +732,12 @@
       "comment": "ダミー 5-9: 工場見学でスケールの大きさを実感できた。",
       "rating": 4,
       "created_at": "2025-12-04T00:04:09Z"
-  }},
-  { "model": "shiokara.companyreview", "pk": 51, "fields": {
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 51,
+    "fields": {
       "company": 5,
       "grade": "M1",
       "department_name": "応用化学系",
@@ -573,5 +747,21 @@
       "comment": "ダミー 5-10: 自分のアイデアに対しても真剣にフィードバックをくれた。",
       "rating": 5,
       "created_at": "2025-12-04T00:04:10Z"
-  }}
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 52,
+    "fields": {
+      "company": 14,
+      "grade": "",
+      "department_name": "",
+      "lab_field": "",
+      "gender": "no_answer",
+      "high_school": "",
+      "comment": "",
+      "rating": 2,
+      "created_at": "2025-12-04T04:39:50.395958+00:00"
+    }
+  }
 ]

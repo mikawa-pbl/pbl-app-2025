@@ -1,13 +1,61 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 
 <head>
   <meta charset="UTF-8">
   <title>PBL 就活サイト</title>
-  {% load static %}  {# ← 追加 #}
 </head>
 
 <body>
+  <!-- ▼ ヘッダー（左上に人アイコン） -->
+  <header
+    style="
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:8px 16px;
+      border-bottom:1px solid #ddd;
+    "
+  >
+    <!-- 左側：人アイコン＋ログイン系 -->
+    <div style="display:flex; align-items:center; gap:8px;">
+      {% if person %}
+        <!-- ログイン中：アイコン＋名前（マイページへのリンク） -->
+        <a href="{% url 'shiokara:my_page' %}" style="display:flex; align-items:center; text-decoration:none;">
+          <img
+            src="{% static 'image/person.png' %}"
+            alt="マイページ"
+            style="width:24px; height:24px; object-fit:cover; margin-right:4px;"
+          />
+          <span>{{ person.name }} さん</span>
+        </a>
+        <a href="{% url 'shiokara:logout' %}" style="font-size:0.9rem; margin-left:8px;">
+          ログアウト
+        </a>
+      {% else %}
+        <!-- 未ログイン：アイコン＋「ログイン」リンク -->
+        <a href="{% url 'shiokara:login' %}" style="display:flex; align-items:center; text-decoration:none;">
+          <img
+            src="{% static 'image/person.png' %}"
+            alt="ログイン"
+            style="width:24px; height:24px; object-fit:cover; margin-right:4px;"
+          />
+          <span>ログイン</span>
+        </a>
+      {% endif %}
+    </div>
+
+        <!-- 右側：サービス名（クリックでホームへ） -->
+        <div>
+          <a href="{% url 'shiokara:department_list' %}" style="text-decoration:none; font-weight:bold;">
+            PBL 就活サイト
+          </a>
+        </div>
+    
+  </header>
+
+  <!-- ▼ 各ページごとの中身 -->
   {% block content %}{% endblock %}
 
   <!-- 体験談ポップアップ（共通） -->

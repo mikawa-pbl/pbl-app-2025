@@ -1,0 +1,178 @@
+{% extends "teams/shiokara/base.html" %}
+
+{% block title %}学生情報登録 - 就活支援サービス{% endblock %}
+
+{% block content %}
+<h1>学生情報登録</h1>
+
+<p>
+  学籍番号・学年・研究分野などを入力して <strong>新規登録</strong> してください。<br />
+  すでに登録済みの方は、ログインメニューからログインしてください。
+</p>
+
+{% if error %}
+  <p style="color: red;">{{ error }}</p>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+
+  <p>
+    <label for="id_student_id">学籍番号:</label><br />
+    <input type="text" name="student_id" id="id_student_id" />
+  </p>
+
+  <p>
+    課程:<br />
+    <label><input type="radio" name="course" value="B" id="id_course_b" /> 学部(B)</label><br />
+    <label><input type="radio" name="course" value="M" id="id_course_m" /> 修士(M)</label><br />
+    <label><input type="radio" name="course" value="D" id="id_course_d" /> 博士(D)</label>
+  </p>
+
+  <p>
+    <label for="id_grade">学年:</label><br />
+    <select name="grade" id="id_grade" disabled>
+      <option value="">課程を先に選択してください</option>
+    </select>
+  </p>
+
+  <p>
+    <label for="id_department_name">学科・専攻:</label><br />
+    <select name="department_name" id="id_department_name" disabled>
+      <option value="">課程を先に選択してください</option>
+      <option value="1系">機械工学(1系)</option>
+      <option value="2系">電気・電子情報工学(2系)</option>
+      <option value="3系">情報・知能工学(3系)</option>
+      <option value="4系">応用化学・生命工学(4系)</option>
+      <option value="5系">建築・都市システム学(5系)</option>
+    </select>
+  </p>
+
+  <p>
+    <label for="id_lab_field">研究分野:</label><br />
+    <select name="lab_field" id="id_lab_field" disabled>
+      <option value="">学科・専攻を先に選択してください</option>
+    </select>
+  </p>
+
+  <p>
+    <label for="id_password">パスワード:</label><br />
+    <input type="password" name="password" id="id_password" />
+  </p>
+
+  <!-- ★ 新規登録専用ボタン + 戻るボタン -->
+  <p>
+    <button type="submit">新規登録</button>
+    <button type="button" onclick="location.href='{% url 'shiokara:login' %}'">戻る</button>
+  </p>
+</form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const courseRadios = document.querySelectorAll('input[name="course"]');
+    const gradeSelect = document.getElementById('id_grade');
+    const deptSelect  = document.getElementById('id_department_name');
+    const fieldSelect = document.getElementById('id_lab_field');
+
+    const GRADE_OPTIONS = {
+      B: ['1年', '2年', '3年', '4年'],
+      M: ['1年', '2年'],
+      D: ['1年', '2年', '3年'],
+    };
+
+    const FIELD_OPTIONS = {
+      '1系': [
+        '機械・システムデザインコース',
+        '材料・生産加工コース',
+        'システム制御・ロボットコース',
+        '環境・エネルギーコース',
+      ],
+      '2系': [
+        '材料エレクトロニクスコース',
+        '機能電気システムコース',
+        '集積電子システムコース',
+        '情報通信システムコース',
+      ],
+      '3系': [
+        '計算機数理科学分野',
+        'データ情報学分野',
+        'ヒューマン・ブレイン情報学分野',
+        'メディア・ロボット情報学分野',
+      ],
+      '4系': [
+        '分子制御化学分野',
+        '分子生物化学分野',
+        '分子機能化学分野',
+      ],
+      '5系': [
+        '建築・都市デザイン学分野',
+        '都市・地域マネジメント学分野',
+      ],
+    };
+
+    function resetSelect(select, placeholderText) {
+      select.innerHTML = '';
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = placeholderText;
+      select.appendChild(opt);
+    }
+
+    function updateGradeOptions(course) {
+      resetSelect(gradeSelect, '学年を選択してください');
+      const list = GRADE_OPTIONS[course] || [];
+      list.forEach((label, idx) => {
+        const opt = document.createElement('option');
+        opt.value = (idx + 1).toString();
+        opt.textContent = label;
+        gradeSelect.appendChild(opt);
+      });
+    }
+
+    function updateFieldOptions() {
+      const dept = deptSelect.value;
+      resetSelect(fieldSelect, '研究分野を選択してください');
+      const list = FIELD_OPTIONS[dept] || [];
+      list.forEach((label) => {
+        const opt = document.createElement('option');
+        opt.value = label;
+        opt.textContent = label;
+        fieldSelect.appendChild(opt);
+      });
+      fieldSelect.disabled = list.length === 0;
+    }
+
+    function disableAllSelects() {
+      gradeSelect.disabled = true;
+      deptSelect.disabled  = true;
+      fieldSelect.disabled = true;
+      resetSelect(gradeSelect, '課程を先に選択してください');
+      resetSelect(fieldSelect, '学科・専攻を先に選択してください');
+      // deptSelect の中身はそのまま
+    }
+
+    courseRadios.forEach((radio) => {
+      radio.addEventListener('change', function () {
+        const course = this.value;
+        gradeSelect.disabled = false;
+        deptSelect.disabled  = false;
+        updateGradeOptions(course);
+        updateFieldOptions();
+      });
+    });
+
+    deptSelect.addEventListener('change', updateFieldOptions);
+
+    const checkedCourse = Array.from(courseRadios).find(r => r.checked);
+    if (!checkedCourse) {
+      disableAllSelects();
+    } else {
+      gradeSelect.disabled = false;
+      deptSelect.disabled  = false;
+      updateGradeOptions(checkedCourse.value);
+      updateFieldOptions();
+    }
+  });
+</script>
+
+{% endblock %}

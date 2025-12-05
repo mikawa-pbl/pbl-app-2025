@@ -24,6 +24,17 @@ class Company(models.Model):
     name = models.CharField("企業名", max_length=100)
     url = models.URLField("企業サイトURL", blank=True, null=True)
     description = models.TextField("紹介文", blank=True,null=True)
+    area = models.CharField("勤務地域", max_length=200, blank=True, null=True)
+    avg_annual_income = models.IntegerField("平均年収（万円）", blank=True, null=True)
+    starting_salary = models.IntegerField("初任給（万円）", blank=True, null=True)
+    annual_holidays = models.IntegerField("年間休日数", blank=True, null=True)
+    employees = models.IntegerField("従業員数", blank=True, null=True)
+    internship_acceptance = models.CharField("インターン受け入れ", max_length=20, blank=True, null=True)
+    hiring_quota = models.CharField("採用目安", max_length=100, blank=True, null=True)
+    selection_process = models.TextField("選考プロセス", blank=True, null=True)
+    accepts_jitsumu_kunren = models.BooleanField("実務訓練受け入れ", default=False)
+    tut_recommendation = models.BooleanField("技科大推薦", default=False)
+    oncampus_briefing = models.CharField("説明会対象分野", max_length=100, blank=True, null=True)
 
     # 1社が複数学科向けという想定（多対多）
     departments = models.ManyToManyField(

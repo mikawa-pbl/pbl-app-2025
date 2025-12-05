@@ -104,90 +104,83 @@ AREA_KEYWORDS = {
     "kansai": ["大阪", "京都", "兵庫", "滋賀", "奈良"],
     "nationwide": ["全国", "全国勤務", "全国拠点"],
 }
-
 def company_search(request):
     """
     企業検索ページ
-    ・q: キーワード（企業名・紹介文から部分一致）
+    ・q: キーワード
     ・dept: 学科 short_name（複数可）
-    ・lab: 研究室大別コード ("1.2" など, 複数可)
-    ・area: 勤務地カテゴリ (tokai / capital / kansai / nationwide ...)
+    ・area: 勤務地カテゴリ
     ・recommend: 1 なら推薦ありのみ
     ・briefing: 1 なら学内説明会ありのみ
-    ・logic: "and" / "or" でフィルタ条件の結合を切り替え
-    ・sort: employees / starting_salary / annual_holidays / review_count
+    ・logic: and / or
+    ・sort: employees / starting_salary / annual_holidays / review_count / name
     """
 
     query = request.GET.get("q", "").strip()
 
-    # 学科（複数選択対応: ?dept=cs&dept=ee）
-    dept_shorts = request.GET.getlist("dept")  # ← 複数取る
-    # 研究室大別（"1.2" みたいなコードを前提）
-    lab_codes = request.GET.getlist("lab")
+    # 学科は getlist で（今はセレクト1個だけど将来チェックボックスにも対応できる）
+    dept_shorts = request.GET.getlist("dept")
+    dept_short = dept_shorts[0] if dept_shorts else ""
 
     area_key = request.GET.get("area", "").strip()
-    recommend = request.GET.get("recommend", "").strip()  # "1" なら有り
-    briefing = request.GET.get("briefing", "").strip()    # "1" なら有り
+    recommend = request.GET.get("recommend", "").strip()
+    briefing = request.GET.get("briefing", "").strip()
+    filter_logic = request.GET.get("logic", "and")
+    sort = request.GET.get("sort", "name")
+    lab_code = request.GET.get("lab", "").strip()
 
-    filter_logic = request.GET.get("logic", "and")  # and / or
-    sort = request.GET.get("sort", "name")          # デフォルトは名前順
-
-    # ベースとなるクエリセット
+    # ベースとなるクエリセット ＋ レビュー件数を annotate
     companies = (
         Company.objects.using(DB_ALIAS)
         .all()
         .prefetch_related("departments")
         .annotate(
-            review_count=Count("companyreview")  # ★ レビュー数
+            review_count=Count("reviews")  # ★ related_name="reviews" を使う
         )
     )
 
-    # ① キーワード検索
+    # キーワード検索
     if query:
         companies = companies.filter(
             Q(name__icontains=query) | Q(description__icontains=query)
         )
 
-    # ② フィルタ条件を Q のリストとして用意
+    # フィルタ条件を Q のリストとして組み立て
     filter_qs = []
 
-    # --- 学科フィルタ (ORでまとめた1つのQにする) ---
+    # 学科フィルタ（複数指定なら OR）
     if dept_shorts:
         q_dept = Q()
         for short in dept_shorts:
-            q_dept |= Q(departments__short_name=short)
-        filter_qs.append(q_dept)
+            if short:
+                q_dept |= Q(departments__short_name=short)
+        if q_dept:
+            filter_qs.append(q_dept)
 
-    # --- 研究室大別フィルタ (oncampus_briefingにコードが含まれるか) ---
-    # oncampus_briefing が JSONField(List[str]) の想定で contains=[code] を使用
-    if lab_codes:
-        q_lab = Q()
-        for code in lab_codes:
-            # JSON配列に特定の文字列が含まれる場合
-            q_lab |= Q(oncampus_briefing__contains=[code])
-        filter_qs.append(q_lab)
-
-    # --- 勤務地フィルタ ---
+    if lab_code:
+        # CharField なので単純に icontains でOK（"1.2,1.3" みたいな想定）
+        filter_qs.append(Q(oncampus_briefing__icontains=lab_code))
+        
+    # 勤務地フィルタ
     if area_key:
-        keywords = AREA_KEYWORDS.get(area_key)
+        keywords = AREA_KEYWORDS.get(area_key, [])
         if keywords:
             q_area = Q()
             for kw in keywords:
                 q_area |= Q(area__icontains=kw)
             filter_qs.append(q_area)
 
-    # --- 推薦の有無 ---
+    # 推薦あり
     if recommend == "1":
-        filter_qs.append(Q(tut_recommendation=1))
+        filter_qs.append(Q(tut_recommendation=True))
 
-    # --- 学内説明会の有無 ---
+    # 学内説明会あり（oncampus_briefing が空/NULLでないもの）
     if briefing == "1":
-        # 「なにかしら oncampus_briefing に入っている企業」
-        # JSONField で空リスト以外をチェックしたい場合は
-        # 長さ判定もありだが、簡易には空文字との比較でもOK
-        filter_qs.append(~Q(oncampus_briefing=[]))
+        filter_qs.append(
+            Q(oncampus_briefing__isnull=False) & ~Q(oncampus_briefing="")
+        )
 
-    # ③ AND / OR モードでフィルタをまとめて適用
+    # AND / OR でまとめて適用
     if filter_qs:
         combined_q = filter_qs[0]
         for q in filter_qs[1:]:
@@ -197,13 +190,13 @@ def company_search(request):
                 combined_q &= q
         companies = companies.filter(combined_q).distinct()
 
-    # ④ ソート
+    # ソート
     if sort == "employees":
-        companies = companies.order_by("-employees")
+        companies = companies.order_by("-employees", "name")
     elif sort == "starting_salary":
-        companies = companies.order_by("-starting_salary")
+        companies = companies.order_by("-starting_salary", "name")
     elif sort == "annual_holidays":
-        companies = companies.order_by("-annual_holidays")
+        companies = companies.order_by("-annual_holidays", "name")
     elif sort == "review_count":
         companies = companies.order_by("-review_count", "name")
     else:
@@ -216,17 +209,18 @@ def company_search(request):
     context = {
         "query": query,
         "departments": departments,
+        "companies": companies,
 
-        # 選択状態をテンプレートで再現する用
+        # テンプレ側で選択状態を再現する用
+        "dept_short": dept_short,
         "dept_shorts": dept_shorts,
-        "lab_codes": lab_codes,
         "area_key": area_key,
         "recommend": recommend,
         "briefing": briefing,
         "filter_logic": filter_logic,
         "sort": sort,
 
-        "companies": companies,
+        "lab_code": lab_code,
     }
     return render(request, "teams/shiokara/company_search.html", context)
 

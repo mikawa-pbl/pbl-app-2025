@@ -61,11 +61,7 @@
       "selection_process": "エントリーシート・適性検査・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "1.4",
-        "2.2",
-        "5.2"
-      ]
+      "oncampus_briefing": "1.4,2.2,5.2"
     }
   },
   {
@@ -89,10 +85,7 @@
       "selection_process": "エントリーシート・適性検査・面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "2.4",
-        "3.4"
-      ]
+      "oncampus_briefing": "2.4,3.4"
     }
   },
   {
@@ -116,10 +109,7 @@
       "selection_process": "エントリー・Webテスト・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "1.2",
-        "4.1"
-      ]
+      "oncampus_briefing": "1.2,4.1"
     }
   },
   {
@@ -143,10 +133,7 @@
       "selection_process": "エントリーシート・筆記・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "1.4",
-        "5.1"
-      ]
+      "oncampus_briefing": "1.4,5.1"
     }
   },
   {
@@ -172,11 +159,7 @@
       "selection_process": "エントリーシート・適性検査・複数回面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "1.2",
-        "2.2",
-        "3.4"
-      ]
+      "oncampus_briefing": "1.2,2.2,3.4"
     }
   },
   {
@@ -200,10 +183,7 @@
       "selection_process": "エントリー・適性検査・面接（複数回）",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "2.3",
-        "3.4"
-      ]
+      "oncampus_briefing": "2.3,3.4"
     }
   },
   {
@@ -227,10 +207,7 @@
       "selection_process": "エントリーシート・Webテスト・面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "2.4",
-        "3.2"
-      ]
+      "oncampus_briefing": "2.4,3.2"
     }
   },
   {
@@ -255,11 +232,7 @@
       "selection_process": "エントリーシート・筆記試験・複数回面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "1.3",
-        "2.3",
-        "3.4"
-      ]
+      "oncampus_briefing": "1.3,2.3,3.4"
     }
   },
   {
@@ -282,9 +255,7 @@
       "selection_process": "エントリー・コーディングテスト等・面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "3.2"
-      ]
+      "oncampus_briefing": "3.2"
     }
   },
   {
@@ -307,9 +278,7 @@
       "selection_process": "エントリーシート・適性検査・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "4.2"
-      ]
+      "oncampus_briefing": "4.2"
     }
   },
   {
@@ -334,11 +303,7 @@
       "selection_process": "エントリー・適性検査・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "1.2",
-        "4.2",
-        "5.1"
-      ]
+      "oncampus_briefing": "1.2,4.2,5.1"
     }
   },
   {
@@ -364,12 +329,7 @@
       "selection_process": "エントリーシート・Webテスト・複数回面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "1.3",
-        "2.2",
-        "3.2",
-        "5.2"
-      ]
+      "oncampus_briefing": "1.3,2.2,3.2,5.2"
     }
   },
   {
@@ -395,12 +355,7 @@
       "selection_process": "エントリー・適性検査・面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "1.2",
-        "2.3",
-        "3.2",
-        "5.1"
-      ]
+      "oncampus_briefing": "1.2,2.3,3.2,5.1"
     }
   },
   {
@@ -426,12 +381,7 @@
       "selection_process": "エントリーシート・適性検査・面接（複数回）",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "1.1",
-        "2.2",
-        "3.2",
-        "5.2"
-      ]
+      "oncampus_briefing": "1.1,2.2,3.2,5.2"
     }
   },
   {
@@ -456,11 +406,7 @@
       "selection_process": "エントリーシート・Webテスト・面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "1.2",
-        "4.2",
-        "5.1"
-      ]
+      "oncampus_briefing": "1.2,4.2,5.1"
     }
   },
   {
@@ -485,11 +431,7 @@
       "selection_process": "エントリーシート・適性検査・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "2.4",
-        "3.2",
-        "5.2"
-      ]
+      "oncampus_briefing": "2.4,3.2,5.2"
     }
   },
   {
@@ -513,10 +455,7 @@
       "selection_process": "エントリー・Webテスト・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "2.4",
-        "3.2"
-      ]
+      "oncampus_briefing": "2.4,3.2"
     }
   },
   {
@@ -539,9 +478,7 @@
       "selection_process": "ポートフォリオ・適性検査・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "3.4"
-      ]
+      "oncampus_briefing": "3.4"
     }
   },
   {
@@ -566,16 +503,12 @@
       "selection_process": "エントリー・Webテスト・グループワーク・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "2.4",
-        "3.4",
-        "5.2"
-      ]
+      "oncampus_briefing": "2.4,3.4,5.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 31,
+    "pk": 35,
     "fields": {
       "name": "本田技研工業株式会社",
       "url": "https://www.honda.co.jp/",
@@ -595,16 +528,12 @@
       "selection_process": "エントリーシート・Webテスト・面接（複数回）",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "2.4",
-        "3.2",
-        "5.2"
-      ]
+      "oncampus_briefing": "2.4,3.2,5.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 32,
+    "pk": 36,
     "fields": {
       "name": "株式会社SUBARU",
       "url": "https://www.subaru.co.jp/",
@@ -624,15 +553,12 @@
       "selection_process": "エントリーシート・適性検査・面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "2.4",
-        "3.2"
-      ]
+      "oncampus_briefing": "2.4,3.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 33,
+    "pk": 37,
     "fields": {
       "name": "ヤマハ発動機株式会社",
       "url": "https://global.yamaha-motor.com/jp/",
@@ -652,14 +578,12 @@
       "selection_process": "エントリーシート・適性検査・面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "3.4"
-      ]
+      "oncampus_briefing": "3.4"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 34,
+    "pk": 38,
     "fields": {
       "name": "川崎重工業株式会社",
       "url": "https://www.khi.co.jp/",
@@ -679,16 +603,12 @@
       "selection_process": "エントリーシート・Webテスト・面接（複数回）",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "2.4",
-        "3.4",
-        "5.2"
-      ]
+      "oncampus_briefing": "2.4,3.4,5.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 35,
+    "pk": 39,
     "fields": {
       "name": "オークマ株式会社",
       "url": "https://www.okuma.co.jp/",
@@ -708,16 +628,12 @@
       "selection_process": "エントリーシート・適性検査・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "1.1",
-        "2.3",
-        "3.4"
-      ]
+      "oncampus_briefing": "1.1,2.3,3.4"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 36,
+    "pk": 40,
     "fields": {
       "name": "DMG森精機株式会社",
       "url": "https://www.dmgmori.co.jp/",
@@ -737,16 +653,12 @@
       "selection_process": "エントリー・適性検査・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "1.1",
-        "2.3",
-        "3.4"
-      ]
+      "oncampus_briefing": "1.1,2.3,3.4"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 37,
+    "pk": 41,
     "fields": {
       "name": "トヨタシステムズ株式会社",
       "url": "https://www.toyota-systems.com/",
@@ -765,15 +677,12 @@
       "selection_process": "エントリーシート・適性検査・面接（複数回）",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "2.4",
-        "3.2"
-      ]
+      "oncampus_briefing": "2.4,3.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 38,
+    "pk": 42,
     "fields": {
       "name": "豊田通商株式会社",
       "url": "https://www.toyota-tsusho.com/",
@@ -794,17 +703,12 @@
       "selection_process": "エントリーシート・Webテスト・面接（複数回）",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "2.2",
-        "3.2",
-        "4.2",
-        "5.2"
-      ]
+      "oncampus_briefing": "2.2,3.2,4.2,5.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 39,
+    "pk": 43,
     "fields": {
       "name": "中部電力株式会社",
       "url": "https://www.chuden.co.jp/",
@@ -824,16 +728,12 @@
       "selection_process": "エントリーシート・適性検査・面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "1.4",
-        "2.2",
-        "5.2"
-      ]
+      "oncampus_briefing": "1.4,2.2,5.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 40,
+    "pk": 44,
     "fields": {
       "name": "東海旅客鉄道株式会社（JR東海）",
       "url": "https://jr-central.co.jp/",
@@ -853,16 +753,12 @@
       "selection_process": "エントリーシート・適性検査・面接（複数回）",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "1.1",
-        "2.2",
-        "5.2"
-      ]
+      "oncampus_briefing": "1.1,2.2,5.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 41,
+    "pk": 45,
     "fields": {
       "name": "名古屋鉄道株式会社",
       "url": "https://www.meitetsu.co.jp/",
@@ -882,16 +778,12 @@
       "selection_process": "エントリーシート・適性検査・面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "1.1",
-        "2.2",
-        "5.2"
-      ]
+      "oncampus_briefing": "1.1,2.2,5.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 42,
+    "pk": 46,
     "fields": {
       "name": "日本ガイシ株式会社",
       "url": "https://www.ngk.co.jp/",
@@ -911,16 +803,12 @@
       "selection_process": "エントリーシート・Webテスト・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "1.2",
-        "2.2",
-        "4.2"
-      ]
+      "oncampus_briefing": "1.2,2.2,4.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 43,
+    "pk": 47,
     "fields": {
       "name": "日東電工株式会社",
       "url": "https://www.nitto.com/jp/ja/",
@@ -940,16 +828,12 @@
       "selection_process": "エントリー・適性検査・面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "2.1",
-        "3.2",
-        "4.2"
-      ]
+      "oncampus_briefing": "2.1,3.2,4.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 44,
+    "pk": 48,
     "fields": {
       "name": "オムロン株式会社",
       "url": "https://www.omron.com/jp/ja/",
@@ -969,16 +853,12 @@
       "selection_process": "エントリーシート・Webテスト・面接（複数回）",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "1.3",
-        "2.3",
-        "3.4"
-      ]
+      "oncampus_briefing": "1.3,2.3,3.4"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 45,
+    "pk": 49,
     "fields": {
       "name": "TIS株式会社",
       "url": "https://www.tis.co.jp/",
@@ -997,15 +877,12 @@
       "selection_process": "エントリーシート・Webテスト・面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "2.4",
-        "3.2"
-      ]
+      "oncampus_briefing": "2.4,3.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 46,
+    "pk": 50,
     "fields": {
       "name": "三菱ケミカル株式会社",
       "url": "https://www.m-chemical.co.jp/",
@@ -1025,16 +902,12 @@
       "selection_process": "エントリーシート・Webテスト・面接（複数回）",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "1.2",
-        "4.2",
-        "5.2"
-      ]
+      "oncampus_briefing": "1.2,4.2,5.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 47,
+    "pk": 51,
     "fields": {
       "name": "信越化学工業株式会社",
       "url": "https://www.shinetsu.co.jp/jp/",
@@ -1054,16 +927,12 @@
       "selection_process": "エントリーシート・適性検査・面接",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "1.2",
-        "2.1",
-        "4.2"
-      ]
+      "oncampus_briefing": "1.2,2.1,4.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 48,
+    "pk": 52,
     "fields": {
       "name": "日本特殊陶業株式会社",
       "url": "https://www.ngkntk.co.jp/",
@@ -1083,16 +952,12 @@
       "selection_process": "エントリーシート・Webテスト・面接",
       "accepts_jitsumu_kunren": 0,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "1.2",
-        "2.1",
-        "4.2"
-      ]
+      "oncampus_briefing": "1.2,2.1,4.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 49,
+    "pk": 53,
     "fields": {
       "name": "東京エレクトロン株式会社",
       "url": "https://www.tel.com/jp/",
@@ -1113,17 +978,12 @@
       "selection_process": "エントリーシート・適性検査・面接（複数回）",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 1,
-      "oncampus_briefing": [
-        "1.1",
-        "2.3",
-        "3.4",
-        "4.2"
-      ]
+      "oncampus_briefing": "1.1,2.3,3.4,4.2"
     }
   },
   {
     "model": "shiokara.company",
-    "pk": 50,
+    "pk": 54,
     "fields": {
       "name": "株式会社サイバーエージェント",
       "url": "https://www.cyberagent.co.jp/",
@@ -1141,9 +1001,7 @@
       "selection_process": "エントリー・コーディングテスト等・面接（複数回）",
       "accepts_jitsumu_kunren": 1,
       "tut_recommendation": 0,
-      "oncampus_briefing": [
-        "3.4"
-      ]
+      "oncampus_briefing": "3.4"
     }
   }
 ]

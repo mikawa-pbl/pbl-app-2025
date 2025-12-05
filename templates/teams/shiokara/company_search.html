@@ -53,6 +53,40 @@
                     </div>
                 </div>
 
+                <div class="search-field">
+                    <label for="course-select">分野・コース</label>
+                    <div class="select-wrapper">
+                        <select id="course-select" name="lab">
+                            <option value="">（分野・コース指定なし）</option>
+                            {# 実際の中身は JS で動的に差し込む #}
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="search-field">
+                    <label for="search-sort-select">並び替え</label>
+                    <div class="select-wrapper">
+                        <select id="search-sort-select" name="sort">
+                            <option value="name" {% if sort == "name" %}selected{% endif %}>
+                                名前順
+                            </option>
+                            <option value="employees" {% if sort == "employees" %}selected{% endif %}>
+                                従業員数が多い順
+                            </option>
+                            <option value="starting_salary" {% if sort == "starting_salary" %}selected{% endif %}>
+                                初任給が高い順
+                            </option>
+                            <option value="annual_holidays" {% if sort == "annual_holidays" %}selected{% endif %}>
+                                年間休日が多い順
+                            </option>
+                            <option value="review_count" {% if sort == "review_count" %}selected{% endif %}>
+                                レビュー件数が多い順
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="search-actions">
                     <button type="submit" class="search-button">
                         検索
@@ -62,7 +96,117 @@
                     </a>
                 </div>
             </div>
+
+            <div class="filter-row">
+                <!-- 勤務地 -->
+                <div class="filter-group">
+                    <span class="filter-label">勤務地</span>
+                    <div class="select-wrapper select-small">
+                        <select name="area">
+                            <option value="">（指定なし）</option>
+                            <option value="tokai" {% if area_key == "tokai" %}selected{% endif %}>
+                                東海エリア
+                            </option>
+                            <option value="capital" {% if area_key == "capital" %}selected{% endif %}>
+                                首都圏
+                            </option>
+                            <option value="kansai" {% if area_key == "kansai" %}selected{% endif %}>
+                                関西
+                            </option>
+                            <option value="nationwide" {% if area_key == "nationwide" %}selected{% endif %}>
+                                全国勤務
+                            </option>
+                        </select>
+                    </div>
+                </div>
+    
+                <!-- 推薦 / 学内説明会 -->
+                <div class="filter-group">
+                    <span class="filter-label">企業フィルタ</span>
+                    <label class="filter-check">
+                        <input type="checkbox" name="recommend" value="1"
+                               {% if recommend == "1" %}checked{% endif %}>
+                        推薦あり
+                    </label>
+                    <label class="filter-check">
+                        <input type="checkbox" name="briefing" value="1"
+                               {% if briefing == "1" %}checked{% endif %}>
+                        学内説明会あり
+                    </label>
+                </div>
+    
+                <!-- AND / OR -->
+                <div class="filter-group">
+                    <span class="filter-label">条件の組み合わせ</span>
+                    <label class="filter-radio">
+                        <input type="radio" name="logic" value="and"
+                               {% if filter_logic == "and" or not filter_logic %}checked{% endif %}>
+                        AND（すべて満たす）
+                    </label>
+                    <label class="filter-radio">
+                        <input type="radio" name="logic" value="or"
+                               {% if filter_logic == "or" %}checked{% endif %}>
+                        OR（どれかを満たす）
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <!-- 勤務地 -->
+                <div class="filter-group">
+                    <span class="filter-label">勤務地</span>
+                    <div class="select-wrapper select-small">
+                        <select name="area">
+                            <option value="">（指定なし）</option>
+                            <option value="tokai" {% if area_key == "tokai" %}selected{% endif %}>
+                                東海エリア
+                            </option>
+                            <option value="capital" {% if area_key == "capital" %}selected{% endif %}>
+                                首都圏
+                            </option>
+                            <option value="kansai" {% if area_key == "kansai" %}selected{% endif %}>
+                                関西
+                            </option>
+                            <option value="nationwide" {% if area_key == "nationwide" %}selected{% endif %}>
+                                全国勤務
+                            </option>
+                        </select>
+                    </div>
+                </div>
+    
+                <!-- 推薦 / 学内説明会 -->
+                <div class="filter-group">
+                    <span class="filter-label">企業フィルタ</span>
+                    <label class="filter-check">
+                        <input type="checkbox" name="recommend" value="1"
+                               {% if recommend == "1" %}checked{% endif %}>
+                        推薦あり
+                    </label>
+                    <label class="filter-check">
+                        <input type="checkbox" name="briefing" value="1"
+                               {% if briefing == "1" %}checked{% endif %}>
+                        学内説明会あり
+                    </label>
+                </div>
+    
+                <!-- AND / OR -->
+                <div class="filter-group">
+                    <span class="filter-label">条件の組み合わせ</span>
+                    <label class="filter-radio">
+                        <input type="radio" name="logic" value="and"
+                               {% if filter_logic == "and" or not filter_logic %}checked{% endif %}>
+                        AND（すべて満たす）
+                    </label>
+                    <label class="filter-radio">
+                        <input type="radio" name="logic" value="or"
+                               {% if filter_logic == "or" %}checked{% endif %}>
+                        OR（どれかを満たす）
+                    </label>
+                </div>
+            </div>
         </form>
+
+
     </section>
 
     <section class="result-section">
@@ -219,10 +363,10 @@
     }
 
     .search-form-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) auto;
-        gap: 12px 16px;
-        align-items: flex-end;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) minmax(0, 1.2fr) auto;
+    gap: 12px 16px;
+    align-items: flex-end;
     }
 
     .search-field label {
@@ -470,6 +614,42 @@
         font-size: 0.9rem;
     }
 
+    .filter-row {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    font-size: 0.8rem;
+    align-items: center;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px 10px;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #444;
+        margin-right: 4px;
+    }
+
+    .filter-check,
+    .filter-radio {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+
+    .select-small select {
+        padding: 4px 10px;
+        font-size: 0.85rem;
+    }
+
+
     @media (max-width: 720px) {
         .company-search-page {
             padding: 18px 12px 32px;
@@ -488,6 +668,117 @@
             align-items: center;
             justify-content: flex-start;
         }
+
+        .filter-row {
+        flex-direction: column;
+        align-items: flex-start;
+        }
     }
 </style>
+<script>
+    /**
+     * 学科 short_name → 系番号（1〜5）
+     * 例:
+     *   機械工学(1系)  short_name = "ms"  → "1"
+     *   電気電子(2系)  short_name = "ee"  → "2"
+     *   情報知能(3系)  short_name = "cs"  → "3"
+     *   応用化学(4系)  short_name = "chem"→ "4"
+     *   建築・都市(5系) short_name = "arch"→ "5"
+     */
+    const deptToSeries = {
+      ms: "1",
+      ee: "2",
+      cs: "3",
+      chem: "4",
+      ace: "5",
+    };
+    
+    /**
+     * 系番号ごとのコース一覧
+     */
+    const seriesToCourses = {
+      "1": [
+        { value: "1.1", label: "1.1 材料・生産加工コース" },
+        { value: "1.2", label: "1.2 システム制御・ロボットコース" },
+        { value: "1.3", label: "1.3 環境・エネルギーコース" },
+        { value: "1.4", label: "1系 機械・システムデザインコース 全般" },
+      ],
+      "2": [
+        { value: "2.1", label: "2.1 材料エレクトロニクスコース" },
+        { value: "2.2", label: "2.2 機能電気システムコース" },
+        { value: "2.3", label: "2.3 集積電子システムコース" },
+        { value: "2.4", label: "2.4 情報通信システムコース" },
+      ],
+      "3": [
+        { value: "3.1", label: "3.1 計算機数理科学分野" },
+        { value: "3.2", label: "3.2 データ情報学分野" },
+        { value: "3.3", label: "3.3 ヒューマン・ブレイン情報学分野" },
+        { value: "3.4", label: "3.4 メディア・ロボット情報学分野" },
+      ],
+      "4": [
+        { value: "4.1", label: "4.1 分子制御化学分野" },
+        { value: "4.2", label: "4.2 分子生物化学分野" },
+        { value: "4.3", label: "4.3 分子機能化学分野" },
+      ],
+      "5": [
+        { value: "5.1", label: "5.1 建築・都市デザイン学分野" },
+        { value: "5.2", label: "5.2 都市・地域マネジメント学分野" },
+      ],
+    };
+    
+    // Django から渡された現在の選択値（再描画時に復元する）
+    const currentLab = "{{ lab_code|default_if_none:''|escapejs }}";
+    
+    function updateCourseOptions() {
+      const deptSelect = document.getElementById("search-dept-select");
+      const courseSelect = document.getElementById("course-select");
+      if (!deptSelect || !courseSelect) return;
+    
+      const deptShort = deptSelect.value;
+      const series = deptToSeries[deptShort];
+    
+      // いったん初期化
+      courseSelect.innerHTML = "";
+      const defaultOpt = document.createElement("option");
+      defaultOpt.value = "";
+      defaultOpt.textContent = "（分野・コース指定なし）";
+      courseSelect.appendChild(defaultOpt);
+    
+      if (!series || !seriesToCourses[series]) {
+        courseSelect.disabled = true;
+        return;
+      }
+    
+      seriesToCourses[series].forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c.value;
+        opt.textContent = c.label;
+        if (c.value === currentLab) {
+          opt.selected = true;
+        }
+        courseSelect.appendChild(opt);
+      });
+    
+      courseSelect.disabled = false;
+    }
+    
+    document.addEventListener("DOMContentLoaded", function () {
+      const deptSelect = document.getElementById("search-dept-select");
+      const courseSelect = document.getElementById("course-select");
+      if (!deptSelect || !courseSelect) return;
+    
+      // 初期表示（URLパラメータがあるときにも対応）
+      updateCourseOptions();
+    
+      // 学科選択が変わったら、分野プルダウンを更新＆選択リセット
+      deptSelect.addEventListener("change", function () {
+        // 学科を変えたら分野の選択も一度クリア
+        courseSelect.value = "";
+        // 現在値も空にしてから更新
+        window.currentLab = "";
+        updateCourseOptions();
+      });
+    });
+    </script>
+    
 {% endblock %}

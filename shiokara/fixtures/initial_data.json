@@ -42,53 +42,23 @@
 
   {
     "model": "shiokara.company",
-    "pk": 1,
-    "fields": {
-      "name": "サンプルソフト株式会社",
-      "url": null,
-      "description": "Webアプリケーションや業務系システムの受託開発を行うソフトウェア企業です。",
-      "departments": [3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 2,
-    "fields": {
-      "name": "東三河ロボティクス株式会社",
-      "url": null,
-      "description": "産業用ロボットの設計・製造から制御ソフトウェア開発まで一貫して手がけるロボティクス企業です。",
-      "departments": [1, 2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 3,
-    "fields": {
-      "name": "グリーンケミカル研究所株式会社",
-      "url": null,
-      "description": "環境配慮型材料や機能性化学品の研究開発を行うケミカル系企業です。",
-      "departments": [4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 4,
-    "fields": {
-      "name": "ミナトミライ建設株式会社",
-      "url": null,
-      "description": "都市再開発やインフラ整備を手がける総合建設・デベロッパー企業です。",
-      "departments": [1, 5]
-    }
-  },
-
-  {
-    "model": "shiokara.company",
     "pk": 5,
     "fields": {
       "name": "トヨタ自動車株式会社",
       "url": "https://global.toyota/",
       "description": "自動車やモビリティサービスを中核とし、グローバルに事業展開する総合モビリティ企業です。",
-      "departments": [1, 2, 3, 4]
+      "departments": [1, 2, 3, 4],
+      "area": "本社:愛知県豊田市 / 全国勤務あり",
+      "avg_annual_income": 850,
+      "starting_salary": 23,
+      "annual_holidays": 121,
+      "employees": 70000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十〜数百名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・複数回面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
@@ -98,7 +68,18 @@
       "name": "ソニーグループ株式会社",
       "url": "https://www.sony.com/ja/",
       "description": "エレクトロニクスからエンタテインメント、金融まで幅広く事業を展開するグローバル企業グループです。",
-      "departments": [2, 3]
+      "departments": [2, 3],
+      "area": "本社:東京都港区 / グローバル勤務あり",
+      "avg_annual_income": 1000,
+      "starting_salary": 25,
+      "annual_holidays": 125,
+      "employees": 110000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数百名/年イメージ",
+      "selection_process": "エントリー・適性検査・面接（複数回）",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
@@ -108,7 +89,18 @@
       "name": "株式会社NTTデータ",
       "url": "https://www.nttdata.com/jp/ja/",
       "description": "システムインテグレーションやコンサルティングを通じて社会・産業のDXを推進するITサービス企業です。",
-      "departments": [2, 3]
+      "departments": [2, 3],
+      "area": "本社:東京都江東区 / 首都圏中心・全国転勤あり",
+      "avg_annual_income": 850,
+      "starting_salary": 24,
+      "annual_holidays": 120,
+      "employees": 140000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数百名/年イメージ",
+      "selection_process": "エントリーシート・Webテスト・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
@@ -118,7 +110,18 @@
       "name": "株式会社キーエンス",
       "url": "https://www.keyence.co.jp/",
       "description": "センサや画像処理装置などのFA機器を企画・開発し、製造業の生産性向上に貢献するメーカーです。",
-      "departments": [1, 2, 3]
+      "departments": [1, 2, 3],
+      "area": "本社:大阪府大阪市 / 全国勤務あり",
+      "avg_annual_income": 2000,
+      "starting_salary": 28,
+      "annual_holidays": 120,
+      "employees": 10000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十名/年イメージ",
+      "selection_process": "エントリーシート・筆記試験・複数回面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
@@ -128,7 +131,18 @@
       "name": "楽天グループ株式会社",
       "url": "https://corp.rakuten.co.jp/",
       "description": "インターネットサービス、フィンテック、モバイルなど多様なサービスを展開するIT企業グループです。",
-      "departments": [3]
+      "departments": [3],
+      "area": "本社:東京都世田谷区（二子玉川）",
+      "avg_annual_income": 800,
+      "starting_salary": 24,
+      "annual_holidays": 120,
+      "employees": 25000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十〜数百名/年イメージ",
+      "selection_process": "エントリー・コーディングテスト等・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
@@ -138,7 +152,18 @@
       "name": "花王株式会社",
       "url": "https://www.kao.com/jp/",
       "description": "日用品・化粧品・ケミカル製品の研究開発・製造・販売を行う総合化学メーカーです。",
-      "departments": [4]
+      "departments": [4],
+      "area": "本社:東京都中央区 / 研究所は東京都・和歌山県など",
+      "avg_annual_income": 800,
+      "starting_salary": 24,
+      "annual_holidays": 123,
+      "employees": 35000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "研究開発職など数十名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
@@ -148,50 +173,21 @@
       "name": "AGC株式会社",
       "url": "https://www.agc.com/",
       "description": "ガラス、電子材料、化学品などの事業をグローバルに展開する素材メーカーです。",
-      "departments": [1, 4, 5]
+      "departments": [1, 4, 5],
+      "area": "本社:東京都千代田区 / 研究所・工場は全国",
+      "avg_annual_income": 900,
+      "starting_salary": 24,
+      "annual_holidays": 120,
+      "employees": 55000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十名/年イメージ",
+      "selection_process": "エントリー・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
 
-  {
-    "model": "shiokara.company",
-    "pk": 12,
-    "fields": {
-      "name": "クラウドサービス総合研究所株式会社",
-      "url": null,
-      "description": "クラウドインフラ構築やデータ分析基盤の設計・運用支援を行うIT企業です。",
-      "departments": [2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 13,
-    "fields": {
-      "name": "豊橋システムデザイン株式会社",
-      "url": null,
-      "description": "組込みソフトウェアからWebサービスまで幅広くシステム開発を行う地域密着型のIT企業です。",
-      "departments": [3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 14,
-    "fields": {
-      "name": "アーバンインフラエンジニアリング株式会社",
-      "url": null,
-      "description": "道路・橋梁・上下水道などの社会インフラの設計・維持管理を手がけるエンジニアリング企業です。",
-      "departments": [1, 2, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 15,
-    "fields": {
-      "name": "スマートライフデバイス株式会社",
-      "url": null,
-      "description": "IoT家電やウェアラブルデバイスの企画・開発を行うエレクトロニクス系スタートアップです。",
-      "departments": [2, 3, 4]
-    }
-  },
   {
     "model": "shiokara.company",
     "pk": 16,
@@ -199,7 +195,18 @@
       "name": "三菱電機株式会社",
       "url": "https://www.mitsubishielectric.co.jp/ja/",
       "description": "電力・産業システムから家電・FA機器まで幅広い製品・サービスを展開する総合電機メーカーです。",
-      "departments": [1, 2, 3, 5]
+      "departments": [1, 2, 3, 5],
+      "area": "本社:東京都千代田区 / 事業所は名古屋・関西など全国",
+      "avg_annual_income": 800,
+      "starting_salary": 23,
+      "annual_holidays": 125,
+      "employees": 145000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数百名/年イメージ",
+      "selection_process": "エントリーシート・Webテスト・複数回面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
@@ -209,7 +216,18 @@
       "name": "パナソニック ホールディングス株式会社",
       "url": "https://holdings.panasonic/jp/home.html",
       "description": "くらしからビジネスまで幅広い領域で製品・ソリューションを提供するグローバルエレクトロニクス企業グループです。",
-      "departments": [1, 2, 3, 5]
+      "departments": [1, 2, 3, 5],
+      "area": "本社:大阪府門真市 / 東京拠点ほか全国",
+      "avg_annual_income": 750,
+      "starting_salary": 23,
+      "annual_holidays": 125,
+      "employees": 240000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数百名/年イメージ",
+      "selection_process": "エントリー・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
@@ -219,7 +237,18 @@
       "name": "株式会社日立製作所",
       "url": "https://www.hitachi.com/ja-jp/",
       "description": "IT・OT・プロダクトを組み合わせた社会イノベーション事業を推進する総合電機・インフラ企業です。",
-      "departments": [1, 2, 3, 5]
+      "departments": [1, 2, 3, 5],
+      "area": "本社:東京都千代田区 / 事業所は全国",
+      "avg_annual_income": 850,
+      "starting_salary": 23,
+      "annual_holidays": 124,
+      "employees": 300000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数百名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・面接（複数回）",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
@@ -229,119 +258,21 @@
       "name": "旭化成株式会社",
       "url": "https://www.asahi-kasei.com/jp/",
       "description": "マテリアル・住宅・ヘルスケアの3領域で事業を展開する総合化学メーカーです。",
-      "departments": [1, 4, 5]
+      "departments": [1, 4, 5],
+      "area": "本社:東京都千代田区 / 宮崎・岡山などに主な拠点",
+      "avg_annual_income": 900,
+      "starting_salary": 24,
+      "annual_holidays": 120,
+      "employees": 45000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十名/年イメージ",
+      "selection_process": "エントリーシート・Webテスト・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
-  {
-    "model": "shiokara.company",
-    "pk": 20,
-    "fields": {
-      "name": "アカデミックAIソリューションズ株式会社",
-      "url": null,
-      "description": "大学・研究機関向けのAIモデル開発支援やデータ分析コンサルティングを行うスタートアップ企業です。",
-      "departments": [3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 21,
-    "fields": {
-      "name": "メカフューチャー設計工房株式会社",
-      "url": null,
-      "description": "産業機械・ロボットの機構設計やCAE解析を中心に受託するエンジニアリング企業です。",
-      "departments": [1]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 22,
-    "fields": {
-      "name": "ネクストリンクネットワークス株式会社",
-      "url": null,
-      "description": "通信インフラ構築やクラウドネットワーク設計を手がけるインフラ系SI企業です。",
-      "departments": [2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 23,
-    "fields": {
-      "name": "バイオマテリアルイノベーションズ株式会社",
-      "url": null,
-      "description": "再生医療向け材料やバイオプラスチックの研究開発を行うバイオ・材料系ベンチャー企業です。",
-      "departments": [4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 24,
-    "fields": {
-      "name": "スマートシティデザイン株式会社",
-      "url": null,
-      "description": "都市OSやスマートシティの計画立案・シミュレーションを行う都市計画コンサルティング企業です。",
-      "departments": [3, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 25,
-    "fields": {
-      "name": "オープンデータプラットフォーム技研株式会社",
-      "url": null,
-      "description": "オープンデータ活用基盤やAPIプラットフォームの設計・実装を行うソフトウェア企業です。",
-      "departments": [2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 26,
-    "fields": {
-      "name": "サステナブルエナジーシステムズ株式会社",
-      "url": null,
-      "description": "再生可能エネルギー設備の設計・遠隔監視システムの開発を行うエネルギー系エンジニアリング企業です。",
-      "departments": [1, 2, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 27,
-    "fields": {
-      "name": "アドバンスドマテリアルデザイン株式会社",
-      "url": null,
-      "description": "高分子材料・機能性薄膜などの材料設計・評価を行う受託研究開発企業です。",
-      "departments": [4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 28,
-    "fields": {
-      "name": "ロボティクス・モビリティサービス株式会社",
-      "url": null,
-      "description": "自律移動ロボットや搬送ロボットを活用した物流・工場内ソリューションを提供するロボットSIerです。",
-      "departments": [1, 2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 29,
-    "fields": {
-      "name": "クラウドアーキテクトデザイン株式会社",
-      "url": null,
-      "description": "マイクロサービスやコンテナ技術を用いたクラウドネイティブアーキテクチャの設計・開発を行う企業です。",
-      "departments": [3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 30,
-    "fields": {
-      "name": "アーバンライフプランニング株式会社",
-      "url": null,
-      "description": "集合住宅や商業施設の企画設計、街区全体のランドスケープデザインを行う建築・都市計画企業です。",
-      "departments": [5]
-    }
-  },
+
   {
     "model": "shiokara.company",
     "pk": 31,
@@ -349,7 +280,18 @@
       "name": "日本電気株式会社（NEC）",
       "url": "https://www.nec.com/",
       "description": "社会インフラやネットワーク、セキュリティなどの領域でITソリューションを提供する総合電機・ICT企業です。",
-      "departments": [2, 3, 5]
+      "departments": [2, 3, 5],
+      "area": "本社:東京都港区 / 川崎・我孫子などに研究・開発拠点",
+      "avg_annual_income": 800,
+      "starting_salary": 24,
+      "annual_holidays": 126,
+      "employees": 110000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数百名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
@@ -359,7 +301,18 @@
       "name": "富士通株式会社",
       "url": "https://www.fujitsu.com/",
       "description": "ITサービスやクラウド、ネットワークなど幅広いソリューションを提供するグローバルICT企業です。",
-      "departments": [2, 3]
+      "departments": [2, 3],
+      "area": "本社:東京都港区 / 川崎市などに大規模拠点",
+      "avg_annual_income": 750,
+      "starting_salary": 23,
+      "annual_holidays": 126,
+      "employees": 120000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数百名/年イメージ",
+      "selection_process": "エントリー・Webテスト・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
@@ -369,7 +322,18 @@
       "name": "任天堂株式会社",
       "url": "https://www.nintendo.co.jp/",
       "description": "ゲーム機やゲームソフトの企画・開発・販売を行い、世界中にエンターテインメントを提供する企業です。",
-      "departments": [3]
+      "departments": [3],
+      "area": "本社:京都府京都市 / 東京開発拠点など",
+      "avg_annual_income": 900,
+      "starting_salary": 25,
+      "annual_holidays": 125,
+      "employees": 7000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "開発系数十名/年イメージ",
+      "selection_process": "ポートフォリオ・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
@@ -379,668 +343,438 @@
       "name": "ソフトバンク株式会社",
       "url": "https://www.softbank.jp/",
       "description": "移動体通信事業を中心に、インターネットやエネルギー、ロボティクスなど多様な分野で事業を展開するICT企業です。",
-      "departments": [2, 3, 5]
+      "departments": [2, 3, 5],
+      "area": "本社:東京都港区 / 全国主要都市に拠点",
+      "avg_annual_income": 900,
+      "starting_salary": 24,
+      "annual_holidays": 123,
+      "employees": 18000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数百名/年イメージ",
+      "selection_process": "エントリー・Webテスト・グループワーク・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 31,
+    "fields": {
+      "name": "本田技研工業株式会社",
+      "url": "https://www.honda.co.jp/",
+      "description": "四輪車・二輪車・パワープロダクツなどを世界中で展開するモビリティメーカーです。",
+      "departments": [1, 2, 3],
+      "area": "本社: 東京都港区 / 栃木・埼玉・三重などに主要拠点",
+      "avg_annual_income": 800,
+      "starting_salary": 23,
+      "annual_holidays": 121,
+      "employees": 45000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数百名/年イメージ",
+      "selection_process": "エントリーシート・Webテスト・面接（複数回）",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 32,
+    "fields": {
+      "name": "株式会社SUBARU",
+      "url": "https://www.subaru.co.jp/",
+      "description": "自動車事業と航空宇宙事業を展開し、安全性能に強みを持つメーカーです。",
+      "departments": [1, 2, 3],
+      "area": "本社: 東京都渋谷区 / 群馬県太田市などに生産拠点",
+      "avg_annual_income": 780,
+      "starting_salary": 23,
+      "annual_holidays": 121,
+      "employees": 17000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十〜数百名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 33,
+    "fields": {
+      "name": "ヤマハ発動機株式会社",
+      "url": "https://global.yamaha-motor.com/jp/",
+      "description": "二輪車やマリン製品、産業用ロボットなどを手がけるモビリティ・機械メーカーです。",
+      "departments": [1, 2, 3],
+      "area": "本社: 静岡県磐田市",
+      "avg_annual_income": 750,
+      "starting_salary": 23,
+      "annual_holidays": 121,
+      "employees": 52000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
+    }
+  },
+  {
+    "model": "shiokara.company",
+    "pk": 34,
+    "fields": {
+      "name": "川崎重工業株式会社",
+      "url": "https://www.khi.co.jp/",
+      "description": "航空宇宙、エネルギー・環境プラント、鉄道車両、産業ロボットなど多様な製品を展開する重工メーカーです。",
+      "departments": [1, 2, 5],
+      "area": "本社: 兵庫県神戸市 / 各地に工場・事業所",
+      "avg_annual_income": 820,
+      "starting_salary": 23,
+      "annual_holidays": 120,
+      "employees": 36000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十〜数百名/年イメージ",
+      "selection_process": "エントリーシート・Webテスト・面接（複数回）",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 35,
     "fields": {
-      "name": "デジタルクリエイトスタジオ株式会社",
-      "url": null,
-      "description": "スマホアプリやゲーム、XRコンテンツの企画・開発を行うエンタメ系ソフトウェア企業です。",
-      "departments": [3]
+      "name": "オークマ株式会社",
+      "url": "https://www.okuma.co.jp/",
+      "description": "工作機械の開発・製造を行い、世界のモノづくりを支えるメーカーです。",
+      "departments": [1, 2, 3],
+      "area": "本社: 愛知県丹羽郡大口町 / 愛知県内に拠点",
+      "avg_annual_income": 700,
+      "starting_salary": 22,
+      "annual_holidays": 121,
+      "employees": 3500,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 36,
     "fields": {
-      "name": "先進モーションシステムズ株式会社",
-      "url": null,
-      "description": "産業用ロボットや自動搬送機の機構設計・制御アルゴリズム開発を行う機械系エンジニアリング企業です。",
-      "departments": [1, 2, 3]
+      "name": "DMG森精機株式会社",
+      "url": "https://www.dmgmori.co.jp/",
+      "description": "工作機械・自動化システムを提供し、スマートファクトリー化を支援するメーカーです。",
+      "departments": [1, 2, 3],
+      "area": "本社: 奈良県大和郡山市 / 名古屋・伊賀などに拠点",
+      "avg_annual_income": 780,
+      "starting_salary": 23,
+      "annual_holidays": 122,
+      "employees": 12000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十名/年イメージ",
+      "selection_process": "エントリー・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 37,
     "fields": {
-      "name": "マイクログリッドエナジー株式会社",
-      "url": null,
-      "description": "再生可能エネルギーと蓄電池を組み合わせたマイクログリッドシステムの設計・運用を行う企業です。",
-      "departments": [1, 2, 5]
+      "name": "トヨタシステムズ株式会社",
+      "url": "https://www.toyota-systems.com/",
+      "description": "トヨタグループ向けのシステム開発やITインフラ構築を担うIT企業です。",
+      "departments": [2, 3],
+      "area": "本社: 愛知県名古屋市 / 東京オフィスなど",
+      "avg_annual_income": 700,
+      "starting_salary": 23,
+      "annual_holidays": 122,
+      "employees": 3000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "ITエンジニア数十名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・面接（複数回）",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 38,
     "fields": {
-      "name": "ライフサイエンスデータソリューション株式会社",
-      "url": null,
-      "description": "バイオ実験データや医療データの解析基盤を構築するライフサイエンス×ITの融合企業です。",
-      "departments": [3, 4]
+      "name": "豊田通商株式会社",
+      "url": "https://www.toyota-tsusho.com/",
+      "description": "自動車関連を中心に、金属・化学品・エネルギーなど多様な分野で事業を行う総合商社です。",
+      "departments": [2, 3, 4, 5],
+      "area": "本社: 愛知県名古屋市 / 東京本社ほか海外拠点多数",
+      "avg_annual_income": 1000,
+      "starting_salary": 25,
+      "annual_holidays": 120,
+      "employees": 8000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "総合職・技術職あわせて数十名/年イメージ",
+      "selection_process": "エントリーシート・Webテスト・面接（複数回）",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 39,
     "fields": {
-      "name": "スマートマテリアルテクノロジーズ株式会社",
-      "url": null,
-      "description": "機能性高分子やスマート材料の開発・評価を行うマテリアル系スタートアップです。",
-      "departments": [1, 4]
+      "name": "中部電力株式会社",
+      "url": "https://www.chuden.co.jp/",
+      "description": "中部地域を中心に電力の供給とエネルギー関連サービスを提供する電力会社です。",
+      "departments": [1, 2, 5],
+      "area": "本社: 愛知県名古屋市 / 中部エリア各地に事業所",
+      "avg_annual_income": 800,
+      "starting_salary": 22,
+      "annual_holidays": 120,
+      "employees": 30000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系・事務系あわせて数十〜数百名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 40,
     "fields": {
-      "name": "シティインフラプランナーズ株式会社",
-      "url": null,
-      "description": "道路・橋梁・上下水道などの社会インフラの計画・設計・維持管理を行うコンサルティング企業です。",
-      "departments": [1, 5]
+      "name": "東海旅客鉄道株式会社（JR東海）",
+      "url": "https://jr-central.co.jp/",
+      "description": "東海道新幹線を中心に、東海地域の鉄道輸送を担う鉄道会社です。",
+      "departments": [1, 2, 5],
+      "area": "本社: 愛知県名古屋市 / 東海エリア各地に拠点",
+      "avg_annual_income": 750,
+      "starting_salary": 22,
+      "annual_holidays": 120,
+      "employees": 30000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十〜数百名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・面接（複数回）",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 41,
     "fields": {
-      "name": "クラウドロボティクスラボ株式会社",
-      "url": null,
-      "description": "クラウド連携型ロボットシステムや遠隔操作基盤の開発を行うロボットソフトウェア企業です。",
-      "departments": [1, 2, 3]
+      "name": "名古屋鉄道株式会社",
+      "url": "https://www.meitetsu.co.jp/",
+      "description": "愛知・岐阜エリアを中心に鉄道・バス・不動産・レジャー事業を展開する企業です。",
+      "departments": [1, 2, 5],
+      "area": "本社: 愛知県名古屋市",
+      "avg_annual_income": 650,
+      "starting_salary": 21,
+      "annual_holidays": 120,
+      "employees": 5000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系・総合職あわせて数十名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 42,
     "fields": {
-      "name": "エコケミカルソリューションズ株式会社",
-      "url": null,
-      "description": "環境負荷低減を目的としたコーティング剤・洗浄剤などの開発を行うケミカル企業です。",
-      "departments": [4]
+      "name": "日本ガイシ株式会社",
+      "url": "https://www.ngk.co.jp/",
+      "description": "セラミックス技術をベースに、自動車部品や電子部品、電力関連機器を提供するメーカーです。",
+      "departments": [1, 2, 4],
+      "area": "本社: 愛知県名古屋市 / 愛知県内に工場・研究所",
+      "avg_annual_income": 780,
+      "starting_salary": 23,
+      "annual_holidays": 123,
+      "employees": 4800,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十名/年イメージ",
+      "selection_process": "エントリーシート・Webテスト・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 43,
     "fields": {
-      "name": "ヒューマンセンタードデザイン株式会社",
-      "url": null,
-      "description": "公共施設やオフィス空間のユーザビリティを重視した設計・コンサルティングを行う企業です。",
-      "departments": [3, 5]
+      "name": "日東電工株式会社",
+      "url": "https://www.nitto.com/jp/ja/",
+      "description": "産業用テープや機能性フィルムなどを提供し、電子機器・自動車・医療など幅広い分野を支えるメーカーです。",
+      "departments": [2, 3, 4],
+      "area": "本社: 大阪府大阪市 / 三重・静岡などに拠点",
+      "avg_annual_income": 850,
+      "starting_salary": 23,
+      "annual_holidays": 123,
+      "employees": 30000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十名/年イメージ",
+      "selection_process": "エントリー・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 44,
     "fields": {
-      "name": "アナリティクスエンジン株式会社",
-      "url": null,
-      "description": "製造業や物流業向けにデータ分析・最適化アルゴリズムを提供するAIソリューション企業です。",
-      "departments": [2, 3]
+      "name": "オムロン株式会社",
+      "url": "https://www.omron.com/jp/ja/",
+      "description": "センシング・制御技術を活かし、FA機器やヘルスケア機器、社会システムなどを提供するメーカーです。",
+      "departments": [1, 2, 3],
+      "area": "本社: 京都府京都市 / 京都・滋賀などに拠点",
+      "avg_annual_income": 800,
+      "starting_salary": 23,
+      "annual_holidays": 125,
+      "employees": 30000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十〜数百名/年イメージ",
+      "selection_process": "エントリーシート・Webテスト・面接（複数回）",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 45,
     "fields": {
-      "name": "ネオバイオプロセス株式会社",
-      "url": null,
-      "description": "バイオリアクターや発酵プロセスのスケールアップ設計・制御を行うバイオプロセス企業です。",
-      "departments": [1, 4]
+      "name": "TIS株式会社",
+      "url": "https://www.tis.co.jp/",
+      "description": "金融・製造・流通など幅広い業界向けにシステムインテグレーションやアウトソーシングを行うIT企業です。",
+      "departments": [2, 3],
+      "area": "本社: 東京都新宿区 / 大阪・名古屋などに拠点",
+      "avg_annual_income": 750,
+      "starting_salary": 23,
+      "annual_holidays": 122,
+      "employees": 20000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "ITエンジニア・コンサル系数百名/年イメージ",
+      "selection_process": "エントリーシート・Webテスト・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 46,
     "fields": {
-      "name": "モビリティインテリジェンス株式会社",
-      "url": null,
-      "description": "自動運転・高度運転支援システム向けの認識・経路計画ソフトウェアを開発する企業です。",
-      "departments": [1, 2, 3]
+      "name": "三菱ケミカル株式会社",
+      "url": "https://www.m-chemical.co.jp/",
+      "description": "高機能化学品や樹脂、炭素製品などを展開する総合化学メーカーです。",
+      "departments": [1, 4, 5],
+      "area": "本社: 東京都千代田区 / 茨城・広島などに研究・生産拠点",
+      "avg_annual_income": 850,
+      "starting_salary": 24,
+      "annual_holidays": 120,
+      "employees": 40000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "研究開発・生産技術系数十名/年イメージ",
+      "selection_process": "エントリーシート・Webテスト・面接（複数回）",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 47,
     "fields": {
-      "name": "アーバンエコロジーデザイン株式会社",
-      "url": null,
-      "description": "都市の緑地計画や環境評価を行い、サステナブルな街づくりを支援するコンサルティング企業です。",
-      "departments": [4, 5]
+      "name": "信越化学工業株式会社",
+      "url": "https://www.shinetsu.co.jp/jp/",
+      "description": "半導体シリコンや塩ビ・シリコーンなどの素材を提供する総合化学メーカーです。",
+      "departments": [1, 2, 4],
+      "area": "本社: 東京都千代田区 / 長野・群馬などに主力工場",
+      "avg_annual_income": 1000,
+      "starting_salary": 24,
+      "annual_holidays": 120,
+      "employees": 24000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 48,
     "fields": {
-      "name": "センシングプラットフォーム株式会社",
-      "url": null,
-      "description": "IoTセンサーとクラウドを組み合わせたモニタリングシステムを開発するエレクトロニクス企業です。",
-      "departments": [2, 3]
+      "name": "日本特殊陶業株式会社",
+      "url": "https://www.ngkntk.co.jp/",
+      "description": "スパークプラグやセラミック部品を中心に、自動車・産業機器向け製品を提供するメーカーです。",
+      "departments": [1, 2, 4],
+      "area": "本社: 愛知県名古屋市 / 愛知県内に工場・研究所",
+      "avg_annual_income": 750,
+      "starting_salary": 23,
+      "annual_holidays": 123,
+      "employees": 7000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十名/年イメージ",
+      "selection_process": "エントリーシート・Webテスト・面接",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 49,
     "fields": {
-      "name": "構造デザインラボ株式会社",
-      "url": null,
-      "description": "建築構造や耐震補強の設計・解析を専門とする構造設計事務所です。",
-      "departments": [1, 5]
+      "name": "東京エレクトロン株式会社",
+      "url": "https://www.tel.com/jp/",
+      "description": "半導体製造装置やフラットパネルディスプレイ製造装置を提供するメーカーです。",
+      "departments": [1, 2, 3, 4],
+      "area": "本社: 東京都港区 / 宮城・熊本などに主力拠点",
+      "avg_annual_income": 1200,
+      "starting_salary": 25,
+      "annual_holidays": 125,
+      "employees": 15000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "技術系数十〜数百名/年イメージ",
+      "selection_process": "エントリーシート・適性検査・面接（複数回）",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   },
   {
     "model": "shiokara.company",
     "pk": 50,
     "fields": {
-      "name": "デバイスインテグレーションテクノロジーズ株式会社",
-      "url": null,
-      "description": "半導体デバイスやセンサの実装・評価を行うエレクトロニクス系企業です。",
-      "departments": [1, 2, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 51,
-    "fields": {
-      "name": "ヘルスケアIoTソリューション株式会社",
-      "url": null,
-      "description": "ウェアラブルデバイスや遠隔医療システムの企画・開発を行うヘルスケアIT企業です。",
-      "departments": [2, 3, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 52,
-    "fields": {
-      "name": "アドバンストシミュレーションサービス株式会社",
-      "url": null,
-      "description": "流体・構造・熱解析などのCAEシミュレーションサービスを提供するエンジニアリング企業です。",
-      "departments": [1, 2]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 53,
-    "fields": {
-      "name": "ニューラルインターフェース研究所株式会社",
-      "url": null,
-      "description": "脳波や生体信号の計測・解析技術を用いたインターフェース研究開発を行う企業です。",
-      "departments": [2, 3, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 54,
-    "fields": {
-      "name": "スマートファクトリーオートメーション株式会社",
-      "url": null,
-      "description": "生産ラインの自動化や工場DXを支援するFAシステムインテグレーターです。",
-      "departments": [1, 2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 55,
-    "fields": {
-      "name": "アーバンモビリティデザイン株式会社",
-      "url": null,
-      "description": "LRTやBRTなど公共交通を含む都市交通システムの計画立案を行うコンサルティング企業です。",
-      "departments": [3, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 56,
-    "fields": {
-      "name": "アプライドナノケミストリー株式会社",
-      "url": null,
-      "description": "ナノ粒子や機能性表面処理の研究開発を行う応用化学系企業です。",
-      "departments": [4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 57,
-    "fields": {
-      "name": "ディープラーニングソリューションズ株式会社",
-      "url": null,
-      "description": "画像認識や自然言語処理などのディープラーニング技術を企業向けに導入支援するAIベンチャーです。",
-      "departments": [3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 58,
-    "fields": {
-      "name": "レジリエントインフラマネジメント株式会社",
-      "url": null,
-      "description": "災害リスク評価やBCP策定支援を行うインフラ・防災コンサルティング企業です。",
-      "departments": [5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 59,
-    "fields": {
-      "name": "スマートビルシステムズ株式会社",
-      "url": null,
-      "description": "ビル設備の監視制御や省エネ最適化を行うビルオートメーション企業です。",
-      "departments": [2, 3, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 60,
-    "fields": {
-      "name": "アグリテックソリューションズ株式会社",
-      "url": null,
-      "description": "センサやドローンを用いた精密農業やスマート農業システムを開発するアグリテック企業です。",
-      "departments": [1, 2, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 61,
-    "fields": {
-      "name": "次世代エネルギー研究開発株式会社",
-      "url": null,
-      "description": "水素エネルギーや蓄電システムなど次世代エネルギー技術の研究開発を行う企業です。",
-      "departments": [1, 2, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 62,
-    "fields": {
-      "name": "データドリブンマニュファクチャリング株式会社",
-      "url": null,
-      "description": "製造現場のデータ収集・可視化・最適化を支援するスマートファクトリー向けソリューション企業です。",
-      "departments": [1, 2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 63,
-    "fields": {
-      "name": "ロボットサービスデザイン株式会社",
-      "url": null,
-      "description": "サービスロボットの導入コンサルティングやアプリケーション開発を行うロボットSI企業です。",
-      "departments": [1, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 64,
-    "fields": {
-      "name": "スマートホームデバイス株式会社",
-      "url": null,
-      "description": "スマートスピーカーやIoT家電などの家庭向けデバイスを企画・開発するエレクトロニクス企業です。",
-      "departments": [2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 65,
-    "fields": {
-      "name": "構造ヘルスモニタリング技術研究所株式会社",
-      "url": null,
-      "description": "橋梁やトンネルなどの構造物に対するセンサ計測・劣化診断技術を提供する企業です。",
-      "departments": [1, 2, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 66,
-    "fields": {
-      "name": "クラウドセキュアインフラ株式会社",
-      "url": null,
-      "description": "クラウド基盤構築やゼロトラストネットワーク設計などセキュリティに特化したインフラ企業です。",
-      "departments": [2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 67,
-    "fields": {
-      "name": "マテリアルインフォマティクスソリューション株式会社",
-      "url": null,
-      "description": "材料開発に機械学習を適用し、新素材の探索やプロセス最適化を支援するMI企業です。",
-      "departments": [3, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 68,
-    "fields": {
-      "name": "都市防災システムデザイン株式会社",
-      "url": null,
-      "description": "洪水・地震などの災害シミュレーションや避難計画の立案を行う防災コンサルティング企業です。",
-      "departments": [3, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 69,
-    "fields": {
-      "name": "ファインケミカルプロダクツ株式会社",
-      "url": null,
-      "description": "電子材料や医薬中間体など高付加価値なファインケミカル製品を開発・製造する企業です。",
-      "departments": [1, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 70,
-    "fields": {
-      "name": "メカトロニクスイノベーションズ株式会社",
-      "url": null,
-      "description": "精密機構と制御技術を組み合わせたメカトロ製品の設計・試作を行うエンジニアリング企業です。",
-      "departments": [1, 2]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 71,
-    "fields": {
-      "name": "クラウドバックエンド開発株式会社",
-      "url": null,
-      "description": "WebサービスやモバイルアプリのバックエンドAPI・認証基盤の設計・実装を行うソフトウェア企業です。",
-      "departments": [3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 72,
-    "fields": {
-      "name": "スマートビルエンジニアリング株式会社",
-      "url": null,
-      "description": "ビル設備のBEMS設計やIoTセンサ導入による省エネ・快適性向上を支援する企業です。",
-      "departments": [2, 3, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 73,
-    "fields": {
-      "name": "ライフサイエンスインスツルメンツ株式会社",
-      "url": null,
-      "description": "分析装置や実験用ロボットなどライフサイエンス向け機器の開発を行う企業です。",
-      "departments": [1, 2, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 74,
-    "fields": {
-      "name": "モバイルアプリケーションスタジオ株式会社",
-      "url": null,
-      "description": "iOS・Android向けの業務アプリやコンシューマアプリを受託開発するソフトウェア企業です。",
-      "departments": [3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 75,
-    "fields": {
-      "name": "交通シミュレーションラボ株式会社",
-      "url": null,
-      "description": "自動車交通・歩行者流のシミュレーションを用いて都市交通計画を支援するコンサルティング企業です。",
-      "departments": [3, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 76,
-    "fields": {
-      "name": "エッジコンピューティングシステムズ株式会社",
-      "url": null,
-      "description": "エッジデバイス上で動作するAI推論・制御システムの設計・開発を行う企業です。",
-      "departments": [2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 77,
-    "fields": {
-      "name": "バーチャルエンジニアリングスタジオ株式会社",
-      "url": null,
-      "description": "VR/ARを活用した設計レビューや遠隔作業支援システムを開発する企業です。",
-      "departments": [1, 3, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 78,
-    "fields": {
-      "name": "クリーンプロセスソリューション株式会社",
-      "url": null,
-      "description": "半導体・医薬などクリーン環境が必要な工場向けに洗浄プロセスや薬液の最適化を行う企業です。",
-      "departments": [1, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 79,
-    "fields": {
-      "name": "環境リスクアセスメント株式会社",
-      "url": null,
-      "description": "事業活動が環境へ与える影響の評価や対策立案を行う環境コンサルティング企業です。",
-      "departments": [4, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 80,
-    "fields": {
-      "name": "ソフトウェアクオリティエンジニアリング株式会社",
-      "url": null,
-      "description": "ソフトウェアテストや品質保証プロセスの設計・自動化を支援する企業です。",
-      "departments": [3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 81,
-    "fields": {
-      "name": "マルチモーダルAIラボ株式会社",
-      "url": null,
-      "description": "画像・音声・テキストを統合したマルチモーダルAIモデルの研究開発を行う企業です。",
-      "departments": [3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 82,
-    "fields": {
-      "name": "次世代モビリティプランニング株式会社",
-      "url": null,
-      "description": "MaaSやオンデマンドバスなど新しい交通サービスの設計・検証を行う企業です。",
-      "departments": [3, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 83,
-    "fields": {
-      "name": "アドバンストセラミックス株式会社",
-      "url": null,
-      "description": "電子部品や耐熱部材向けの高機能セラミックス材料を開発・製造する企業です。",
-      "departments": [1, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 84,
-    "fields": {
-      "name": "オプトエレクトロニクスデバイス株式会社",
-      "url": null,
-      "description": "レーザやフォトダイオードなど光デバイスの設計・評価を行う企業です。",
-      "departments": [2, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 85,
-    "fields": {
-      "name": "スマートウォーターマネジメント株式会社",
-      "url": null,
-      "description": "上下水道インフラの遠隔監視や漏水検知など水資源管理システムを提供する企業です。",
-      "departments": [2, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 86,
-    "fields": {
-      "name": "シビルエンジニアリングデザイン株式会社",
-      "url": null,
-      "description": "土木構造物の設計・解析や施工計画立案を行う土木系エンジニアリング企業です。",
-      "departments": [1, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 87,
-    "fields": {
-      "name": "インダストリアルUXスタジオ株式会社",
-      "url": null,
-      "description": "工場やプラントの監視画面・操作インターフェースのUX改善に特化したデザイン企業です。",
-      "departments": [3, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 88,
-    "fields": {
-      "name": "サイバーセキュリティインサイト株式会社",
-      "url": null,
-      "description": "脆弱性診断やSOC運用支援など企業向けサイバーセキュリティサービスを提供する企業です。",
-      "departments": [2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 89,
-    "fields": {
-      "name": "ヘルスケアデータアナリティクス株式会社",
-      "url": null,
-      "description": "医療・介護の現場データを活用した分析・予測モデルの構築を行う企業です。",
-      "departments": [3, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 90,
-    "fields": {
-      "name": "アドバンスドコンクリートテクノロジーズ株式会社",
-      "url": null,
-      "description": "高強度・高耐久コンクリートの配合設計や品質管理技術を提供する企業です。",
-      "departments": [1, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 91,
-    "fields": {
-      "name": "シミュレーションドリブンデザイン株式会社",
-      "url": null,
-      "description": "構造・熱・流体解析を活用した製品設計支援を行うCAEコンサルティング企業です。",
-      "departments": [1, 2]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 92,
-    "fields": {
-      "name": "スマートロジスティクスオペレーションズ株式会社",
-      "url": null,
-      "description": "倉庫内自動化や配送最適化システムをワンストップで提供するロジスティクス企業です。",
-      "departments": [1, 2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 93,
-    "fields": {
-      "name": "グリーンビルディングテクノロジーズ株式会社",
-      "url": null,
-      "description": "環境配慮型建材の活用やZEB設計など、サステナブル建築を支援する企業です。",
-      "departments": [4, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 94,
-    "fields": {
-      "name": "ヒューマンインタラクションデザイン研究所株式会社",
-      "url": null,
-      "description": "ヒューマンインタフェースやHCIの知見をもとに、製品・サービスのUI/UX設計を行う企業です。",
-      "departments": [3, 5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 95,
-    "fields": {
-      "name": "アドバンスドセンシングソリューション株式会社",
-      "url": null,
-      "description": "画像・LiDAR・慣性センサなどを組み合わせたセンシングシステムを開発する企業です。",
-      "departments": [1, 2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 96,
-    "fields": {
-      "name": "スマートアグリデザイン株式会社",
-      "url": null,
-      "description": "ビニールハウスや植物工場向けの環境制御システムや生育データ解析を行う企業です。",
-      "departments": [1, 2, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 97,
-    "fields": {
-      "name": "モバイルネットワークソリューションズ株式会社",
-      "url": null,
-      "description": "5G・ローカル5Gなどの無線ネットワーク設計やトラフィック最適化を行う企業です。",
-      "departments": [2, 3]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 98,
-    "fields": {
-      "name": "バイオインフォマティクスデザイン株式会社",
-      "url": null,
-      "description": "ゲノムデータやタンパク質構造データの解析・可視化ツールを開発する企業です。",
-      "departments": [3, 4]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 99,
-    "fields": {
-      "name": "レジリエントシティプランニング株式会社",
-      "url": null,
-      "description": "災害に強い都市構造やインフラ配置の検討を支援する都市計画コンサルティング企業です。",
-      "departments": [5]
-    }
-  },
-  {
-    "model": "shiokara.company",
-    "pk": 100,
-    "fields": {
-      "name": "クラウドネイティブソフトウェアアーキテクツ株式会社",
-      "url": null,
-      "description": "マイクロサービスやコンテナ技術を活用したクラウドネイティブなシステム設計・開発を行う企業です。",
-      "departments": [3]
+      "name": "株式会社サイバーエージェント",
+      "url": "https://www.cyberagent.co.jp/",
+      "description": "インターネット広告事業やメディア事業、ゲーム事業などを展開するIT企業です。",
+      "departments": [3],
+      "area": "本社: 東京都渋谷区",
+      "avg_annual_income": 800,
+      "starting_salary": 24,
+      "annual_holidays": 123,
+      "employees": 6000,
+      "internship_acceptance": "あり",
+      "hiring_quota": "エンジニア・デザイナ・プランナー系数十名/年イメージ",
+      "selection_process": "エントリー・コーディングテスト等・面接（複数回）",
+      "accepts_jitsumu_kunren": "不明",
+      "tut_recommendation": "不明",
+      "oncampus_briefing": "不明"
     }
   }
-
 ]

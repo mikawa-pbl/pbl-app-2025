@@ -46,7 +46,7 @@ def department_detail(request, short_name):
     }
     return render(request, "teams/shiokara/department_detail.html", context)
 
-
+'''
 def company_search(request):
     """
     企業検索ページ
@@ -85,6 +85,151 @@ def company_search(request):
         "companies": companies,
     }
     return render(request, "teams/shiokara/company_search.html", context)
+'''
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Q, Avg, Count  # ★ Count 追加
+from django.conf import settings
+from pathlib import Path
+import json
+
+from .models import Department, Company, CompanyReview
+
+DB_ALIAS = "shiokara"
+FIXTURE_PATH = Path(settings.BASE_DIR) / "shiokara" / "fixtures" / "company_reviews.json"
+
+# 勤務地カテゴリ → area のキーワード例
+AREA_KEYWORDS = {
+    "tokai": ["愛知", "岐阜", "三重", "静岡"],
+    "capital": ["東京", "神奈川", "千葉", "埼玉"],
+    "kansai": ["大阪", "京都", "兵庫", "滋賀", "奈良"],
+    "nationwide": ["全国", "全国勤務", "全国拠点"],
+}
+
+def company_search(request):
+    """
+    企業検索ページ
+    ・q: キーワード（企業名・紹介文から部分一致）
+    ・dept: 学科 short_name（複数可）
+    ・lab: 研究室大別コード ("1.2" など, 複数可)
+    ・area: 勤務地カテゴリ (tokai / capital / kansai / nationwide ...)
+    ・recommend: 1 なら推薦ありのみ
+    ・briefing: 1 なら学内説明会ありのみ
+    ・logic: "and" / "or" でフィルタ条件の結合を切り替え
+    ・sort: employees / starting_salary / annual_holidays / review_count
+    """
+
+    query = request.GET.get("q", "").strip()
+
+    # 学科（複数選択対応: ?dept=cs&dept=ee）
+    dept_shorts = request.GET.getlist("dept")  # ← 複数取る
+    # 研究室大別（"1.2" みたいなコードを前提）
+    lab_codes = request.GET.getlist("lab")
+
+    area_key = request.GET.get("area", "").strip()
+    recommend = request.GET.get("recommend", "").strip()  # "1" なら有り
+    briefing = request.GET.get("briefing", "").strip()    # "1" なら有り
+
+    filter_logic = request.GET.get("logic", "and")  # and / or
+    sort = request.GET.get("sort", "name")          # デフォルトは名前順
+
+    # ベースとなるクエリセット
+    companies = (
+        Company.objects.using(DB_ALIAS)
+        .all()
+        .prefetch_related("departments")
+        .annotate(
+            review_count=Count("companyreview")  # ★ レビュー数
+        )
+    )
+
+    # ① キーワード検索
+    if query:
+        companies = companies.filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        )
+
+    # ② フィルタ条件を Q のリストとして用意
+    filter_qs = []
+
+    # --- 学科フィルタ (ORでまとめた1つのQにする) ---
+    if dept_shorts:
+        q_dept = Q()
+        for short in dept_shorts:
+            q_dept |= Q(departments__short_name=short)
+        filter_qs.append(q_dept)
+
+    # --- 研究室大別フィルタ (oncampus_briefingにコードが含まれるか) ---
+    # oncampus_briefing が JSONField(List[str]) の想定で contains=[code] を使用
+    if lab_codes:
+        q_lab = Q()
+        for code in lab_codes:
+            # JSON配列に特定の文字列が含まれる場合
+            q_lab |= Q(oncampus_briefing__contains=[code])
+        filter_qs.append(q_lab)
+
+    # --- 勤務地フィルタ ---
+    if area_key:
+        keywords = AREA_KEYWORDS.get(area_key)
+        if keywords:
+            q_area = Q()
+            for kw in keywords:
+                q_area |= Q(area__icontains=kw)
+            filter_qs.append(q_area)
+
+    # --- 推薦の有無 ---
+    if recommend == "1":
+        filter_qs.append(Q(tut_recommendation=1))
+
+    # --- 学内説明会の有無 ---
+    if briefing == "1":
+        # 「なにかしら oncampus_briefing に入っている企業」
+        # JSONField で空リスト以外をチェックしたい場合は
+        # 長さ判定もありだが、簡易には空文字との比較でもOK
+        filter_qs.append(~Q(oncampus_briefing=[]))
+
+    # ③ AND / OR モードでフィルタをまとめて適用
+    if filter_qs:
+        combined_q = filter_qs[0]
+        for q in filter_qs[1:]:
+            if filter_logic == "or":
+                combined_q |= q
+            else:
+                combined_q &= q
+        companies = companies.filter(combined_q).distinct()
+
+    # ④ ソート
+    if sort == "employees":
+        companies = companies.order_by("-employees")
+    elif sort == "starting_salary":
+        companies = companies.order_by("-starting_salary")
+    elif sort == "annual_holidays":
+        companies = companies.order_by("-annual_holidays")
+    elif sort == "review_count":
+        companies = companies.order_by("-review_count", "name")
+    else:
+        sort = "name"
+        companies = companies.order_by("name")
+
+    # 学科プルダウン用
+    departments = Department.objects.using(DB_ALIAS).all()
+
+    context = {
+        "query": query,
+        "departments": departments,
+
+        # 選択状態をテンプレートで再現する用
+        "dept_shorts": dept_shorts,
+        "lab_codes": lab_codes,
+        "area_key": area_key,
+        "recommend": recommend,
+        "briefing": briefing,
+        "filter_logic": filter_logic,
+        "sort": sort,
+
+        "companies": companies,
+    }
+    return render(request, "teams/shiokara/company_search.html", context)
+
 
 def company_detail(request, pk):
     company = get_object_or_404(Company.objects.using("shiokara"), pk=pk)

@@ -748,20 +748,5 @@
       "rating": 5,
       "created_at": "2025-12-04T00:04:10Z"
     }
-  },
-  {
-    "model": "shiokara.companyreview",
-    "pk": 52,
-    "fields": {
-      "company": 14,
-      "grade": "",
-      "department_name": "",
-      "lab_field": "",
-      "gender": "no_answer",
-      "high_school": "",
-      "comment": "",
-      "rating": 2,
-      "created_at": "2025-12-04T04:39:50.395958+00:00"
-    }
   }
 ]

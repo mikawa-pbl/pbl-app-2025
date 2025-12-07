@@ -107,3 +107,20 @@ class ChatRoomModelTests(TestCase):
         self.assertEqual(len(data["messages"]), 1)
         self.assertEqual(data["messages"][0]["id"], m2.id)
         self.assertEqual(data["messages"][0]["content"], "Msg 2")
+
+    def test_message_manager_for_room(self):
+        """ChatMessageManager.for_roomのテスト (Refactoring Red)."""
+        room = ChatRoom.objects.using("team_terrace").create(title="Manager Test Room")
+        from .models import ChatMessage
+
+        m1 = ChatMessage.objects.using("team_terrace").create(room=room, content="Msg 1")
+        m2 = ChatMessage.objects.using("team_terrace").create(room=room, content="Msg 2")
+
+        # Room指定のみ
+        messages = ChatMessage.objects.using("team_terrace").for_room(room)
+        self.assertEqual(len(messages), 2)
+
+        # after_id 指定
+        messages_after = ChatMessage.objects.using("team_terrace").for_room(room, after_id=m1.id)
+        self.assertEqual(len(messages_after), 1)
+        self.assertEqual(messages_after[0].id, m2.id)

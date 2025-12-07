@@ -72,11 +72,8 @@ def get_messages(request, room_id):
     from .models import ChatMessage
 
     room = get_object_or_404(ChatRoom.objects.using("team_terrace"), uuid=room_id)
-    messages = ChatMessage.objects.using("team_terrace").filter(room=room).order_by("created_at")
-
     after_id = request.GET.get("after_id")
-    if after_id:
-        messages = messages.filter(id__gt=after_id)
+    messages = ChatMessage.objects.using("team_terrace").for_room(room, after_id)
 
     data = [{"id": m.id, "content": m.content, "is_question": m.is_question} for m in messages]
     return JsonResponse({"messages": data})

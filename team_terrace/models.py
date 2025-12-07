@@ -34,3 +34,25 @@ class ChatRoom(models.Model):
             str: チャットルームのタイトル.
         """
         return self.title
+
+class ChatMessage(models.Model):
+    """チャットメッセージを表すモデル.
+
+    Attributes:
+        room (ChatRoom): メッセージが属するチャットルーム.
+        content (str): メッセージの内容.
+        created_at (datetime): メッセージの作成日時.
+        is_question (bool): 質問かどうかを示すフラグ.
+    """
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_question = models.BooleanField(default=False)
+
+    def __str__(self):
+        """メッセージの文字列表現を返す.
+
+        Returns:
+            str: メッセージの内容（先頭20文字）.
+        """
+        return self.content[:20]

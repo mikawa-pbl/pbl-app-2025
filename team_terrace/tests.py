@@ -45,3 +45,18 @@ class ChatRoomModelTests(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Test Room View")
+
+    def test_create_chat_message(self):
+        """ChatMessageが正しく作成できるかテスト."""
+        room = ChatRoom.objects.using('team_terrace').create(title="Message Test Room")
+        
+        # Test creating a message via model directly (though we don't have the model yet)
+        # Since we are TDD, this test is expected to fail with NameError until model is defined
+        from .models import ChatMessage
+        message = ChatMessage.objects.using('team_terrace').create(
+            room=room,
+            content="Hello World"
+        )
+        self.assertEqual(message.content, "Hello World")
+        self.assertEqual(message.room, room)
+        self.assertFalse(message.is_question)

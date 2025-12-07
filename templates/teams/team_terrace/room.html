@@ -47,13 +47,21 @@
         }
 
         // メッセージ一覧を取得
+        let lastMessageId = 0;
         async function fetchMessages() {
             try {
-                const res = await fetch(`/team_terrace/api/room/${roomId}/messages/list/`);
+                let url = `/team_terrace/api/room/${roomId}/messages/list/`;
+                if (lastMessageId > 0) {
+                    url += `?after_id=${lastMessageId}`;
+                }
+
+                const res = await fetch(url);
                 if (res.ok) {
                     const data = await res.json();
-                    chatContainer.innerHTML = ''; // クリア
-                    data.messages.forEach(appendMessage);
+                    if (data.messages.length > 0) {
+                        data.messages.forEach(appendMessage);
+                        lastMessageId = data.messages[data.messages.length - 1].id;
+                    }
                 }
             } catch (error) {
                 console.error('Failed to fetch messages:', error);
@@ -108,6 +116,9 @@
 
         // 初回ロード
         fetchMessages();
+
+        // ポーリング開始 (2秒間隔)
+        setInterval(fetchMessages, 2000);
     </script>
 </body>
 </html>

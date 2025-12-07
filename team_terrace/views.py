@@ -51,10 +51,11 @@ def post_message(request, room_id):
         room = get_object_or_404(ChatRoom.objects.using("team_terrace"), uuid=room_id)
         data = json.loads(request.body)
         content = data.get("content")
+        is_question = data.get("is_question", False)
 
         if content:
-            msg = ChatMessage.objects.using("team_terrace").create(room=room, content=content)
-            return JsonResponse({"id": msg.id, "content": msg.content}, status=201)
+            msg = ChatMessage.objects.using("team_terrace").create(room=room, content=content, is_question=is_question)
+            return JsonResponse({"id": msg.id, "content": msg.content, "is_question": msg.is_question}, status=201)
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 

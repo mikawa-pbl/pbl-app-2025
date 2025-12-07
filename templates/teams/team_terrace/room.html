@@ -27,8 +27,23 @@
 
     <div id="input-area">
         {% csrf_token %}
+        <label style="display: flex; align-items: center; margin-right: 5px;">
+            <input type="checkbox" id="is-question"> 質問
+        </label>
         <input type="text" id="message-input" placeholder="メッセージを入力...">
         <button id="send-button">送信</button>
+    </div>
+
+    <div id="thread-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>スレッド</h2>
+            <div id="thread-messages"></div>
+            <div style="margin-top: 10px; display: flex; gap: 5px;">
+                <input type="text" id="reply-input" style="flex: 1; padding: 5px;" placeholder="返信...">
+                <button onclick="sendReply()">返信</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -36,13 +51,33 @@
         const chatContainer = document.getElementById('chat-container');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
+        const isQuestionCheckbox = document.getElementById('is-question');
+        let currentThreadId = null;
 
         // メッセージを表示する関数
         function appendMessage(msg) {
+            // 重複チェック: 既に同じIDのメッセージがある場合は追加しない
+            const existingMsg = document.getElementById(`msg-${msg.id}`);
+            if (existingMsg) return;
+
             const div = document.createElement('div');
+            div.id = `msg-${msg.id}`; // IDを付与
             div.className = `message ${msg.is_question ? 'question' : ''}`;
             div.textContent = msg.content;
+            
+            if (msg.is_question) {
+                const icon = document.createElement('span');
+                icon.className = 'thread-icon';
+                icon.textContent = '💬 スレッド';
+                icon.onclick = () => openThread(msg.id);
+                div.appendChild(icon);
+            }
+            
             chatContainer.appendChild(div);
+            // 新しいメッセージのIDが現在のlastMessageIdより大きい場合更新
+            if (msg.id > lastMessageId) {
+                lastMessageId = msg.id;
+            }
             chatContainer.scrollTop = chatContainer.scrollHeight; // 最下部へスクロール
         }
 
@@ -60,7 +95,7 @@
                     const data = await res.json();
                     if (data.messages.length > 0) {
                         data.messages.forEach(appendMessage);
-                        lastMessageId = data.messages[data.messages.length - 1].id;
+                        // lastMessageId is updated in appendMessage
                     }
                 }
             } catch (error) {
@@ -71,6 +106,7 @@
         // メッセージ送信
         async function sendMessage() {
             const content = messageInput.value.trim();
+            const isQuestion = isQuestionCheckbox.checked;
             if (!content) return;
 
             try {
@@ -80,11 +116,12 @@
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ content: content })
+                    body: JSON.stringify({ content: content, is_question: isQuestion })
                 });
 
                 if (res.ok) {
                     messageInput.value = '';
+                    isQuestionCheckbox.checked = false;
                     const newMsg = await res.json();
                     appendMessage(newMsg);
                 }
@@ -92,6 +129,73 @@
                 console.error('Failed to send message:', error);
             }
         }
+
+        // --- Thread Modal Logic ---
+        const modal = document.getElementById('thread-modal');
+        const threadMessages = document.getElementById('thread-messages');
+        const replyInput = document.getElementById('reply-input');
+
+        async function openThread(messageId) {
+            currentThreadId = messageId;
+            modal.style.display = "block";
+            threadMessages.innerHTML = 'Loading...';
+            
+            try {
+                const res = await fetch(`/team_terrace/api/messages/${messageId}/replies/list/`);
+                if (res.ok) {
+                    const data = await res.json();
+                    threadMessages.innerHTML = ''; // Clear loading
+                    if (data.replies.length === 0) {
+                        threadMessages.innerHTML = '<p>返信はまだありません。</p>';
+                    } else {
+                        data.replies.forEach(r => {
+                            const div = document.createElement('div');
+                            div.className = 'reply';
+                            div.textContent = r.content;
+                            threadMessages.appendChild(div);
+                        });
+                    }
+                }
+            } catch (error) {
+                threadMessages.textContent = 'Error loading replies.';
+            }
+        }
+
+        function closeModal() {
+            modal.style.display = "none";
+            currentThreadId = null;
+        }
+
+        async function sendReply() {
+            if (!currentThreadId) return;
+            const content = replyInput.value.trim();
+            if (!content) return;
+
+            try {
+                const res = await fetch(`/team_terrace/api/messages/${currentThreadId}/replies/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ content: content })
+                });
+
+                if (res.ok) {
+                    replyInput.value = '';
+                    openThread(currentThreadId); // Reload replies
+                }
+            } catch (error) {
+                alert('Error sending reply');
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+        // --------------------------
 
         // CSRFトークン取得のためのヘルパー関数
         function getCookie(name) {

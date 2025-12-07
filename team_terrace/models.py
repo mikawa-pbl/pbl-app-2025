@@ -77,6 +77,25 @@ class ChatMessage(models.Model):
 
     objects = ChatMessageQuerySet.as_manager()
 
+    def reply(self, content: str):
+        """スレッドへの返信を作成する.
+
+        Args:
+            content (str): 返信内容.
+
+        Returns:
+            ThreadReply: 作成された返信オブジェクト.
+        """
+        return self.replies.create(content=content)
+
+    def get_replies(self):
+        """スレッドの返信一覧を取得する.
+
+        Returns:
+            QuerySet: 返信のクエリセット.
+        """
+        return self.replies.all().order_by('created_at')
+
     def __str__(self):
         """メッセージの文字列表現を返す.
 
@@ -84,3 +103,22 @@ class ChatMessage(models.Model):
             str: メッセージの内容（先頭20文字）.
         """
         return self.content[:20]
+
+
+class ThreadReply(models.Model):
+    """スレッドへの返信を表すモデル.
+
+    Attributes:
+        parent_message (ChatMessage): 返信元のメッセージ（質問）.
+        content (str): 返信内容.
+        created_at (datetime): 作成日時.
+    """
+    parent_message = models.ForeignKey(
+        ChatMessage, on_delete=models.CASCADE, related_name='replies'
+    )
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        """返信の文字列表現を返す."""
+        return f"Reply to {self.parent_message_id}: {self.content[:20]}"

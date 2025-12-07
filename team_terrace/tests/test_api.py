@@ -81,6 +81,36 @@ class ThreadAPITests(TestCase):
         self.assertEqual(reply.content, "Answer via API")
         self.assertEqual(reply.parent_message, self.message)
 
+    def test_post_like(self):
+        """いいね投稿APIのテスト."""
+        url = reverse("team_terrace:post_like", args=[self.message.id])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 201)
+
+        data = response.json()
+        self.assertEqual(data["like_count"], 1)
+
+        # DB確認
+        self.message.refresh_from_db()
+        self.assertEqual(self.message.like_count, 1)
+
+    def test_post_unlike(self):
+        """いいね解除APIのテスト."""
+        # 先にいいねしておく
+        self.message.like_count = 1
+        self.message.save()
+
+        url = reverse("team_terrace:post_unlike", args=[self.message.id])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertEqual(data["like_count"], 0)
+
+        # DB確認
+        self.message.refresh_from_db()
+        self.assertEqual(self.message.like_count, 0)
+
     def test_get_replies(self):
         """返信一覧取得APIのテスト."""
         ThreadReply.objects.using("team_terrace").create(parent_message=self.message, content="Reply 1")

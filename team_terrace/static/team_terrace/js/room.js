@@ -33,6 +33,30 @@ function appendMessage(msg) {
   contentSpan.textContent = msg.content;
   div.appendChild(contentSpan);
 
+  // Like Button
+  const likeBtn = document.createElement('button');
+  likeBtn.className = 'like-btn';
+  likeBtn.onclick = () => toggleLike(msg.id);
+
+  const heartIcon = document.createElement('span');
+  heartIcon.className = 'heart-icon';
+  heartIcon.textContent = '♥'; // or simple heart character
+
+  const countSpan = document.createElement('span');
+  countSpan.className = 'like-count';
+  countSpan.id = `like-count-${msg.id}`;
+  countSpan.textContent = '0';
+
+  likeBtn.appendChild(heartIcon);
+  likeBtn.appendChild(countSpan);
+  div.appendChild(likeBtn);
+
+  // Check if I liked this message
+  const myLikes = getMyLikes();
+  if (myLikes.includes(msg.id)) {
+    likeBtn.classList.add('liked');
+  }
+
   if (msg.is_question) {
     const icon = document.createElement('span');
     icon.className = 'thread-icon';
@@ -59,6 +83,110 @@ function appendMessage(msg) {
   });
 
   updateEmptyState();
+}
+
+// --- Like Feature ---
+function getMyLikes() {
+  const likes = localStorage.getItem('my_likes_terrace');
+  return likes ? JSON.parse(likes) : [];
+}
+
+function addToMyLikes(messageId) {
+  const likes = getMyLikes();
+  if (!likes.includes(messageId)) {
+    likes.push(messageId);
+    localStorage.setItem('my_likes_terrace', JSON.stringify(likes));
+  }
+}
+
+function removeFromMyLikes(messageId) {
+  const likes = getMyLikes();
+  const newLikes = likes.filter(id => id !== messageId);
+  localStorage.setItem('my_likes_terrace', JSON.stringify(newLikes));
+}
+
+async function toggleLike(messageId) {
+  const countSpan = document.getElementById(`like-count-${messageId}`);
+  if (!countSpan) return;
+
+  const btn = countSpan.parentElement;
+
+  // Check local state
+  const myLikes = getMyLikes();
+  const isLiked = myLikes.includes(messageId);
+
+  // Optimistic UI update
+  let currentCount = parseInt(countSpan.textContent);
+
+  if (isLiked) {
+    // UNLIKE
+    if (currentCount > 0) countSpan.textContent = currentCount - 1;
+    btn.classList.remove('liked');
+    removeFromMyLikes(messageId);
+
+    try {
+      const res = await fetch(`/team_terrace/api/messages/${messageId}/unlike/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        countSpan.textContent = data.like_count;
+      }
+    } catch (error) {
+      console.error('Error unliking:', error);
+    }
+  } else {
+    // LIKE
+    countSpan.textContent = currentCount + 1;
+    btn.classList.add('liked');
+    btn.classList.add('liked-anim');
+    setTimeout(() => btn.classList.remove('liked-anim'), 300);
+    addToMyLikes(messageId);
+
+    try {
+      const res = await fetch(`/team_terrace/api/messages/${messageId}/like/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        countSpan.textContent = data.like_count;
+      }
+    } catch (error) {
+      console.error('Error liking:', error);
+    }
+  }
+}
+
+async function fetchLikes() {
+  try {
+    const res = await fetch(`/team_terrace/api/room/${roomId}/likes/`);
+    if (res.ok) {
+      const data = await res.json();
+      const likesMap = data.likes; // { message_id: count }
+
+      // Iterate all like-count elements in the DOM
+      const countSpans = document.querySelectorAll('.like-count');
+      countSpans.forEach(span => {
+        const idStr = span.id.replace('like-count-', '');
+        // If present in API response, use that count. Otherwise 0.
+        const count = likesMap[idStr] || 0;
+        span.textContent = count;
+      });
+
+      // Ensure my liked state styling is correct
+      const myLikes = getMyLikes();
+      myLikes.forEach(msgId => {
+        const el = document.getElementById(`like-count-${msgId}`);
+        if (el) {
+          el.parentElement.classList.add('liked');
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching likes:', error);
+  }
 }
 
 // メッセージ一覧を取得
@@ -235,11 +363,13 @@ messageInput.addEventListener('keypress', (e) => {
 // 初回ロード
 fetchMessages();
 fetchReactions();
+fetchLikes();
 
 // ポーリング開始 (2秒間隔)
 setInterval(() => {
   fetchMessages();
   fetchReactions();
+  fetchLikes();
 }, 2000);
 
 // --- Reaction Logic ---

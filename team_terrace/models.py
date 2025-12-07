@@ -76,6 +76,7 @@ class ChatMessage(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_question = models.BooleanField(default=False)
+    like_count = models.IntegerField(default=0)
 
     objects = ChatMessageQuerySet.as_manager()
 

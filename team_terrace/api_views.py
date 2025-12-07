@@ -107,3 +107,40 @@ class GetReactionsView(View):
 
         data = [{"id": r.id, "reaction_type": r.reaction_type} for r in reactions]
         return JsonResponse({"reactions": data})
+
+
+class PostLikeView(View):
+    """メッセージにいいねをするAPI."""
+
+    def post(self, request, message_id):
+        """いいね投稿処理."""
+        message = get_object_or_404(ChatMessage.objects.using("team_terrace"), id=message_id)
+        message.like_count += 1
+        message.save()
+        return JsonResponse({"id": message.id, "like_count": message.like_count}, status=201)
+
+
+class PostUnlikeView(View):
+    """メッセージのいいねを解除するAPI."""
+
+    def post(self, request, message_id):
+        """いいね解除処理."""
+        message = get_object_or_404(ChatMessage.objects.using("team_terrace"), id=message_id)
+        if message.like_count > 0:
+            message.like_count -= 1
+            message.save()
+        return JsonResponse({"id": message.id, "like_count": message.like_count}, status=200)
+
+
+class GetLikesView(View):
+    """ルーム内のいいね一覧を取得するAPI."""
+
+    def get(self, request, room_id):
+        """いいね一覧取得処理."""
+        room = get_object_or_404(ChatRoom.objects.using("team_terrace"), uuid=room_id)
+        # いいねが1以上のメッセージのみ取得
+        messages = ChatMessage.objects.using("team_terrace").filter(room=room, like_count__gt=0)
+
+        # {message_id: count} の辞書形式で返す
+        data = {str(m.id): m.like_count for m in messages}
+        return JsonResponse({"likes": data})

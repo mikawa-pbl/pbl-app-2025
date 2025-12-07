@@ -26,9 +26,11 @@ class ChatRoomModelTests(TestCase):
     def test_create_chat_message(self):
         """ChatMessageが正しく作成できるかテスト."""
         room = ChatRoom.objects.using("team_terrace").create(title="Message Test Room")
+        from team_terrace.models import ChatMessage
 
         message = ChatMessage.objects.using("team_terrace").create(room=room, content="Hello World")
         self.assertEqual(message.content, "Hello World")
+        self.assertEqual(message.like_count, 0)  # Default value check
 
     def test_message_manager_for_room(self):
         """ChatMessageManager.for_roomのテスト (Refactoring Red)."""

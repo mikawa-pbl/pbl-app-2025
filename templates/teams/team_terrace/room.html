@@ -22,15 +22,120 @@
         .close:hover { color: black; }
         .thread-icon { cursor: pointer; color: #007bff; font-weight: bold; margin-left: 10px; }
         .reply { background: #e9ecef; margin: 5px 0; padding: 5px 10px; border-radius: 4px; }
+
+        /* Reaction Styles */
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-300px) scale(1.5); opacity: 0; }
+        }
+        .floating-reaction {
+            position: absolute;
+            bottom: 120px; /* input-area height + reaction-bar height */
+            /* Random horizontal position will be set by JS */
+            font-size: 2rem;
+            animation: floatUp 3s ease-out forwards;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        .reaction-bar {
+            padding: 10px;
+            background: #f9f9f9;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .reaction-btn {
+            display: flex;
+            flex-direction: row; /* Horizontal layout */
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px; /* Adjust padding for rectangular shape */
+            width: auto; /* Let width adapt to content */
+            min-width: 100px; /* Minimum width for consistency */
+            height: 48px; /* Standard button height */
+            background: #fff;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+            margin: 0;
+            gap: 8px; /* Space between icon and text */
+        }
+        .reaction-btn:hover {
+            transform: translateY(-2px); /* Slight lift instead of scale only */
+            background-color: #eef;
+            border-color: #007bff;
+        }
+        .reaction-btn:active {
+            transform: translateY(0);
+        }
+        .reaction-icon {
+            font-size: 20px; /* Slightly smaller icon to match text */
+            margin-bottom: 0; /* Remove margin */
+        }
+        .reaction-label {
+            font-size: 14px; /* Slightly larger text for readability */
+            color: #555;
+            font-weight: bold;
+        }
+
+        /* App Header Styles */
+        .app-header {
+            padding: 10px 20px;
+            background-color: #fff;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0; /* Prevent shrinking in flex container */
+        }
+        .app-logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .app-logo:hover {
+            color: #007bff;
+        }
     </style>
 </head>
 <body>
-    <header>
-        <h1>{{ room.title }}</h1>
+    <header class="app-header">
+        <a href="{% url 'team_terrace:index' %}" class="app-logo">
+            <span>🔙</span> Anony Chat
+        </a>
     </header>
 
     <div id="chat-container">
         <!-- Messages will be loaded here -->
+    </div>
+
+    <!-- Reaction Animation Container (Canvas) -->
+    <div id="reaction-canvas"></div>
+
+    <!-- Reaction Bar (Above Input Area) -->
+    <div class="reaction-bar">
+        <button class="reaction-btn" onclick="sendReaction('like')">
+            <span class="reaction-icon">👍</span>
+            <span class="reaction-label">いいね</span>
+        </button>
+        <button class="reaction-btn" onclick="sendReaction('heh')">
+            <!-- Using surprised face for "Heh~"? Or😮. User said "Heh~" (へぇ〜). 😮 fits nicely. -->
+            <span class="reaction-icon">😮</span>
+            <span class="reaction-label">へぇ〜</span>
+        </button>
+        <button class="reaction-btn" onclick="sendReaction('question')">
+            <span class="reaction-icon">❓</span>
+            <span class="reaction-label">？？？</span>
+        </button>
+        <button class="reaction-btn" onclick="sendReaction('clap')">
+            <span class="reaction-icon">👏</span>
+            <span class="reaction-label">ぱちぱち</span>
+        </button>
     </div>
 
     <div id="input-area">
@@ -228,9 +333,101 @@
 
         // 初回ロード
         fetchMessages();
+        fetchReactions(); // Start fetching reactions
 
         // ポーリング開始 (2秒間隔)
-        setInterval(fetchMessages, 2000);
+        setInterval(() => {
+            fetchMessages();
+            fetchReactions();
+        }, 2000);
+
+        // --- Reaction Logic ---
+        let lastReactionId = 0;
+
+        async function sendReaction(type) {
+            try {
+                const res = await fetch(`/team_terrace/api/room/${roomId}/reactions/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ reaction_type: type })
+                });
+                if (res.ok) {
+                    showReactionAnimation(type);
+                }
+            } catch (error) {
+                console.error('Error sending reaction:', error);
+            }
+        }
+
+        async function fetchReactions() {
+             try {
+                const res = await fetch(`/team_terrace/api/room/${roomId}/reactions/list/`);
+                if (res.ok) {
+                    const data = await res.json();
+                    let maxId = lastReactionId;
+                    data.reactions.forEach(r => {
+                        if (r.id > lastReactionId) {
+                            if (lastReactionId !== 0) { // Initial load suppression
+                                showReactionAnimation(r.reaction_type);
+                            }
+                            if (r.id > maxId) maxId = r.id;
+                        }
+                    });
+                    lastReactionId = maxId;
+                }
+            } catch (error) {
+                console.error('Error fetching reactions:', error);
+            }
+        }
+
+        function showReactionAnimation(type) {
+            // Find body or chat container to append to. Body is safer for fixed position.
+            const el = document.createElement('div');
+            el.className = 'floating-reaction';
+            
+            let emoji = '';
+            if (type === 'like') emoji = '👍';
+            if (type === 'love') emoji = '😮'; // Mapped 'love' (from button ID in API) to 'Heh' (😮) visually? Wait, button sends 'like', 'love', etc. 
+            // Wait, I used 'love' for "Heh~" button in HTML above? No, I should fix the type mapping to be consistent.
+            // HTML: sendReaction('love') -> Label: "へぇ〜", Icon: 😮. 
+            // This is confusing mapping. I should align type names with intent if possible, OR map correctly here.
+            
+            // Let's verify the button onclicks I wrote:
+            // 1. sendReaction('like') -> 👍 "いいね"
+            // 2. sendReaction('love') -> 😮 "へぇ〜" (This usage of 'love' type for "Heh" is weird but I already wrote it in HTML chunk above. I will stick to it or fix HTML chunk? HTML chunk isn't executed yet. I can make them consistent.)
+            
+            // CORRECT MAPPING based on User Request:
+            // "いいね" -> 👍
+            // "へぇ〜" -> 😮
+            // "？？？" -> ❓
+            // "ぱちぱち" -> 👏
+            
+            // I should use logical keys in sendReaction:
+            // sendReaction('like')
+            // sendReaction('heh')
+            // sendReaction('question')
+            // sendReaction('clap')
+
+            // Updating HTML chunk to use 'heh' instead of 'love', and updating here too.
+            
+            if (type === 'like') emoji = '👍';
+            if (type === 'heh') emoji = '😮';
+            if (type === 'question') emoji = '❓';
+            if (type === 'clap') emoji = '👏';
+            
+            el.textContent = emoji;
+            
+            // Random horizontal position
+            const randomLeft = Math.floor(Math.random() * 80) + 10; // 10% to 90%
+            el.style.left = randomLeft + '%';
+            
+            document.body.appendChild(el);
+            
+            setTimeout(() => { el.remove(); }, 3000);
+        }
     </script>
 </body>
 </html>

@@ -190,3 +190,55 @@ class ThreadAPITests(TestCase):
         data = response.json()
         self.assertEqual(len(data["replies"]), 1)
         self.assertEqual(data["replies"][0]["content"], "Reply 1")
+
+
+class ReactionModelTests(TestCase):
+    """リアクションモデルのテスト."""
+
+    databases = "__all__"
+
+    def test_create_reaction(self):
+        """Reaction作成のテスト."""
+        from .models import Reaction
+
+        room = ChatRoom.objects.using("team_terrace").create(title="Reaction Room")
+        reaction = Reaction.objects.using("team_terrace").create(room=room, reaction_type="like")
+
+        self.assertEqual(reaction.reaction_type, "like")
+        self.assertEqual(reaction.room, room)
+        self.assertIsNotNone(reaction.created_at)
+
+
+class ReactionAPITests(TestCase):
+    """リアクションAPIのテスト."""
+
+    databases = "__all__"
+
+    def setUp(self):
+        """テストデータのセットアップ."""
+        self.room = ChatRoom.objects.using("team_terrace").create(title="Reaction API Room")
+
+    def test_post_reaction(self):
+        """リアクション投稿APIのテスト."""
+        url = reverse("team_terrace:post_reaction", args=[self.room.uuid])
+        data = {"reaction_type": "love"}
+        response = self.client.post(url, data, content_type="application/json")
+        self.assertEqual(response.status_code, 201)
+
+        from .models import Reaction
+
+        self.assertTrue(Reaction.objects.using("team_terrace").filter(room=self.room, reaction_type="love").exists())
+
+    def test_get_reactions(self):
+        """リアクション取得APIのテスト."""
+        from .models import Reaction
+
+        Reaction.objects.using("team_terrace").create(room=self.room, reaction_type="laugh")
+
+        url = reverse("team_terrace:get_reactions", args=[self.room.uuid])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(len(data["reactions"]) > 0)
+        self.assertEqual(data["reactions"][0]["reaction_type"], "laugh")

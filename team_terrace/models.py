@@ -121,3 +121,21 @@ class ThreadReply(models.Model):
     def __str__(self):
         """返信の文字列表現を返す."""
         return f"Reply to {self.parent_message_id}: {self.content[:20]}"
+
+
+class Reaction(models.Model):
+    """リアクションを表すモデル.
+
+    Attributes:
+        room (ChatRoom): リアクションが行われたルーム.
+        reaction_type (str): リアクションの種類 (like, love, laugh, surprised).
+        created_at (datetime): 作成日時.
+    """
+
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name="reactions")
+    reaction_type = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        """文字列表現."""
+        return f"{self.reaction_type} in {self.room}"

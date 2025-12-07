@@ -10,4 +10,6 @@ urlpatterns = [
     path("api/room/<uuid:room_id>/messages/list/", api_views.GetMessagesView.as_view(), name="get_messages"),
     path("api/messages/<int:message_id>/replies/", api_views.PostReplyView.as_view(), name="post_reply"),
     path("api/messages/<int:message_id>/replies/list/", api_views.GetRepliesView.as_view(), name="get_replies"),
+    path("api/room/<uuid:room_id>/reactions/", api_views.PostReactionView.as_view(), name="post_reaction"),
+    path("api/room/<uuid:room_id>/reactions/list/", api_views.GetReactionsView.as_view(), name="get_reactions"),
 ]

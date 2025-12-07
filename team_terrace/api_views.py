@@ -73,3 +73,37 @@ class GetRepliesView(View):
         data = [{"id": r.id, "content": r.content, "created_at": r.created_at.isoformat()} for r in replies]
 
         return JsonResponse({"replies": data})
+
+
+class PostReactionView(View):
+    """リアクションを投稿するAPI."""
+
+    def post(self, request, room_id):
+        """リアクション投稿処理."""
+        room = get_object_or_404(ChatRoom.objects.using("team_terrace"), uuid=room_id)
+        try:
+            data = json.loads(request.body)
+            reaction_type = data.get("reaction_type")
+            if not reaction_type:
+                return JsonResponse({"error": "reaction_type is required"}, status=400)
+
+            from .models import Reaction
+
+            reaction = Reaction.objects.using("team_terrace").create(room=room, reaction_type=reaction_type)
+            return JsonResponse({"id": reaction.id, "reaction_type": reaction.reaction_type}, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+
+class GetReactionsView(View):
+    """リアクション一覧を取得するAPI."""
+
+    def get(self, request, room_id):
+        """リアクション取得処理."""
+        room = get_object_or_404(ChatRoom.objects.using("team_terrace"), uuid=room_id)
+        from .models import Reaction
+
+        reactions = Reaction.objects.using("team_terrace").filter(room=room).order_by("created_at")
+
+        data = [{"id": r.id, "reaction_type": r.reaction_type} for r in reactions]
+        return JsonResponse({"reactions": data})

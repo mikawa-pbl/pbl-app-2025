@@ -1,12 +1,13 @@
 from django.urls import path
-from . import views
+
+from . import api_views, views
 
 app_name = "team_terrace"
 urlpatterns = [
-    path("", views.index, name="index"),
-    path("room/<uuid:room_id>/", views.room, name="room"),
-    path("api/room/<uuid:room_id>/messages/", views.post_message, name="post_message"),
-    path("api/room/<uuid:room_id>/messages/list/", views.get_messages, name="get_messages"),
-    path('api/messages/<int:message_id>/replies/', views.post_reply, name='post_reply'),
-    path('api/messages/<int:message_id>/replies/list/', views.get_replies, name='get_replies'),
+    path("", views.IndexView.as_view(), name="index"),
+    path("room/<uuid:room_id>/", views.RoomView.as_view(), name="room"),
+    path("api/room/<uuid:room_id>/messages/", api_views.PostMessageView.as_view(), name="post_message"),
+    path("api/room/<uuid:room_id>/messages/list/", api_views.GetMessagesView.as_view(), name="get_messages"),
+    path("api/messages/<int:message_id>/replies/", api_views.PostReplyView.as_view(), name="post_reply"),
+    path("api/messages/<int:message_id>/replies/list/", api_views.GetRepliesView.as_view(), name="get_replies"),
 ]

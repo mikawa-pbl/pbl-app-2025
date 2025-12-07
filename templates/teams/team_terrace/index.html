@@ -2,9 +2,15 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Team Terrace</title></head>
+    <title>Team Terrace - Create Room</title>
+</head>
 <body>
-<h1>Team Terrace</h1>
-<p><a href="/team_terrace/members/">メンバー一覧</a></p>
+    <h1>Team Terrace</h1>
+    <h2>新しいチャットルームを作成</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="ルーム名を入力" required>
+        <button type="submit">作成して入室</button>
+    </form>
 </body>
 </html>

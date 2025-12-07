@@ -88,3 +88,22 @@ class ChatRoomModelTests(TestCase):
         self.assertEqual(len(data["messages"]), 2)
         self.assertEqual(data["messages"][0]["content"], "Msg 1")
         self.assertEqual(data["messages"][1]["content"], "Msg 2")
+
+    def test_get_messages_polling(self):
+        """ポーリング用の差分取得テスト."""
+        room = ChatRoom.objects.using("team_terrace").create(title="Polling Room")
+        from .models import ChatMessage
+
+        m1 = ChatMessage.objects.using("team_terrace").create(room=room, content="Msg 1")
+        m2 = ChatMessage.objects.using("team_terrace").create(room=room, content="Msg 2")
+
+        # m1のID以降を取得
+        url = reverse("team_terrace:get_messages", args=[room.uuid])
+        response = self.client.get(url, {"after_id": m1.id})
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        # m2だけが返るはず
+        self.assertEqual(len(data["messages"]), 1)
+        self.assertEqual(data["messages"][0]["id"], m2.id)
+        self.assertEqual(data["messages"][0]["content"], "Msg 2")

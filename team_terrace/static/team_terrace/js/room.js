@@ -1,8 +1,21 @@
+// ============================================
+// Anony Chat - Room JavaScript
+// ============================================
+
 const chatContainer = document.getElementById('chat-container');
 const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
 const isQuestionCheckbox = document.getElementById('is-question');
+const emptyState = document.getElementById('empty-state');
 let currentThreadId = null;
+
+// Hide empty state when messages exist
+function updateEmptyState() {
+  const messages = chatContainer.querySelectorAll('.message');
+  if (emptyState) {
+    emptyState.style.display = messages.length > 0 ? 'none' : 'flex';
+  }
+}
 
 // メッセージを表示する関数
 function appendMessage(msg) {
@@ -11,24 +24,41 @@ function appendMessage(msg) {
   if (existingMsg) return;
 
   const div = document.createElement('div');
-  div.id = `msg-${msg.id}`; // IDを付与
+  div.id = `msg-${msg.id}`;
   div.className = `message ${msg.is_question ? 'question' : ''}`;
-  div.textContent = msg.content;
+
+  // メッセージコンテンツをspan要素で包む
+  const contentSpan = document.createElement('span');
+  contentSpan.className = 'message-content';
+  contentSpan.textContent = msg.content;
+  div.appendChild(contentSpan);
 
   if (msg.is_question) {
     const icon = document.createElement('span');
     icon.className = 'thread-icon';
-    icon.textContent = '💬 スレッド';
+    icon.innerHTML = '💬 スレッド';
     icon.onclick = () => openThread(msg.id);
     div.appendChild(icon);
   }
 
+  // Animation delay based on index for staggered appearance
+  const messageCount = chatContainer.querySelectorAll('.message').length;
+  div.style.animationDelay = `${Math.min(messageCount * 0.05, 0.3)}s`;
+
   chatContainer.appendChild(div);
+
   // 新しいメッセージのIDが現在のlastMessageIdより大きい場合更新
   if (msg.id > lastMessageId) {
     lastMessageId = msg.id;
   }
-  chatContainer.scrollTop = chatContainer.scrollHeight; // 最下部へスクロール
+
+  // Smooth scroll to bottom
+  chatContainer.scrollTo({
+    top: chatContainer.scrollHeight,
+    behavior: 'smooth'
+  });
+
+  updateEmptyState();
 }
 
 // メッセージ一覧を取得
@@ -45,8 +75,8 @@ async function fetchMessages() {
       const data = await res.json();
       if (data.messages.length > 0) {
         data.messages.forEach(appendMessage);
-        // lastMessageId is updated in appendMessage
       }
+      updateEmptyState();
     }
   } catch (error) {
     console.error('Failed to fetch messages:', error);
@@ -58,6 +88,9 @@ async function sendMessage() {
   const content = messageInput.value.trim();
   const isQuestion = isQuestionCheckbox.checked;
   if (!content) return;
+
+  // Disable button during send
+  sendButton.disabled = true;
 
   try {
     const res = await fetch(`/team_terrace/api/room/${roomId}/messages/`, {
@@ -77,6 +110,9 @@ async function sendMessage() {
     }
   } catch (error) {
     console.error('Failed to send message:', error);
+  } finally {
+    sendButton.disabled = false;
+    messageInput.focus();
   }
 }
 
@@ -88,27 +124,40 @@ const replyInput = document.getElementById('reply-input');
 async function openThread(messageId) {
   currentThreadId = messageId;
   modal.style.display = "block";
-  threadMessages.innerHTML = 'Loading...';
+
+  // Loading state
+  threadMessages.innerHTML = `
+    <div class="loading-indicator">
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+    </div>
+  `;
 
   try {
     const res = await fetch(`/team_terrace/api/messages/${messageId}/replies/list/`);
     if (res.ok) {
       const data = await res.json();
-      threadMessages.innerHTML = ''; // Clear loading
+      threadMessages.innerHTML = '';
+
       if (data.replies.length === 0) {
-        threadMessages.innerHTML = '<p>返信はまだありません。</p>';
+        threadMessages.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">返信はまだありません</p>';
       } else {
-        data.replies.forEach(r => {
+        data.replies.forEach((r, index) => {
           const div = document.createElement('div');
           div.className = 'reply';
           div.textContent = r.content;
+          div.style.animationDelay = `${index * 0.1}s`;
           threadMessages.appendChild(div);
         });
       }
     }
   } catch (error) {
-    threadMessages.textContent = 'Error loading replies.';
+    threadMessages.innerHTML = '<p style="color: var(--text-muted); text-align: center;">読み込みエラー</p>';
   }
+
+  // Focus reply input
+  setTimeout(() => replyInput.focus(), 100);
 }
 
 function closeModal() {
@@ -136,15 +185,29 @@ async function sendReply() {
       openThread(currentThreadId); // Reload replies
     }
   } catch (error) {
-    alert('Error sending reply');
+    console.error('Error sending reply:', error);
   }
 }
 
+// Close modal on backdrop click
 window.onclick = function (event) {
   if (event.target == modal) {
     closeModal();
   }
 }
+
+// Close modal on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modal.style.display === 'block') {
+    closeModal();
+  }
+});
+
+// Reply input Enter key
+replyInput?.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendReply();
+});
+
 // --------------------------
 
 // CSRFトークン取得のためのヘルパー関数
@@ -163,6 +226,7 @@ function getCookie(name) {
   return cookieValue;
 }
 
+// Event Listeners
 sendButton.addEventListener('click', sendMessage);
 messageInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendMessage();
@@ -170,7 +234,7 @@ messageInput.addEventListener('keypress', (e) => {
 
 // 初回ロード
 fetchMessages();
-fetchReactions(); // Start fetching reactions
+fetchReactions();
 
 // ポーリング開始 (2秒間隔)
 setInterval(() => {
@@ -207,7 +271,7 @@ async function fetchReactions() {
       let maxId = lastReactionId;
       data.reactions.forEach(r => {
         if (r.id > lastReactionId) {
-          if (lastReactionId !== 0) { // Initial load suppression
+          if (lastReactionId !== 0) {
             showReactionAnimation(r.reaction_type);
           }
           if (r.id > maxId) maxId = r.id;
@@ -221,24 +285,33 @@ async function fetchReactions() {
 }
 
 function showReactionAnimation(type) {
-  // Find body or chat container to append to. Body is safer for fixed position.
+  const canvas = document.getElementById('reaction-canvas');
   const el = document.createElement('div');
   el.className = 'floating-reaction';
 
-  let emoji = '';
+  const emojis = {
+    'like': '👍',
+    'heh': '😮',
+    'question': '❓',
+    'clap': '👏'
+  };
 
-  if (type === 'like') emoji = '👍';
-  if (type === 'heh') emoji = '😮';
-  if (type === 'question') emoji = '❓';
-  if (type === 'clap') emoji = '👏';
+  el.textContent = emojis[type] || '✨';
 
-  el.textContent = emoji;
-
-  // Random horizontal position
-  const randomLeft = Math.floor(Math.random() * 80) + 10; // 10% to 90%
+  // Random horizontal position (10% - 90%)
+  const randomLeft = Math.floor(Math.random() * 80) + 10;
   el.style.left = randomLeft + '%';
 
-  document.body.appendChild(el);
+  // Slight random delay for multiple reactions
+  el.style.animationDelay = `${Math.random() * 0.2}s`;
 
-  setTimeout(() => { el.remove(); }, 3000);
+  canvas.appendChild(el);
+
+  // Remove element after animation completes
+  setTimeout(() => {
+    el.remove();
+  }, 2700);
 }
+
+// Initial empty state check
+updateEmptyState();

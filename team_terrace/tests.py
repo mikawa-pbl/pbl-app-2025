@@ -121,72 +121,72 @@ class ChatRoomModelTests(TestCase):
         self.assertEqual(len(messages), 2)
 
         # after_id 指定
-        messages_after = ChatMessage.objects.using('team_terrace').for_room(room, after_id=m1.id)
+        messages_after = ChatMessage.objects.using("team_terrace").for_room(room, after_id=m1.id)
         self.assertEqual(len(messages_after), 1)
         self.assertEqual(messages_after[0].id, m2.id)
 
+
 class ThreadModelTests(TestCase):
     """スレッド機能に関連するモデルのテスト."""
-    databases = '__all__'
+
+    databases = "__all__"
 
     def test_create_thread_reply(self):
         """スレッド返信作成のテスト."""
-        room = ChatRoom.objects.using('team_terrace').create(title="Thread Room")
+        room = ChatRoom.objects.using("team_terrace").create(title="Thread Room")
         # 親メッセージ（質問）
-        from .models import ChatMessage     # 循環回避のため内部インポートまたはトップレベル移動検討
-        parent = ChatMessage.objects.using('team_terrace').create(
-            room=room, content="Question?", is_question=True
-        )
-        
+        from .models import ChatMessage  # 循環回避のため内部インポートまたはトップレベル移動検討
+
+        parent = ChatMessage.objects.using("team_terrace").create(room=room, content="Question?", is_question=True)
+
         # 返信作成 (まだモデルがないのでImportError/NameErrorになるはず)
         from .models import ThreadReply
-        reply = ThreadReply.objects.using('team_terrace').create(
-            parent_message=parent,
-            content="Reply Answer"
-        )
-        
+
+        reply = ThreadReply.objects.using("team_terrace").create(parent_message=parent, content="Reply Answer")
+
         self.assertEqual(reply.parent_message, parent)
         self.assertEqual(reply.content, "Reply Answer")
 
+
 class ThreadAPITests(TestCase):
     """スレッドAPIのテスト."""
-    databases = '__all__'
+
+    databases = "__all__"
 
     def setUp(self):
         """テストデータのセットアップ."""
         from .models import ChatMessage
-        self.room = ChatRoom.objects.using('team_terrace').create(title="Thread API Room")
-        self.message = ChatMessage.objects.using('team_terrace').create(
+
+        self.room = ChatRoom.objects.using("team_terrace").create(title="Thread API Room")
+        self.message = ChatMessage.objects.using("team_terrace").create(
             room=self.room, content="Question?", is_question=True
         )
 
     def test_post_reply(self):
         """返信投稿APIのテスト."""
-        url = reverse('team_terrace:post_reply', args=[self.message.id])
-        data = {'content': 'Answer via API'}
-        response = self.client.post(
-            url, data, content_type='application/json'
-        )
+        url = reverse("team_terrace:post_reply", args=[self.message.id])
+        data = {"content": "Answer via API"}
+        response = self.client.post(url, data, content_type="application/json")
         self.assertEqual(response.status_code, 201)
-        
+
         # 保存確認
         from .models import ThreadReply
-        reply = ThreadReply.objects.using('team_terrace').first()
+
+        reply = ThreadReply.objects.using("team_terrace").first()
         self.assertIsNotNone(reply)
-        self.assertEqual(reply.content, 'Answer via API')
+        self.assertEqual(reply.content, "Answer via API")
         self.assertEqual(reply.parent_message, self.message)
 
     def test_get_replies(self):
         """返信一覧取得APIのテスト."""
         from .models import ThreadReply
-        ThreadReply.objects.using('team_terrace').create(
-            parent_message=self.message, content="Reply 1"
-        )
-        
-        url = reverse('team_terrace:get_replies', args=[self.message.id])
+
+        ThreadReply.objects.using("team_terrace").create(parent_message=self.message, content="Reply 1")
+
+        url = reverse("team_terrace:get_replies", args=[self.message.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        
+
         data = response.json()
-        self.assertEqual(len(data['replies']), 1)
-        self.assertEqual(data['replies'][0]['content'], "Reply 1")
+        self.assertEqual(len(data["replies"]), 1)
+        self.assertEqual(data["replies"][0]["content"], "Reply 1")

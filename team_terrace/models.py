@@ -94,7 +94,7 @@ class ChatMessage(models.Model):
         Returns:
             QuerySet: 返信のクエリセット.
         """
-        return self.replies.all().order_by('created_at')
+        return self.replies.all().order_by("created_at")
 
     def __str__(self):
         """メッセージの文字列表現を返す.
@@ -113,9 +113,8 @@ class ThreadReply(models.Model):
         content (str): 返信内容.
         created_at (datetime): 作成日時.
     """
-    parent_message = models.ForeignKey(
-        ChatMessage, on_delete=models.CASCADE, related_name='replies'
-    )
+
+    parent_message = models.ForeignKey(ChatMessage, on_delete=models.CASCADE, related_name="replies")
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 

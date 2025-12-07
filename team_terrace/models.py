@@ -1,6 +1,8 @@
 from __future__ import annotations
-from django.db import models
+
 import uuid
+
+from django.db import models
 
 
 class Member(models.Model):
@@ -44,7 +46,7 @@ class ChatRoom(models.Model):
 class ChatMessageQuerySet(models.QuerySet):
     """ChatMessageのカスタムQuerySet."""
 
-    def for_room(self, room: "ChatRoom", after_id: int | None = None):
+    def for_room(self, room: ChatRoom, after_id: int | None = None):
         """指定されたルームのメッセージを取得する.
 
         Args:

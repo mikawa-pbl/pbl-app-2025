@@ -20,11 +20,11 @@ indent-width = 4
 target-version = "py39"
 
 [tool.ruff.lint]
-select = ["E", "F", "D"]
+select = ["E", "W", "F", "B", "I", "UP", "D"]
 ignore = ["D100", "D104"]
 
 [tool.ruff.lint.per-file-ignores]
-"**/migrations/*" = ["D"]
+"**/migrations/*.py" = ["D", "E501"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

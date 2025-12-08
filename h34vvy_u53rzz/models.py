@@ -6,6 +6,27 @@ from .doors import DOORS
 DOOR_LABEL_MAP = {door.id: door.label for door in DOORS}
 
 
+class AppAccount(models.Model):
+    """
+    default DB の auth_user（共有）と、アプリ内のローカルユーザー名を紐づける。
+    FKを張るとDBが跨ってしまうため、user_idは整数で保持する。
+    """
+
+    app_code = models.CharField(max_length=64, default="h34vvy", db_index=True)
+    local_username = models.CharField(max_length=150)
+    user_id = models.PositiveIntegerField(help_text="auth_user.id")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("app_code", "local_username")
+        indexes = [
+            models.Index(fields=["app_code", "local_username"]),
+        ]
+
+    def __str__(self):
+        return f"{self.app_code}:{self.local_username} -> {self.user_id}"
+
+
 # 後でなくす
 class Member(models.Model):
     first_name = models.CharField(max_length=100)

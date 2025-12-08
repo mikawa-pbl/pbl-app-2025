@@ -6,6 +6,9 @@ from datetime import datetime, timedelta
 import calendar
 import json
 
+# カレンダーを日曜日始まりに設定
+calendar.setfirstweekday(calendar.SUNDAY)
+
 
 def index(request):
     return redirect("team_UD:calendar")
@@ -131,6 +134,7 @@ def get_memo_by_date(request, year, month, day):
             memo_list = [
                 {
                     "id": memo.id,
+                    "date": memo.date.strftime("%Y-%m-%d"),
                     "company_id": memo.company.id if memo.company else None,
                     "company_name": memo.company.name if memo.company else "",
                     "interview_stage": memo.interview_stage,

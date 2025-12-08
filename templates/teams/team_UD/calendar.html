@@ -74,6 +74,18 @@
             color: #333;
             border-radius: 5px;
         }
+        .calendar-day-header:first-child {
+            color: #dc3545; /* 日曜日を赤色 */
+        }
+        .calendar-day-header:last-child {
+            color: #0d6efd; /* 土曜日を青色 */
+        }
+        .calendar-day.sunday .day-number {
+            color: #dc3545; /* 日曜日の数字を赤色 */
+        }
+        .calendar-day.saturday .day-number {
+            color: #0d6efd; /* 土曜日の数字を青色 */
+        }
         .calendar-day {
             min-height: 100px;
             border: 2px solid #e0e0e0;
@@ -488,7 +500,7 @@
             <div class="calendar-day-header">土</div>
 
             {% for day in calendar_days %}
-            <div class="calendar-day {% if day.is_other_month %}other-month{% endif %} {% if day.is_today %}today{% endif %}"
+            <div class="calendar-day {% if day.is_other_month %}other-month{% endif %} {% if day.is_today %}today{% endif %} {% if forloop.counter0|divisibleby:7 %}sunday{% elif forloop.counter|divisibleby:7 %}saturday{% endif %}"
                  data-year="{{ year }}" data-month="{{ month }}" data-day="{{ day.day }}"
                  onclick="openMemoModal(this)">
                 <div class="day-number">{{ day.day }}</div>

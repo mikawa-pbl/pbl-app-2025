@@ -165,6 +165,35 @@ def logout_view(request):
 
 
 @login_required(login_url=LOGIN_URL)
+def ranking_view(request):
+    accounts = list(
+        AppAccount.objects.using("h34vvy_u53rzz")
+        .order_by("-points", "local_username")
+        .all()
+    )
+    rankings = []
+    last_points = None
+    last_rank = 0
+    for idx, account in enumerate(accounts, start=1):
+        if account.points == last_points:
+            rank = last_rank
+        else:
+            rank = idx
+        rankings.append({"account": account, "rank": rank})
+        last_points = account.points
+        last_rank = rank
+    return render(
+        request,
+        "teams/h34vvy_u53rzz/ranking.html",
+        {
+            "rankings": rankings,
+            "nav_active": "ranking",
+            "current_user_id": request.user.id,
+        },
+    )
+
+
+@login_required(login_url=LOGIN_URL)
 def help(request):
     doors_by_id = {door.id: door for door in DOORS}
     selected_door_id = None

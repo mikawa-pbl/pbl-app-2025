@@ -9,6 +9,7 @@ urlpatterns = [
     path("signup/", views.signup_view, name="signup"),
     path("logout/", views.logout_view, name="logout"),
     path("help/", views.help, name="help"),
+    path("ranking/", views.ranking_view, name="ranking"),
     path("waiting/<int:entry_id>/", views.waiting_view, name="waiting"),
     path(
         "waiting/<int:entry_id>/status/",

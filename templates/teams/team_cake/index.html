@@ -11,7 +11,8 @@
         <div class="col s12 m6 l4">
             <!-- <a href="/team_cake/goods/{{ good.id }}/" class="card-link"> -->
             <!-- <a href="#" class="card-link"> -->
-            <a href="#" class="card-link" onclick="openModal('{{ good.name }}','{{ good.price }}')">
+            <a href="#" class="card-link"
+                onclick="openModal('{{ good.name }}', '{{ good.price }}', '{{ good.description }}')">
                 <div class="card hoverable">
                     <div class="card-image">
                         {% if good.image_filename %}
@@ -56,11 +57,12 @@
 {% include 'teams/team_cake/footer.html' %}
 
 <script>
-    function openModal(title, price) {
+    function openModal(title, price, description) {
         if (event) event.preventDefault(); // Prevent default behavior of the link
         document.getElementById('modalTitle').innerText = title;
-        // document.getElementById('modalDescription').innerText = description;
+        document.getElementById('modalDescription').innerText = description;
         document.getElementById('modalPrice').innerText = price;
+        document.getElementById('modalDescription').innerText = description;
         const modal = document.getElementById('detailModal');
         const instance = M.Modal.init(modal);
         instance.open();

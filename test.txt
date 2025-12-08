@@ -1,6 +1,0 @@
-INSERT INTO team_akb5_member (first_name, last_name) VALUES ('央樹', '堀');
-INSERT INTO team_akb5_member (first_name, last_name) VALUES ('春樹', '泉谷');
-INSERT INTO team_akb5_member (first_name, last_name) VALUES ('一平', '多賀');
-INSERT INTO team_akb5_member (first_name, last_name) VALUES ('快多', '湯原');
-INSERT INTO team_akb5_member (first_name, last_name) VALUES ('理希', '岩田');
-SELECT * FROM team_akb5_member;

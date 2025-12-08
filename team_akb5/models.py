@@ -1,5 +1,6 @@
 from django.db import models
-from django.utils import timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 class Member(models.Model):
     first_name = models.CharField(max_length=100)
@@ -42,14 +43,14 @@ class StatusReport(models.Model):
 
     timestamp = models.DateTimeField(
         verbose_name='発生時刻',
-        default=timezone.now
+        default=datetime.now
     )
 
     created_at = models.DateTimeField(
         verbose_name='投稿日時',
-        auto_now_add=True
+        #auto_now_add=True
+        default=datetime.now
     )
 
     def __str__(self):
-        tokyo_tz = timezone.get_current_timezone()
-        return f'[{self.get_location_display()}] {self.get_symptom_display()} ({self.timestamp.astimezone(tokyo_tz).strftime("%Y-%m-%d %H:%M")})'
+        return f'[{self.get_location_display()}] {self.get_symptom_display()} ({self.timestamp.astimezone(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M")})'

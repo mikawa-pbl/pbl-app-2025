@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
   <head>
@@ -29,16 +30,16 @@
   </head>
   <body>
     {% include "teams/takenoko/Components/header.html" %}
-    <div style="position: relative; width: 720px; height: 56px; margin: 32px auto; padding: 0px 32px; border-radius: 32px; background-color:#8C8EFC;">
-      <form class="search-bar" method="get" action="" style="position: absolute; margin: 16px auto;">
+    <div style="position: relative; width: 880px; height: 56px; margin: 32px auto; padding: 0px 32px; border-radius: 32px; background-color:#8C8EFC;">
+      <form class="search-bar" method="get" action="" style="position: absolute; margin-top: 16px;">
         <input
           type="text"
           size="64"
           name="q"
           placeholder="何をお探しですか？"
-          style="background: transparent; border: none; outline: none; color: white;"
+          style="background: transparent; border: none; outline: none; width: auto;"
         >
-        <button type="submit" ><i class="fas fa-search" style="font-size: 24px; color: white;"></i></button>
+        <button type="submit" ><i class="fas fa-search" style="margin: auto; font-size: 24px; color: white;"></i></button>
       </form>
     </div>  
     <div style="position: relative; width:1120px; margin: 64px auto;"> 

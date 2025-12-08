@@ -1,10 +1,18 @@
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .doors import DOORS
 from .forms import EntryForm
 from .models import Entry
+
+
+LOGIN_REDIRECT_FALLBACK = reverse_lazy("h34vvy_u53rzz:index")
 
 
 def index(request):
@@ -17,6 +25,60 @@ def index(request):
     )
 
 
+def _get_safe_redirect(request):
+    target = request.POST.get("next") or request.GET.get("next")
+    if target and url_has_allowed_host_and_scheme(target, allowed_hosts={request.get_host()}):
+        return target
+    return str(LOGIN_REDIRECT_FALLBACK)
+
+
+def _style_auth_form(form):
+    # Tailwind風の見た目を既存フォームと揃える
+    base_attrs = {
+        "class": "w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40",
+    }
+    form.fields["username"].widget.attrs.update(
+        {
+            **base_attrs,
+            "placeholder": "ユーザー名",
+            "autocomplete": "username",
+        }
+    )
+    form.fields["password"].widget.attrs.update(
+        {
+            **base_attrs,
+            "placeholder": "パスワード",
+            "autocomplete": "current-password",
+        }
+    )
+    return form
+
+
+def login_view(request):
+    redirect_to = _get_safe_redirect(request)
+    if request.user.is_authenticated:
+        return redirect(redirect_to)
+
+    if request.method == "POST":
+        form = _style_auth_form(AuthenticationForm(request, data=request.POST))
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect(redirect_to)
+    else:
+        form = _style_auth_form(AuthenticationForm(request))
+
+    return render(
+        request,
+        "teams/h34vvy_u53rzz/login.html",
+        {
+            "form": form,
+            "next": redirect_to,
+            "nav_active": None,
+        },
+    )
+
+
+@login_required(login_url=LOGIN_REDIRECT_FALLBACK)
 def help(request):
     doors_by_id = {door.id: door for door in DOORS}
     selected_door_id = None
@@ -49,6 +111,7 @@ def help(request):
     )
 
 
+@login_required(login_url=LOGIN_REDIRECT_FALLBACK)
 def waiting_view(request, entry_id):
     entry = get_object_or_404(Entry, pk=entry_id)
     return render(
@@ -61,6 +124,7 @@ def waiting_view(request, entry_id):
     )
 
 
+@login_required(login_url=LOGIN_REDIRECT_FALLBACK)
 def waiting_status(request, entry_id):
     entry = get_object_or_404(Entry, pk=entry_id)
     return JsonResponse(
@@ -73,6 +137,7 @@ def waiting_status(request, entry_id):
     )
 
 
+@login_required(login_url=LOGIN_REDIRECT_FALLBACK)
 def timeline_view(request):
     if request.method == "POST":
         entry_id = request.POST.get("entry_id")

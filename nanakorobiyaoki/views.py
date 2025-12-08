@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import MyPage
-from .forms import MyPageEditForm
+from .models import MyPage, Member
+from .forms import MyPageEditForm,UserRegisterForm
 
 def index(request):
     return render(request, 'teams/nanakorobiyaoki/index.html')
@@ -12,6 +12,10 @@ def members(request):
 def mypage(request):
     qs = MyPage.objects.using('nanakorobiyaoki').all()
     return render(request, 'teams/nanakorobiyaoki/mypage.html', {'mypage': qs})
+
+def register(request):
+    qs = MyPage.objects.using('nanakorobiyaoki').all()
+    return render(request, 'teams/nanakorobiyaoki/register.html', {'register': qs})
 
 # 【追加】 詳細ページ用のビュー関数
 def user_profile(request, user_id):
@@ -64,3 +68,13 @@ def user_profile_edit(request, user_id):
         'user': user_data  # ページのタイトルなどで使うため
     }
     return render(request, 'teams/nanakorobiyaoki/user_profile_edit.html', context)
+
+def user_register(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()  # フォームのデータを保存し、保存されたインスタンスを取得
+            return redirect('nanakorobiyaoki:user_profile_edit', user_id=user.user_id)  # user_id を渡してリダイレクト
+    else:
+        form = UserRegisterForm()
+    return render(request, 'teams/nanakorobiyaoki/user_register.html', {'form': form})

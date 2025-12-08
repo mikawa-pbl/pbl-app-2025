@@ -1,6 +1,16 @@
 from django import forms
 from .models import MyPage
 
+class UserRegisterForm(forms.ModelForm):
+    class Meta:
+        model = MyPage
+        fields = [
+            'name',
+            'email',
+            'password',
+            'user_id',
+                  ]  
+
 class MyPageEditForm(forms.ModelForm):
     class Meta:
         model = MyPage

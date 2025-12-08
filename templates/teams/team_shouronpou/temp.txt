@@ -34,9 +34,11 @@
             border-top: 1px dashed #ccc;
             padding-top: 10px;
             margin-top: 5px;
+            /* 初期状態はJSで制御するため display: none */
             display: none; 
         }
         
+        /* ラジオボタンリストのスタイル調整 */
         .condition-options ul { list-style-type: none; padding-left: 0; margin: 0; }
         .condition-options li { margin-bottom: 5px; }
         
@@ -194,26 +196,27 @@
         try {
             const rawValue = slotsInput.value;
             if (rawValue) {
-                // シングルクォートをダブルクォートに変換
                 const validJson = rawValue.replace(/'/g, '"');
-                selectedSlots = JSON.parse(validJson);
+                const parsed = JSON.parse(validJson);
+                
+                // 【追加】データがちゃんと「配列」かチェックする
+                if (Array.isArray(parsed)) {
+                    selectedSlots = parsed;
+                } else {
+                    selectedSlots = [];
+                }
             }
         } catch(e) {
             console.error("Parse error:", e);
             selectedSlots = [];
         }
 
-        // 安全策: 配列でない場合は初期化
-        if (!Array.isArray(selectedSlots)) {
-            selectedSlots = [];
-        }
-
         slotBtns.forEach(btn => {
             const val = btn.dataset.value;
-            // 初期状態の反映（緑色にする）
+            // 既存データを反映
             if (selectedSlots.includes(val)) btn.classList.add('active');
 
-            // クリック時
+            // クリック時の挙動
             btn.addEventListener('click', function() {
                 this.classList.toggle('active');
                 const value = this.dataset.value;
@@ -241,8 +244,8 @@
                 }
             }
             
-            toggle(); // 初期表示反映
-            checkbox.addEventListener('change', toggle);
+            toggle(); // 初期表示
+            checkbox.addEventListener('change', toggle); // 変更検知
         }
 
         setupToggle('enable_nationality', 'options_nationality');

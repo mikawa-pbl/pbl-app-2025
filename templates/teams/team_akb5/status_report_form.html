@@ -5,6 +5,7 @@
 {% block content %}
     <h1>ネットワーク状況の投稿</h1>
     <p>ネットワークの「遅い」「つながらない」などの状況を報告してください。</p>
+    <p><button id="get-location">現在位置を取得</button></p>
 
     <form method="post">
         {% csrf_token %}
@@ -14,4 +15,32 @@
     
     <hr>
     <a href="{% url 'team_akb5:admin' %}">一覧に戻る</a>
+
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+    const getLocationButton = document.getElementById('get-location');
+    const latitudeInput = document.getElementById('id_latitude');
+    const longitudeInput = document.getElementById('id_longitude');
+
+    if (getLocationButton && latitudeInput && longitudeInput) {
+        getLocationButton.addEventListener('click', () => {
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        latitudeInput.value = position.coords.latitude;
+                        longitudeInput.value = position.coords.longitude;
+                        alert(`位置情報を取得しました: Latitude ${position.coords.latitude}, Longtitude ${position.coords.longitude}`);
+                    },
+                    (error) => {
+                        console.error("Error getting location: ", error);
+                        alert("位置情報の取得に失敗しました。");
+                    }
+                );
+            } else {
+                alert("このブラウザは位置情報取得に対応していません。");
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

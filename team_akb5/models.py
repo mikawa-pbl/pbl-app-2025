@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-import pytz # Re-introduce pytz
+import pytz
 
 class Member(models.Model):
     first_name = models.CharField(max_length=100)
@@ -49,6 +49,18 @@ class StatusReport(models.Model):
     created_at = models.DateTimeField(
         verbose_name='投稿日時',
         auto_now_add=True
+    )
+
+    latitude = models.FloatField(
+        verbose_name='緯度',
+        blank=True,
+        null=True
+    )
+
+    longitude = models.FloatField(
+        verbose_name='経度',
+        blank=True,
+        null=True
     )
 
     def __str__(self):

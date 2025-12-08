@@ -4,6 +4,8 @@
 {% block title %}ネットワーク状況一覧 - User{% endblock %}
 
 {% block content %}
+    <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
+
     <h1>ネットワーク状況一覧</h1>
     <p>
         <a href="{% url 'team_akb5:status_report_form' %}" role="button">＋ 新規投稿する</a>
@@ -37,4 +39,54 @@
             {% endfor %}
         </tbody>
     </table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Map coordinates
+        const lat1 = 34.70315;
+        const lon1 = 137.40365;
+        const lat2 = 34.70047;
+        const lon2 = 137.41189;
+
+        // Initialize map and set bounds
+        const map = L.map('map').fitBounds([
+            [lat1, lon1],
+            [lat2, lon2]
+        ]);
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // GeoJSON data from Django context
+        const reportsData = {{reports_geojson|safe}};
+
+        // Add markers to the map
+        L.geoJSON(reportsData, {
+            onEachFeature: function (feature, layer) {
+                if (feature.properties) {
+                    let popupContent = ``;
+                    if (feature.properties.symptom) {
+                        popupContent += `<strong>症状:</strong> ${feature.properties.symptom}<br>`;
+                    }
+                    if (feature.properties.location) {
+                        popupContent += `<strong>場所:</strong> ${feature.properties.location}<br>`;
+                    }
+                    if (feature.properties.description) {
+                        popupContent += `<strong>詳細:</strong> ${feature.properties.description}<br>`;
+                    }
+                    if (feature.properties.timestamp) {
+                        const date = new Date(feature.properties.timestamp);
+                        popupContent += `<strong>発生時刻:</strong> ${date.toLocaleString('ja-JP')}`;
+                    }
+                    layer.bindPopup(popupContent);
+                }
+            }
+        }).addTo(map);
+    });
+</script>
 {% endblock %}

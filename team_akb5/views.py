@@ -4,7 +4,8 @@ from .models import Member, StatusReport
 from .forms import StatusReportForm
 from django.views.generic import CreateView, ListView
 from django.utils import timezone 
-from datetime import timedelta    
+from datetime import timedelta
+import json
 
 def index(request):
     return render(request, 'teams/team_akb5/index.html')
@@ -43,10 +44,36 @@ class UserView(ListView):
     context_object_name = 'reports'
     
     def get_queryset(self):
-
+        """
+        直近30秒以内に作成されたレポートのみを返す
+        """
         now = timezone.now()
-        time_threshold = now - timedelta(minutes=30)
+        time_threshold = now - timedelta(seconds=30)
         return StatusReport.objects.using('team_akb5').filter(
-            timestamp__gte=time_threshold
+            created_at__gte=time_threshold
         ).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Get reports with location data from the initial queryset
+        reports_with_location = self.get_queryset().exclude(latitude__isnull=True).exclude(longitude__isnull=True)
+        
+        features = []
+        for report in reports_with_location:
+            features.append({
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [report.longitude, report.latitude]
+                },
+                "properties": {
+                    "symptom": report.get_symptom_display(),
+                    "location": report.get_location_display(),
+                    "description": report.description,
+                    "timestamp": report.timestamp.isoformat()
+                }
+            })
+        
+        context['reports_geojson'] = json.dumps({"type": "FeatureCollection", "features": features})
+        return context
 

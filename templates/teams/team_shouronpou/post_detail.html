@@ -2,107 +2,265 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ post.title }} - 募集詳細</title>
+    <style>
+        body { font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; color: #333; }
+        a { text-decoration: none; }
+        
+        /* メインコンテナ（中央寄せ） */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* ヘッダー */
+        .header { border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { margin: 0 0 10px 0; color: #0056b3; font-size: 1.8rem; }
+        .meta-info { color: #666; font-size: 0.9rem; }
+
+        /* セクション見出し */
+        h3 {
+            border-left: 5px solid #0056b3;
+            padding-left: 10px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            background-color: #f9f9f9;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        /* テーブル */
+        table.info-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        table.info-table th { width: 30%; text-align: left; padding: 10px; background-color: #f8f9fa; border-bottom: 1px solid #eee; }
+        table.info-table td { padding: 10px; border-bottom: 1px solid #eee; }
+
+        /* 時間割グリッド */
+        .schedule-grid { display: grid; grid-template-columns: 60px repeat(5, 1fr); gap: 4px; margin-bottom: 20px; overflow-x: auto; }
+        .grid-header { font-weight: bold; text-align: center; background-color: #666; color: white; padding: 5px; font-size: 0.8rem; border-radius: 3px;}
+        .time-label { font-size: 0.75em; text-align: center; display: flex; flex-direction: column; justify-content: center; background-color: #eee; font-weight: bold;}
+        
+        .slot-box { 
+            height: 40px; 
+            border: 1px solid #ddd; 
+            background-color: #fff; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 3px;
+        }
+        /* 緑色（登録済み）の状態 */
+        .slot-box.active { 
+            background-color: #28a745; 
+            color: white; 
+            font-weight: bold; 
+        }
+        .slot-box.active::after { content: "〇"; }
+
+        /* 応募状況・アクションエリア */
+        .status-section {
+            background-color: #f0f8ff;
+            border: 1px solid #cce5ff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        .status-number { font-size: 1.5rem; font-weight: bold; margin: 10px 0; }
+        
+        /* ボタン */
+        .btn { display: inline-block; padding: 10px 20px; border-radius: 5px; text-align: center; cursor: pointer; border: none; font-size: 1rem; color: white; transition: opacity 0.2s; margin: 5px; }
+        .btn:hover { opacity: 0.8; }
+        .btn-success { background-color: #28a745; width: 100%; max-width: 300px; padding: 15px; font-weight: bold; font-size: 1.1rem; }
+        .btn-primary { background-color: #007bff; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-outline { background-color: transparent; border: 1px solid #6c757d; color: #6c757d; padding: 5px 10px; font-size: 0.9rem;}
+        .btn-outline:hover { background-color: #f0f0f0; }
+
+    </style>
 </head>
 <body>
-    <h2>{{ post.title }}</h2>
-    <p><strong>投稿日時:</strong> {{ post.created_at }}</p>
 
-    <hr>
-    <h3>募集状況</h3>
-    <div style="border: 2px solid #ddd; padding: 15px; margin: 10px 0; background-color: #f9f9f9;">
-        <p>
-            <strong>募集人数:</strong> 
-            {% if post.max_participants %}
-                {{ post.max_participants }} 名
-            {% else %}
-                無制限
-            {% endif %}
-        </p>
-        <p>
-            <strong>現在の参加者:</strong> {{ post.current_participants }} 名
-        </p>
-
-        {% if post.max_participants %}
-            <p>
-                <strong>残り枠:</strong> 
-                <span style="font-size: 1.5em; font-weight: bold; color: {% if post.remaining_spots == 0 %}red{% else %}blue{% endif %};">
-                    {{ post.remaining_spots }}
-                </span> 名
-            </p>
-
-            {% if post.remaining_spots > 0 %}
-                <form action="{% url 'team_shouronpou:post_apply' post.pk %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" style="font-size: 1.2em; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 5px;">
-                        応募する
-                    </button>
-                </form>
-            {% else %}
-                <p style="color: red; font-weight: bold; font-size: 1.2em;">募集は終了しました（満員）</p>
-            {% endif %}
-
-        {% else %}
-            <form action="{% url 'team_shouronpou:post_apply' post.pk %}" method="post">
-                {% csrf_token %}
-                <button type="submit" style="font-size: 1.2em; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 5px;">
-                    応募する
-                </button>
-            </form>
-        {% endif %}
+<div class="container">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'team_shouronpou:post_list' %}" class="btn-outline">&larr; 一覧に戻る</a>
     </div>
 
-    <hr>
-    <h3>募集要項</h3>
-    <p>
-        <strong>募集期間:</strong> 
-        {% if post.recruitment_start_date or post.recruitment_end_date %}
-            {{ post.recruitment_start_date|date:"Y年n月j日"|default:"指定なし" }}
-            〜 
-            {{ post.recruitment_end_date|date:"Y年n月j日"|default:"指定なし" }}
-        {% else %}
-            特に指定なし
-        {% endif %}
-    </p>
+    <div class="header">
+        <h1>{{ post.title }}</h1>
+        <div class="meta-info">
+            投稿日: {{ post.created_at|date:"Y/m/d H:i" }}
+        </div>
+    </div>
 
-    <hr>
+    <h3>募集内容</h3>
+    <div style="line-height: 1.8; white-space: pre-wrap;">{{ post.content|urlize }}</div>
+
     <h3>参加条件</h3>
-    <table style="width: 100%; border-collapse: collapse;">
+    <table class="info-table">
         <tr>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd; width: 30%;"><strong>国籍</strong></td>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;">
-                {{ post.condition_nationality | default:"特に指定なし" }}
-            </td>
+            <th>国籍</th>
+            <td>{{ post.get_condition_nationality_display|default:"特に指定なし" }}</td>
         </tr>
         <tr>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>性別</strong></td>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;">
-                {{ post.condition_gender | default:"特に指定なし" }}
-            </td>
+            <th>性別</th>
+            <td>{{ post.get_condition_gender_display|default:"特に指定なし" }}</td>
         </tr>
         <tr>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>持病の有無</strong></td>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;">
-                {{ post.condition_has_disease | default:"特に指定なし" }}
-            </td>
+            <th>持病</th>
+            <td>{{ post.get_condition_has_disease_display|default:"特に指定なし" }}</td>
         </tr>
     </table>
 
-    <hr>
-    <h3>募集内容</h3>
-    <div style="margin-bottom: 20px;">
-      {{ post.content|urlize|linebreaksbr }}
-    </div>
-    <hr>
+    <h3>実験受け入れ可能時間</h3>
+    <div class="schedule-grid">
+        <div class="grid-header" style="background: transparent;"></div>
+        <div class="grid-header">月</div>
+        <div class="grid-header">火</div>
+        <div class="grid-header">水</div>
+        <div class="grid-header">木</div>
+        <div class="grid-header">金</div>
 
-    <div style="margin-top: 20px;">
-        <a href="{% url 'team_shouronpou:post_edit' post.pk %}">編集する</a>
-        <span style="margin: 0 10px;">|</span>
-        <a href="{% url 'team_shouronpou:post_delete' post.pk %}" style="color: red;">削除する</a>
+        <div class="time-label">1限</div>
+        <div class="slot-box" data-value="mon_1"></div>
+        <div class="slot-box" data-value="tue_1"></div>
+        <div class="slot-box" data-value="wed_1"></div>
+        <div class="slot-box" data-value="thu_1"></div>
+        <div class="slot-box" data-value="fri_1"></div>
+        
+        <div class="time-label">2限</div>
+        <div class="slot-box" data-value="mon_2"></div>
+        <div class="slot-box" data-value="tue_2"></div>
+        <div class="slot-box" data-value="wed_2"></div>
+        <div class="slot-box" data-value="thu_2"></div>
+        <div class="slot-box" data-value="fri_2"></div>
+
+        <div class="time-label">昼</div>
+        <div class="slot-box" data-value="mon_lunch"></div>
+        <div class="slot-box" data-value="tue_lunch"></div>
+        <div class="slot-box" data-value="wed_lunch"></div>
+        <div class="slot-box" data-value="thu_lunch"></div>
+        <div class="slot-box" data-value="fri_lunch"></div>
+
+        <div class="time-label">3限</div>
+        <div class="slot-box" data-value="mon_3"></div>
+        <div class="slot-box" data-value="tue_3"></div>
+        <div class="slot-box" data-value="wed_3"></div>
+        <div class="slot-box" data-value="thu_3"></div>
+        <div class="slot-box" data-value="fri_3"></div>
+
+        <div class="time-label">4限</div>
+        <div class="slot-box" data-value="mon_4"></div>
+        <div class="slot-box" data-value="tue_4"></div>
+        <div class="slot-box" data-value="wed_4"></div>
+        <div class="slot-box" data-value="thu_4"></div>
+        <div class="slot-box" data-value="fri_4"></div>
+
+        <div class="time-label">5限</div>
+        <div class="slot-box" data-value="mon_5"></div>
+        <div class="slot-box" data-value="tue_5"></div>
+        <div class="slot-box" data-value="wed_5"></div>
+        <div class="slot-box" data-value="thu_5"></div>
+        <div class="slot-box" data-value="fri_5"></div>
+
+        <div class="time-label">6限</div>
+        <div class="slot-box" data-value="mon_6"></div>
+        <div class="slot-box" data-value="tue_6"></div>
+        <div class="slot-box" data-value="wed_6"></div>
+        <div class="slot-box" data-value="thu_6"></div>
+        <div class="slot-box" data-value="fri_6"></div>
+
+        <div class="time-label">放課後</div>
+        <div class="slot-box" data-value="mon_after"></div>
+        <div class="slot-box" data-value="tue_after"></div>
+        <div class="slot-box" data-value="wed_after"></div>
+        <div class="slot-box" data-value="thu_after"></div>
+        <div class="slot-box" data-value="fri_after"></div>
     </div>
-    
-    <p style="margin-top: 30px;">
-        <a href="{% url 'team_shouronpou:post_list' %}">掲示板一覧に戻る</a>
-    </p>
+    <input type="hidden" id="saved_slots_data" value="{{ post.available_slots }}">
+
+    <div class="status-section">
+        <p>募集期間: 
+            {% if post.recruitment_start_date or post.recruitment_end_date %}
+                {{ post.recruitment_start_date|date:"Y/m/d"|default:"-" }} 〜 {{ post.recruitment_end_date|date:"Y/m/d"|default:"-" }}
+            {% else %}
+                常時募集中
+            {% endif %}
+        </p>
+
+        <div style="display: flex; justify-content: space-around; margin: 20px 0;">
+            <div>
+                <small>募集人数</small>
+                <div class="status-number">
+                    {% if post.max_participants %}{{ post.max_participants }}名{% else %}無制限{% endif %}
+                </div>
+            </div>
+            <div>
+                <small>現在の参加者</small>
+                <div class="status-number">{{ post.current_participants }}名</div>
+            </div>
+            {% if post.max_participants %}
+            <div>
+                <small>残り枠</small>
+                <div class="status-number" style="color: {% if post.remaining_spots == 0 %}#dc3545{% else %}#28a745{% endif %};">
+                    {{ post.remaining_spots }}名
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-top: 20px;">
+            {% if post.max_participants and post.remaining_spots == 0 %}
+                <button class="btn btn-secondary" disabled>満員のため応募できません</button>
+            {% else %}
+                <form action="{% url 'team_shouronpou:post_apply' post.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">この募集に応募する</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div style="margin-top: 40px; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
+        <a href="{% url 'team_shouronpou:post_edit' post.pk %}" class="btn btn-primary" style="font-size: 0.9rem;">編集する</a>
+        <a href="{% url 'team_shouronpou:post_delete' post.pk %}" class="btn btn-danger" style="font-size: 0.9rem;">削除する</a>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const slotsInput = document.getElementById('saved_slots_data');
+        const slotBoxes = document.querySelectorAll('.slot-box');
+        let savedSlots = [];
+
+        try {
+            const rawValue = slotsInput.value;
+            if (rawValue) {
+                // Pythonのリスト形式をJSONに変換
+                const validJson = rawValue.replace(/'/g, '"');
+                savedSlots = JSON.parse(validJson);
+            }
+        } catch(e) {
+            console.error("Parse error:", e);
+            savedSlots = [];
+        }
+
+        // 緑色に反映
+        slotBoxes.forEach(box => {
+            const val = box.dataset.value;
+            if (savedSlots.includes(val)) {
+                box.classList.add('active');
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

@@ -13,6 +13,7 @@ from .models import H34vvyUser, Entry
 
 
 LOGIN_REDIRECT_FALLBACK = reverse_lazy("h34vvy_u53rzz:index")
+LOGIN_URL = reverse_lazy("h34vvy_u53rzz:login")
 
 
 def index(request):
@@ -154,7 +155,7 @@ def logout_view(request):
     return redirect(LOGIN_REDIRECT_FALLBACK)
 
 
-@login_required(login_url=LOGIN_REDIRECT_FALLBACK)
+@login_required(login_url=LOGIN_URL)
 def help(request):
     doors_by_id = {door.id: door for door in DOORS}
     selected_door_id = None
@@ -187,7 +188,7 @@ def help(request):
     )
 
 
-@login_required(login_url=LOGIN_REDIRECT_FALLBACK)
+@login_required(login_url=LOGIN_URL)
 def waiting_view(request, entry_id):
     entry = get_object_or_404(Entry, pk=entry_id)
     return render(
@@ -200,7 +201,7 @@ def waiting_view(request, entry_id):
     )
 
 
-@login_required(login_url=LOGIN_REDIRECT_FALLBACK)
+@login_required(login_url=LOGIN_URL)
 def waiting_status(request, entry_id):
     entry = get_object_or_404(Entry, pk=entry_id)
     return JsonResponse(
@@ -213,7 +214,7 @@ def waiting_status(request, entry_id):
     )
 
 
-@login_required(login_url=LOGIN_REDIRECT_FALLBACK)
+@login_required(login_url=LOGIN_URL)
 def timeline_view(request):
     if request.method == "POST":
         entry_id = request.POST.get("entry_id")

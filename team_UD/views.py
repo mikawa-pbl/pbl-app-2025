@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Member, Event, Memo, Account
+from .models import Member, Event, Memo, Account, Company
 from datetime import datetime, timedelta
 import calendar
 import json
@@ -90,6 +90,33 @@ def calendar_view(request):
 
 
 @csrf_exempt
+def get_companies(request):
+    """会社リストを取得するAPI（検索機能付き）"""
+    if request.method == "GET":
+        try:
+            search_query = request.GET.get("search", "").strip()
+            
+            if search_query:
+                # 検索クエリがある場合は部分一致で検索
+                companies = Company.objects.using("team_UD").filter(name__icontains=search_query)[:50]
+            else:
+                # 検索クエリがない場合は全件取得（最大100件）
+                companies = Company.objects.using("team_UD").all()[:100]
+            
+            company_list = [
+                {
+                    "id": company.id,
+                    "name": company.name,
+                }
+                for company in companies
+            ]
+            
+            return JsonResponse({"companies": company_list}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
+@csrf_exempt
 def get_memo_by_date(request, year, month, day):
     """特定の日付のメモを取得するAPI"""
     if request.method == "GET":
@@ -104,7 +131,8 @@ def get_memo_by_date(request, year, month, day):
             memo_list = [
                 {
                     "id": memo.id,
-                    "company_name": memo.company_name,
+                    "company_id": memo.company.id if memo.company else None,
+                    "company_name": memo.company.name if memo.company else "",
                     "interview_stage": memo.interview_stage,
                     "interview_date": memo.interview_date.strftime("%Y-%m-%d") if memo.interview_date else None,
                     "status": memo.status,
@@ -132,7 +160,7 @@ def save_memo(request):
             data = json.loads(request.body)
             date_str = data.get("date")
             content = data.get("content", "")  # デフォルト値を空文字に設定
-            company_name = data.get("company_name", "")
+            company_id = data.get("company_id")
             interview_stage = data.get("interview_stage", "")
             interview_date_str = data.get("interview_date")
             status = data.get("status", "")
@@ -142,6 +170,14 @@ def save_memo(request):
                 return JsonResponse({"error": "日付は必須です"}, status=400)
 
             target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+
+            # 会社の取得
+            company = None
+            if company_id:
+                try:
+                    company = Company.objects.using("team_UD").get(id=company_id)
+                except Company.DoesNotExist:
+                    return JsonResponse({"error": "指定された会社が見つかりません"}, status=400)
 
             # 面接日の処理
             interview_date = None
@@ -153,7 +189,7 @@ def save_memo(request):
                 memo = Memo.objects.using("team_UD").get(id=memo_id, account_id=user_id)
                 memo.content = content
                 memo.date = target_date
-                memo.company_name = company_name
+                memo.company = company
                 memo.interview_stage = interview_stage
                 memo.interview_date = interview_date
                 memo.status = status
@@ -165,7 +201,7 @@ def save_memo(request):
                     account=account,
                     date=target_date,
                     content=content,
-                    company_name=company_name,
+                    company=company,
                     interview_stage=interview_stage,
                     interview_date=interview_date,
                     status=status,
@@ -176,7 +212,8 @@ def save_memo(request):
                 {
                     "id": memo.id,
                     "content": memo.content,
-                    "company_name": memo.company_name,
+                    "company_id": memo.company.id if memo.company else None,
+                    "company_name": memo.company.name if memo.company else "",
                     "interview_stage": memo.interview_stage,
                     "interview_date": memo.interview_date.strftime("%Y-%m-%d") if memo.interview_date else None,
                     "status": memo.status,

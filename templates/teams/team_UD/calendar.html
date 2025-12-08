@@ -382,6 +382,51 @@
             background: #764ba2;
             transform: translateY(-2px);
         }
+        
+        /* 会社検索ドロップダウン */
+        .company-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 5px;
+        }
+        .company-dropdown.active {
+            display: block;
+        }
+        .company-dropdown-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .company-dropdown-item:hover {
+            background: #f8f9ff;
+        }
+        .company-dropdown-item:last-child {
+            border-bottom: none;
+        }
+        .company-dropdown-loading {
+            padding: 15px;
+            text-align: center;
+            color: #999;
+        }
+        .company-dropdown-empty {
+            padding: 15px;
+            text-align: center;
+            color: #999;
+        }
+        .form-group {
+            position: relative;
+        }
     </style>
 </head>
 <body>
@@ -454,7 +499,9 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="modalCompanyName">会社名 *</label>
-                        <input type="text" id="modalCompanyName" placeholder="例: 株式会社〇〇" required>
+                        <input type="text" id="modalCompanyName" placeholder="会社名を入力して検索..." required autocomplete="off">
+                        <input type="hidden" id="modalCompanyId">
+                        <div id="companyDropdown" class="company-dropdown"></div>
                     </div>
                     <div class="form-group">
                         <label for="modalInterviewStage">面接段階 *</label>
@@ -502,6 +549,7 @@
     <script>
         let currentYear, currentMonth, currentDay;
         let editingMemoId = null;  // 編集中のメモIDを保持
+        let searchTimeout = null;  // 検索のデバウンス用
 
         // ページ読み込み時に各日付のメモを確認してインジケータを表示
         document.addEventListener('DOMContentLoaded', function() {
@@ -514,7 +562,86 @@
                     checkMemoExists(year, month, day, dayElement);
                 }
             });
+            
+            // 会社名検索機能の初期化
+            initCompanySearch();
         });
+        
+        function initCompanySearch() {
+            const companyInput = document.getElementById('modalCompanyName');
+            const companyDropdown = document.getElementById('companyDropdown');
+            
+            // 入力時の検索
+            companyInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                
+                // デバウンス処理
+                clearTimeout(searchTimeout);
+                
+                if (query.length === 0) {
+                    companyDropdown.classList.remove('active');
+                    return;
+                }
+                
+                searchTimeout = setTimeout(() => {
+                    searchCompanies(query);
+                }, 300);
+            });
+            
+            // フォーカス時に一覧を表示
+            companyInput.addEventListener('focus', function() {
+                const query = this.value.trim();
+                if (query.length > 0) {
+                    searchCompanies(query);
+                }
+            });
+            
+            // 外部クリックでドロップダウンを閉じる
+            document.addEventListener('click', function(e) {
+                if (!companyInput.contains(e.target) && !companyDropdown.contains(e.target)) {
+                    companyDropdown.classList.remove('active');
+                }
+            });
+        }
+        
+        function searchCompanies(query) {
+            const dropdown = document.getElementById('companyDropdown');
+            dropdown.innerHTML = '<div class="company-dropdown-loading">検索中...</div>';
+            dropdown.classList.add('active');
+            
+            fetch(`/team_UD/api/companies/?search=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    dropdown.innerHTML = '';
+                    
+                    if (data.companies && data.companies.length > 0) {
+                        data.companies.forEach(company => {
+                            const item = document.createElement('div');
+                            item.className = 'company-dropdown-item';
+                            item.textContent = company.name;
+                            item.dataset.companyId = company.id;
+                            item.addEventListener('click', function() {
+                                selectCompany(company);
+                            });
+                            dropdown.appendChild(item);
+                        });
+                        dropdown.classList.add('active');
+                    } else {
+                        dropdown.innerHTML = '<div class="company-dropdown-empty">該当する会社が見つかりませんでした</div>';
+                        dropdown.classList.add('active');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    dropdown.innerHTML = '<div class="company-dropdown-empty">検索エラーが発生しました</div>';
+                });
+        }
+        
+        function selectCompany(company) {
+            document.getElementById('modalCompanyName').value = company.name;
+            document.getElementById('modalCompanyId').value = company.id;
+            document.getElementById('companyDropdown').classList.remove('active');
+        }
 
         function checkMemoExists(year, month, day, dayElement) {
             fetch(`/team_UD/api/memo/${year}/${month}/${day}/`)
@@ -564,10 +691,12 @@
         function clearModalForm() {
             editingMemoId = null;  // 編集モードを解除
             document.getElementById('modalCompanyName').value = '';
+            document.getElementById('modalCompanyId').value = '';
             document.getElementById('modalInterviewStage').value = '';
             document.getElementById('modalInterviewDate').value = '';
             document.getElementById('modalStatus').value = '';
             document.getElementById('modalMemoInput').value = '';
+            document.getElementById('companyDropdown').classList.remove('active');
         }
 
         function loadModalMemos() {
@@ -634,6 +763,7 @@
 
         function saveModalMemo() {
             const companyName = document.getElementById('modalCompanyName').value.trim();
+            const companyId = document.getElementById('modalCompanyId').value;
             const interviewStage = document.getElementById('modalInterviewStage').value;
             const interviewDate = document.getElementById('modalInterviewDate').value;
             const status = document.getElementById('modalStatus').value;
@@ -642,6 +772,11 @@
             // 必須フィールドのチェック（contentは任意）
             if (!companyName || !interviewStage || !status) {
                 alert('必須項目(会社名、面接段階、選考状況)を入力してください');
+                return;
+            }
+            
+            if (!companyId) {
+                alert('会社リストから会社を選択してください');
                 return;
             }
 
@@ -655,7 +790,7 @@
 
             const requestBody = {
                 date: dateStr,
-                company_name: companyName,
+                company_id: parseInt(companyId),
                 interview_stage: interviewStage,
                 interview_date: interviewDate || null,
                 status: status,
@@ -699,6 +834,7 @@
 
             // フォームに既存データを入力
             document.getElementById('modalCompanyName').value = memo.company_name;
+            document.getElementById('modalCompanyId').value = memo.company_id || '';
             document.getElementById('modalInterviewStage').value = memo.interview_stage;
             document.getElementById('modalInterviewDate').value = memo.interview_date || '';
             document.getElementById('modalStatus').value = memo.status;

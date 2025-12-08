@@ -58,6 +58,6 @@ class UserView(ListView):
         # 3. 30秒前(time_threshold)以上のcreated_atを持つデータを抽出
         # ※ DBルーターを使用しているようなので .using('team_akb5') を念のため入れています
         return StatusReport.objects.using('team_akb5').filter(
-            created_at__gte=time_threshold
+            timestamp__gte=time_threshold
         ).order_by('-created_at')
 

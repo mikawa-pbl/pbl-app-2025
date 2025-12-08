@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+import pytz # Re-introduce pytz
 
 class Member(models.Model):
     first_name = models.CharField(max_length=100)
@@ -51,5 +52,6 @@ class StatusReport(models.Model):
     )
 
     def __str__(self):
-        tokyo_tz = timezone.get_current_timezone()
+        # Explicitly define the Tokyo timezone
+        tokyo_tz = pytz.timezone('Asia/Tokyo')
         return f'[{self.get_location_display()}] {self.get_symptom_display()} ({self.timestamp.astimezone(tokyo_tz).strftime("%Y-%m-%d %H:%M")})'

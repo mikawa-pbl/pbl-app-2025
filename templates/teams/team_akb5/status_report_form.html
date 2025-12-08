@@ -3,25 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>ネットワーク状況の投稿</title>
-    <style>
-        body { font-family: sans-serif; margin: 2em; }
-        form p { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; }
-        input[type="text"], select, textarea { width: 300px; padding: 5px; }
-        button { padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
 </head>
 <body>
-    <h1>ネットワーク状況の投稿</h1>
-    <p>ネットワークの「遅い」「つながらない」などの状況を報告してください。</p>
+    <main class="container">
+        <h1>ネットワーク状況の投稿</h1>
+        <p>ネットワークの「遅い」「つながらない」などの状況を報告してください。</p>
 
-    <form method="post">
-        {% csrf_token %} {{ form.as_p }}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">投稿する</button>
+        </form>
         
-        <button type="submit">投稿する</button>
-    </form>
-    
-    <hr>
-<a href="{% url 'team_akb5:admin' %}">一覧に戻る</a>
+        <hr>
+        <a href="{% url 'team_akb5:admin' %}">一覧に戻る</a>
+    </main>
 </body>
 </html>

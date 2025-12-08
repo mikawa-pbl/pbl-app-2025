@@ -4,18 +4,21 @@
 <head>
   <meta charset="UTF-8">
   <title>Team AKB5 Members</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
 </head>
 
 <body>
-  <h1>Team AKB5 Members</h1>
-  <ul>
-    {% for member in members %}
-    <li>{{ member.last_name }} {{ member.first_name }}</li>
-    {% empty %}
-    <li>データがありません</li>
-    {% endfor %}
-  </ul>
-  <p><a href="/team_akb5/">Team AKB5 トップへ</a></p>
+  <main class="container">
+    <h1>Team AKB5 Members</h1>
+    <ul>
+      {% for member in members %}
+      <li>{{ member.last_name }} {{ member.first_name }}</li>
+      {% empty %}
+      <li>データがありません</li>
+      {% endfor %}
+    </ul>
+    <a href="{% url 'team_akb5:index' %}">Team AKB5 トップへ</a>
+  </main>
 </body>
 
 </html>

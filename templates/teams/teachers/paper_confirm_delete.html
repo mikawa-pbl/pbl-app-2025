@@ -1,0 +1,9 @@
+<h1>論文削除確認</h1>
+
+<p>ID {{ paper.id }}: 「{{ paper.title }}」を本当に削除しますか？</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">削除する</button>
+  <a href="{% url 'papers:paper_detail' paper.pk %}">キャンセル</a>
+</form>

@@ -1,9 +1,13 @@
-<h1>論文登録</h1>
+<h1>
+  {% if paper %}論文修正{% else %}論文登録{% endif %}
+</h1>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit">登録</button>
+  <button type="submit">
+    {% if paper %}更新{% else %}登録{% endif %}
+  </button>
 </form>
 
 <p><a href="{% url 'teachers:paper_list' %}">一覧に戻る</a></p>

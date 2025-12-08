@@ -1,24 +1,28 @@
-<!-- templates/app_name/paper_list.html -->
 <h1>論文一覧</h1>
 
-<p><a href="{% url 'teachers:paper_create' %}">新規登録</a> |
-   <a href="{% url 'teachers:paper_search' %}">検索</a></p>
+<p>
+  <a href="{% url 'teachers:paper_create' %}">新規登録</a> |
+  <a href="{% url 'teachers:paper_search' %}">検索</a>
+</p>
 
 <table border="1">
   <tr>
-    <th>タイトル</th>
+    <th>ID</th>
+    <th>題目</th>
     <th>著者</th>
     <th>年</th>
     <th>掲載誌</th>
   </tr>
   {% for paper in papers %}
   <tr>
+    <td>{{ paper.id }}</td>
     <td><a href="{% url 'teachers:paper_detail' paper.pk %}">{{ paper.title }}</a></td>
     <td>{{ paper.author }}</td>
     <td>{{ paper.year }}</td>
     <td>{{ paper.booktitle }}</td>
   </tr>
   {% empty %}
-  <tr><td colspan="4">登録されている論文はありません。</td></tr>
+  <tr><td colspan="5">登録されている論文はありません。</td></tr>
   {% endfor %}
 </table>
+

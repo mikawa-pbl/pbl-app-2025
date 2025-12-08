@@ -1,9 +1,61 @@
 <h1>{{ paper.title }}</h1>
 
+<p><strong>ID:</strong> {{ paper.id }}</p>
 <p><strong>著者:</strong> {{ paper.author }}</p>
-<p><strong>年:</strong> {{ paper.year }}</p>
 <p><strong>掲載誌:</strong> {{ paper.booktitle }}</p>
-<p><strong>URL:</strong> {{ paper.url }}</p>
+<p><strong>年:</strong> {{ paper.year }}</p>
 <p><strong>DOI:</strong> {{ paper.doi }}</p>
+<p><strong>URL:</strong> <a href="{{ paper.url }}" target="_blank">{{ paper.url }}</a></p>
+<p><strong>登録者:</strong> {{ paper.submitter }}</p>
+<p><strong>登録時刻:</strong> {{ paper.submit_time }}</p>
+<p><strong>キーワード:</strong> {{ paper.keywords }}</p>
 
-<p><a href="{% url 'teachers:paper_list' %}">一覧に戻る</a></p>
+<h2>どんな論文か</h2>
+<p>{{ paper.imp_overview|linebreaksbr }}</p>
+
+<h2>先行研究との比較</h2>
+<p>{{ paper.imp_comparison|linebreaksbr }}</p>
+
+<h2>技術や手法の中心的アイデア</h2>
+<p>{{ paper.imp_idea|linebreaksbr }}</p>
+
+<h2>有効性の検証方法と結果</h2>
+<p>{{ paper.imp_usefulness|linebreaksbr }}</p>
+
+<h2>議論（利点，欠点，制限）</h2>
+<p>{{ paper.imp_discussion|linebreaksbr }}</p>
+
+{% if paper.imp_relation %}
+<h2>自身の研究との関連性</h2>
+<p>{{ paper.imp_relation|linebreaksbr }}</p>
+{% endif %}
+
+{% if paper.note %}
+<h2>その他</h2>
+<p>{{ paper.note|linebreaksbr }}</p>
+{% endif %}
+
+<h2>関連ファイル</h2>
+<ul>
+  {% if paper.paper_file %}
+  <li>論文PDF: <a href="{{ paper.paper_file.url }}" target="_blank">開く</a></li>
+  {% endif %}
+
+  {% if paper.rc_slide %}
+  <li>輪講スライド: <a href="{{ paper.rc_slide.url }}" target="_blank">開く</a></li>
+  {% endif %}
+
+  {% if paper.paper_figure %}
+  <li>画像ファイル:
+    <a href="{{ paper.paper_figure.url }}" target="_blank">ファイルを開く</a><br>
+    <!-- 画像ならブラウザ上に表示される -->
+    <img src="{{ paper.paper_figure.url }}" alt="論文画像" style="max-width:400px; height:auto;">
+  </li>
+  {% endif %}
+</ul>
+
+<p>
+  <a href="{% url 'teachers:paper_update' paper.pk %}">この論文を修正</a> |
+  <a href="{% url 'teachers:paper_delete' paper.pk %}">この論文を削除</a> |
+  <a href="{% url 'teachers:paper_list' %}">一覧に戻る</a>
+</p>

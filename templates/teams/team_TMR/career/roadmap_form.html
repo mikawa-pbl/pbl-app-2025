@@ -1,0 +1,40 @@
+{% extends 'teams/team_TMR/base.html' %}
+
+{% block title %}{% if form.instance.pk %}ロードマップ編集{% else %}ロードマップ作成{% endif %}{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-6 text-gray-800">
+    {% if form.instance.pk %}ロードマップ編集{% else %}ロードマップ作成{% endif %}
+</h2>
+
+<form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Title -->
+    <div>
+        <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.title.label }}:</label>
+        <input type="text" name="{{ form.title.name }}" id="{{ form.title.id_for_label }}"
+               value="{{ form.title.value|default_if_none:'' }}"
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               required>
+    </div>
+
+    <!-- Content -->
+    <div>
+        <label for="{{ form.content.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.content.label }}:</label>
+        <textarea name="{{ form.content.name }}" id="{{ form.content.id_for_label }}" rows="10"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required>{{ form.content.value|default_if_none:'' }}</textarea>
+        {% if form.content.help_text %}
+            <p class="text-gray-500 text-sm mt-1">{{ form.content.help_text|safe }}</p>
+        {% endif %}
+    </div>
+
+    <div>
+        <button type="submit"
+                class="w-full md:w-auto flex justify-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            保存する
+        </button>
+    </div>
+</form>
+{% endblock %}

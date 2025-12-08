@@ -1,0 +1,30 @@
+{% extends 'teams/team_TMR/base.html' %}
+
+{% block title %}ロードマップ一覧{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">ロードマップ一覧</h2>
+    <a href="{% url 'roadmap_create' %}"
+       class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+        新規作成
+    </a>
+</div>
+
+<div class="space-y-4">
+    {% for roadmap in roadmaps %}
+        <div class="bg-white shadow border rounded-lg p-4 flex justify-between items-center">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">{{ roadmap.title }}</h3>
+                <p class="text-sm text-gray-500">更新日: {{ roadmap.updated_at|date:"Y/m/d H:i" }}</p>
+            </div>
+            <div>
+                <a href="{% url 'roadmap_edit' roadmap.pk %}" class="text-blue-600 hover:text-blue-800 mr-4">編集</a>
+                <a href="{% url 'roadmap_delete' roadmap.pk %}" class="text-red-600 hover:text-red-800">削除</a>
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-gray-600">ロードマップはまだありません。</p>
+    {% endfor %}
+</div>
+{% endblock %}

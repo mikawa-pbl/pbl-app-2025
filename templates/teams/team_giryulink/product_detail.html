@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>{{ product.title }} — Team Giryulink</title>
+  <style>
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#f6f7fb;margin:0;padding:24px;color:#222}
+    .wrap{max-width:920px;margin:24px auto}
+    .card{background:#fff;padding:18px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    .media{display:flex;gap:20px;flex-wrap:wrap}
+    .media img{width:100%;max-width:420px;height:auto;object-fit:contain;background:#f3f4f6;border-radius:6px}
+    .meta{flex:1;min-width:220px}
+    h1{margin:0 0 8px 0;font-size:1.4rem}
+    .price{color:#e53935;font-weight:700;font-size:1.3rem;margin:8px 0}
+    .section{margin-top:14px}
+    a.back{color:#1e88e5;text-decoration:none;display:inline-block;margin-bottom:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="{% url 'team_giryulink:index' %}">← 商品一覧へ戻る</a>
+    <div class="card">
+      <div class="media">
+        <img src="{{ product.image }}" alt="{{ product.title }}">
+        <div class="meta">
+          {% if product %}
+            <h1>{{ product.name }}</h1>
+            <div class="price">¥{{ product.price|floatformat:0 }}</div>
+            <div class="section">
+              <strong>商品説明</strong>
+              <p>{{ product.description|default:"説明はありません。" }}</p>
+            </div>
+          {% else %}
+            <p>Product not found.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

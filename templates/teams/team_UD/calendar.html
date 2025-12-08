@@ -317,6 +317,24 @@
             color: #555;
             font-size: 0.9em;
         }
+        /* 必須マーク(*)を赤色に */
+        .form-group label:has-text(*),
+        label {
+            position: relative;
+        }
+        label::after {
+            content: '';
+        }
+        /* 必須マーク(*)のスタイル */
+        .required-mark {
+            color: #ff4444;
+            font-weight: bold;
+        }
+        /* データ収集マーク(†)のスタイル */
+        .data-collection-mark {
+            color: #ffa500;
+            font-weight: bold;
+        }
         .memo-form input,
         .memo-form select,
         .memo-form textarea {
@@ -506,13 +524,13 @@
             <div class="memo-form">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="modalCompanyName">会社名 *†</label>
+                        <label for="modalCompanyName">会社名 <span class="required-mark">*</span><span class="data-collection-mark">†</span></label>
                         <input type="text" id="modalCompanyName" placeholder="会社名を入力して検索..." required autocomplete="off">
                         <input type="hidden" id="modalCompanyId">
                         <div id="companyDropdown" class="company-dropdown"></div>
                     </div>
                     <div class="form-group">
-                        <label for="modalInterviewStage">イベント・工程 *†</label>
+                        <label for="modalInterviewStage">イベント・工程 <span class="required-mark">*</span><span class="data-collection-mark">†</span></label>
                         <select id="modalInterviewStage" required>
                             <option value="">選択してください</option>
                             <optgroup label="選考前">
@@ -555,7 +573,7 @@
                         <input type="date" id="modalInterviewDate">
                     </div>
                     <div class="form-group">
-                        <label for="modalStatus">選考状況 *</label>
+                        <label for="modalStatus">選考状況 <span class="required-mark">*</span></label>
                         <select id="modalStatus" required>
                             <option value="">選択してください</option>
                             <optgroup label="選考前・選考中">
@@ -587,7 +605,7 @@
                 <!-- 面接時の追加入力欄（初期は非表示） -->
                 <div id="interviewFields" style="display: none;">
                     <div class="form-group">
-                        <label>どんなことを聞かれたか？ *†</label>
+                        <label>どんなことを聞かれたか？ <span class="required-mark">*</span><span class="data-collection-mark">†</span></label>
                         <div id="questionsContainer">
                             <div class="question-item" style="display: flex; gap: 8px; margin-bottom: 8px;">
                                 <input type="text" class="question-input" placeholder="質問内容を入力..." style="flex: 1;">

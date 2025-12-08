@@ -275,13 +275,32 @@
             background: #ee5a52;
             transform: scale(1.05);
         }
+        .add-memo-btn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        .add-memo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
         .memo-form {
-            display: flex;
+            display: none;
             flex-direction: column;
             gap: 15px;
             padding: 20px;
             background: #f8f9ff;
             border-radius: 10px;
+        }
+        .memo-form.active {
+            display: flex;
         }
         .form-row {
             display: grid;
@@ -483,6 +502,7 @@
                 <button class="close-btn" onclick="closeModal()">✕</button>
             </div>
             <div class="memo-list" id="modalMemoList"></div>
+            <button id="addMemoBtn" class="add-memo-btn" onclick="showMemoForm()">➕ メモを追加する</button>
             <div class="memo-form">
                 <div class="form-row">
                     <div class="form-group">
@@ -541,7 +561,7 @@
                             <optgroup label="選考前・選考中">
                                 <option value="興味あり">興味あり</option>
                                 <option value="エントリー予定">エントリー予定</option>
-                                <option value="選考中">選考中</option>
+                                <option value="予定あり">予定あり</option>
                                 <option value="結果待ち">結果待ち</option>
                             </optgroup>
                             <optgroup label="選考結果">
@@ -590,6 +610,7 @@
     <script>
         let currentYear, currentMonth, currentDay;
         let editingMemoId = null;  // 編集中のメモIDを保持
+        let originalMemoDate = null;  // 編集前のメモの日付を保持
         let searchTimeout = null;  // 検索のデバウンス用
 
         // ページ読み込み時に各日付のメモを確認してインジケータを表示
@@ -613,6 +634,7 @@
         
         function initInterviewFieldsToggle() {
             const stageSelect = document.getElementById('modalInterviewStage');
+            const statusSelect = document.getElementById('modalStatus');
             const interviewFields = document.getElementById('interviewFields');
             
             // 面接系のイベント一覧
@@ -624,17 +646,25 @@
                 'グループディスカッション'
             ];
             
-            stageSelect.addEventListener('change', function() {
-                const selectedStage = this.value;
+            function updateInterviewFieldsVisibility() {
+                const selectedStage = stageSelect.value;
+                const selectedStatus = statusSelect.value;
                 
-                if (interviewStages.includes(selectedStage)) {
+                // 聞かれたことフィールドを非表示にする選考状況
+                const hiddenStatuses = ['興味あり', 'エントリー予定', '予定あり', '選考辞退'];
+                
+                // 面接系イベントかつ特定の状況以外の場合に表示
+                if (interviewStages.includes(selectedStage) && !hiddenStatuses.includes(selectedStatus)) {
                     interviewFields.style.display = 'block';
                 } else {
                     interviewFields.style.display = 'none';
                     // 面接以外の場合はクリア
                     clearInterviewQuestions();
                 }
-            });
+            }
+            
+            stageSelect.addEventListener('change', updateInterviewFieldsVisibility);
+            statusSelect.addEventListener('change', updateInterviewFieldsVisibility);
         }
         
         function addQuestion() {
@@ -818,11 +848,30 @@
             const selectedDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
             document.getElementById('modalInterviewDate').value = selectedDate;
 
+            // フォームを非表示にし、メモ一覧と追加ボタンを表示
+            hideMemoForm();
+
             // メモを読み込む
             loadModalMemos();
 
             // モーダルを表示
             document.getElementById('memoModal').classList.add('active');
+        }
+        
+        function showMemoForm() {
+            // フォームを表示
+            document.querySelector('.memo-form').classList.add('active');
+            // 追加ボタンを非表示
+            document.getElementById('addMemoBtn').style.display = 'none';
+        }
+        
+        function hideMemoForm() {
+            // フォームを非表示
+            document.querySelector('.memo-form').classList.remove('active');
+            // 追加ボタンを表示
+            document.getElementById('addMemoBtn').style.display = 'block';
+            // フォームをクリア
+            clearModalForm();
         }
 
         function closeModal(event) {
@@ -830,12 +879,13 @@
 
             document.getElementById('memoModal').classList.remove('active');
 
-            // フォームをクリア
-            clearModalForm();
+            // フォームを非表示にして追加ボタンを表示
+            hideMemoForm();
         }
 
         function clearModalForm() {
             editingMemoId = null;  // 編集モードを解除
+            originalMemoDate = null;  // 元の日付情報をクリア
             document.getElementById('modalCompanyName').value = '';
             document.getElementById('modalCompanyId').value = '';
             document.getElementById('modalInterviewStage').value = '';
@@ -847,7 +897,7 @@
             document.getElementById('companyDropdown').classList.remove('active');
         }
 
-        function loadModalMemos() {
+        function loadModalMemos(callback) {
             const memoList = document.getElementById('modalMemoList');
 
             fetch(`/team_UD/api/memo/${currentYear}/${currentMonth}/${currentDay}/`)
@@ -920,10 +970,13 @@
                     } else {
                         memoList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">まだメモがありません</p>';
                     }
+                    // コールバックがあれば実行
+                    if (callback) callback();
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     memoList.innerHTML = '<p style="color: #ff6b6b;">メモの読み込みに失敗しました</p>';
+                    if (callback) callback();
                 });
         }
 
@@ -947,9 +1000,10 @@
                 return;
             }
             
-            // 面接系イベントの場合は「聞かれたこと」も必須
+            // 面接系イベントかつ特定の状況以外の場合は「聞かれたこと」も必須
             const interviewStages = ['一次面接', '二次面接', '三次面接', '最終面接', 'グループディスカッション'];
-            if (interviewStages.includes(interviewStage) && !interviewQuestions) {
+            const hiddenStatuses = ['興味あり', 'エントリー予定', '予定あり', '選考辞退'];
+            if (interviewStages.includes(interviewStage) && !hiddenStatuses.includes(status) && !interviewQuestions) {
                 alert('面接の場合、「どんなことを聞かれたか？」は必須です（最低1つ入力してください）');
                 return;
             }
@@ -989,12 +1043,14 @@
                 if (data.error) {
                     alert('エラー: ' + data.error);
                 } else {
-                    // フォームをクリア
-                    clearModalForm();
+                    // フォームを非表示にして追加ボタンを表示
+                    hideMemoForm();
 
-                    loadModalMemos();
-                    // インジケータを更新
-                    updateMemoIndicator();
+                    // メモを再読み込み後、インジケータを更新
+                    loadModalMemos(() => {
+                        // インジケータを更新（元の日付と新しい日付の両方）
+                        updateMemoIndicators(dateStr);
+                    });
                 }
             })
             .catch(error => {
@@ -1006,6 +1062,8 @@
         function editModalMemo(memo) {
             // 編集モードを設定
             editingMemoId = memo.id;
+            // 元の日付を保存（日付変更時のインジケーター更新用）
+            originalMemoDate = memo.date;
 
             // フォームに既存データを入力
             document.getElementById('modalCompanyName').value = memo.company_name;
@@ -1016,11 +1074,15 @@
             document.getElementById('modalMemoInput').value = memo.content;
             setInterviewQuestions(memo.interview_questions || '');
             
-            // 面接系イベントの場合は追加フィールドを表示
+            // 面接系イベントかつ特定の状況以外の場合は追加フィールドを表示
             const interviewStages = ['一次面接', '二次面接', '三次面接', '最終面接', 'グループディスカッション'];
-            if (interviewStages.includes(memo.interview_stage)) {
+            const hiddenStatuses = ['興味あり', 'エントリー予定', '予定あり', '選考辞退'];
+            if (interviewStages.includes(memo.interview_stage) && !hiddenStatuses.includes(memo.status)) {
                 document.getElementById('interviewFields').style.display = 'block';
             }
+            
+            // フォームを表示
+            showMemoForm();
 
             // フォームエリアまでスクロール
             document.getElementById('modalMemoInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1041,11 +1103,12 @@
                 } else {
                     // 編集中のメモが削除された場合はフォームをクリア
                     if (editingMemoId === memoId) {
-                        clearModalForm();
+                        hideMemoForm();
                     }
-                    loadModalMemos();
-                    // インジケータを更新
-                    updateMemoIndicator();
+                    // メモを再読み込み後、インジケータを更新
+                    loadModalMemos(() => {
+                        updateMemoIndicator();
+                    });
                 }
             })
             .catch(error => {
@@ -1061,6 +1124,36 @@
             if (dayElement) {
                 checkMemoExists(currentYear, currentMonth, currentDay, dayElement);
             }
+        }
+        
+        function updateMemoIndicators(newDateStr) {
+            // 現在のモーダルの日付を更新
+            updateMemoIndicator();
+            
+            // 編集モードで日付が変更された場合、元の日付も更新
+            if (originalMemoDate && originalMemoDate !== newDateStr) {
+                const [origYear, origMonth, origDay] = originalMemoDate.split('-').map(Number);
+                const origDayElement = document.querySelector(
+                    `.calendar-day[data-year="${origYear}"][data-month="${origMonth}"][data-day="${origDay}"]`
+                );
+                if (origDayElement) {
+                    checkMemoExists(origYear, origMonth, origDay, origDayElement);
+                }
+            }
+            
+            // 新しい日付が現在のモーダルの日付と異なる場合も更新
+            const [newYear, newMonth, newDay] = newDateStr.split('-').map(Number);
+            if (newYear !== currentYear || newMonth !== currentMonth || newDay !== currentDay) {
+                const newDayElement = document.querySelector(
+                    `.calendar-day[data-year="${newYear}"][data-month="${newMonth}"][data-day="${newDay}"]`
+                );
+                if (newDayElement) {
+                    checkMemoExists(newYear, newMonth, newDay, newDayElement);
+                }
+            }
+            
+            // 編集完了後は元の日付情報をクリア
+            originalMemoDate = null;
         }
 
         function escapeHtml(text) {

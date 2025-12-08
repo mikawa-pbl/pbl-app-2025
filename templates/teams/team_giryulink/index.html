@@ -334,7 +334,6 @@
             // Infinite Scroll Implementation
             let currentPage = 1;
             let isLoading = false;
-            // @ts-ignore - Django template syntax
             let hasMoreProducts = {% if page_obj.has_next %}true{% else %}false{% endif %};
             const loadingIndicator = document.getElementById('loadingIndicator');
             const noMoreProducts = document.getElementById('noMoreProducts');

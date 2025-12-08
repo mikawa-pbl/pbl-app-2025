@@ -4,39 +4,122 @@
 <head>
     <meta charset="UTF-8">
     <title>部屋検索</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
         body {
             margin: 0;
             font-family: system-ui, -apple-system, BlinkMacSystemFont,
                          "Segoe UI", sans-serif;
-        }
-
-        .container {
-            display: flex;
-            height: 100vh;
-        }
-
-        /* 左: 画像エリア */
-        .left-panel {
-            flex: 2;
-            position: relative;
             background-color: #f5f5f5;
+        }
+
+        .page {
+            min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
+        }
+
+        /* 検索バー（上部） */
+        .search-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #ddd;
+            padding: 12px 12px 8px;
+        }
+
+        .search-title {
+            font-size: 18px;
+            margin: 0 0 8px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 4px;
+        }
+
+        .search-field {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-label {
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 6px 8px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .search-building {
+            flex: 0 0 62px; /* 棟の小さめボックス */
+        }
+
+        .search-button {
+            flex: 0 0 44px;
+        }
+
+        .search-button button {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .error {
+            color: #d32f2f;
+            font-size: 13px;
+            padding: 4px 12px 0;
+        }
+
+        /* マップ部分（下部） */
+        .content {
+            flex: 1;
+            padding: 12px;
+            box-sizing: border-box;
+        }
+
+        .map-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .map-title {
+            font-size: 15px;
+            margin: 0 0 6px;
+        }
+
+        .map-wrapper {
+            position: relative;
+            width: 100%;
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             overflow: hidden;
         }
 
-        .floorplan-wrapper {
+        .map-wrapper-inner {
             position: relative;
-            max-width: 100%;
-            max-height: 100%;
+            width: 100%;
         }
 
-        .floorplan-wrapper img {
-            max-width: 100%;
-            height: auto;
+        .map-wrapper-inner img {
             display: block;
+            width: 100%;
+            height: auto;
         }
 
         .cursor-dot {
@@ -50,125 +133,111 @@
             box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
         }
 
-        /* 右: 検索エリア */
-        .right-panel {
-            flex: 1;
-            border-left: 1px solid #ddd;
-            padding: 24px;
-            box-sizing: border-box;
-            background-color: #ffffff;
-        }
-
-        h1 {
-            font-size: 20px;
-            margin-top: 0;
-            margin-bottom: 16px;
-        }
-
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        input[type="text"],
-        input[type="number"] {
-            width: 100%;
-            padding: 6px 8px;
-            box-sizing: border-box;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-
-        button {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        button[type="submit"] {
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        .error {
-            color: #d32f2f;
-            margin-top: 8px;
+        .hint-text {
+            margin-top: 6px;
             font-size: 13px;
+            color: #777;
         }
 
         .result-info {
-            margin-top: 16px;
-            font-size: 14px;
+            font-size: 13px;
+            margin-top: 6px;
         }
 
-        .no-selection-text {
-            color: #777;
-            font-size: 14px;
+        /* 画面が広いときは少し余白を増やす */
+        @media (min-width: 768px) {
+            .search-header {
+                padding: 16px 24px 10px;
+            }
+            .content {
+                padding: 16px 24px 24px;
+                max-width: 480px;
+                margin: 0 auto;
+            }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <!-- 左: 画像 + カーソル -->
-    <div class="left-panel">
-        {% if room and room.floor %}
-            <div class="floorplan-wrapper">
-                <!-- floor_table の url を使用 -->
-                <!--img src="{{ room.floor.url }}" alt="フロア画像"-->
-                <!-- x, y は 0〜100 の割合として使用 -->
-                <div class="cursor-dot"
-                     style="left: {{ room.x }}%; top: {{ room.y }}%;"></div>
-            </div>
-        {% else %}
-            <div class="no-selection-text">
-                <img src="images/A-3.png" alt="フロア画像">
-                右側で部屋を検索すると、このエリアにフロア図と部屋位置が表示されます。
-            </div>
-        {% endif %}
-    </div>
+<div class="page">
 
-    <!-- 右: 検索フォーム -->
-    <div class="right-panel">
-        <h1>部屋検索</h1>
-        <form method="get">
-            <div class="form-group">
-                <label for="building_id">棟</label>
+    <!-- 上部：検索バー -->
+    <header class="search-header">
+        <h1 class="search-title">部屋検索</h1>
+        <form method="get" class="search-form">
+            <div class="search-field search-building">
+                <div class="search-label">棟</div>
                 <input type="number"
                        id="building_id"
                        name="building_id"
+                       class="search-input"
                        value="{{ building_id }}">
             </div>
-            <div class="form-group">
-                <label for="room_number">部屋番号</label>
+            <div class="search-field">
+                <div class="search-label">部屋番号</div>
                 <input type="text"
                        id="room_number"
                        name="room_number"
+                       class="search-input"
                        value="{{ room_number }}">
             </div>
-            <button type="submit">検索</button>
+            <div class="search-button">
+                <button type="submit" aria-label="検索">🔍</button>
+            </div>
         </form>
 
         {% if error_message %}
             <div class="error">{{ error_message }}</div>
         {% endif %}
+    </header>
 
-        {% if room %}
-            <div class="result-info">
-                <div>棟ID: {{ room.building_id }}</div>
-                <div>部屋番号: {{ room.room_number }}</div>
-                <div>フロア: {{ room.floor.floor }}F</div>
-                <div>座標: (x={{ room.x }}, y={{ room.y }})</div>
+    <!-- 下部：全体マップ & 詳細マップ -->
+    <main class="content">
+
+        <!-- 全体マップ -->
+        <section class="map-card">
+            <h2 class="map-title">全体マップ</h2>
+            <div class="map-wrapper">
+                <div class="map-wrapper-inner">
+                    <!-- とりあえず適当な全体図の画像パス -->
+                    <img src="images/campus_all.png" alt="全体マップ">
+                </div>
             </div>
-        {% endif %}
-    </div>
+        </section>
+
+        <!-- 詳細マップ（フロアマップ） -->
+        <section class="map-card">
+            <h2 class="map-title">詳細マップ（フロアマップ）</h2>
+            <div class="map-wrapper">
+                <div class="map-wrapper-inner">
+                    {% if room and room.floor %}
+                        <!-- floor_table の URL を使う場合は下をコメントアウト解除 -->
+                        <!-- <img src="{{ room.floor.url }}" alt="フロア画像"> -->
+                        <img src="images/A-3.png" alt="フロア画像">
+                        <div class="cursor-dot"
+                             style="left: {{ room.x }}%; top: {{ room.y }}%;"></div>
+                    {% else %}
+                        <img src="images/A-3.png" alt="フロア画像">
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if not room %}
+                <p class="hint-text">
+                    棟と部屋番号を入力して検索すると、このマップ上に部屋の位置が表示されます。
+                </p>
+            {% endif %}
+
+            {% if room %}
+                <div class="result-info">
+                    <div>棟ID: {{ room.building_id }}</div>
+                    <div>部屋番号: {{ room.room_number }}</div>
+                    <div>フロア: {{ room.floor.floor }}F</div>
+                    <div>座標: (x={{ room.x }}, y={{ room.y }})</div>
+                </div>
+            {% endif %}
+        </section>
+
+    </main>
 </div>
 </body>
 </html>

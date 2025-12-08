@@ -163,27 +163,40 @@
     <!-- 上部：検索バー -->
     <header class="search-header">
         <h1 class="search-title">部屋検索</h1>
+        <!-- 棟のプルダウンバージョン -->
         <form method="get" class="search-form">
             <div class="search-field search-building">
                 <div class="search-label">棟</div>
-                <input type="number"
-                       id="building_id"
-                       name="building_id"
-                       class="search-input"
-                       value="{{ building_id }}">
+                <select id="building_id"
+                        name="building_id"
+                        class="search-input">
+                    <option value="">選択</option>
+                    <option value="A" {% if building_id == "A" %}selected{% endif %}>A</option>
+                    <option value="A1" {% if building_id == "A1" %}selected{% endif %}>A1</option>
+                    <option value="A2" {% if building_id == "A2" %}selected{% endif %}>A2</option>
+                    <option value="B" {% if building_id == "B" %}selected{% endif %}>B</option>
+                    <option value="C" {% if building_id == "C" %}selected{% endif %}>C</option>
+                    <option value="D" {% if building_id == "D" %}selected{% endif %}>D</option>
+                    <option value="E" {% if building_id == "E" %}selected{% endif %}>E</option>
+                    <option value="F" {% if building_id == "F" %}selected{% endif %}>F</option>
+                    <option value="G" {% if building_id == "G" %}selected{% endif %}>G</option>
+                </select>
             </div>
+
             <div class="search-field">
                 <div class="search-label">部屋番号</div>
                 <input type="text"
-                       id="room_number"
-                       name="room_number"
-                       class="search-input"
-                       value="{{ room_number }}">
+                    id="room_number"
+                    name="room_number"
+                    class="search-input"
+                    value="{{ room_number }}">
             </div>
+
             <div class="search-button">
                 <button type="submit" aria-label="検索">🔍</button>
             </div>
         </form>
+
 
         {% if error_message %}
             <div class="error">{{ error_message }}</div>
@@ -205,36 +218,38 @@
         </section>
 
         <!-- 詳細マップ（フロアマップ） -->
+        <!-- 詳細マップ（フロアマップ） -->
         <section class="map-card">
             <h2 class="map-title">詳細マップ（フロアマップ）</h2>
             <div class="map-wrapper">
                 <div class="map-wrapper-inner">
-                    {% if room and room.floor %}
-                        <!-- floor_table の URL を使う場合は下をコメントアウト解除 -->
-                        <!-- <img src="{{ room.floor.url }}" alt="フロア画像"> -->
-                        <img src="images/A-3.png" alt="フロア画像">
-                        <div class="cursor-dot"
-                             style="left: {{ room.x }}%; top: {{ room.y }}%;"></div>
+
+                    {% if room_number %}
+                        {% with first=room_number|slice:"0:1" %}
+
+                            {% if first == "1" %}
+                                <img src="images/A-1.png" alt="A-1フロア図">
+
+                            {% elif first == "2" %}
+                                <img src="images/A-2.png" alt="A-2フロア図">
+
+                            {% elif first == "3" %}
+                                <img src="images/A-3.png" alt="A-3フロア図">
+
+                            {% else %}
+                                <!-- 想定外の番号 -->
+                                <img src="images/A-3.png" alt="フロア画像">
+                            {% endif %}
+
+                        {% endwith %}
+
                     {% else %}
+                        <!-- room_number 未入力 -->
                         <img src="images/A-3.png" alt="フロア画像">
                     {% endif %}
+
                 </div>
             </div>
-
-            {% if not room %}
-                <p class="hint-text">
-                    棟と部屋番号を入力して検索すると、このマップ上に部屋の位置が表示されます。
-                </p>
-            {% endif %}
-
-            {% if room %}
-                <div class="result-info">
-                    <div>棟ID: {{ room.building_id }}</div>
-                    <div>部屋番号: {{ room.room_number }}</div>
-                    <div>フロア: {{ room.floor.floor }}F</div>
-                    <div>座標: (x={{ room.x }}, y={{ room.y }})</div>
-                </div>
-            {% endif %}
         </section>
 
     </main>

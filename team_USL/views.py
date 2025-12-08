@@ -6,7 +6,14 @@ from pathlib import Path
 import mimetypes
 
 def index(request):
-    return render(request, 'teams/team_USL/index.html')
+    building_id = request.GET.get("building_id", "")
+    room_number = request.GET.get("room_number", "")
+
+    context = {
+        "building_id": building_id,
+        "room_number": room_number,
+    }
+    return render(request, 'teams/team_USL/index.html', context)
 
 def members(request):
     qs = Member.objects.using('team_USL').all()  # ← team_USL DBを明示

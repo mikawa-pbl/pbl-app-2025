@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
+from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -230,6 +231,10 @@ def timeline_view(request):
             if entry.helper_confirmed_at is None:
                 entry.helper_confirmed_at = timezone.now()
                 entry.save(update_fields=["helper_confirmed_at"])
+                # 助けたユーザーにポイントを付与
+                AppAccount.objects.using("h34vvy_u53rzz").filter(
+                    app_code="h34vvy", user_id=request.user.id
+                ).update(points=F("points") + 1)
         return redirect("h34vvy_u53rzz:timeline")
     entries = Entry.objects.all()  # Meta.ordering で新しい順
     return render(

@@ -26,9 +26,9 @@ function saveStatus() {
     // ステータスを更新
     if (statusCell) {
         if (talkStatus === 'ok') {
-            statusCell.innerHTML = '<span class="status-ok">✅ OK</span>';
+            statusCell.innerHTML = '<span class="status-ok">✅</span>';
         } else {
-            statusCell.innerHTML = '<span class="status-ng">❌ NG</span>';
+            statusCell.innerHTML = '<span class="status-ng">❌</span>';
         }
     }
 

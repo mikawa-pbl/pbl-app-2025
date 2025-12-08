@@ -15,6 +15,7 @@ class AppAccount(models.Model):
     app_code = models.CharField(max_length=64, default="h34vvy", db_index=True)
     local_username = models.CharField(max_length=150)
     user_id = models.PositiveIntegerField(help_text="auth_user.id")
+    points = models.PositiveIntegerField(default=0, help_text="アプリ内ポイント")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -56,9 +56,10 @@
 {% include 'teams/team_cake/footer.html' %}
 
 <script>
-    function openModal(title, description, price) {
+    function openModal(title, price) {
+        if (event) event.preventDefault(); // Prevent default behavior of the link
         document.getElementById('modalTitle').innerText = title;
-        document.getElementById('modalDescription').innerText = description;
+        // document.getElementById('modalDescription').innerText = description;
         document.getElementById('modalPrice').innerText = price;
         const modal = document.getElementById('detailModal');
         const instance = M.Modal.init(modal);

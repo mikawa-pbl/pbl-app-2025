@@ -10,8 +10,37 @@ def members(request):
     return render(request, 'teams/team_TeXTeX/members.html', {'members': qs})
 
 def main(request):
-    qs = Main.objects.using('team_TeXTeX').all()
-    return render(request, 'teams/team_TeXTeX/main.html', {'main': qs})
+    """
+    エディタメインビュー。SQLiteからサイドバーのデータを取得し、HTMLに渡す
+    """
+    qs = Editer.objects.using('team_TeXTeX').all()
+
+    # データベースからGroupとContentを取得し、テンプレートで扱いやすい辞書リストに変換
+    content = []
+    groups = Group.objects.prefetch_related('items')
+
+    for group in groups:
+        group_data = {
+            "title": group.title,
+            "items": []
+        }
+        
+        # Contentのデータを取得
+        for item in group.items.all():
+            group_data["items"].append({
+                "name": item.name,
+                "tex_code": item.tex_code,
+                "slug": item.function_slug
+            })
+            
+        content.append(group_data)
+
+    context = {
+        'editer': qs,
+        'content': content
+    }
+    
+    return render(request, 'teams/team_TeXTeX/main.html', context)
 
 def main_select(request, select):
     template_name = f'teams/team_TeXTeX/main/{select}.html'

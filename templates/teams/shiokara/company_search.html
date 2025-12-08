@@ -230,10 +230,13 @@
                 <article class="company-card">
                     <header class="company-card-header">
                         <h2 class="company-name">
-                            <a href="{% url 'shiokara:company_detail' company.pk %}">
-                                {{ company.name }}
-                            </a>
-                        </h2>
+                                <a href="{% url 'shiokara:company_detail' company.pk %}">
+                                    {{ company.name }}
+                                </a>
+                                {% if person and company.pk not in viewed_company_ids %}
+                                    <span class="unviewed-lock" title="未閲覧">🔏</span>
+                                {% endif %}
+                            </h2>
 
                         {% if company.departments.all %}
                         <div class="company-depts">
@@ -299,6 +302,12 @@
         margin: 0 auto;
         padding: 24px 16px 40px;
         color: var(--tut-gray);
+    }
+
+    .unviewed-lock {
+        margin-left: 8px;
+        font-size: 0.95rem;
+        color: #b33030;
     }
 
     /* TUT風ヘッダー */

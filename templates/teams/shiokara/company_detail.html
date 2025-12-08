@@ -81,4 +81,89 @@
 <p>
     <a href="{% url 'shiokara:company_search' %}">← 企業検索に戻る</a>
 </p>
+
+{% if points_awarded %}
+  <div id="points-popup-wrapper" aria-live="polite" role="status">
+    <div id="points-popup" class="points-popup" role="alert">
+      <div class="points-popup-title">ポイント獲得！</div>
+      <div class="points-popup-body">{{ points_awarded }}pt を獲得しました。</div>
+      <button id="points-popup-close" class="points-popup-close" aria-label="ポップアップを閉じる">✕</button>
+    </div>
+  </div>
+
+  <style>
+    /* ポップアップ: 上中央からひょっこりポップイン */
+    #points-popup-wrapper {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 12000;
+      pointer-events: none; /* wrapper はクリック透過、内部でボタンは有効 */
+    }
+
+    .points-popup {
+      pointer-events: auto;
+      min-width: 260px;
+      max-width: 90vw;
+      background: linear-gradient(180deg,#f0fff4,#ffffff);
+      color: #155724;
+      padding: 12px 16px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+      border: 1px solid rgba(34,139,34,0.12);
+      text-align: left;
+      transform-origin: 50% 0%;
+      transform: translateY(-22px) scale(0.92);
+      opacity: 0;
+      transition: transform 420ms cubic-bezier(.2,.9,.3,1), opacity 300ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 表示時クラス */
+    .points-popup.show {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .points-popup-title{ font-weight:700; margin-bottom:6px; }
+    .points-popup-body{ font-size:0.98rem; }
+
+    .points-popup-close{
+      position:absolute; top:6px; right:8px; border:0; background:transparent; font-size:14px; cursor:pointer; color:#2f6f34;
+      padding:4px 6px; line-height:1; border-radius:6px;
+    }
+    .points-popup-close:focus{ outline:2px solid rgba(34,139,34,0.15); }
+  </style>
+
+  <script>
+    (function(){
+      var wrapper = document.getElementById('points-popup-wrapper');
+      if(!wrapper) return;
+      var popup = document.getElementById('points-popup');
+      var btn = document.getElementById('points-popup-close');
+      // 小さな遅延でアニメーションを発火させる（ブラウザの描画タイミングを待つ）
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          popup.classList.add('show');
+        });
+      });
+
+      // 自動で数秒後にフェードアウトして DOM から削除
+      var hideDelay = 3500;
+      var hideTimer = setTimeout(function(){
+        popup.classList.remove('show');
+        setTimeout(function(){ if(wrapper) wrapper.remove(); }, 420);
+      }, hideDelay);
+
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        clearTimeout(hideTimer);
+        popup.classList.remove('show');
+        setTimeout(function(){ if(wrapper) wrapper.remove(); }, 220);
+      });
+    })();
+  </script>
+{% endif %}
 {% endblock %}

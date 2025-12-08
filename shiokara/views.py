@@ -255,9 +255,17 @@ def department_detail(request, short_name):
     )
     companies = department.companies.all()
 
+    # 閲覧済み企業一覧（ログイン中のみ）
+    person = get_current_person(request)
+    if person:
+        viewed_company_ids = list(CompanyView.objects.using(DB_ALIAS).filter(person=person).values_list('company_id', flat=True))
+    else:
+        viewed_company_ids = []
+
     context = {
         "department": department,
         "companies": companies,
+        "viewed_company_ids": viewed_company_ids,
     }
     return render_with_person(request, "teams/shiokara/department_detail.html", context)
 
@@ -378,10 +386,18 @@ def company_search(request):
     # 学科プルダウン用
     departments = Department.objects.using(DB_ALIAS).all()
 
+    # 閲覧済み企業一覧（ログイン中のみ）
+    person = get_current_person(request)
+    if person:
+        viewed_company_ids = list(CompanyView.objects.using(DB_ALIAS).filter(person=person).values_list('company_id', flat=True))
+    else:
+        viewed_company_ids = []
+
     context = {
         "query": query,
         "departments": departments,
         "companies": companies,
+        "viewed_company_ids": viewed_company_ids,
 
         # テンプレ側で選択状態を再現する用
         "dept_short": dept_short,
@@ -407,6 +423,9 @@ def company_detail(request, pk):
 
     # リフレッシュされた person 情報を取得
     person = Person.objects.using(DB_ALIAS).get(pk=person.pk)
+    # ポイント付与ポップアップ用フラグ（POST→redirect 後に表示するため session から取得）
+    points_awarded = request.session.pop('points_awarded', None)
+
     if person.points < 1:
         # ポイント不足: 専用のロック画面を表示
         return render_with_person(request, "teams/shiokara/company_detail_locked.html", {"company": company})
@@ -447,6 +466,7 @@ def company_detail(request, pk):
         "reviews": reviews,
         "avg_rating": avg_rating,
         "sort": sort,
+        "points_awarded": points_awarded,
     }
     return render_with_person(request, "teams/shiokara/company_detail.html", context)
 
@@ -513,6 +533,8 @@ def company_experience_post(request, pk):
 
             # 投稿者にポイント付与（+5）
             Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(points=F('points') + 5)
+            # セッションに付与情報を入れてリダイレクト先でポップアップ表示する
+            request.session['points_awarded'] = 5
 
             return redirect("shiokara:company_detail", pk=company.pk)
 

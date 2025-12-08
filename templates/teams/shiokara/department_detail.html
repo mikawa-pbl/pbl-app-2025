@@ -13,6 +13,9 @@
             <a href="{% url 'shiokara:company_detail' company.pk %}">
                 {{ company.name }}
             </a>
+            {% if person and company.pk not in viewed_company_ids %}
+                <span class="unviewed-lock">🔏</span>
+            {% endif %}
         </strong><br>
 
         {% if company.url %}

@@ -234,7 +234,7 @@ def register_view(request):
         request.session["user_id"] = account.id
         request.session["username"] = account.username
         
-        return redirect("team_UD:memo")
+        return redirect("team_UD:calendar")
 
 
 def login_view(request):
@@ -253,7 +253,7 @@ def login_view(request):
             # セッションにユーザー情報を保存
             request.session["user_id"] = account.id
             request.session["username"] = account.username
-            return redirect("team_UD:memo")
+            return redirect("team_UD:calendar")
         except Account.DoesNotExist:
             return render(request, "teams/team_UD/login.html", {"error": "ユーザー名またはパスワードが間違っています"})
 

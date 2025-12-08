@@ -1,0 +1,16 @@
+{% load static %}
+<!-- templates/components/header.html -->
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<header>
+  <div style="background-color: #649CE4; width: 100%; height: 96px; position: relative;">
+    <div style="left: 32px;">
+      <img src="{% static 'images/hubhub.PNG' %}" alt="logo" width="96px">
+    </div>
+    <nav style="position: absolute; top: 10px; right: 32px; color:white; font-size: 48px; display: flex; gap: 24px;">
+      <button><i class="fas fa-info-circle"></i></button>
+      <button><i class="fas fa-bell"></i></button>
+      <button><i class="fas fa-user-circle"></i></button>
+    </nav>
+  </div>
+</header>

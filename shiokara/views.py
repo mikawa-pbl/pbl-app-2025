@@ -1,11 +1,14 @@
 # shiokara/views.py
 from django.shortcuts import render, get_object_or_404, redirect
-from django.db.models import Q, Avg, Count
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q, Avg, Count, F
+from django.views.decorators.cache import never_cache
 from django.conf import settings
 import json
 from pathlib import Path
 
-from .models import Department, Company, CompanyReview, Person
+from .models import Department, Company, CompanyReview, Person, CompanyView
 from .forms import PersonLoginForm  # いまは未使用でもOK
 
 
@@ -79,6 +82,8 @@ def append_person_to_fixture(person: Person) -> None:
             "lab_field": person.lab_field,
             "password": person.password,
             "created_at": person.created_at.isoformat(),
+            "seen_tutorial": person.seen_tutorial,
+            "points": person.points,
         },
     }
 
@@ -214,7 +219,29 @@ def department_list(request):
     context = {
         "departments": departments,
     }
+    # チュートリアルの自動起動判定（ログイン中かつ未表示の場合）
+    person = get_current_person(request)
+    context["auto_start_tutorial"] = bool(person and not getattr(person, "seen_tutorial", False))
     return render_with_person(request, "teams/shiokara/department_list.html", context)
+
+
+@csrf_exempt
+def tutorial_seen(request):
+    """
+    フロントからチュートリアルを表示済みにするために呼ばれる API。
+    POST で呼び出すことを想定。
+    """
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "error": "POST required"}, status=405)
+
+    person = get_current_person(request)
+    if not person:
+        return JsonResponse({"ok": False, "error": "not authenticated"}, status=403)
+
+    # 更新（using DB alias を指定）
+    Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(seen_tutorial=True)
+    # セッション内の person は次回取得時に DB から刷新されるためそのままで良い
+    return JsonResponse({"ok": True})
 
 
 def department_detail(request, short_name):
@@ -369,8 +396,39 @@ def company_search(request):
     return render_with_person(request, "teams/shiokara/company_search.html", context)
 
 
+@never_cache
 def company_detail(request, pk):
     company = get_object_or_404(Company.objects.using(DB_ALIAS), pk=pk)
+    # ポイント制：企業詳細は1ポイント消費して閲覧
+    person = get_current_person(request)
+    if not person:
+        # 未ログインならログイン画面へ
+        return redirect("shiokara:login")
+
+    # リフレッシュされた person 情報を取得
+    person = Person.objects.using(DB_ALIAS).get(pk=person.pk)
+    if person.points < 1:
+        # ポイント不足: 専用のロック画面を表示
+        return render_with_person(request, "teams/shiokara/company_detail_locked.html", {"company": company})
+
+    # 既にこのユーザーがこの企業を閲覧済みかを確認
+    viewed_exists = CompanyView.objects.using(DB_ALIAS).filter(person=person, company=company).exists()
+    if not viewed_exists:
+        # 1ポイント消費（条件付きで安全に更新）
+        updated = Person.objects.using(DB_ALIAS).filter(pk=person.pk, points__gte=1).update(points=F('points') - 1)
+        if not updated:
+            # まれに同時更新で失敗した場合
+            return render_with_person(request, "teams/shiokara/company_detail_locked.html", {"company": company})
+
+        # 閲覧履歴を作成（以後この企業はポイントを消費しない）
+        try:
+            CompanyView.objects.using(DB_ALIAS).create(person=person, company=company)
+        except Exception:
+            # unique 制約違反等は無視して続行
+            pass
+
+        # 再取得して最新ポイント反映
+        person = Person.objects.using(DB_ALIAS).get(pk=person.pk)
 
     sort = request.GET.get("sort", "new")
 
@@ -396,6 +454,11 @@ def company_detail(request, pk):
 def company_experience_post(request, pk):
     """企業ごとの口コミ投稿ページ（体験談と口コミをまとめて扱う）"""
     company = get_object_or_404(Company.objects.using(DB_ALIAS), pk=pk)
+
+    # ログインしていない場合はログインへリダイレクト
+    person = get_current_person(request)
+    if not person:
+        return redirect("shiokara:login")
 
     initial = {
         "grade": "",
@@ -447,6 +510,9 @@ def company_experience_post(request, pk):
             )
 
             append_review_to_fixture(review)
+
+            # 投稿者にポイント付与（+5）
+            Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(points=F('points') + 5)
 
             return redirect("shiokara:company_detail", pk=company.pk)
 

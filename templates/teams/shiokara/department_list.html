@@ -312,4 +312,236 @@
         }
     }
 </style>
+<!-- Tutorial overlay and controls -->
+<div id="tut-overlay" aria-hidden="true"></div>
+<div id="tut-tooltip" aria-hidden="true" role="dialog" aria-label="チュートリアル説明">
+    <div id="tut-tooltip-content"></div>
+    <div id="tut-tooltip-controls">
+        <button id="tut-prev" type="button">戻る</button>
+        <button id="tut-next" type="button">次へ</button>
+        <button id="tut-close" type="button">閉じる</button>
+    </div>
+</div>
+
+<button id="tut-start-btn" aria-label="チュートリアルを開始">チュートリアル</button>
+
+<style>
+    /* Overlay + controls */
+    #tut-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        z-index: 9998;
+        display: none;
+    }
+
+    .tut-highlight {
+        position: relative;
+        z-index: 9999 !important;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 6px rgba(255,255,255,0.05) inset;
+        transform: translateZ(0) scale(1.02);
+        transition: box-shadow 180ms ease, transform 180ms ease;
+        outline: 3px solid rgba(203,0,0,0.95);
+        border-radius: 8px;
+    }
+
+    #tut-tooltip {
+        position: fixed;
+        z-index: 10000;
+        max-width: 320px;
+        background: #fff;
+        color: #222;
+        border-radius: 8px;
+        box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+        padding: 12px;
+        display: none;
+        font-size: 0.95rem;
+    }
+
+    #tut-tooltip #tut-tooltip-controls {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 8px;
+    }
+
+    #tut-tooltip button {
+        background: #f3f3f3;
+        border: 1px solid #ddd;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    #tut-start-btn {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 10001;
+        background: linear-gradient(180deg,var(--tut-red),#b00000);
+        color: #fff;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    @media (max-width:640px) {
+        #tut-tooltip { max-width: 260px; font-size: 0.9rem; }
+        #tut-start-btn { right: 12px; bottom: 12px; }
+    }
+</style>
+
+<script>
+    (function(){
+        const steps = [
+            {
+                sel: '.tut-search-group input[type="text"]',
+                title: '検索ボックス',
+                body: 'ここに企業名やキーワードを入力して、企業を検索できます。'
+            },
+            {
+                sel: '.tut-search-group button[type="submit"]',
+                title: '検索ボタン',
+                body: '検索ボタンを押すとキーワードで企業一覧を絞り込みます。'
+            },
+            {
+                sel: '.tut-dept-card:first-of-type',
+                title: '学科カード',
+                body: '学科カードをクリックすると、その学科に関連する企業一覧が見れます。'
+            },
+            {
+                sel: '.tut-page-title h1',
+                title: 'ページの説明',
+                body: 'このページは学科ごとに企業を一覧表示します。まずは検索を試してみましょう。'
+            }
+        ];
+
+        let idx = 0;
+        const overlay = document.getElementById('tut-overlay');
+        const tooltip = document.getElementById('tut-tooltip');
+        const tooltipContent = document.getElementById('tut-tooltip-content');
+        const btnPrev = document.getElementById('tut-prev');
+        const btnNext = document.getElementById('tut-next');
+        const btnClose = document.getElementById('tut-close');
+        const startBtn = document.getElementById('tut-start-btn');
+        const TUTORIAL_SEEN_URL = "{% url 'shiokara:tutorial_seen' %}";
+        const AUTO_START = {{ auto_start_tutorial|yesno:"true,false" }};
+
+        function getCookie(name) {
+            const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+            return v ? v.pop() : '';
+        }
+
+        function markSeen(){
+            // send POST to server to mark tutorial seen; ignore failures
+            try{
+                fetch(TUTORIAL_SEEN_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({ seen: true }),
+                    credentials: 'same-origin',
+                }).catch(()=>{});
+            }catch(e){}
+        }
+
+        function showStep(i){
+            // clear previous
+            document.querySelectorAll('.tut-highlight').forEach(el=>el.classList.remove('tut-highlight'));
+            tooltip.style.display = 'none';
+            overlay.style.display = 'block';
+
+            const step = steps[i];
+            if(!step) { endTutorial(); return; }
+            const target = document.querySelector(step.sel);
+            tooltipContent.innerHTML = '<strong>'+step.title+'</strong><div style="margin-top:6px;">'+step.body+'</div>';
+
+            if(target){
+                // highlight target
+                target.classList.add('tut-highlight');
+
+                // position tooltip near target
+                const r = target.getBoundingClientRect();
+                const tt = tooltip;
+                // prefer above unless not enough space
+                const margin = 8;
+                let top = window.scrollY + r.top - tt.offsetHeight - margin;
+                if(top < window.scrollY + 8) top = window.scrollY + r.bottom + margin;
+                let left = window.scrollX + r.left;
+                // keep inside viewport
+                left = Math.min(Math.max(left, 8 + window.scrollX), window.scrollX + document.documentElement.clientWidth - tt.offsetWidth - 8);
+
+                tt.style.top = top + 'px';
+                tt.style.left = left + 'px';
+                tt.style.display = 'block';
+
+                // focus first interactive element in tooltip for accessibility
+                btnNext.focus();
+            } else {
+                // if target missing, show centered tooltip
+                const tt = tooltip;
+                tt.style.top = (window.scrollY + window.innerHeight/2 - 80) + 'px';
+                tt.style.left = (window.scrollX + (window.innerWidth - tt.offsetWidth)/2) + 'px';
+                tt.style.display = 'block';
+            }
+
+            // update control visibility
+            btnPrev.disabled = (i===0);
+            btnNext.textContent = (i === steps.length -1) ? '完了' : '次へ';
+            idx = i;
+        }
+
+        function nextStep(){
+            if(idx < steps.length -1) showStep(idx+1);
+            else endTutorial();
+        }
+        function prevStep(){ if(idx>0) showStep(idx-1); }
+
+        function startTutorial(){
+            // small delay to allow layout to settle
+            showStep(0);
+            overlay.style.display = 'block';
+            document.body.classList.add('tut-in-progress');
+        }
+
+        function endTutorial(){
+            overlay.style.display = 'none';
+            tooltip.style.display = 'none';
+            document.querySelectorAll('.tut-highlight').forEach(el=>el.classList.remove('tut-highlight'));
+            document.body.classList.remove('tut-in-progress');
+            // mark seen for logged-in users (server will reject if not authenticated)
+            markSeen();
+        }
+
+        // wire events
+        btnNext.addEventListener('click', nextStep);
+        btnPrev.addEventListener('click', prevStep);
+        btnClose.addEventListener('click', endTutorial);
+        overlay.addEventListener('click', ()=>{ /* click overlay to close */ endTutorial(); });
+        startBtn.addEventListener('click', startTutorial);
+
+        // keyboard support
+        document.addEventListener('keydown', (ev)=>{
+            if(!document.body.classList.contains('tut-in-progress')) return;
+            if(ev.key === 'Escape') endTutorial();
+            if(ev.key === 'ArrowRight' || ev.key === 'Enter') nextStep();
+            if(ev.key === 'ArrowLeft') prevStep();
+        });
+
+        // auto-start for new users
+        if(AUTO_START){
+            // small timeout to allow layout and fonts to settle
+            setTimeout(()=>{ startTutorial(); }, 200);
+        }
+
+        // expose start for developers
+        window.__tut_start = startTutorial;
+    })();
+</script>
 {% endblock %}

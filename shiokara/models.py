@@ -112,6 +112,10 @@ class Person(models.Model):
     password = models.CharField("パスワード", max_length=128)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    # 初回チュートリアル表示済みフラグ
+    seen_tutorial = models.BooleanField("チュートリアル表示済み", default=False)
+    # ポイント（初期値 10）
+    points = models.IntegerField("ポイント", default=10)
 
     class Meta:
         verbose_name = "学生"
@@ -119,3 +123,18 @@ class Person(models.Model):
 
     def __str__(self):
         return f"{self.student_id} ({self.get_course_display()}{self.grade}年)"
+
+
+class CompanyView(models.Model):
+    """ユーザーが企業詳細を閲覧した履歴。重複を防いで1度だけポイントを消費するために使用する。"""
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="views")
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "企業閲覧履歴"
+        verbose_name_plural = "企業閲覧履歴"
+        unique_together = ("person", "company")
+
+    def __str__(self) -> str:
+        return f"{self.person.student_id} viewed {self.company.name} at {self.viewed_at.isoformat()}"

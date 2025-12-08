@@ -20,15 +20,16 @@
   >
     <!-- 左側：人アイコン＋ログイン系 -->
     <div style="display:flex; align-items:center; gap:8px;">
-      {% if person %}
-        <!-- ログイン中：アイコン＋名前（マイページへのリンク） -->
-        <a href="{% url 'shiokara:my_page' %}" style="display:flex; align-items:center; text-decoration:none;">
+        {% if person %}
+        <!-- ログイン中：アイコン＋学籍番号（マイページへのリンク）＋ポイント -->
+        <a href="{% url 'shiokara:my_page' %}" style="display:flex; align-items:center; text-decoration:none; gap:6px;">
           <img
             src="{% static 'image/person.png' %}"
             alt="マイページ"
-            style="width:24px; height:24px; object-fit:cover; margin-right:4px;"
+            style="width:24px; height:24px; object-fit:cover;"
           />
-          <span>{{ person.name }} さん</span>
+          <span>{{ person.student_id }} さん</span>
+          <span style="background:#f0f4f8;padding:4px 8px;border-radius:12px;font-size:0.85rem;color:#333;border:1px solid #e0e6eb;">{{ person.points }} pt</span>
         </a>
         <a href="{% url 'shiokara:logout' %}" style="font-size:0.9rem; margin-left:8px;">
           ログアウト
@@ -116,6 +117,16 @@
           openModal(companyId, companyName);
         });
       });
+    });
+  </script>
+
+  <script>
+    // ブラウザの戻る/進むキャッシュから復帰したときに古い表示が出る問題を防ぐ
+    // pageshow の persisted が true ならページが bfcache から復帰しているためリロードする
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted) {
+        window.location.reload();
+      }
     });
   </script>
 

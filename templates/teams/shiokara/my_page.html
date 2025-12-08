@@ -13,6 +13,7 @@
       <li>学年: {{ person.grade }} 年</li>
       <li>学科・専攻: {{ person.department_name }}</li>
       <li>研究分野: {{ person.lab_field }}</li>
+      <li>ポイント: <strong>{{ person.points }}</strong> pt</li>
       <li>登録日時: {{ person.created_at|date:"Y/m/d H:i" }}</li>
     </ul>
   {% else %}

@@ -18,6 +18,15 @@ def index(request):
 def members(request):
     qs = Member.objects.using('team_USL').all()  # ← team_USL DBを明示
     return render(request, 'teams/team_USL/members.html', {'members': qs})
+
+def search_room(request):
+    qs = Member.objects.using('team_USL').all()  # ← team_USL DBを明示
+    return render(request, 'teams/team_USL/index.html', {'room_table': qs})
+
+def search_floor(request):
+    qs = Member.objects.using('team_USL').all()  # ← team_USL DBを明示
+    return render(request, 'teams/team_USL/index.html', {'floor_table': qs})
+
 # Create your views here.
 def serve_template_image(request, filename: str):
     """

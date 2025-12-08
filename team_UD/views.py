@@ -137,6 +137,7 @@ def get_memo_by_date(request, year, month, day):
                     "interview_date": memo.interview_date.strftime("%Y-%m-%d") if memo.interview_date else None,
                     "status": memo.status,
                     "content": memo.content,
+                    "interview_questions": memo.interview_questions,
                     "created_at": memo.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                     "updated_at": memo.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
                 }
@@ -164,6 +165,7 @@ def save_memo(request):
             interview_stage = data.get("interview_stage", "")
             interview_date_str = data.get("interview_date")
             status = data.get("status", "")
+            interview_questions = data.get("interview_questions", "")
             memo_id = data.get("id")
 
             if not date_str:
@@ -193,6 +195,7 @@ def save_memo(request):
                 memo.interview_stage = interview_stage
                 memo.interview_date = interview_date
                 memo.status = status
+                memo.interview_questions = interview_questions
                 memo.save(using="team_UD")
             else:
                 # 新しいメモを作成
@@ -205,6 +208,7 @@ def save_memo(request):
                     interview_stage=interview_stage,
                     interview_date=interview_date,
                     status=status,
+                    interview_questions=interview_questions,
                 )
                 memo.save(using="team_UD")
 
@@ -217,6 +221,7 @@ def save_memo(request):
                     "interview_stage": memo.interview_stage,
                     "interview_date": memo.interview_date.strftime("%Y-%m-%d") if memo.interview_date else None,
                     "status": memo.status,
+                    "interview_questions": memo.interview_questions,
                     "date": memo.date.strftime("%Y-%m-%d"),
                     "created_at": memo.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                     "updated_at": memo.updated_at.strftime("%Y-%m-%d %H:%M:%S"),

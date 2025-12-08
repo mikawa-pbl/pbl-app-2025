@@ -52,6 +52,10 @@ class Memo(models.Model):
     interview_date = models.DateField(null=True, blank=True)  # 面接日
     status = models.CharField(max_length=100, default='')  # 選考状況
 
+    # 面接詳細フィールド（面接系イベント用）
+    interview_questions = models.TextField(blank=True, default='')  # 面接で聞かれたこと
+    interview_details = models.TextField(blank=True, default='')  # 面接の詳細メモ
+
     # メモ内容
     content = models.TextField()  # メモの内容
 

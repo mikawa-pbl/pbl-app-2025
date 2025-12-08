@@ -504,39 +504,92 @@
                         <div id="companyDropdown" class="company-dropdown"></div>
                     </div>
                     <div class="form-group">
-                        <label for="modalInterviewStage">面接段階 *</label>
+                        <label for="modalInterviewStage">イベント・工程 *</label>
                         <select id="modalInterviewStage" required>
                             <option value="">選択してください</option>
-                            <option value="説明会">説明会</option>
-                            <option value="ES提出">ES提出</option>
-                            <option value="適性検査">適性検査</option>
-                            <option value="一次面接">一次面接</option>
-                            <option value="二次面接">二次面接</option>
-                            <option value="三次面接">三次面接</option>
-                            <option value="最終面接">最終面接</option>
-                            <option value="内定">内定</option>
-                            <option value="その他">その他</option>
+                            <optgroup label="選考前">
+                                <option value="企業研究">企業研究</option>
+                                <option value="説明会">説明会</option>
+                                <option value="カジュアル面談">カジュアル面談</option>
+                                <option value="OB/OG訪問">OB/OG訪問</option>
+                            </optgroup>
+                            <optgroup label="応募・書類選考">
+                                <option value="ES作成中">ES作成中</option>
+                                <option value="ES提出">ES提出</option>
+                                <option value="書類選考">書類選考</option>
+                            </optgroup>
+                            <optgroup label="試験・面接">
+                                <option value="適性検査">適性検査</option>
+                                <option value="Webテスト">Webテスト</option>
+                                <option value="一次面接">一次面接</option>
+                                <option value="二次面接">二次面接</option>
+                                <option value="三次面接">三次面接</option>
+                                <option value="最終面接">最終面接</option>
+                                <option value="グループディスカッション">グループディスカッション</option>
+                            </optgroup>
+                            <optgroup label="内定関連">
+                                <option value="内定通知">内定通知</option>
+                                <option value="オファー面談">オファー面談</option>
+                                <option value="内定者懇親会">内定者懇親会</option>
+                                <option value="内定後イベント">内定後イベント</option>
+                                <option value="承諾書〆切">承諾書〆切</option>
+                            </optgroup>
+                            <optgroup label="その他">
+                                <option value="インターン">インターン</option>
+                                <option value="その他">その他</option>
+                            </optgroup>
                         </select>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="modalInterviewDate">面接日</label>
+                        <label for="modalInterviewDate">実施日・〆切日</label>
                         <input type="date" id="modalInterviewDate">
                     </div>
                     <div class="form-group">
                         <label for="modalStatus">選考状況 *</label>
                         <select id="modalStatus" required>
                             <option value="">選択してください</option>
-                            <option value="応募予定">応募予定</option>
-                            <option value="選考中">選考中</option>
-                            <option value="結果待ち">結果待ち</option>
-                            <option value="通過">通過</option>
-                            <option value="不合格">不合格</option>
-                            <option value="辞退">辞退</option>
+                            <optgroup label="選考前・選考中">
+                                <option value="興味あり">興味あり</option>
+                                <option value="エントリー予定">エントリー予定</option>
+                                <option value="選考中">選考中</option>
+                                <option value="結果待ち">結果待ち</option>
+                            </optgroup>
+                            <optgroup label="選考結果">
+                                <option value="書類通過">書類通過</option>
+                                <option value="一次通過">一次通過</option>
+                                <option value="二次通過">二次通過</option>
+                                <option value="最終通過">最終通過</option>
+                                <option value="内定">内定</option>
+                                <option value="内定承諾">内定承諾</option>
+                            </optgroup>
+                            <optgroup label="不合格・辞退">
+                                <option value="書類不合格">書類不合格</option>
+                                <option value="一次不合格">一次不合格</option>
+                                <option value="二次不合格">二次不合格</option>
+                                <option value="最終不合格">最終不合格</option>
+                                <option value="選考辞退">選考辞退</option>
+                                <option value="内定辞退">内定辞退</option>
+                            </optgroup>
                         </select>
                     </div>
                 </div>
+                
+                <!-- 面接時の追加入力欄（初期は非表示） -->
+                <div id="interviewFields" style="display: none;">
+                    <div class="form-group">
+                        <label>どんなことを聞かれたか？ *</label>
+                        <div id="questionsContainer">
+                            <div class="question-item" style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <input type="text" class="question-input" placeholder="質問内容を入力..." style="flex: 1;">
+                                <button type="button" class="remove-question-btn" onclick="removeQuestion(this)" style="display: none; padding: 8px 12px; background: #ff6b6b; color: white; border: none; border-radius: 5px; cursor: pointer;">✕</button>
+                            </div>
+                        </div>
+                        <button type="button" onclick="addQuestion()" style="margin-top: 8px; padding: 8px 15px; background: #51cf66; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9em;">➕ 質問を追加</button>
+                    </div>
+                </div>
+                
                 <div class="form-group">
                     <label for="modalMemoInput">メモ内容</label>
                     <textarea id="modalMemoInput" placeholder="面接の内容、感じたこと、質問された内容などを記録しましょう"></textarea>
@@ -565,7 +618,112 @@
             
             // 会社名検索機能の初期化
             initCompanySearch();
+            
+            // イベント・工程の選択変更時に追加フィールドを表示/非表示
+            initInterviewFieldsToggle();
         });
+        
+        function initInterviewFieldsToggle() {
+            const stageSelect = document.getElementById('modalInterviewStage');
+            const interviewFields = document.getElementById('interviewFields');
+            
+            // 面接系のイベント一覧
+            const interviewStages = [
+                '一次面接',
+                '二次面接',
+                '三次面接',
+                '最終面接',
+                'グループディスカッション'
+            ];
+            
+            stageSelect.addEventListener('change', function() {
+                const selectedStage = this.value;
+                
+                if (interviewStages.includes(selectedStage)) {
+                    interviewFields.style.display = 'block';
+                } else {
+                    interviewFields.style.display = 'none';
+                    // 面接以外の場合はクリア
+                    clearInterviewQuestions();
+                }
+            });
+        }
+        
+        function addQuestion() {
+            const container = document.getElementById('questionsContainer');
+            const newItem = document.createElement('div');
+            newItem.className = 'question-item';
+            newItem.style.cssText = 'display: flex; gap: 8px; margin-bottom: 8px;';
+            newItem.innerHTML = `
+                <input type="text" class="question-input" placeholder="質問内容を入力..." style="flex: 1;">
+                <button type="button" class="remove-question-btn" onclick="removeQuestion(this)" style="padding: 8px 12px; background: #ff6b6b; color: white; border: none; border-radius: 5px; cursor: pointer;">✕</button>
+            `;
+            container.appendChild(newItem);
+            updateRemoveButtons();
+        }
+        
+        function removeQuestion(button) {
+            const item = button.parentElement;
+            item.remove();
+            updateRemoveButtons();
+        }
+        
+        function updateRemoveButtons() {
+            const items = document.querySelectorAll('.question-item');
+            items.forEach((item, index) => {
+                const removeBtn = item.querySelector('.remove-question-btn');
+                if (items.length > 1) {
+                    removeBtn.style.display = 'block';
+                } else {
+                    removeBtn.style.display = 'none';
+                }
+            });
+        }
+        
+        function getInterviewQuestions() {
+            const inputs = document.querySelectorAll('.question-input');
+            const questions = [];
+            inputs.forEach(input => {
+                const value = input.value.trim();
+                if (value) {
+                    questions.push(value);
+                }
+            });
+            return questions.join('\n');
+        }
+        
+        function setInterviewQuestions(questionsText) {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            
+            if (questionsText) {
+                const questions = questionsText.split('\n').filter(q => q.trim());
+                questions.forEach((question, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'question-item';
+                    item.style.cssText = 'display: flex; gap: 8px; margin-bottom: 8px;';
+                    item.innerHTML = `
+                        <input type="text" class="question-input" placeholder="質問内容を入力..." style="flex: 1;" value="${escapeHtml(question)}">
+                        <button type="button" class="remove-question-btn" onclick="removeQuestion(this)" style="${questions.length > 1 ? '' : 'display: none;'} padding: 8px 12px; background: #ff6b6b; color: white; border: none; border-radius: 5px; cursor: pointer;">✕</button>
+                    `;
+                    container.appendChild(item);
+                });
+            } else {
+                // デフォルトで1つの入力欄を作成
+                const item = document.createElement('div');
+                item.className = 'question-item';
+                item.style.cssText = 'display: flex; gap: 8px; margin-bottom: 8px;';
+                item.innerHTML = `
+                    <input type="text" class="question-input" placeholder="質問内容を入力..." style="flex: 1;">
+                    <button type="button" class="remove-question-btn" onclick="removeQuestion(this)" style="display: none; padding: 8px 12px; background: #ff6b6b; color: white; border: none; border-radius: 5px; cursor: pointer;">✕</button>
+                `;
+                container.appendChild(item);
+            }
+        }
+        
+        function clearInterviewQuestions() {
+            setInterviewQuestions('');
+        }
         
         function initCompanySearch() {
             const companyInput = document.getElementById('modalCompanyName');
@@ -696,6 +854,8 @@
             document.getElementById('modalInterviewDate').value = '';
             document.getElementById('modalStatus').value = '';
             document.getElementById('modalMemoInput').value = '';
+            clearInterviewQuestions();
+            document.getElementById('interviewFields').style.display = 'none';
             document.getElementById('companyDropdown').classList.remove('active');
         }
 
@@ -727,6 +887,23 @@
                                 badgeHtml += `<span class="memo-badge memo-badge-date">${memo.interview_date}</span>`;
                             }
                             badgeHtml += '</div>';
+                            
+                            // 面接詳細があれば表示
+                            let interviewDetailsHtml = '';
+                            if (memo.interview_questions) {
+                                const questions = memo.interview_questions.split('\n').filter(q => q.trim());
+                                let questionsHtml = '<strong>💬 聞かれたこと:</strong><ol style="margin: 8px 0 0 20px; padding: 0;">';
+                                questions.forEach(q => {
+                                    questionsHtml += `<li style="margin-bottom: 5px;">${escapeHtml(q)}</li>`;
+                                });
+                                questionsHtml += '</ol>';
+                                
+                                interviewDetailsHtml += `
+                                    <div class="memo-item-content" style="background: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                                        ${questionsHtml}
+                                    </div>
+                                `;
+                            }
 
                             memoItem.innerHTML = `
                                 <div class="memo-item-header">
@@ -735,6 +912,7 @@
                                         ${badgeHtml}
                                     </div>
                                 </div>
+                                ${interviewDetailsHtml}
                                 <div class="memo-item-content">${escapeHtml(memo.content)}</div>
                                 <div class="memo-item-time">作成: ${memo.created_at}</div>
                                 <div class="memo-actions">
@@ -768,15 +946,23 @@
             const interviewDate = document.getElementById('modalInterviewDate').value;
             const status = document.getElementById('modalStatus').value;
             const content = document.getElementById('modalMemoInput').value.trim();
+            const interviewQuestions = getInterviewQuestions();
 
             // 必須フィールドのチェック（contentは任意）
             if (!companyName || !interviewStage || !status) {
-                alert('必須項目(会社名、面接段階、選考状況)を入力してください');
+                alert('必須項目(会社名、イベント・工程、選考状況)を入力してください');
                 return;
             }
             
             if (!companyId) {
                 alert('会社リストから会社を選択してください');
+                return;
+            }
+            
+            // 面接系イベントの場合は「聞かれたこと」も必須
+            const interviewStages = ['一次面接', '二次面接', '三次面接', '最終面接', 'グループディスカッション'];
+            if (interviewStages.includes(interviewStage) && !interviewQuestions) {
+                alert('面接の場合、「どんなことを聞かれたか？」は必須です（最低1つ入力してください）');
                 return;
             }
 
@@ -794,7 +980,8 @@
                 interview_stage: interviewStage,
                 interview_date: interviewDate || null,
                 status: status,
-                content: content
+                content: content,
+                interview_questions: interviewQuestions
             };
 
             // 編集モードの場合はメモIDを含める
@@ -839,6 +1026,13 @@
             document.getElementById('modalInterviewDate').value = memo.interview_date || '';
             document.getElementById('modalStatus').value = memo.status;
             document.getElementById('modalMemoInput').value = memo.content;
+            setInterviewQuestions(memo.interview_questions || '');
+            
+            // 面接系イベントの場合は追加フィールドを表示
+            const interviewStages = ['一次面接', '二次面接', '三次面接', '最終面接', 'グループディスカッション'];
+            if (interviewStages.includes(memo.interview_stage)) {
+                document.getElementById('interviewFields').style.display = 'block';
+            }
 
             // フォームエリアまでスクロール
             document.getElementById('modalMemoInput').scrollIntoView({ behavior: 'smooth', block: 'center' });

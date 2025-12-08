@@ -1,14 +1,8 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% extends "teams/team_akb5/base.html" %}
 
-<head>
-  <meta charset="UTF-8">
-  <title>Team AKB5 Members</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-</head>
+{% block title %}Team AKB5 Members{% endblock %}
 
-<body>
-  <main class="container">
+{% block content %}
     <h1>Team AKB5 Members</h1>
     <ul>
       {% for member in members %}
@@ -17,8 +11,5 @@
       <li>データがありません</li>
       {% endfor %}
     </ul>
-    <a href="{% url 'team_akb5:index' %}">Team AKB5 トップへ</a>
-  </main>
-</body>
+{% endblock %}
 
-</html>

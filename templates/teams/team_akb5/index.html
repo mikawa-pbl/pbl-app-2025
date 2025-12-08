@@ -1,23 +1,12 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% extends "teams/team_akb5/base.html" %}
 
-<head>
-  <meta charset="UTF-8">
-  <title>Team AKB5</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-</head>
+{% block title %}Team AKB5 - Home{% endblock %}
 
-<body>
-  <main class="container">
-    <h1>Team AKB5</h1>
-    <nav>
-      <ul>
-        <li><a href="{% url 'team_akb5:members' %}">メンバー一覧</a></li>
-        <li><a href="{% url 'team_akb5:user' %}">ネットワーク報告アプリ ユーザ</a></li>
-        <li><a href="{% url 'team_akb5:admin' %}">ネットワーク報告アプリ アドミン</a></li>
-      </ul>
-    </nav>
-  </main>
-</body>
+{% block content %}
+    <article>
+        <header>
+            <h2>Welcome to Team AKB5</h2>
+        </header>
+    </article>
+{% endblock %}
 
-</html>

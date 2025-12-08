@@ -4,8 +4,15 @@ from . import views
 
 app_name = "team_tansaibou"
 urlpatterns = [
+    # 認証
+    path('signup/', views.signup, name='signup'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+
     # レジ画面（ホーム）
-    path('', views.register_sale, name='index'),  # ホームを販売登録画面に
+    path('', views.register_sale, name='index'),
+    path('register/', views.register_sale, name='register_sale'),
 
     # 販売関連
     path('sales/', views.sale_list, name='sale_list'),

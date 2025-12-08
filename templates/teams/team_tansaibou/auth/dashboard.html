@@ -1,0 +1,41 @@
+{% extends 'teams/team_tansaibou/base.html' %}
+
+{% block title %}ダッシュボード - {{ store.name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h1 style="text-align: center; margin-bottom: 10px;">{{ store.name }}</h1>
+    <p style="text-align: center; color: #666; margin-bottom: 30px;">
+        ようこそ！下のボタンからPOSレジに移動できます。
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+        <a href="{% url 'team_tansaibou:index' %}"
+           style="display: block; text-align: center; padding: 15px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 8px; font-size: 18px;">
+            POSレジを開く
+        </a>
+
+        <a href="{% url 'team_tansaibou:product_list' %}"
+           style="display: block; text-align: center; padding: 15px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 8px; font-size: 18px;">
+            商品管理
+        </a>
+
+        <a href="{% url 'team_tansaibou:sale_list' %}"
+           style="display: block; text-align: center; padding: 15px; background-color: #FF9800; color: white; text-decoration: none; border-radius: 8px; font-size: 18px;">
+            販売履歴
+        </a>
+    </div>
+
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
+        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">
+            ログイン中: {{ user.username }}
+        </p>
+        <form action="{% url 'team_tansaibou:logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" style="background: none; border: none; color: #f44336; cursor: pointer; font-size: 14px;">
+                ログアウト
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

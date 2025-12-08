@@ -1,20 +1,20 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
+from django.contrib.auth.hashers import make_password, check_password
 from decimal import Decimal
 import uuid
 
 
 class Store(models.Model):
-    """模擬店モデル（1店舗 = 1ユーザーアカウント）"""
-    # Note: user_id is stored as IntegerField to avoid cross-database FK issues
-    # User model is in 'default' DB, Store is in 'team_tansaibou' DB
-    user_id = models.IntegerField('ユーザーID', unique=True)
+    """模擬店モデル（独自認証対応）"""
+    username = models.CharField('ログインID', max_length=50, unique=True)
+    password = models.CharField('パスワード', max_length=128)
     name = models.CharField('店舗名', max_length=100)
     slug = models.SlugField('識別子', max_length=50, unique=True)
     description = models.TextField('説明', blank=True)
+    is_active = models.BooleanField('有効', default=True)
     created_at = models.DateTimeField('作成日時', auto_now_add=True)
     updated_at = models.DateTimeField('更新日時', auto_now=True)
 
@@ -25,13 +25,13 @@ class Store(models.Model):
     def __str__(self):
         return self.name
 
-    def get_user(self):
-        """関連するUserオブジェクトを取得"""
-        from django.contrib.auth.models import User
-        try:
-            return User.objects.get(id=self.user_id)
-        except User.DoesNotExist:
-            return None
+    def set_password(self, raw_password):
+        """パスワードをハッシュ化して設定"""
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        """パスワードを検証"""
+        return check_password(raw_password, self.password)
 
     def save(self, *args, **kwargs):
         if not self.slug:

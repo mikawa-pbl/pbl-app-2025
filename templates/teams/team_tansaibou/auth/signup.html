@@ -89,12 +89,6 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        .errorlist {
-            color: #721c24;
-            font-size: 14px;
-            margin-top: 5px;
-            list-style: none;
-        }
         .helptext {
             color: #666;
             font-size: 13px;
@@ -122,58 +116,31 @@
             <form method="post">
                 {% csrf_token %}
 
-                {% if form.non_field_errors %}
-                <div class="message error">
-                    {% for error in form.non_field_errors %}
-                    {{ error }}
-                    {% endfor %}
-                </div>
-                {% endif %}
-
                 <div class="form-group">
                     <label for="id_store_name">店舗名</label>
-                    {{ form.store_name }}
-                    {% if form.store_name.errors %}
-                    <ul class="errorlist">
-                        {% for error in form.store_name.errors %}<li>{{ error }}</li>{% endfor %}
-                    </ul>
-                    {% endif %}
+                    <input type="text" name="store_name" id="id_store_name" class="form-input" placeholder="例: たこ焼き屋さん" required>
                     <p class="helptext">模擬店の名前を入力してください</p>
                 </div>
 
                 <div class="form-group">
-                    <label for="id_username">ユーザー名（ログインID）</label>
-                    {{ form.username }}
-                    {% if form.username.errors %}
-                    <ul class="errorlist">
-                        {% for error in form.username.errors %}<li>{{ error }}</li>{% endfor %}
-                    </ul>
-                    {% endif %}
+                    <label for="id_username">ログインID</label>
+                    <input type="text" name="username" id="id_username" class="form-input" placeholder="半角英数字3文字以上" required>
+                    <p class="helptext">ログインに使用するIDです</p>
                 </div>
 
                 <div class="form-group">
                     <label for="id_password1">パスワード</label>
-                    {{ form.password1 }}
-                    {% if form.password1.errors %}
-                    <ul class="errorlist">
-                        {% for error in form.password1.errors %}<li>{{ error }}</li>{% endfor %}
-                    </ul>
-                    {% endif %}
+                    <input type="password" name="password1" id="id_password1" class="form-input" placeholder="4文字以上" required>
                 </div>
 
                 <div class="form-group">
                     <label for="id_password2">パスワード（確認）</label>
-                    {{ form.password2 }}
-                    {% if form.password2.errors %}
-                    <ul class="errorlist">
-                        {% for error in form.password2.errors %}<li>{{ error }}</li>{% endfor %}
-                    </ul>
-                    {% endif %}
+                    <input type="password" name="password2" id="id_password2" class="form-input" placeholder="もう一度入力" required>
                 </div>
 
                 <div class="form-group">
                     <label for="id_description">店舗の説明（任意）</label>
-                    {{ form.description }}
+                    <textarea name="description" id="id_description" class="form-input" placeholder="店舗の説明（任意）"></textarea>
                 </div>
 
                 <button type="submit" class="btn">登録する</button>

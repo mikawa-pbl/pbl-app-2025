@@ -9,32 +9,32 @@ Team Tansaibou POS システムのビューモジュール
 
 設計方針:
 - マルチデータベース対応（'team_tansaibou' データベースを使用）
+- 独自認証（Django authに依存しない）
 - トランザクション管理（在庫減算の一貫性保証）
 - エラーハンドリング（ユーザーフレンドリーなメッセージ）
 """
 
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.decorators import login_required
 from django.db import transaction as db_transaction
 from django.utils import timezone
 from decimal import Decimal
 from functools import wraps
 
 from .models import Store, Member, Product, ProductSet, ProductSetItem, Transaction, TransactionItem
-from .forms import StoreSignUpForm, StoreLoginForm
 
 DB = 'team_tansaibou'
 LOGIN_URL = 'team_tansaibou:login'
+SESSION_KEY = 'tansaibou_store_id'
 
 
 def get_current_store(request):
-    """現在のログインユーザーの店舗を取得"""
-    if not request.user.is_authenticated:
+    """現在のログイン店舗を取得"""
+    store_id = request.session.get(SESSION_KEY)
+    if not store_id:
         return None
     try:
-        return Store.objects.using(DB).get(user_id=request.user.id)
+        return Store.objects.using(DB).get(id=store_id, is_active=True)
     except Store.DoesNotExist:
         return None
 
@@ -43,9 +43,11 @@ def tansaibou_login_required(view_func):
     """team_tansaibou用のログイン必須デコレータ"""
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        if not request.user.is_authenticated:
+        store = get_current_store(request)
+        if not store:
             messages.warning(request, 'ログインが必要です')
             return redirect(LOGIN_URL)
+        request.current_store = store
         return view_func(request, *args, **kwargs)
     return wrapper
 
@@ -54,46 +56,81 @@ def tansaibou_login_required(view_func):
 
 def signup(request):
     """店舗登録（サインアップ）"""
-    if request.user.is_authenticated:
+    if get_current_store(request):
         return redirect('team_tansaibou:dashboard')
 
     if request.method == 'POST':
-        form = StoreSignUpForm(request.POST)
-        if form.is_valid():
-            user = form.save(using=DB)
-            login(request, user)
-            store = Store.objects.using(DB).get(user_id=user.id)
+        username = request.POST.get('username', '').strip()
+        password1 = request.POST.get('password1', '')
+        password2 = request.POST.get('password2', '')
+        store_name = request.POST.get('store_name', '').strip()
+        description = request.POST.get('description', '').strip()
+
+        errors = []
+        if not username:
+            errors.append('ログインIDを入力してください')
+        elif len(username) < 3:
+            errors.append('ログインIDは3文字以上で入力してください')
+        elif Store.objects.using(DB).filter(username=username).exists():
+            errors.append('このログインIDは既に使用されています')
+
+        if not password1:
+            errors.append('パスワードを入力してください')
+        elif len(password1) < 4:
+            errors.append('パスワードは4文字以上で入力してください')
+        elif password1 != password2:
+            errors.append('パスワードが一致しません')
+
+        if not store_name:
+            errors.append('店舗名を入力してください')
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+        else:
+            store = Store(
+                username=username,
+                name=store_name,
+                description=description
+            )
+            store.set_password(password1)
+            store.save(using=DB)
+            request.session[SESSION_KEY] = store.id
             messages.success(request, f'店舗「{store.name}」を登録しました！')
             return redirect('team_tansaibou:dashboard')
-    else:
-        form = StoreSignUpForm()
 
-    return render(request, 'teams/team_tansaibou/auth/signup.html', {'form': form})
+    return render(request, 'teams/team_tansaibou/auth/signup.html')
 
 
 def login_view(request):
     """ログイン"""
-    if request.user.is_authenticated:
+    if get_current_store(request):
         return redirect('team_tansaibou:dashboard')
 
     if request.method == 'POST':
-        form = StoreLoginForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            messages.success(request, 'ログインしました')
-            next_url = request.GET.get('next', 'team_tansaibou:dashboard')
-            return redirect(next_url)
-    else:
-        form = StoreLoginForm()
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
 
-    return render(request, 'teams/team_tansaibou/auth/login.html', {'form': form})
+        try:
+            store = Store.objects.using(DB).get(username=username, is_active=True)
+            if store.check_password(password):
+                request.session[SESSION_KEY] = store.id
+                messages.success(request, 'ログインしました')
+                next_url = request.GET.get('next', 'team_tansaibou:dashboard')
+                return redirect(next_url)
+            else:
+                messages.error(request, 'パスワードが正しくありません')
+        except Store.DoesNotExist:
+            messages.error(request, 'ログインIDが見つかりません')
+
+    return render(request, 'teams/team_tansaibou/auth/login.html')
 
 
 def logout_view(request):
     """ログアウト"""
     if request.method == 'POST':
-        logout(request)
+        if SESSION_KEY in request.session:
+            del request.session[SESSION_KEY]
         messages.success(request, 'ログアウトしました')
     return redirect('team_tansaibou:login')
 
@@ -101,7 +138,7 @@ def logout_view(request):
 @tansaibou_login_required
 def dashboard(request):
     """ダッシュボード"""
-    store = get_current_store(request)
+    store = request.current_store
     return render(request, 'teams/team_tansaibou/auth/dashboard.html', {'store': store})
 
 
@@ -114,15 +151,15 @@ def index(request):
 
 @tansaibou_login_required
 def members(request):
-    store = get_current_store(request)
+    store = request.current_store
     qs = Member.objects.using(DB).filter(store=store)
-    return render(request, 'teams/team_tansaibou/members.html', {'members': qs})
+    return render(request, 'teams/team_tansaibou/members.html', {'store': store, 'members': qs})
 
 
 @tansaibou_login_required
 def register_sale(request):
     """販売登録画面（POSレジ）"""
-    store = get_current_store(request)
+    store = request.current_store
     if request.method == 'POST':
         try:
             transaction_date = request.POST.get('transaction_date')
@@ -194,6 +231,7 @@ def register_sale(request):
             messages.error(request, f'エラーが発生しました: {str(e)}')
 
     context = {
+        'store': store,
         'members': Member.objects.using(DB).filter(store=store),
         'products': Product.objects.using(DB).filter(store=store, is_active=True).order_by('name'),
         'product_sets': ProductSet.objects.using(DB).filter(store=store, is_active=True).order_by('name'),
@@ -206,12 +244,13 @@ def register_sale(request):
 @tansaibou_login_required
 def sale_list(request):
     """販売履歴一覧"""
-    store = get_current_store(request)
+    store = request.current_store
     transactions = Transaction.objects.using(DB).filter(store=store).select_related('recorded_by').prefetch_related(
         'items__product', 'items__product_set'
     ).order_by('-transaction_date', '-created_at')
 
     context = {
+        'store': store,
         'transactions': transactions,
     }
     return render(request, 'teams/team_tansaibou/sale_list.html', context)
@@ -222,9 +261,10 @@ def sale_list(request):
 @tansaibou_login_required
 def product_list(request):
     """商品一覧"""
-    store = get_current_store(request)
+    store = request.current_store
     products = Product.objects.using(DB).filter(store=store).order_by('name')
     context = {
+        'store': store,
         'products': products,
     }
     return render(request, 'teams/team_tansaibou/product_list.html', context)
@@ -233,7 +273,7 @@ def product_list(request):
 @tansaibou_login_required
 def product_add(request):
     """商品登録"""
-    store = get_current_store(request)
+    store = request.current_store
     if request.method == 'POST':
         try:
             name = request.POST.get('name')
@@ -257,13 +297,13 @@ def product_add(request):
         except Exception as e:
             messages.error(request, f'エラーが発生しました: {str(e)}')
 
-    return render(request, 'teams/team_tansaibou/product_add.html')
+    return render(request, 'teams/team_tansaibou/product_add.html', {'store': store})
 
 
 @tansaibou_login_required
 def product_edit(request, product_id):
     """商品編集"""
-    store = get_current_store(request)
+    store = request.current_store
     try:
         product = Product.objects.using(DB).get(id=product_id, store=store)
     except Product.DoesNotExist:
@@ -286,6 +326,7 @@ def product_edit(request, product_id):
             messages.error(request, f'エラーが発生しました: {str(e)}')
 
     context = {
+        'store': store,
         'product': product,
     }
     return render(request, 'teams/team_tansaibou/product_edit.html', context)
@@ -294,7 +335,7 @@ def product_edit(request, product_id):
 @tansaibou_login_required
 def product_restock(request, product_id):
     """在庫補充"""
-    store = get_current_store(request)
+    store = request.current_store
     try:
         product = Product.objects.using(DB).get(id=product_id, store=store)
     except Product.DoesNotExist:
@@ -317,6 +358,7 @@ def product_restock(request, product_id):
             messages.error(request, f'エラーが発生しました: {str(e)}')
 
     context = {
+        'store': store,
         'product': product,
     }
     return render(request, 'teams/team_tansaibou/product_restock.html', context)
@@ -327,9 +369,10 @@ def product_restock(request, product_id):
 @tansaibou_login_required
 def productset_list(request):
     """セット商品一覧"""
-    store = get_current_store(request)
+    store = request.current_store
     product_sets = ProductSet.objects.using(DB).filter(store=store).prefetch_related('items__product').order_by('name')
     context = {
+        'store': store,
         'product_sets': product_sets,
     }
     return render(request, 'teams/team_tansaibou/productset_list.html', context)
@@ -338,7 +381,7 @@ def productset_list(request):
 @tansaibou_login_required
 def productset_add(request):
     """セット商品登録"""
-    store = get_current_store(request)
+    store = request.current_store
     if request.method == 'POST':
         try:
             with db_transaction.atomic():
@@ -374,6 +417,7 @@ def productset_add(request):
 
     products = Product.objects.using(DB).filter(store=store, is_active=True).order_by('name')
     context = {
+        'store': store,
         'products': products,
     }
     return render(request, 'teams/team_tansaibou/productset_add.html', context)
@@ -382,7 +426,7 @@ def productset_add(request):
 @tansaibou_login_required
 def productset_edit(request, productset_id):
     """セット商品編集"""
-    store = get_current_store(request)
+    store = request.current_store
     try:
         product_set = ProductSet.objects.using(DB).prefetch_related('items__product').get(id=productset_id, store=store)
     except ProductSet.DoesNotExist:
@@ -419,6 +463,7 @@ def productset_edit(request, productset_id):
 
     products = Product.objects.using(DB).filter(store=store, is_active=True).order_by('name')
     context = {
+        'store': store,
         'product_set': product_set,
         'products': products,
     }

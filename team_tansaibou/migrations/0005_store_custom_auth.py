@@ -1,5 +1,5 @@
-# Generated manually - Store model with IntegerField for user_id
-# This avoids cross-database FK issues (no dependency on auth_user table)
+# Generated manually - Store model with custom authentication
+# No dependency on Django auth - fully self-contained in team_tansaibou DB
 
 from django.db import migrations, models
 import django.db.models.deletion
@@ -16,10 +16,12 @@ class Migration(migrations.Migration):
             name='Store',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('user_id', models.IntegerField(verbose_name='ユーザーID', unique=True)),
+                ('username', models.CharField(max_length=50, unique=True, verbose_name='ログインID')),
+                ('password', models.CharField(max_length=128, verbose_name='パスワード')),
                 ('name', models.CharField(max_length=100, verbose_name='店舗名')),
                 ('slug', models.SlugField(unique=True, verbose_name='識別子')),
                 ('description', models.TextField(blank=True, verbose_name='説明')),
+                ('is_active', models.BooleanField(default=True, verbose_name='有効')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='作成日時')),
                 ('updated_at', models.DateTimeField(auto_now=True, verbose_name='更新日時')),
             ],

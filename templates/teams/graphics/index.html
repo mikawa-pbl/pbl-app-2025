@@ -135,6 +135,15 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             text-align: center;
+            text-decoration: none;
+            display: block;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background-color: #f0f8ff;
         }
         .feature-card h4 {
             color: #333;
@@ -144,30 +153,6 @@
         .feature-card p {
             color: #666;
             font-size: 14px;
-        }
-        .cta-section {
-            text-align: center;
-            margin-top: 40px;
-        }
-        .cta-button {
-            display: inline-block;
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px 40px;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 18px;
-            margin: 10px;
-            transition: background-color 0.3s;
-        }
-        .cta-button:hover {
-            background-color: #45a049;
-        }
-        .secondary-button {
-            background-color: #007bff;
-        }
-        .secondary-button:hover {
-            background-color: #0056b3;
         }
     </style>
 </head>
@@ -212,24 +197,19 @@
             </p>
 
             <div class="features">
-                <div class="feature-card">
+                <a href="{% url 'graphics:book_reviews' %}" class="feature-card">
                     <h4>📚 科目別レビュー</h4>
                     <p>各科目に特化した参考書情報を簡単に検索・閲覧できます</p>
-                </div>
-                <div class="feature-card">
+                </a>
+                <a href="{% url 'graphics:add_book_review' %}" class="feature-card">
                     <h4>✍️ レビュー投稿</h4>
                     <p>実際に使った参考書のレビューを投稿して他の学生を支援</p>
-                </div>
-                <div class="feature-card">
+                </a>
+                <a href="{% url 'graphics:add_book_review' %}" class="feature-card">
                     <h4>📖 書籍情報自動取得</h4>
                     <p>ISBNコードから書籍情報を自動で取得します</p>
-                </div>
+                </a>
             </div>
-        </section>
-
-        <section class="cta-section">
-            <a href="{% url 'graphics:book_reviews' %}" class="cta-button">レビューを見る</a>
-            <a href="{% url 'graphics:add_book_review' %}" class="cta-button secondary-button">レビューを投稿する</a>
         </section>
     </div>
 

@@ -1,9 +1,57 @@
+from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.sessions.base_session import AbstractBaseSession
+from django.contrib.sessions.models import SessionManager
 from django.db import models
 
 from .doors import DOORS
 
 
 DOOR_LABEL_MAP = {door.id: door.label for door in DOORS}
+
+
+class H34vvySession(AbstractBaseSession):
+    """
+    チーム独自のセッションDB
+    """
+
+    objects = SessionManager()
+
+    @classmethod
+    def get_session_store_class(cls):
+        from .backends import SessionStore
+
+        return SessionStore
+
+
+class H34vvyGroup(Group):
+    pass
+
+
+class H34vvyPermission(Permission):
+    pass
+
+
+class H34vvyUser(AbstractUser):
+    """
+    チーム独自の認証・認可用ユーザアカウント
+    """
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # auth.models.PermissionsMixin で定義されている外部キーが
+    # 共有テーブルではなくチーム固有のテーブルを参照するように変更する
+    groups = models.ManyToManyField(
+        H34vvyGroup,
+        blank=True,
+        related_name="h34vvy_user_set",
+        related_query_name="h34vvy_user",
+    )
+    user_permissions = models.ManyToManyField(
+        H34vvyPermission,
+        blank=True,
+        related_name="h34vvy_user_set",
+        related_query_name="h34vvy_user",
+    )
 
 
 # 後でなくす

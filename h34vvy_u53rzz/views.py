@@ -1,6 +1,5 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -8,7 +7,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .doors import DOORS
-from .forms import EntryForm
+from .forms import EntryForm, NamespacedLoginForm
 from .models import Entry
 
 
@@ -62,12 +61,12 @@ def login_view(request):
         return redirect(redirect_to)
 
     if request.method == "POST":
-        form = _style_auth_form(AuthenticationForm(request, data=request.POST))
+        form = _style_auth_form(NamespacedLoginForm(request, data=request.POST))
         if form.is_valid():
             login(request, form.get_user())
             return redirect(redirect_to)
     else:
-        form = _style_auth_form(AuthenticationForm(request))
+        form = _style_auth_form(NamespacedLoginForm(request))
 
     return render(
         request,

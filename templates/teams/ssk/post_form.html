@@ -4,26 +4,39 @@
 <form method="post">
   {% csrf_token %}
 
-  <div>
-    {{ form.title.label_tag }}<br>
-    {{ form.title }}
+{# ★ ここを追加 ★ #}
+{% if form.errors %}
+  <div style="color:red; margin-bottom: 1em;">
+    {% for field in form %}
+      {% for error in field.errors %}
+        <div>{{ field.label }}: {{ error }}</div>
+      {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+      <div>{{ error }}</div>
+    {% endfor %}
   </div>
+{% endif %}
 
-  <div>
-    {{ form.date.label_tag }}<br>
-    {{ form.date }}
-  </div>
+<p>
+  {{ form.title.label_tag }}<br>
+  {{ form.title }}
+</p>
 
-  <div>
-    {{ form.body.label_tag }}<br>
-    {{ form.body }}
-  </div>
+<p>
+  {{ form.date.label_tag }}<br>
+  {{ form.date }}  {# ← ここが年・月・日セレクトになる #}
+</p>
 
-  <div>
-    {{ form.tags_text.label_tag }}<br>
-    {{ form.tags_text }}<br>
-    <small>{{ form.tags_text.help_text }}</small>
-  </div>
+<p>
+  {{ form.body.label_tag }}<br>
+  {{ form.body }}
+</p>
 
-  <button type="submit">投稿</button>
+<p>
+  {{ form.tags_text.label_tag }}<br>
+  {{ form.tags_text }}
+</p>
+
+<button type="submit">投稿</button>
 </form>

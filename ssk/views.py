@@ -13,6 +13,8 @@ def post_list(request):
 def post_create(request):
     if request.method == "POST":
         form = PostForm(request.POST)
+    
+            
         if form.is_valid():
             # ① Post 本体を保存
             post = Post(
@@ -42,6 +44,7 @@ def post_create(request):
 
             # ③ 保存できたら一覧ページへ戻る
             return redirect("ssk:post_list")
+
     else:
         form = PostForm()
 

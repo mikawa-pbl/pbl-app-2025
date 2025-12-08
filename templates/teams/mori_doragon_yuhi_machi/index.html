@@ -35,10 +35,13 @@
 </head>
 
 <body>
-<h1>♨いまどこだ！表 ベジータ版</h1>
-<p>メンバーの現在の居場所です。プルダウンを変更すると即時更新されます。</p>
+<h1>♨いまどこだ！表 スーパーベジータ版</h1>
+<p>現在のメンバーの居場所です。プルダウンで変更すると即時更新されます。</p>
 
 <hr>
+
+{% load static %}
+
 
 <h2>現在の状況</h2>
 
@@ -77,5 +80,12 @@
     
     {% endfor %}
 </ul>
+
+<p>
+    <a href="{% url 'mori_doragon_yuhi_machi:add_place' %}" title="場所を追加">
+        <img src="{% static 'images/add_icon.webp' %}" alt="場所を追加" style="width: 30px; height: 30px;">
+    </a>
+</p>
+
 </body>
 </html>

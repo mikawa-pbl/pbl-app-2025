@@ -16,4 +16,8 @@ urlpatterns = [
     # http://.../(アプリのURL)/update_location/
     # (このURLにフォームが送信される)
     path('update_location/', views.update_location, name='update_location'), 
+    path('places/add/', views.add_place, name='add_place'), 
+    path('places/delete/', views.delete_place, name='delete_place'), 
 ]
+
+

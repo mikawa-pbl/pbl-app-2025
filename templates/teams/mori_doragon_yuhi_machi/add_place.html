@@ -1,0 +1,32 @@
+<h2>新しい場所を追加</h2>
+
+{% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+<form method="POST" action="{% url 'mori_doragon_yuhi_machi:add_place' %}">
+    {% csrf_token %} <label for="place-name">場所名:</label>
+    <input type="text" id="place-name" name="place_name" required>
+    
+    <button type="submit">追加</button>
+</form>
+
+<h3>登録場所一覧</h3>
+<ul>
+    {% for place in all_places %}
+    <li>
+        {{ place.name }} (ID: {{ place.id }})
+        
+        <form method="POST" action="{% url 'mori_doragon_yuhi_machi:delete_place' %}" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="place_id" value="{{ place.id }}">
+            <button type="submit" onclick="return confirm('{{ place.name }} を本当に削除しますか？');" style="color: red;">
+                削除
+            </button>
+        </form>
+        
+    </li>
+    {% endfor %}
+</ul>
+
+<p><a href="{% url 'mori_doragon_yuhi_machi:index' %}">HOMEに戻る</a></p>

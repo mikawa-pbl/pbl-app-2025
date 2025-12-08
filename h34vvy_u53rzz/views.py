@@ -1,4 +1,4 @@
-from django.contrib.auth import login
+from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -7,8 +7,8 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .doors import DOORS
-from .forms import EntryForm, NamespacedLoginForm
-from .models import Entry
+from .forms import EntryForm, NamespacedLoginForm, SignupForm
+from .models import AppAccount, Entry
 
 
 LOGIN_REDIRECT_FALLBACK = reverse_lazy("h34vvy_u53rzz:index")
@@ -75,6 +75,91 @@ def login_view(request):
             "nav_active": None,
         },
     )
+
+
+def signup_view(request):
+    redirect_to = _get_safe_redirect(request)
+    if request.user.is_authenticated:
+        return redirect(redirect_to)
+
+    def style_signup(form):
+        base_attrs = {
+            "class": "w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40",
+        }
+        form.fields["local_username"].widget.attrs.update(
+            {**base_attrs, "placeholder": "アプリ内で使うユーザー名"}
+        )
+        form.fields["password1"].widget.attrs.update(
+            {**base_attrs, "placeholder": "パスワード"}
+        )
+        form.fields["password2"].widget.attrs.update(
+            {**base_attrs, "placeholder": "パスワード（確認）"}
+        )
+        return form
+
+    if request.method == "POST":
+        form = style_signup(SignupForm(request.POST))
+        if form.is_valid():
+            local_username = form.cleaned_data["local_username"]
+            password = form.cleaned_data["password1"]
+            # auth_user側のユーザー名は衝突を避けるために接頭辞を付与
+            auth_username = f"h34vvy_{local_username}"
+            if len(auth_username) > 150:
+                form.add_error(
+                    "local_username",
+                    "ユーザー名が長すぎます（プレフィックス込み150文字以内）。",
+                )
+            else:
+                UserModel = get_user_model()
+                # 共有ユーザー表側の重複チェック
+                if UserModel.objects.using("default").filter(username=auth_username).exists():
+                    form.add_error(
+                        "local_username",
+                        "このユーザー名は既に使用されています。別の名前を入力してください。",
+                    )
+                # アプリ内ローカル名の重複チェック
+                elif AppAccount.objects.using("h34vvy_u53rzz").filter(
+                    app_code="h34vvy", local_username=local_username
+                ).exists():
+                    form.add_error(
+                        "local_username",
+                        "このユーザー名は既に登録されています。別の名前を入力してください。",
+                    )
+                else:
+                    user = UserModel._default_manager.db_manager("default").create_user(
+                        username=auth_username,
+                        password=password,
+                    )
+                    try:
+                        AppAccount.objects.using("h34vvy_u53rzz").create(
+                            app_code="h34vvy",
+                            local_username=local_username,
+                            user_id=user.id,
+                        )
+                    except Exception:
+                        # AppAccount作成に失敗したらユーザーを削除しておく
+                        user.delete(using="default")
+                        form.add_error(None, "登録に失敗しました。時間をおいて再度お試しください。")
+                    else:
+                        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+                        return redirect(redirect_to)
+    else:
+        form = style_signup(SignupForm())
+
+    return render(
+        request,
+        "teams/h34vvy_u53rzz/signup.html",
+        {
+            "form": form,
+            "next": redirect_to,
+            "nav_active": None,
+        },
+    )
+
+
+def logout_view(request):
+    logout(request)
+    return redirect(LOGIN_REDIRECT_FALLBACK)
 
 
 @login_required(login_url=LOGIN_REDIRECT_FALLBACK)

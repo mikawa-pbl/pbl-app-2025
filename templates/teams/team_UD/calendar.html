@@ -246,11 +246,16 @@
             font-size: 0.8em;
             color: #999;
         }
-        .memo-delete-btn {
+        .memo-actions {
             position: absolute;
             top: 10px;
             right: 10px;
-            background: #ff6b6b;
+            display: flex;
+            gap: 5px;
+        }
+        .memo-edit-btn,
+        .memo-delete-btn {
+            background: #667eea;
             color: white;
             border: none;
             padding: 5px 12px;
@@ -258,6 +263,13 @@
             cursor: pointer;
             font-size: 0.85em;
             transition: all 0.3s;
+        }
+        .memo-edit-btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+        .memo-delete-btn {
+            background: #ff6b6b;
         }
         .memo-delete-btn:hover {
             background: #ee5a52;
@@ -489,6 +501,7 @@
 
     <script>
         let currentYear, currentMonth, currentDay;
+        let editingMemoId = null;  // 編集中のメモIDを保持
 
         // ページ読み込み時に各日付のメモを確認してインジケータを表示
         document.addEventListener('DOMContentLoaded', function() {
@@ -545,6 +558,11 @@
             document.getElementById('memoModal').classList.remove('active');
 
             // フォームをクリア
+            clearModalForm();
+        }
+
+        function clearModalForm() {
+            editingMemoId = null;  // 編集モードを解除
             document.getElementById('modalCompanyName').value = '';
             document.getElementById('modalInterviewStage').value = '';
             document.getElementById('modalInterviewDate').value = '';
@@ -590,8 +608,18 @@
                                 </div>
                                 <div class="memo-item-content">${escapeHtml(memo.content)}</div>
                                 <div class="memo-item-time">作成: ${memo.created_at}</div>
-                                <button class="memo-delete-btn" onclick="deleteModalMemo(${memo.id})">削除</button>
+                                <div class="memo-actions">
+                                    <button class="memo-edit-btn" data-memo-id="${memo.id}">編集</button>
+                                    <button class="memo-delete-btn" onclick="deleteModalMemo(${memo.id})">削除</button>
+                                </div>
                             `;
+                            
+                            // 編集ボタンにイベントリスナーを追加
+                            const editBtn = memoItem.querySelector('.memo-edit-btn');
+                            editBtn.addEventListener('click', function() {
+                                editModalMemo(memo);
+                            });
+                            
                             memoList.appendChild(memoItem);
                         });
                     } else {
@@ -619,19 +647,26 @@
 
             const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
 
+            const requestBody = {
+                date: dateStr,
+                company_name: companyName,
+                interview_stage: interviewStage,
+                interview_date: interviewDate || null,
+                status: status,
+                content: content
+            };
+
+            // 編集モードの場合はメモIDを含める
+            if (editingMemoId) {
+                requestBody.id = editingMemoId;
+            }
+
             fetch('/team_UD/api/memo/save/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    date: dateStr,
-                    company_name: companyName,
-                    interview_stage: interviewStage,
-                    interview_date: interviewDate || null,
-                    status: status,
-                    content: content
-                })
+                body: JSON.stringify(requestBody)
             })
             .then(response => response.json())
             .then(data => {
@@ -639,11 +674,7 @@
                     alert('エラー: ' + data.error);
                 } else {
                     // フォームをクリア
-                    document.getElementById('modalCompanyName').value = '';
-                    document.getElementById('modalInterviewStage').value = '';
-                    document.getElementById('modalInterviewDate').value = '';
-                    document.getElementById('modalStatus').value = '';
-                    document.getElementById('modalMemoInput').value = '';
+                    clearModalForm();
 
                     loadModalMemos();
                     // インジケータを更新
@@ -654,6 +685,21 @@
                 console.error('Error:', error);
                 alert('メモの保存に失敗しました');
             });
+        }
+
+        function editModalMemo(memo) {
+            // 編集モードを設定
+            editingMemoId = memo.id;
+
+            // フォームに既存データを入力
+            document.getElementById('modalCompanyName').value = memo.company_name;
+            document.getElementById('modalInterviewStage').value = memo.interview_stage;
+            document.getElementById('modalInterviewDate').value = memo.interview_date || '';
+            document.getElementById('modalStatus').value = memo.status;
+            document.getElementById('modalMemoInput').value = memo.content;
+
+            // フォームエリアまでスクロール
+            document.getElementById('modalMemoInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         function deleteModalMemo(memoId) {
@@ -669,6 +715,10 @@
                 if (data.error) {
                     alert('エラー: ' + data.error);
                 } else {
+                    // 編集中のメモが削除された場合はフォームをクリア
+                    if (editingMemoId === memoId) {
+                        clearModalForm();
+                    }
                     loadModalMemos();
                     // インジケータを更新
                     updateMemoIndicator();

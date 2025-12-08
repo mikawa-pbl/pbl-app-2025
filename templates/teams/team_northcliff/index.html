@@ -6,6 +6,12 @@
 <body>
 <h1>Team Northcliff</h1>
 <p><a href="/team_northcliff/members/">メンバー一覧</a></p>
-<p><a href="/team_northcliff/ui/">アプリ</a></p>
+
+<h2>アプリ利用ユーザー</h2>
+<ul>
+    {% for user in users %}
+    <li><a href="/team_northcliff/ui/{{ user.name }}/">{{ user.name }}</a></li>
+    {% endfor %}
+</ul>
 </body>
 </html>

@@ -6,4 +6,5 @@ urlpatterns = [
     path('', views.index, name='index'),
     # path('goods/', views.goods, name='goods'),
     path('registration_goods/', views.registration_goods, name='registration_goods'),
+    path('images/<path:filename>', views.serve_template_image, name='cake_image'),
 ]

@@ -3,7 +3,11 @@ from .models import Good
 from .forms import GoodsForm
 from types import SimpleNamespace
 from django.db import connections
+from pathlib import Path
+import mimetypes
 import uuid
+from django.http import FileResponse, Http404
+from django.conf import settings
 
 # def index(request):
 #     return render(request, 'teams/team_cake/index.html')
@@ -18,18 +22,73 @@ def index(request):
         # テンプレートは objects の `.name` / `.price` を参照する想定のため SimpleNamespace を作る。
         conn = connections['team_cake']
         with conn.cursor() as cur:
-            cur.execute('SELECT id, name, price FROM team_cake_good')
+            cur.execute('SELECT id, name, price, description, image_filename FROM team_cake_good')
             rows = cur.fetchall()
 
-        goods = [SimpleNamespace(id=row[0], name=row[1], price=row[2]) for row in rows]
+        goods = [SimpleNamespace(id=row[0], name=row[1], price=row[2], description=row[3], image_filename=row[4]) for row in rows]
         return render(request, 'teams/team_cake/index.html', {'goods': goods})
 
 def registration_goods(request):
     if request.method == 'POST':
-        form = GoodsForm(request.POST)
+        form = GoodsForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return redirect('team_cake:registration_goods')  # 適切な名前のURLに変更
+            # create instance but don't commit so we can set image_filename
+            good = form.save(commit=False)
+
+            # handle uploaded file (if any) and save it under this app's templates images dir
+            uploaded = request.FILES.get('image')
+            if uploaded:
+                base_dir = Path(__file__).resolve().parent
+                images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
+                images_dir.mkdir(parents=True, exist_ok=True)
+
+                # generate unique filename preserving extension
+                orig_name = uploaded.name
+                ext = ''
+                if '.' in orig_name:
+                    ext = '.' + orig_name.split('.')[-1]
+                filename = f"{uuid.uuid4().hex}{ext}"
+                dest_path = (images_dir / filename).resolve()
+
+                # prevent directory traversal
+                if not str(dest_path).startswith(str(images_dir)):
+                    raise Http404("Invalid target path")
+
+                with open(dest_path, 'wb') as out:
+                    for chunk in uploaded.chunks():
+                        out.write(chunk)
+
+                good.image_filename = filename
+
+            # Save to the team_cake db explicitly (router may handle but be explicit)
+            good.save(using='team_cake')
+            return redirect('team_cake:registration_goods')
     else:
         form = GoodsForm()
     return render(request, 'teams/team_cake/registrationGoods.html', {'form': form})
+
+
+def serve_template_image(request, filename: str):
+    """
+    Serve files placed under templates/teams/team_cake/images/ at
+    /team_cake/images/<filename> similar to `team_USL.serve_template_image`.
+    """
+    base_dir = Path(__file__).resolve().parent.parent
+    images_dir = base_dir / 'team_cake' / 'templates' / 'teams' / 'team_cake' / 'images'
+    # If code runs with different cwd layout, also try app dir variant
+    if not images_dir.exists():
+        images_dir = Path(__file__).resolve().parent / 'templates' / 'teams' / 'team_cake' / 'images'
+
+    file_path = (images_dir / filename).resolve()
+
+    if not str(file_path).startswith(str(images_dir)):
+        raise Http404("Invalid path")
+
+    if not file_path.exists():
+        raise Http404("Image not found")
+
+    content_type, _ = mimetypes.guess_type(str(file_path))
+    if content_type is None:
+        content_type = 'application/octet-stream'
+
+    return FileResponse(open(file_path, 'rb'), content_type=content_type)

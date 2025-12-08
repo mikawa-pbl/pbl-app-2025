@@ -1,0 +1,25 @@
+<h1>論文検索</h1>
+
+<form method="get">
+  <input type="text" name="q" value="{{ query }}" placeholder="タイトル・著者・キーワードなど">
+  <button type="submit">検索</button>
+</form>
+
+<hr>
+
+{% if query %}
+  <p>"{{ query }}" の検索結果: {{ results|length }} 件</p>
+{% endif %}
+
+<ul>
+  {% for paper in results %}
+    <li>
+      <a href="{% url 'teachers:paper_detail' paper.pk %}">{{ paper.title }}</a>
+      ({{ paper.author }}, {{ paper.year }})
+    </li>
+  {% empty %}
+    <li>該当する論文はありません。</li>
+  {% endfor %}
+</ul>
+
+<p><a href="{% url 'teachers:paper_list' %}">一覧に戻る</a></p>

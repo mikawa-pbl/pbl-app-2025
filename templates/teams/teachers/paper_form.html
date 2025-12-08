@@ -1,0 +1,9 @@
+<h1>論文登録</h1>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">登録</button>
+</form>
+
+<p><a href="{% url 'teachers:paper_list' %}">一覧に戻る</a></p>

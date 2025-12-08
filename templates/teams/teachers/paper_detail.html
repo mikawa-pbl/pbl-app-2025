@@ -1,0 +1,9 @@
+<h1>{{ paper.title }}</h1>
+
+<p><strong>著者:</strong> {{ paper.author }}</p>
+<p><strong>年:</strong> {{ paper.year }}</p>
+<p><strong>掲載誌:</strong> {{ paper.booktitle }}</p>
+<p><strong>URL:</strong> {{ paper.url }}</p>
+<p><strong>DOI:</strong> {{ paper.doi }}</p>
+
+<p><a href="{% url 'teachers:paper_list' %}">一覧に戻る</a></p>

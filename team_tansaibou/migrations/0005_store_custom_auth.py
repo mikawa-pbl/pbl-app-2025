@@ -1,8 +1,78 @@
 # Generated manually - Store model with custom authentication
 # No dependency on Django auth - fully self-contained in team_tansaibou DB
+# Handles both fresh installs and migrations from old schema
 
 from django.db import migrations, models
 import django.db.models.deletion
+
+
+def check_and_migrate_store(apps, schema_editor):
+    """既存のStoreテーブルがあれば、新しいカラムを追加してデータを移行"""
+    from django.db import connection
+    from django.contrib.auth.hashers import make_password
+
+    db_alias = schema_editor.connection.alias
+
+    # テーブルが存在するか確認
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT name FROM sqlite_master
+            WHERE type='table' AND name='team_tansaibou_store'
+        """)
+        table_exists = cursor.fetchone() is not None
+
+    if not table_exists:
+        # テーブルが存在しない場合は何もしない（CreateModelで作成される）
+        return
+
+    # 既存テーブルのカラムを確認
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute("PRAGMA table_info(team_tansaibou_store)")
+        columns = {row[1] for row in cursor.fetchall()}
+
+    # usernameカラムがなければ追加
+    if 'username' not in columns:
+        with schema_editor.connection.cursor() as cursor:
+            cursor.execute("""
+                ALTER TABLE team_tansaibou_store
+                ADD COLUMN username VARCHAR(50) DEFAULT ''
+            """)
+
+    # passwordカラムがなければ追加
+    if 'password' not in columns:
+        with schema_editor.connection.cursor() as cursor:
+            cursor.execute("""
+                ALTER TABLE team_tansaibou_store
+                ADD COLUMN password VARCHAR(128) DEFAULT ''
+            """)
+
+    # is_activeカラムがなければ追加
+    if 'is_active' not in columns:
+        with schema_editor.connection.cursor() as cursor:
+            cursor.execute("""
+                ALTER TABLE team_tansaibou_store
+                ADD COLUMN is_active BOOLEAN DEFAULT 1
+            """)
+
+    # 既存データにusername/passwordを設定
+    Store = apps.get_model('team_tansaibou', 'Store')
+    for store in Store.objects.using(db_alias).all():
+        changed = False
+        if not store.username:
+            if hasattr(store, 'slug') and store.slug:
+                store.username = store.slug
+            else:
+                store.username = f"store_{store.id}"
+            changed = True
+        if not store.password:
+            store.password = make_password("password")
+            changed = True
+        if changed:
+            store.save(using=db_alias)
+
+
+def reverse_check(apps, schema_editor):
+    pass
 
 
 class Migration(migrations.Migration):
@@ -12,6 +82,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # まずPythonでテーブルの状態を確認し、必要に応じてカラムを追加
+        migrations.RunPython(check_and_migrate_store, reverse_check),
+
+        # 新規インストールの場合のみCreateModelが効く
+        # 既存テーブルがある場合は上のRunPythonで対応済み
         migrations.CreateModel(
             name='Store',
             fields=[

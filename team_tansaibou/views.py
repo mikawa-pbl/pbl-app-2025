@@ -150,10 +150,96 @@ def index(request):
 
 
 @tansaibou_login_required
-def members(request):
+def member_list(request):
+    """担当者一覧"""
     store = request.current_store
-    qs = Member.objects.using(DB).filter(store=store)
-    return render(request, 'teams/team_tansaibou/members.html', {'store': store, 'members': qs})
+    members = Member.objects.using(DB).filter(store=store).order_by('last_name', 'first_name')
+    context = {
+        'store': store,
+        'members': members,
+    }
+    return render(request, 'teams/team_tansaibou/member_list.html', context)
+
+
+@tansaibou_login_required
+def member_add(request):
+    """担当者登録"""
+    store = request.current_store
+    if request.method == 'POST':
+        try:
+            last_name = request.POST.get('last_name', '').strip()
+            first_name = request.POST.get('first_name', '').strip()
+
+            if not last_name or not first_name:
+                messages.error(request, '姓と名を入力してください')
+            else:
+                Member.objects.using(DB).create(
+                    store=store,
+                    last_name=last_name,
+                    first_name=first_name
+                )
+                messages.success(request, f'担当者「{last_name} {first_name}」を登録しました')
+                return redirect('team_tansaibou:member_list')
+
+        except Exception as e:
+            messages.error(request, f'エラーが発生しました: {str(e)}')
+
+    return render(request, 'teams/team_tansaibou/member_add.html', {'store': store})
+
+
+@tansaibou_login_required
+def member_edit(request, member_id):
+    """担当者編集"""
+    store = request.current_store
+    try:
+        member = Member.objects.using(DB).get(id=member_id, store=store)
+    except Member.DoesNotExist:
+        messages.error(request, '担当者が見つかりません')
+        return redirect('team_tansaibou:member_list')
+
+    if request.method == 'POST':
+        try:
+            last_name = request.POST.get('last_name', '').strip()
+            first_name = request.POST.get('first_name', '').strip()
+
+            if not last_name or not first_name:
+                messages.error(request, '姓と名を入力してください')
+            else:
+                member.last_name = last_name
+                member.first_name = first_name
+                member.save(using=DB)
+                messages.success(request, f'担当者「{last_name} {first_name}」を更新しました')
+                return redirect('team_tansaibou:member_list')
+
+        except Exception as e:
+            messages.error(request, f'エラーが発生しました: {str(e)}')
+
+    context = {
+        'store': store,
+        'member': member,
+    }
+    return render(request, 'teams/team_tansaibou/member_edit.html', context)
+
+
+@tansaibou_login_required
+def member_delete(request, member_id):
+    """担当者削除"""
+    store = request.current_store
+    try:
+        member = Member.objects.using(DB).get(id=member_id, store=store)
+    except Member.DoesNotExist:
+        messages.error(request, '担当者が見つかりません')
+        return redirect('team_tansaibou:member_list')
+
+    if request.method == 'POST':
+        try:
+            name = f'{member.last_name} {member.first_name}'
+            member.delete(using=DB)
+            messages.success(request, f'担当者「{name}」を削除しました')
+        except Exception as e:
+            messages.error(request, f'この担当者は販売履歴があるため削除できません')
+
+    return redirect('team_tansaibou:member_list')
 
 
 @tansaibou_login_required

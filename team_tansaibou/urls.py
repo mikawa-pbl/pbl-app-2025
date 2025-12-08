@@ -28,6 +28,9 @@ urlpatterns = [
     path('product-sets/add/', views.productset_add, name='productset_add'),
     path('product-sets/<int:productset_id>/edit/', views.productset_edit, name='productset_edit'),
 
-    # その他
-    path('members/', views.members, name='members'),
+    # 担当者管理
+    path('members/', views.member_list, name='member_list'),
+    path('members/add/', views.member_add, name='member_add'),
+    path('members/<int:member_id>/edit/', views.member_edit, name='member_edit'),
+    path('members/<int:member_id>/delete/', views.member_delete, name='member_delete'),
 ]

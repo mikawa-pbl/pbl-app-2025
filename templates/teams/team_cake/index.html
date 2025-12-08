@@ -1,29 +1,37 @@
 {% include 'teams/team_cake/header.html' %}
 
 <main class="container">
+    {% include 'teams/team_cake/description.html' %}
+    {% include 'teams/team_cake/bread-scedule.html' %}
+    {% include 'teams/team_cake/opening-hours.html' %}
     <h3 class="section">Goods</h3>
 
     <div class="row">
         {% for good in goods %}
         <div class="col s12 m6 l4">
-            <div class="card hoverable">
-                <!-- <div class="card-image">
-                    {% if good.image_url %}
-                    <img src="{{ good.image_url }}" alt="{{ good.name }}">
-                    {% else %}
-                    <img src="/static/images/placeholder-400x300.png" alt="placeholder">
-                    {% endif %}
-                </div> -->
-                <div class="card-content">
-                    <span class="card-title">{{ good.name }}</span>
-                    <p class="grey-text">{{ good.description|default:"説明なし" }}</p>
+            <!-- <a href="/team_cake/goods/{{ good.id }}/" class="card-link"> -->
+            <!-- <a href="#" class="card-link"> -->
+            <a href="#" class="card-link"
+                onclick="openModal('{{ good.name }}', '{{ good.price }}', '{{ good.description }}')">
+                <div class="card hoverable">
+                    <div class="card-image">
+                        {% if good.image_filename %}
+                        <img src="/team_cake/images/{{ good.image_filename }}" alt="{{ good.name }}">
+                        {% else %}
+                        <img src="/static/images/placeholder-400x300.png" alt="placeholder">
+                        {% endif %}
+                    </div>
+                    <div class="card-content">
+                        <span class="card-title">{{ good.name }}</span>
+                        <p class="grey-text">{{ good.description|default:"説明なし" }}</p>
+                    </div>
+                    <div class="card-action">
+                        <span class="teal-text text-darken-2">¥{{ good.price }}</span>
+                        <!-- <a href="/team_cake/goods/{{ good.id }}/" class="right">詳細</a> -->
+                        <!-- <a href="#" class="right">詳細</a> -->
+                    </div>
                 </div>
-                <div class="card-action">
-                    <span class="teal-text text-darken-2">¥{{ good.price }}</span>
-                    <!-- <a href="/team_cake/goods/{{ good.id }}/" class="right">詳細</a> -->
-                    <a href="#" class="right">詳細</a>
-                </div>
-            </div>
+            </a>
         </div>
         {% empty %}
         <div class="col s12">
@@ -33,7 +41,30 @@
         </div>
         {% endfor %}
     </div>
-
+    <!-- Modal Structure -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <h4 id="modalTitle"></h4>
+            <p id="modalDescription"></p>
+            <p><strong>Price:</strong> ¥<span id="modalPrice"></span></p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+        </div>
+    </div>
 </main>
 
 {% include 'teams/team_cake/footer.html' %}
+
+<script>
+    function openModal(title, price, description) {
+        if (event) event.preventDefault(); // Prevent default behavior of the link
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalDescription').innerText = description;
+        document.getElementById('modalPrice').innerText = price;
+        document.getElementById('modalDescription').innerText = description;
+        const modal = document.getElementById('detailModal');
+        const instance = M.Modal.init(modal);
+        instance.open();
+    }
+</script>

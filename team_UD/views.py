@@ -12,6 +12,10 @@ def index(request):
 
 
 def calendar_view(request):
+    # ログインチェック
+    if "user_id" not in request.session:
+        return redirect("team_UD:login")
+    
     # 現在の年月を取得（またはパラメータから）
     today = datetime.now()
 

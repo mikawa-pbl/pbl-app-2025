@@ -36,6 +36,7 @@ class H34vvyUser(AbstractUser):
     チーム独自の認証・認可用ユーザアカウント
     """
 
+    points = models.PositiveIntegerField(default=0, help_text="アプリ内ポイント")
     created_at = models.DateTimeField(auto_now_add=True)
 
     # auth.models.PermissionsMixin で定義されている外部キーが

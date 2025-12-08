@@ -1,7 +1,7 @@
+from django.contrib import admin
 from django.urls import path
-from . import views
+from team_USL.views import room_search_view
 
-app_name = "team_USL"
 urlpatterns = [
     path('', views.index, name='index'),
     path('members/', views.members, name='members'),

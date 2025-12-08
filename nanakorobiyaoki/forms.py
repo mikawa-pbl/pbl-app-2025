@@ -9,7 +9,8 @@ class MyPageEditForm(forms.ModelForm):
         fields = [
             'name', 
             'icon', 
-            'grade_department', 
+            'grade',
+            'department', 
             'age', 
             'gender', 
             'club', 

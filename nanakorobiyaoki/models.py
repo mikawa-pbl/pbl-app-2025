@@ -34,6 +34,14 @@ class MyPage(models.Model):
         ('M2','M2'),
     ]
 
+    DEPARTMENT_CHOICES = [
+        ('1系','1系'),
+        ('2系','2系'),
+        ('3系','3系'),
+        ('4系','4系'),
+        ('5系','5系'),
+    ]
+
     # 基本情報
     name = models.CharField(max_length=100, verbose_name="名前")
     icon = models.ImageField(upload_to='icons/', blank=True, null=True, verbose_name="アイコン")
@@ -42,11 +50,18 @@ class MyPage(models.Model):
     password = models.CharField(max_length=100, verbose_name="パスワード")
     
     # プロフィール情報
-    grade_department = models.CharField(
+    grade = models.CharField(
         max_length=50, 
         choices=GRADE_CHOICES, # プルダウンにする
+        verbose_name="学科",
+    )
+    
+    department = models.CharField(
+        max_length=50, 
+        choices=DEPARTMENT_CHOICES, # プルダウンにする
         verbose_name="学年",
     )
+
     age = models.IntegerField(verbose_name="年齢")
     gender = models.CharField(
         max_length=50, 

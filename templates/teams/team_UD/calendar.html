@@ -491,8 +491,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="modalMemoInput">メモ内容 *</label>
-                    <textarea id="modalMemoInput" placeholder="面接の内容、感じたこと、質問された内容などを記録しましょう" required></textarea>
+                    <label for="modalMemoInput">メモ内容</label>
+                    <textarea id="modalMemoInput" placeholder="面接の内容、感じたこと、質問された内容などを記録しましょう"></textarea>
                 </div>
                 <button onclick="saveModalMemo()">💾 保存</button>
             </div>
@@ -639,13 +639,19 @@
             const status = document.getElementById('modalStatus').value;
             const content = document.getElementById('modalMemoInput').value.trim();
 
-            // 必須フィールドのチェック
-            if (!companyName || !interviewStage || !status || !content) {
-                alert('必須項目(会社名、面接段階、選考状況、メモ内容)を入力してください');
+            // 必須フィールドのチェック（contentは任意）
+            if (!companyName || !interviewStage || !status) {
+                alert('必須項目(会社名、面接段階、選考状況)を入力してください');
                 return;
             }
 
-            const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
+            // 面接日が選択されている場合は、その日付を使用。なければモーダルの日付を使用
+            let dateStr;
+            if (interviewDate) {
+                dateStr = interviewDate;
+            } else {
+                dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
+            }
 
             const requestBody = {
                 date: dateStr,

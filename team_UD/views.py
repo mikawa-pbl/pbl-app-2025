@@ -131,15 +131,15 @@ def save_memo(request):
             user_id = request.session["user_id"]
             data = json.loads(request.body)
             date_str = data.get("date")
-            content = data.get("content")
+            content = data.get("content", "")  # デフォルト値を空文字に設定
             company_name = data.get("company_name", "")
             interview_stage = data.get("interview_stage", "")
             interview_date_str = data.get("interview_date")
             status = data.get("status", "")
             memo_id = data.get("id")
 
-            if not date_str or not content:
-                return JsonResponse({"error": "日付と内容は必須です"}, status=400)
+            if not date_str:
+                return JsonResponse({"error": "日付は必須です"}, status=400)
 
             target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
 

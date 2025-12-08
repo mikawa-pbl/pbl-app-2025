@@ -92,14 +92,16 @@
     {% endif %}
 
     {% if menu_lines %}
-      <div class="today-menu-card">
-        <div class="today-label">本日のメニュー</div>
-        <div class="today-menu-text">
-          {% for line in menu_lines %}
-            {{ line }}{% if not forloop.last %}<br>{% endif %}
-          {% endfor %}
-        </div>
-      </div>
+          <a href="{% url 'team_kitajaki:rate_menu' %}" style="text-decoration: none; color: inherit;">
+            <div class="today-menu-card">
+              <div class="today-label">本日のメニュー</div>
+              <div class="today-menu-text">
+                {% for line in menu_lines %}
+                  {{ line }}{% if not forloop.last %}<br>{% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </a>
     {% else %}
       <p>本日のメニューはPDFから取得できませんでした。</p>
     {% endif %}

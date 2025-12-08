@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>今日のメニュー評価</title>
+</head>
+<body>
+  <h1>今日のメニュー評価</h1>
+
+  {% if today_menu %}
+    <p>評価するメニュー: **{{ today_menu }}**</p>
+    <p>ここに評価フォーム（星の数、コメント欄など）が入ります。</p>
+  {% else %}
+    <p>メニュー情報が取得できませんでした。</p>
+  {% endif %}
+
+  <p><a href="{% url 'team_kitajaki:today_menu' %}">今日の喫茶メニューへ戻る</a></p>
+  <p><a href="{% url 'team_kitajaki:index' %}">トップに戻る</a></p>
+</body>
+</html>

@@ -3,65 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <title>新規募集の投稿</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            padding: 0 20px;
+        }
+
+        /* 時間割グリッドのスタイル */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(5, 1fr); /* 時間ラベル + 月火水木金 */
+            gap: 5px;
+            margin-bottom: 20px;
+            max-width: 800px; /* 横幅を制限 */
+            overflow-x: auto;
+        }
+        .grid-header {
+            font-weight: bold;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 10px;
+        }
+        .time-label {
+            font-size: 0.8em;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+        .slot-btn {
+            height: 50px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        .slot-btn:hover {
+            background-color: #e6f7ff;
+        }
+        .slot-btn.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+            font-weight: bold;
+        }
+        .slot-btn.active::after {
+            content: "〇";
+        }
+
+        /* キャンセルボタン */
+        .btn-cancel {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #999;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-left: 10px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        /* 条件セクションのスタイル */
+        .condition-group {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .condition-options {
+            margin-top: 10px;
+            padding-left: 20px;
+            display: none; /* 初期状態は非表示 */
+            border-top: 1px dashed #ccc;
+            padding-top: 10px;
+        }
+        /* ラジオボタンのリストスタイル解除 */
+        .condition-options ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .condition-options li {
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 <body>
-   <h2>新規募集の投稿</h2>
+
+    <h2>新規募集の投稿</h2>
   
-  <form method="post">
-    {% csrf_token %}
+    <form method="post" id="postForm">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        <p>
+            <label for="{{ form.title.id_for_label }}">タイトル:</label>
+            {{ form.title }}
+        </p>
+        
+        <p>
+            <label for="{{ form.content.id_for_label }}">内容:</label>
+            {{ form.content }}
+        </p>
+        
+        <p>
+            {{ form.recruitment_end_date.label_tag }} 
+            {{ form.recruitment_end_date }}
+        </p>
+
+        <hr>
+        <h3>実験受け入れ可能時間</h3>
+        <p><small>クリックして受け入れ可能な時間を登録してください（緑色が登録状態）</small></p>
+
+        <div class="schedule-grid">
+            <div class="grid-header"></div>
+            <div class="grid-header">月</div>
+            <div class="grid-header">火</div>
+            <div class="grid-header">水</div>
+            <div class="grid-header">木</div>
+            <div class="grid-header">金</div>
     
-    {{ form.non_field_errors }}
-    
-    <p>
-        <label for="{{ form.title.id_for_label }}">タイトル:</label>
-        {{ form.title }}
-    </p>
-    <p>
-        <label for="{{ form.content.id_for_label }}">内容:</label>
-        {{ form.content }}
-    </p>
-    
-    <p>{{ form.recruitment_start_date.label_tag }} {{ form.recruitment_start_date }}</p>
-    <p>{{ form.recruitment_end_date.label_tag }} {{ form.recruitment_end_date }}</p>
+            <div class="time-label"><strong>1限</strong><span>8:50-10:20</span></div>
+            <div class="slot-btn" data-value="mon_1"></div>
+            <div class="slot-btn" data-value="tue_1"></div>
+            <div class="slot-btn" data-value="wed_1"></div>
+            <div class="slot-btn" data-value="thu_1"></div>
+            <div class="slot-btn" data-value="fri_1"></div>
 
-    <hr>
-    <p>
-        <label for="id_participants_selector">募集人数:</label>
-        {{ form.participants_selector }}
-    </p>
-    <p id="custom_input_container">
-        {{ form.custom_participants }}
-    </p>
-    <hr>
+            <div class="time-label"><strong>2限</strong><span>10:30-12:00</span></div>
+            <div class="slot-btn" data-value="mon_2"></div>
+            <div class="slot-btn" data-value="tue_2"></div>
+            <div class="slot-btn" data-value="wed_2"></div>
+            <div class="slot-btn" data-value="thu_2"></div>
+            <div class="slot-btn" data-value="fri_2"></div>
 
-    <p>{{ form.condition_nationality.label_tag }} {{ form.condition_nationality }}</p>
-    <p>{{ form.condition_gender.label_tag }} {{ form.condition_gender }}</p>
-    <p>{{ form.condition_has_disease.label_tag }} {{ form.condition_has_disease }}</p>
+            <div class="time-label"><strong>昼休み</strong><span>12:00-13:00</span></div>
+            <div class="slot-btn" data-value="mon_lunch"></div>
+            <div class="slot-btn" data-value="tue_lunch"></div>
+            <div class="slot-btn" data-value="wed_lunch"></div>
+            <div class="slot-btn" data-value="thu_lunch"></div>
+            <div class="slot-btn" data-value="fri_lunch"></div>
 
-    <button type="submit">投稿する</button>
-  </form>
+            <div class="time-label"><strong>3限</strong><span>13:00-14:30</span></div>
+            <div class="slot-btn" data-value="mon_3"></div>
+            <div class="slot-btn" data-value="tue_3"></div>
+            <div class="slot-btn" data-value="wed_3"></div>
+            <div class="slot-btn" data-value="thu_3"></div>
+            <div class="slot-btn" data-value="fri_3"></div>
 
-  <script>
+            <div class="time-label"><strong>4限</strong><span>14:40-16:10</span></div>
+            <div class="slot-btn" data-value="mon_4"></div>
+            <div class="slot-btn" data-value="tue_4"></div>
+            <div class="slot-btn" data-value="wed_4"></div>
+            <div class="slot-btn" data-value="thu_4"></div>
+            <div class="slot-btn" data-value="fri_4"></div>
+
+            <div class="time-label"><strong>5限</strong><span>16:20-17:50</span></div>
+            <div class="slot-btn" data-value="mon_5"></div>
+            <div class="slot-btn" data-value="tue_5"></div>
+            <div class="slot-btn" data-value="wed_5"></div>
+            <div class="slot-btn" data-value="thu_5"></div>
+            <div class="slot-btn" data-value="fri_5"></div>
+
+            <div class="time-label"><strong>6限</strong><span>18:00-19:30</span></div>
+            <div class="slot-btn" data-value="mon_6"></div>
+            <div class="slot-btn" data-value="tue_6"></div>
+            <div class="slot-btn" data-value="wed_6"></div>
+            <div class="slot-btn" data-value="thu_6"></div>
+            <div class="slot-btn" data-value="fri_6"></div>
+
+            <div class="time-label"><strong>放課後</strong><span>19:30~</span></div>
+            <div class="slot-btn" data-value="mon_after"></div>
+            <div class="slot-btn" data-value="tue_after"></div>
+            <div class="slot-btn" data-value="wed_after"></div>
+            <div class="slot-btn" data-value="thu_after"></div>
+            <div class="slot-btn" data-value="fri_after"></div>
+        </div>
+        
+        {{ form.available_slots }}
+
+        <hr>
+        <h3>募集人数</h3>
+        <p>
+            <label for="id_participants_selector">人数選択:</label>
+            {{ form.participants_selector }}
+        </p>
+        <p id="custom_input_container">
+            {{ form.custom_participants }}
+        </p>
+        
+        <hr>
+        <h3>参加条件</h3>
+
+        <div class="condition-group">
+            <label>
+                {{ form.enable_nationality }} <strong>国籍の条件を設定する</strong>
+            </label>
+            <div class="condition-options" id="options_nationality">
+                {{ form.condition_nationality }}
+            </div>
+        </div>
+
+        <div class="condition-group">
+            <label>
+                {{ form.enable_gender }} <strong>性別の条件を設定する</strong>
+            </label>
+            <div class="condition-options" id="options_gender">
+                {{ form.condition_gender }}
+            </div>
+        </div>
+
+        <div class="condition-group">
+            <label>
+                {{ form.enable_disease }} <strong>持病の条件を設定する</strong>
+            </label>
+            <div class="condition-options" id="options_disease">
+                {{ form.condition_has_disease }}
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; margin-bottom: 50px;">
+            <button type="submit" style="padding: 10px 20px; font-size:16px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">投稿する</button>
+            <a href="{% url 'team_shouronpou:post_list' %}" class="btn-cancel">キャンセル</a>
+        </div>
+
+    </form>
+
+    <script>
     document.addEventListener('DOMContentLoaded', function() {
+        
+        // --- 1. 時間割機能 ---
+        const slotsInput = document.getElementById('id_available_slots');
+        const slotBtns = document.querySelectorAll('.slot-btn');
+        let selectedSlots = [];
+        try {
+            if (slotsInput.value) {
+                const validJson = slotsInput.value.replace(/'/g, '"');
+                selectedSlots = JSON.parse(validJson);
+            }
+        } catch(e) { selectedSlots = []; }
+
+        slotBtns.forEach(btn => {
+            const val = btn.dataset.value;
+            if (selectedSlots.includes(val)) {
+                btn.classList.add('active');
+            }
+            btn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const value = this.dataset.value;
+                if (this.classList.contains('active')) {
+                    if (!selectedSlots.includes(value)) selectedSlots.push(value);
+                } else {
+                    selectedSlots = selectedSlots.filter(item => item !== value);
+                }
+                slotsInput.value = JSON.stringify(selectedSlots);
+            });
+        });
+
+        // --- 2. 条件ON/OFF機能 ---
+        function setupToggle(checkboxName, optionsId) {
+            const checkbox = document.querySelector(`input[name="${checkboxName}"]`);
+            const optionsDiv = document.getElementById(optionsId);
+            function toggle() {
+                if (checkbox.checked) {
+                    optionsDiv.style.display = 'block';
+                } else {
+                    optionsDiv.style.display = 'none';
+                }
+            }
+            if(checkbox) {
+                toggle();
+                checkbox.addEventListener('change', toggle);
+            }
+        }
+        setupToggle('enable_nationality', 'options_nationality');
+        setupToggle('enable_gender', 'options_gender');
+        setupToggle('enable_disease', 'options_disease');
+
+        // --- 3. 人数入力機能 ---
         const selector = document.getElementById('id_participants_selector');
         const customInput = document.getElementById('id_custom_participants');
-        
         function toggleCustomInput() {
             if (selector.value === 'custom') {
                 customInput.style.display = 'inline-block';
-                customInput.required = true; // 入力を必須にする
+                customInput.required = true;
             } else {
                 customInput.style.display = 'none';
                 customInput.required = false;
             }
         }
-
-        // 初期表示時の実行
         toggleCustomInput();
-
-        // 変更時の実行
         selector.addEventListener('change', toggleCustomInput);
     });
-  </script>
+    </script>
 </body>
 </html>

@@ -61,22 +61,22 @@ class Classroom(models.Model):
 
 
 
-# class ClassroomAttribute(models.Model):
-#     """属性タグ: 教室と属性の中間テーブル"""
+class ClassroomAttribute(models.Model):
+    """属性タグ: 教室と属性の中間テーブル"""
 
-#     classroom = models.ForeignKey(
-#         Classroom,
-#         verbose_name="教室",
-#         on_delete=models.CASCADE,
-#     )
-#     attribute = models.ForeignKey(
-#         Attribute,
-#         verbose_name="属性",
-#         on_delete=models.CASCADE,
-#     )
+    classroom = models.ForeignKey(
+        Classroom,
+        verbose_name="教室",
+        on_delete=models.CASCADE,
+    )
+    attribute = models.ForeignKey(
+        Attribute,
+        verbose_name="属性",
+        on_delete=models.CASCADE,
+    )
 
-#     class Meta:
-#         unique_together = ("classroom", "attribute")
+    class Meta:
+        unique_together = ("classroom", "attribute")
 
-#     def __str__(self):
-#         return f"{self.classroom} - {self.attribute}"
+    def __str__(self):
+        return f"{self.classroom} - {self.attribute}"

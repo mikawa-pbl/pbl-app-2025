@@ -1,7 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Member, Event, Memo
+from .models import Member, Event, Memo, Account
 from datetime import datetime, timedelta
 import calendar
 import json
@@ -91,8 +91,13 @@ def calendar_view(request):
 
 
 def memo_view(request):
-    memos = Memo.objects.using("team_UD").all().order_by("-created_at")
-    return render(request, "teams/team_UD/memo.html", {"memos": memos})
+    # ログインチェック
+    if "user_id" not in request.session:
+        return redirect("team_UD:login")
+    
+    user_id = request.session["user_id"]
+    memos = Memo.objects.using("team_UD").filter(account_id=user_id).order_by("-created_at")
+    return render(request, "teams/team_UD/memo.html", {"memos": memos, "username": request.session.get("username")})
 
 
 @csrf_exempt
@@ -100,8 +105,13 @@ def get_memo_by_date(request, year, month, day):
     """特定の日付のメモを取得するAPI"""
     if request.method == "GET":
         try:
+            # ログインチェック
+            if "user_id" not in request.session:
+                return JsonResponse({"error": "ログインが必要です"}, status=401)
+            
+            user_id = request.session["user_id"]
             target_date = datetime(year, month, day).date()
-            memos = Memo.objects.using("team_UD").filter(date=target_date).order_by("-created_at")
+            memos = Memo.objects.using("team_UD").filter(date=target_date, account_id=user_id).order_by("-created_at")
             memo_list = [
                 {
                     "id": memo.id,
@@ -125,6 +135,11 @@ def save_memo(request):
     """メモを保存するAPI"""
     if request.method == "POST":
         try:
+            # ログインチェック
+            if "user_id" not in request.session:
+                return JsonResponse({"error": "ログインが必要です"}, status=401)
+            
+            user_id = request.session["user_id"]
             data = json.loads(request.body)
             date_str = data.get("date")
             content = data.get("content")
@@ -145,8 +160,8 @@ def save_memo(request):
                 interview_date = datetime.strptime(interview_date_str, "%Y-%m-%d").date()
 
             if memo_id:
-                # 既存のメモを更新
-                memo = Memo.objects.using("team_UD").get(id=memo_id)
+                # 既存のメモを更新（自分のメモのみ）
+                memo = Memo.objects.using("team_UD").get(id=memo_id, account_id=user_id)
                 memo.content = content
                 memo.date = target_date
                 memo.company_name = company_name
@@ -156,7 +171,9 @@ def save_memo(request):
                 memo.save(using="team_UD")
             else:
                 # 新しいメモを作成
+                account = Account.objects.using("team_UD").get(id=user_id)
                 memo = Memo(
+                    account=account,
                     date=target_date,
                     content=content,
                     company_name=company_name,
@@ -189,6 +206,12 @@ def create_memo(request):
     """就活メモを作成する"""
     if request.method == "POST":
         try:
+            # ログインチェック
+            if "user_id" not in request.session:
+                return redirect("team_UD:login")
+            
+            user_id = request.session["user_id"]
+            
             # フォームデータを取得
             company_name = request.POST.get("company_name", "")
             interview_stage = request.POST.get("interview_stage", "")
@@ -206,7 +229,9 @@ def create_memo(request):
                 interview_date = datetime.strptime(interview_date_str, "%Y-%m-%d").date()
 
             # メモを作成
+            account = Account.objects.using("team_UD").get(id=user_id)
             memo = Memo(
+                account=account,
                 company_name=company_name,
                 interview_stage=interview_stage,
                 interview_date=interview_date,
@@ -217,7 +242,6 @@ def create_memo(request):
             memo.save(using="team_UD")
 
             # メモ一覧ページにリダイレクト
-            from django.shortcuts import redirect
             return redirect("team_UD:memo")
 
         except Exception as e:
@@ -231,10 +255,74 @@ def delete_memo(request, memo_id):
     """メモを削除するAPI"""
     if request.method == "DELETE":
         try:
-            memo = Memo.objects.using("team_UD").get(id=memo_id)
+            # ログインチェック
+            if "user_id" not in request.session:
+                return JsonResponse({"error": "ログインが必要です"}, status=401)
+            
+            user_id = request.session["user_id"]
+            # 自分のメモのみ削除可能
+            memo = Memo.objects.using("team_UD").get(id=memo_id, account_id=user_id)
             memo.delete(using="team_UD")
             return JsonResponse({"message": "削除しました"}, status=200)
         except Memo.DoesNotExist:
             return JsonResponse({"error": "メモが見つかりません"}, status=404)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+
+
+# アカウント関連のビュー
+def register_view(request):
+    """アカウント登録ページ"""
+    if request.method == "GET":
+        return render(request, "teams/team_UD/register.html")
+    elif request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        
+        if not username or not password:
+            return render(request, "teams/team_UD/register.html", {"error": "ユーザー名とパスワードは必須です"})
+        
+        # ユーザー名の重複チェック
+        if Account.objects.using("team_UD").filter(username=username).exists():
+            return render(request, "teams/team_UD/register.html", {"error": "このユーザー名は既に使用されています"})
+        
+        # アカウントを作成
+        account = Account(username=username, password=password)
+        account.save(using="team_UD")
+        
+        # セッションにユーザー情報を保存
+        request.session["user_id"] = account.id
+        request.session["username"] = account.username
+        
+        return redirect("team_UD:memo")
+
+
+def login_view(request):
+    """ログインページ"""
+    if request.method == "GET":
+        return render(request, "teams/team_UD/login.html")
+    elif request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        
+        if not username or not password:
+            return render(request, "teams/team_UD/login.html", {"error": "ユーザー名とパスワードを入力してください"})
+        
+        try:
+            account = Account.objects.using("team_UD").get(username=username, password=password)
+            # セッションにユーザー情報を保存
+            request.session["user_id"] = account.id
+            request.session["username"] = account.username
+            return redirect("team_UD:memo")
+        except Account.DoesNotExist:
+            return render(request, "teams/team_UD/login.html", {"error": "ユーザー名またはパスワードが間違っています"})
+
+
+def logout_view(request):
+    """ログアウト"""
+    if "user_id" in request.session:
+        del request.session["user_id"]
+    if "username" in request.session:
+        del request.session["username"]
+    return redirect("team_UD:login")
+

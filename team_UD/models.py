@@ -2,6 +2,15 @@ from django.db import models
 from django.utils import timezone
 
 
+class Account(models.Model):
+    username = models.CharField(max_length=100, unique=True)
+    password = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.username
+
+
 class Member(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
@@ -21,6 +30,9 @@ class Event(models.Model):
 
 
 class Memo(models.Model):
+    # アカウント（ユーザー）
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
+
     # 就活関連フィールド
     company_name = models.CharField(max_length=200, default='')  # 会社名
     interview_stage = models.CharField(max_length=100, default='')  # 面接段階

@@ -31,8 +31,32 @@ body {
 }
 
 .status-button {
-    float: right;
-    margin-bottom: 20px;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 18px 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+    transition: all 0.3s ease;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.7);
+}
+
+.status-button:active {
+    transform: translateY(-2px);
 }
 
 table {
@@ -52,6 +76,26 @@ td {
     padding: 8px;
     text-align: center;
     vertical-align: middle;
+}
+
+/* 話しかけステータスのスタイル */
+.status-ok {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.status-ng {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* 研究室にいる場合の行の色 */
+#user-row.in-lab {
+    background-color: #e3f2fd;
+}
+
+#user-row.in-lab td {
+    background-color: #e3f2fd;
 }
 
 .footer {

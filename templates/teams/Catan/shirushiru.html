@@ -19,33 +19,42 @@
       </div>
     </div>
 
-    <button class="status-button" onclick="openDialog()">② 在室状況変更ボタン</button>
-
     <table>
       <tr>
+        <th>学年</th>
         <th>名前</th>
         <th>場所</th>
         <th>コメント</th>
+        <th>ステータス</th>
       </tr>
       <tr>
+        <td>M1</td>
         <td>勝田</td>
         <td>学内</td>
         <td>A1です</td>
+        <td><span class="status-ok">✅ OK</span></td>
       </tr>
-      <tr>
+      <tr >
+        <td>M1</td>
         <td>よよよ</td>
         <td>自宅</td>
         <td>明日は行きます</td>
+        <td><span class="status-ng">❌ NG</span></td>
       </tr>
       <tr id="user-row">
+        <td>B4</td>
         <td id="user-name-cell">ゲスト</td>
         <td id="user-location-cell">-</td>
         <td id="user-comment-cell">-</td>
+        <td id="user-status-cell">-</td>
       </tr>
     </table>
 
     <div class="footer">画面イメージ図</div>
   </div>
+
+  <!-- 在室状況変更ボタン（固定表示） -->
+  <button class="status-button" onclick="openDialog()">✏️ 在室状況変更</button>
 
   <!-- 在室状況変更ダイアログ -->
   <div id="statusDialog" class="dialog-overlay">
@@ -54,14 +63,23 @@
       <div class="dialog-content">
         <label for="locationSelect">場所:</label>
         <select id="locationSelect">
-          <option value="学内">学内</option>
-          <option value="自宅">自宅</option>
-          <option value="外出">外出</option>
-          <option value="不在">不在</option>
+          <option key="lab1" value="研究室（B4,M1）C3-502">研究室（B4,M1）C3-502</option>
+          <option key="lab2" value="研究室（M2）C3-503">研究室（M2）C3-503</option>
+          <option key="lab3" value="3Dプリンタの部屋 C3-511">3Dプリンタの部屋 C3-511</option>
+          <option key="lab4" value="ゼミ室 C3-513">ゼミ室 C3-513</option>
+          <option key="class" value="授業">授業</option>
+          <option key="oncampus" value="学内">学内</option>
+          <option key="absent" value="不在">不在</option>
         </select>
 
         <label for="commentInput">コメント:</label>
         <input type="text" id="commentInput" placeholder="コメントを入力してください" />
+
+        <label for="talkStatusSelect">話しかけステータス:</label>
+        <select id="talkStatusSelect">
+          <option value="ok">✅ OK（話しかけていい）</option>
+          <option value="ng">❌ NG（話しかけないで）</option>
+        </select>
       </div>
       <div class="dialog-buttons">
         <button onclick="closeDialog()">キャンセル</button>

@@ -1,4 +1,4 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -7,8 +7,8 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .doors import DOORS
-from .forms import EntryForm, NamespacedLoginForm
-from .models import Entry
+from .forms import EntryForm, NamespacedLoginForm, SignupForm
+from .models import H34vvyUser, Entry
 
 
 LOGIN_REDIRECT_FALLBACK = reverse_lazy("h34vvy_u53rzz:index")
@@ -77,6 +77,80 @@ def login_view(request):
             "nav_active": None,
         },
     )
+
+
+def signup_view(request):
+    redirect_to = _get_safe_redirect(request)
+    if request.user.is_authenticated:
+        return redirect(redirect_to)
+
+    def style_signup(form):
+        base_attrs = {
+            "class": "w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40",
+        }
+        form.fields["username"].widget.attrs.update(
+            {**base_attrs, "placeholder": "アプリ内で使うユーザー名"}
+        )
+        form.fields["password1"].widget.attrs.update(
+            {**base_attrs, "placeholder": "パスワード"}
+        )
+        form.fields["password2"].widget.attrs.update(
+            {**base_attrs, "placeholder": "パスワード（確認）"}
+        )
+        return form
+
+    if request.method == "POST":
+        form = style_signup(SignupForm(request.POST))
+        if form.is_valid():
+            username = form.cleaned_data["username"]
+            password = form.cleaned_data["password1"]
+            # auth_user側のユーザー名は衝突を避けるために接頭辞を付与
+            if len(username) > 150:
+                form.add_error(
+                    "username",
+                    "ユーザー名が長すぎます（プレフィックス込み150文字以内）。",
+                )
+            else:
+                if H34vvyUser.objects.filter(username=username).exists():
+                    form.add_error(
+                        "username",
+                        "このユーザー名は既に登録されています。別の名前を入力してください。",
+                    )
+                else:
+                    try:
+                        user = H34vvyUser.objects.db_manager(
+                            "h34vvy_u53rzz"
+                        ).create_user(username=username, password=password)
+                    except Exception:
+                        # H34vvyUser作成に失敗したらユーザーを削除しておく
+                        user.delete()
+                        form.add_error(
+                            None, "登録に失敗しました。時間をおいて再度お試しください。"
+                        )
+                    else:
+                        login(
+                            request,
+                            user,
+                            backend="h34vvy_u53rzz.backends.H34vvyUserBackend",
+                        )
+                        return redirect(redirect_to)
+    else:
+        form = style_signup(SignupForm())
+
+    return render(
+        request,
+        "teams/h34vvy_u53rzz/signup.html",
+        {
+            "form": form,
+            "next": redirect_to,
+            "nav_active": None,
+        },
+    )
+
+
+def logout_view(request):
+    logout(request)
+    return redirect(LOGIN_REDIRECT_FALLBACK)
 
 
 @login_required(login_url=LOGIN_REDIRECT_FALLBACK)

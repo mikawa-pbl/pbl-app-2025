@@ -3,6 +3,7 @@ from . import views
 
 app_name = "ssk"
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('members/', views.members, name='members'),
+    # 掲示板
+    path('', views.post_list, name='post_list'),
+    path('new/', views.post_create, name='post_create'),
 ]

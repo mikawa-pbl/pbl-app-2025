@@ -1,0 +1,27 @@
+{# teams/ssk/post_list.html #}
+{% load tz %}
+
+<h1>イベント一覧</h1>
+
+<p><a href="{% url 'ssk:post_create' %}">新規投稿</a></p>
+
+{% regroup posts by date|date:"Y年n月" as month_list %}
+
+{% for month in month_list %}
+  <h2>{{ month.grouper }}</h2>
+  <ul>
+    {% for post in month.list %}
+      <li>
+        {{ post.title }}
+        {% for tag in post.tags.all %}
+          <span class="tag">
+            #{{ tag.name }}
+          </span>
+        {% endfor %}
+        {{ post.date|date:"n/j" }}
+      </li>
+    {% endfor %}
+  </ul>
+{% empty %}
+  <p>まだ投稿がありません。</p>
+{% endfor %}

@@ -1,0 +1,29 @@
+{# teams/ssk/post_form.html #}
+<h1>新規投稿</h1>
+
+<form method="post">
+  {% csrf_token %}
+
+  <div>
+    {{ form.title.label_tag }}<br>
+    {{ form.title }}
+  </div>
+
+  <div>
+    {{ form.date.label_tag }}<br>
+    {{ form.date }}
+  </div>
+
+  <div>
+    {{ form.body.label_tag }}<br>
+    {{ form.body }}
+  </div>
+
+  <div>
+    {{ form.tags_text.label_tag }}<br>
+    {{ form.tags_text }}<br>
+    <small>{{ form.tags_text.help_text }}</small>
+  </div>
+
+  <button type="submit">投稿</button>
+</form>

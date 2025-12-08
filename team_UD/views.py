@@ -308,3 +308,79 @@ def logout_view(request):
         del request.session["username"]
     return redirect("team_UD:login")
 
+
+def statistics_view(request):
+    """統計ページ"""
+    # ログインチェック
+    if "user_id" not in request.session:
+        return redirect("team_UD:login")
+    
+    return render(request, "teams/team_UD/statistics.html")
+
+
+@csrf_exempt
+def get_statistics(request):
+    """統計データを取得するAPI"""
+    if request.method == "GET":
+        try:
+            # ログインチェック
+            if "user_id" not in request.session:
+                return JsonResponse({"error": "ログインが必要です"}, status=401)
+            
+            search_query = request.GET.get("search", "").strip()
+            
+            # 面接系イベントのみを対象
+            interview_stages = ['一次面接', '二次面接', '三次面接', '最終面接', 'グループディスカッション']
+            
+            # interview_questionsが空でないメモのみを取得
+            memos = Memo.objects.using("team_UD").filter(
+                interview_stage__in=interview_stages,
+                interview_questions__isnull=False
+            ).exclude(interview_questions='').select_related('company')
+            
+            # 会社名で検索
+            if search_query:
+                memos = memos.filter(company__name__icontains=search_query)
+            
+            # 会社×面接段階でグループ化
+            statistics = {}
+            for memo in memos:
+                if not memo.company:
+                    continue
+                    
+                company_name = memo.company.name
+                stage = memo.interview_stage
+                
+                if company_name not in statistics:
+                    statistics[company_name] = {}
+                
+                if stage not in statistics[company_name]:
+                    statistics[company_name][stage] = []
+                
+                # 質問をリストに追加
+                questions = memo.interview_questions.split('\n')
+                for question in questions:
+                    question = question.strip()
+                    if question:
+                        statistics[company_name][stage].append(question)
+            
+            # レスポンス用にフォーマット
+            result = []
+            for company_name in sorted(statistics.keys()):
+                company_data = {
+                    "company_name": company_name,
+                    "stages": []
+                }
+                for stage in interview_stages:
+                    if stage in statistics[company_name]:
+                        company_data["stages"].append({
+                            "stage": stage,
+                            "questions": statistics[company_name][stage]
+                        })
+                if company_data["stages"]:
+                    result.append(company_data)
+            
+            return JsonResponse({"statistics": result}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+

@@ -463,26 +463,14 @@
             {% endfor %}
         </div>
 
-        <div class="events-list">
-            <h3>📋 今月のイベント一覧</h3>
-            {% if events %}
-                {% for event in events %}
-                <div class="event-card">
-                    <div class="event-title">{{ event.title }}</div>
-                    <div class="event-time">
-                        🕐 {{ event.start_time|date:"Y年m月d日 H:i" }} - {{ event.end_time|date:"Y年m月d日 H:i" }}
-                    </div>
-                    {% if event.description %}
-                    <div style="margin-top: 8px; color: #555;">{{ event.description }}</div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            {% else %}
-                <p style="color: #999; text-align: center;">今月のイベントはありません</p>
-            {% endif %}
+        <div style="background: #e3f2fd; padding: 15px 20px; border-radius: 10px; margin-top: 30px; font-size: 0.9em; color: #1976d2; border-left: 4px solid #2196f3;">
+            <strong>📊 データ収集について</strong><br>
+            †マークの項目（会社名、イベント・工程、聞かれたこと）は、匿名で統計データとして収集され、他のユーザーと共有されます。<br>
+            メモ内容や個人情報は共有されません。統計データは「面接質問統計」ページで確認できます。
         </div>
 
         <div class="nav-links">
+            <a href="{% url 'team_UD:statistics' %}">📊 面接質問統計</a>
             <a href="{% url 'team_UD:logout' %}">🚪 ログアウト</a>
         </div>
     </div>
@@ -498,13 +486,13 @@
             <div class="memo-form">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="modalCompanyName">会社名 *</label>
+                        <label for="modalCompanyName">会社名 *†</label>
                         <input type="text" id="modalCompanyName" placeholder="会社名を入力して検索..." required autocomplete="off">
                         <input type="hidden" id="modalCompanyId">
                         <div id="companyDropdown" class="company-dropdown"></div>
                     </div>
                     <div class="form-group">
-                        <label for="modalInterviewStage">イベント・工程 *</label>
+                        <label for="modalInterviewStage">イベント・工程 *†</label>
                         <select id="modalInterviewStage" required>
                             <option value="">選択してください</option>
                             <optgroup label="選考前">
@@ -579,7 +567,7 @@
                 <!-- 面接時の追加入力欄（初期は非表示） -->
                 <div id="interviewFields" style="display: none;">
                     <div class="form-group">
-                        <label>どんなことを聞かれたか？ *</label>
+                        <label>どんなことを聞かれたか？ *†</label>
                         <div id="questionsContainer">
                             <div class="question-item" style="display: flex; gap: 8px; margin-bottom: 8px;">
                                 <input type="text" class="question-input" placeholder="質問内容を入力..." style="flex: 1;">

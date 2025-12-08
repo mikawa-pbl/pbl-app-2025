@@ -242,7 +242,7 @@ def product_add(request):
             description = request.POST.get('description', '')
             is_active = request.POST.get('is_active') == 'on'
 
-            Product.objects.using(DB_NAME).create(
+            Product.objects.using(DB).create(
                 name=name,
                 current_price=current_price,
                 stock=stock,
@@ -277,7 +277,7 @@ def product_edit(request, product_id):
             product.stock = request.POST.get('stock')
             product.description = request.POST.get('description', '')
             product.is_active = request.POST.get('is_active') == 'on'
-            product.save(using=DB_NAME)
+            product.save(using=DB)
 
             messages.success(request, f'商品「{product.name}」を更新しました')
             return redirect('team_tansaibou:product_list')
@@ -306,7 +306,7 @@ def product_restock(request, product_id):
             add_quantity = int(request.POST.get('add_quantity', 0))
             if add_quantity > 0:
                 product.stock += add_quantity
-                product.save(using=DB_NAME)
+                product.save(using=DB)
                 messages.success(request, f'商品「{product.name}」の在庫を{add_quantity}個追加しました（合計: {product.stock}個）')
             else:
                 messages.error(request, '追加数量は1以上を指定してください')
@@ -360,7 +360,7 @@ def productset_add(request):
 
                 for product_id, quantity in zip(product_ids, quantities):
                     if product_id and quantity:
-                        ProductSetItem.objects.using(DB_NAME).create(
+                        ProductSetItem.objects.using(DB).create(
                             product_set=product_set,
                             product_id=product_id,
                             quantity=int(quantity)
@@ -396,7 +396,7 @@ def productset_edit(request, productset_id):
                 product_set.price = request.POST.get('price')
                 product_set.description = request.POST.get('description', '')
                 product_set.is_active = request.POST.get('is_active') == 'on'
-                product_set.save(using=DB_NAME)
+                product_set.save(using=DB)
 
                 ProductSetItem.objects.using(DB).filter(product_set=product_set).delete()
 
@@ -405,7 +405,7 @@ def productset_edit(request, productset_id):
 
                 for product_id, quantity in zip(product_ids, quantities):
                     if product_id and quantity:
-                        ProductSetItem.objects.using(DB_NAME).create(
+                        ProductSetItem.objects.using(DB).create(
                             product_set=product_set,
                             product_id=product_id,
                             quantity=int(quantity)

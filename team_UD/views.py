@@ -8,12 +8,7 @@ import json
 
 
 def index(request):
-    return render(request, "teams/team_UD/index.html")
-
-
-def members(request):
-    qs = Member.objects.using("team_UD").all()  # ← team_terrace DBを明示
-    return render(request, "teams/team_UD/members.html", {"members": qs})
+    return redirect("team_UD:calendar")
 
 
 def calendar_view(request):
@@ -88,16 +83,6 @@ def calendar_view(request):
     }
 
     return render(request, "teams/team_UD/calendar.html", context)
-
-
-def memo_view(request):
-    # ログインチェック
-    if "user_id" not in request.session:
-        return redirect("team_UD:login")
-    
-    user_id = request.session["user_id"]
-    memos = Memo.objects.using("team_UD").filter(account_id=user_id).order_by("-created_at")
-    return render(request, "teams/team_UD/memo.html", {"memos": memos, "username": request.session.get("username")})
 
 
 @csrf_exempt
@@ -199,55 +184,6 @@ def save_memo(request):
             )
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
-
-
-@csrf_exempt
-def create_memo(request):
-    """就活メモを作成する"""
-    if request.method == "POST":
-        try:
-            # ログインチェック
-            if "user_id" not in request.session:
-                return redirect("team_UD:login")
-            
-            user_id = request.session["user_id"]
-            
-            # フォームデータを取得
-            company_name = request.POST.get("company_name", "")
-            interview_stage = request.POST.get("interview_stage", "")
-            interview_date_str = request.POST.get("interview_date")
-            status = request.POST.get("status", "")
-            content = request.POST.get("content", "")
-
-            # 必須フィールドのチェック
-            if not company_name or not interview_stage or not status or not content:
-                return JsonResponse({"error": "必須項目を入力してください"}, status=400)
-
-            # 面接日の処理
-            interview_date = None
-            if interview_date_str:
-                interview_date = datetime.strptime(interview_date_str, "%Y-%m-%d").date()
-
-            # メモを作成
-            account = Account.objects.using("team_UD").get(id=user_id)
-            memo = Memo(
-                account=account,
-                company_name=company_name,
-                interview_stage=interview_stage,
-                interview_date=interview_date,
-                status=status,
-                content=content,
-                date=datetime.now().date(),
-            )
-            memo.save(using="team_UD")
-
-            # メモ一覧ページにリダイレクト
-            return redirect("team_UD:memo")
-
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-
-    return JsonResponse({"error": "POSTメソッドのみ許可されています"}, status=405)
 
 
 @csrf_exempt

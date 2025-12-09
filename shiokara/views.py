@@ -3,6 +3,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Avg, Count, F
+from django.utils import timezone
+from datetime import timedelta
 from django.views.decorators.cache import never_cache
 from django.conf import settings
 import json
@@ -518,25 +520,36 @@ def company_experience_post(request, pk):
         if rating < 1 or rating > 5:
             error = "評価（★）は1〜5のいずれかを選んでください。"
         else:
-            review = CompanyReview.objects.using(DB_ALIAS).create(
-                company=company,
-                grade=grade,
-                department_name=department_name,
-                lab_field=lab_field,
-                gender=gender,
-                high_school=high_school,
-                comment=comment,
-                rating=rating,
+            # 直近の投稿時間を確認して、同一企業への投稿が10分以内であれば拒否する
+            ten_minutes_ago = timezone.now() - timedelta(minutes=10)
+            latest = (
+                CompanyReview.objects.using(DB_ALIAS)
+                .filter(company=company)
+                .order_by("-created_at")
+                .first()
             )
+            if latest and latest.created_at and latest.created_at >= ten_minutes_ago:
+                error = "この企業には直近10分以内に口コミが投稿されています。しばらく待ってから再度投稿してください。"
+            else:
+                review = CompanyReview.objects.using(DB_ALIAS).create(
+                    company=company,
+                    grade=grade,
+                    department_name=department_name,
+                    lab_field=lab_field,
+                    gender=gender,
+                    high_school=high_school,
+                    comment=comment,
+                    rating=rating,
+                )
 
-            append_review_to_fixture(review)
+                append_review_to_fixture(review)
 
-            # 投稿者にポイント付与（+5）
-            Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(points=F('points') + 5)
-            # セッションに付与情報を入れてリダイレクト先でポップアップ表示する
-            request.session['points_awarded'] = 5
+                # 投稿者にポイント付与（+5）
+                Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(points=F('points') + 5)
+                # セッションに付与情報を入れてリダイレクト先でポップアップ表示する
+                request.session['points_awarded'] = 5
 
-            return redirect("shiokara:company_detail", pk=company.pk)
+                return redirect("shiokara:company_detail", pk=company.pk)
 
     context = {"company": company, "error": error, **initial}
     return render_with_person(request, "teams/shiokara/company_experience_post.html", context)

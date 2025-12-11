@@ -150,66 +150,12 @@
                     </label>
                 </div>
             </div>
-
-            <div class="filter-row">
-                <!-- 勤務地 -->
-                <div class="filter-group">
-                    <span class="filter-label">勤務地</span>
-                    <div class="select-wrapper select-small">
-                        <select name="area">
-                            <option value="">（指定なし）</option>
-                            <option value="tokai" {% if area_key == "tokai" %}selected{% endif %}>
-                                東海エリア
-                            </option>
-                            <option value="capital" {% if area_key == "capital" %}selected{% endif %}>
-                                首都圏
-                            </option>
-                            <option value="kansai" {% if area_key == "kansai" %}selected{% endif %}>
-                                関西
-                            </option>
-                            <option value="nationwide" {% if area_key == "nationwide" %}selected{% endif %}>
-                                全国勤務
-                            </option>
-                        </select>
-                    </div>
-                </div>
-    
-                <!-- 推薦 / 学内説明会 -->
-                <div class="filter-group">
-                    <span class="filter-label">企業フィルタ</span>
-                    <label class="filter-check">
-                        <input type="checkbox" name="recommend" value="1"
-                               {% if recommend == "1" %}checked{% endif %}>
-                        推薦あり
-                    </label>
-                    <label class="filter-check">
-                        <input type="checkbox" name="briefing" value="1"
-                               {% if briefing == "1" %}checked{% endif %}>
-                        学内説明会あり
-                    </label>
-                </div>
-    
-                <!-- AND / OR -->
-                <div class="filter-group">
-                    <span class="filter-label">条件の組み合わせ</span>
-                    <label class="filter-radio">
-                        <input type="radio" name="logic" value="and"
-                               {% if filter_logic == "and" or not filter_logic %}checked{% endif %}>
-                        AND（すべて満たす）
-                    </label>
-                    <label class="filter-radio">
-                        <input type="radio" name="logic" value="or"
-                               {% if filter_logic == "or" %}checked{% endif %}>
-                        OR（どれかを満たす）
-                    </label>
-                </div>
-            </div>
         </form>
 
 
     </section>
 
-    <section class="result-section">
+    <section class="result-section" data-viewed-ids='{{ viewed_company_ids_json|safe }}'>
         {% if companies %}
             <p class="result-summary">
                 {{ companies|length }} 件の企業が見つかりました
@@ -230,7 +176,7 @@
                 <article class="company-card">
                     <header class="company-card-header">
                         <h2 class="company-name">
-                                <a href="{% url 'shiokara:company_detail' company.pk %}">
+                                <a class="detail-link" href="{% url 'shiokara:company_detail' company.pk %}">
                                     {{ company.name }}
                                 </a>
                                 {% if person and company.pk not in viewed_company_ids %}
@@ -788,6 +734,456 @@
         updateCourseOptions();
       });
     });
+    </script>
+
+    <!-- ======================== -->
+    <!-- 企業検索チュートリアル -->
+    <!-- ======================== -->
+    <style>
+        #search-tut-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 9998;
+            display: none;
+        }
+
+        .search-tut-highlight {
+            position: relative;
+            z-index: 9999 !important;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 6px rgba(255,255,255,0.05) inset;
+            transform: translateZ(0) scale(1.02);
+            transition: box-shadow 180ms ease, transform 180ms ease;
+            outline: 3px solid rgba(203,0,0,0.95);
+            border-radius: 8px;
+        }
+
+        #search-tut-tooltip {
+            position: fixed;
+            z-index: 10000;
+            max-width: 320px;
+            background: #fff;
+            color: #222;
+            border-radius: 8px;
+            box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+            padding: 12px;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        #search-tut-tooltip #search-tut-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        #search-tut-tooltip button {
+            background: #f3f3f3;
+            border: 1px solid #ddd;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        #search-tut-start-btn {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 10001;
+            background: linear-gradient(180deg, #FF6B6B, #ee5a52);
+            color: #fff;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 999px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width:640px) {
+            #search-tut-tooltip { max-width: 260px; font-size: 0.9rem; }
+            #search-tut-start-btn { right: 12px; bottom: 12px; font-size: 0.85rem; }
+        }
+    </style>
+
+    <div id="search-tut-overlay" aria-hidden="true"></div>
+    <div id="search-tut-tooltip" aria-hidden="true" role="dialog" aria-label="企業検索チュートリアル">
+        <div id="search-tut-content"></div>
+        <div id="search-tut-controls">
+            <button id="search-tut-prev" type="button">戻る</button>
+            <button id="search-tut-next" type="button">次へ</button>
+            <button id="search-tut-close" type="button">閉じる</button>
+        </div>
+    </div>
+
+    <button id="search-tut-start-btn" aria-label="企業検索チュートリアルを開始">🔍 検索ガイド</button>
+
+    <script>
+        (function(){
+            const steps = [
+                {
+                    sel: '#company-search-q',
+                    title: 'キーワード検索',
+                    body: '企業名や業種、キーワードを入力して企業を検索できます。'
+                },
+                {
+                    sel: '#search-dept-select',
+                    title: '学科フィルタ',
+                    body: '学科を選択すると、その学科に関連する企業のみ表示されます。'
+                },
+                {
+                    sel: '#search-sort-select',
+                    title: '並び替え',
+                    body: '企業を名前、従業員数、給与など、様々な条件でソートできます。'
+                },
+                {
+                    sel: '.search-section',
+                    title: '検索結果',
+                    body: '条件を入力して、あなたにぴったりの企業を見つけましょう！'
+                }
+            ];
+
+            let idx = 0;
+            const overlay = document.getElementById('search-tut-overlay');
+            const tooltip = document.getElementById('search-tut-tooltip');
+            const content = document.getElementById('search-tut-content');
+            const btnPrev = document.getElementById('search-tut-prev');
+            const btnNext = document.getElementById('search-tut-next');
+            const btnClose = document.getElementById('search-tut-close');
+            const startBtn = document.getElementById('search-tut-start-btn');
+            const FIRST_VISIT = {{ first_visit_search|yesno:"true,false" }};
+            const AUTO_START_TUTORIAL = {{ auto_start_tutorial|yesno:"true,false" }};
+
+            function showStep(i){
+                document.querySelectorAll('.search-tut-highlight').forEach(el=>el.classList.remove('search-tut-highlight'));
+                tooltip.style.display = 'none';
+                overlay.style.display = 'block';
+
+                const step = steps[i];
+                if(!step) { endTutorial(); return; }
+                const target = document.querySelector(step.sel);
+                content.innerHTML = '<strong>'+step.title+'</strong><div style="margin-top:6px;">'+step.body+'</div>';
+
+                if(target){
+                    target.classList.add('search-tut-highlight');
+                    const r = target.getBoundingClientRect();
+                    const tt = tooltip;
+                    const margin = 100;
+                    let top = window.scrollY + r.bottom + margin;
+                    let left = window.scrollX + r.left;
+                    left = Math.min(Math.max(left, 8 + window.scrollX), window.scrollX + document.documentElement.clientWidth - tt.offsetWidth - 8);
+                    tt.style.top = top + 'px';
+                    tt.style.left = left + 'px';
+                    tt.style.display = 'block';
+                    btnNext.focus();
+                } else {
+                    const tt = tooltip;
+                    tt.style.top = (window.scrollY + window.innerHeight/2 - 80) + 'px';
+                    tt.style.left = (window.scrollX + (window.innerWidth - tt.offsetWidth)/2) + 'px';
+                    tt.style.display = 'block';
+                }
+
+                btnPrev.disabled = (i===0);
+                btnNext.textContent = (i === steps.length -1) ? '完了' : '次へ';
+                idx = i;
+            }
+
+            function nextStep(){
+                if(idx < steps.length -1) showStep(idx+1);
+                else endTutorial();
+            }
+            function prevStep(){ if(idx>0) showStep(idx-1); }
+
+            function startTutorial(){
+                showStep(0);
+                overlay.style.display = 'block';
+                document.body.classList.add('search-tut-in-progress');
+            }
+
+            function endTutorial(){
+                overlay.style.display = 'none';
+                tooltip.style.display = 'none';
+                document.querySelectorAll('.search-tut-highlight').forEach(el=>el.classList.remove('search-tut-highlight'));
+                document.body.classList.remove('search-tut-in-progress');
+                
+                // チュートリアルを表示済みにするAPIを呼び出し
+                if(AUTO_START_TUTORIAL){
+                    fetch('{% url "shiokara:tutorial_seen" %}?type=search', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({}),
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if(data.ok) {
+                            console.log('✅ チュートリアル表示済みフラグを更新しました (type:', data.type, ')');
+                        }
+                    })
+                    .catch(err => console.error('❌ チュートリアル更新エラー:', err));
+                }
+            }
+
+            btnNext.addEventListener('click', nextStep);
+            btnPrev.addEventListener('click', prevStep);
+            btnClose.addEventListener('click', endTutorial);
+            overlay.addEventListener('click', endTutorial);
+            startBtn.addEventListener('click', startTutorial);
+
+            document.addEventListener('keydown', (ev)=>{
+                if(!document.body.classList.contains('search-tut-in-progress')) return;
+                if(ev.key === 'Escape') endTutorial();
+                if(ev.key === 'ArrowRight' || ev.key === 'Enter') nextStep();
+                if(ev.key === 'ArrowLeft') prevStep();
+            });
+
+            // 初回訪問時は自動起動
+            if(AUTO_START_TUTORIAL){
+                setTimeout(()=>{ startTutorial(); }, 300);
+            }
+
+            window.__search_tut_start = startTutorial;
+        })();
+    </script>
+
+    <!-- ======================== -->
+    <!-- ポイント消費確認ポップアップ -->
+    <!-- ======================== -->
+    <style>
+        #point-confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 19998;
+            display: none;
+        }
+
+        #point-confirm-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 19999;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+            padding: 24px;
+            max-width: 380px;
+            width: 90vw;
+            display: none;
+            text-align: center;
+        }
+
+        #point-confirm-modal h2 {
+            margin: 0 0 12px;
+            font-size: 1.3rem;
+            color: #333;
+        }
+
+        #point-confirm-modal p {
+            margin: 8px 0;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .point-confirm-highlight {
+            font-weight: 700;
+            color: #FF6B6B;
+            font-size: 1.1em;
+        }
+
+        #point-confirm-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        #point-confirm-actions button {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #point-confirm-cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        #point-confirm-cancel:hover {
+            background: #e0e0e0;
+        }
+
+        #point-confirm-ok {
+            background: linear-gradient(180deg, #FF6B6B, #ee5a52);
+            color: #fff;
+        }
+
+        #point-confirm-ok:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(255,107,107,0.3);
+        }
+    </style>
+
+    <div id="point-confirm-overlay"></div>
+    <div id="point-confirm-modal" role="dialog" aria-labelledby="point-confirm-title" aria-modal="true">
+        <h2 id="point-confirm-title">⚠️ ポイント消費確認</h2>
+        <p id="point-confirm-company-name" style="font-size: 1.1rem; font-weight: 600; color: #333; margin: 12px 0;">
+            <!-- 企業名が JS で動的に挿入される -->
+        </p>
+        <p>この企業の詳細ページを見るには</p>
+        <p><span class="point-confirm-highlight">1ポイント</span> を消費します。</p>
+        {% if person %}
+        <div style="background: #f0f0f0; padding: 12px; border-radius: 6px; margin: 12px 0; font-size: 0.9rem;">
+            <p style="margin: 6px 0; color: #666;">
+                現在のポイント: <strong id="point-before" style="color: #ff6b6b;">{{ person.points }}</strong>
+            </p>
+            <p style="margin: 6px 0; color: #666;">
+                消費後のポイント: <strong id="point-after" style="color: #ff6b6b;">{{ person.points|add:'-1' }}</strong>
+            </p>
+        </div>
+        {% endif %}
+        <p style="font-size: 0.85rem; color: #999; margin-top: 12px;">
+            ※ 同じ企業は2回目以降、ポイント不要です。
+        </p>
+        <div id="point-confirm-actions">
+            <button id="point-confirm-cancel" type="button">キャンセル</button>
+            <button id="point-confirm-ok" type="button">確認して進む</button>
+        </div>
+    </div>
+
+    <script>
+        (function(){
+            const overlay = document.getElementById('point-confirm-overlay');
+            const modal = document.getElementById('point-confirm-modal');
+            const cancelBtn = document.getElementById('point-confirm-cancel');
+            const okBtn = document.getElementById('point-confirm-ok');
+            let pendingUrl = null;
+
+            // 閲覧済み企業 ID のリストを取得
+            const resultSection = document.querySelector('.result-section');
+            const viewedIdsStr = resultSection ? resultSection.getAttribute('data-viewed-ids') : '[]';
+            let viewedIds = [];
+            try {
+                viewedIds = JSON.parse(viewedIdsStr);
+                console.log('✅ viewedIds parsed successfully:', viewedIds);
+            } catch(e) {
+                console.warn('⚠️ Failed to parse viewedIds:', viewedIdsStr, e);
+                viewedIds = [];
+            }
+
+            // 企業詳細ページへのリンククリックを傍受
+            document.addEventListener('click', function(e){
+                const link = e.target.closest('a.detail-link');
+                if(!link) {
+                    console.log('📌 Clicked element is not a detail-link');
+                    return;
+                }
+
+                console.log('🔗 detail-link clicked:', link.href);
+
+                // すでに閲覧済み企業かどうかを判定
+                // URL が /shiokara/company/123/ のような形式なので、company/ の後の数字を抽出
+                const match = link.href.match(/\/company\/(\d+)/);
+                const companyId = match ? match[1] : null;
+                console.log('🆔 companyId:', companyId, 'viewedIds:', viewedIds);
+                
+                if(!companyId) {
+                    console.warn('⚠️ Could not extract companyId from URL:', link.href);
+                    return;
+                }
+
+                if(viewedIds.includes(parseInt(companyId))){
+                    // 閲覧済み企業なら確認ポップアップを表示しない
+                    console.log('✅ Already viewed company, no popup needed');
+                    return;
+                }
+
+                // 企業名を取得（article 要素内から取得）
+                const article = link.closest('article.company-card');
+                let companyName = '企業';
+                if(article) {
+                    const nameEl = article.querySelector('.company-name a');
+                    if(nameEl) {
+                        companyName = nameEl.textContent.trim();
+                    }
+                }
+
+                // 未閲覧企業なら確認ポップアップを表示
+                console.log('🎬 Showing modal for company:', companyId, companyName);
+                console.log('⏹️ preventDefault() を実行します');
+                e.preventDefault();  // ← ここでデフォルト動作を止める
+                pendingUrl = link.href;
+                showModal(companyName);
+            });
+
+            function showModal(companyName){
+                // 企業名を表示
+                document.getElementById('point-confirm-company-name').textContent = companyName;
+                
+                overlay.style.display = 'block';
+                modal.style.display = 'block';
+                okBtn.focus();
+                console.log('🎬 Modal displayed');
+            }
+
+            function hideModal(){
+                overlay.style.display = 'none';
+                modal.style.display = 'none';
+                pendingUrl = null;
+                console.log('❌ Modal hidden');
+            }
+
+            function proceed(){
+                if(pendingUrl){
+                    console.log('➡️ Proceeding to:', pendingUrl);
+                    
+                    // ポイント消費確認モーダルを初めて見た場合、チュートリアルフラグを更新
+                    fetch('{% url "shiokara:tutorial_seen" %}?type=points', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({}),
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if(data.ok) {
+                            console.log('✅ ポイントチュートリアルフラグを更新しました (type:', data.type, ')');
+                        }
+                    })
+                    .catch(err => console.error('❌ チュートリアル更新エラー:', err));
+                    
+                    console.log('🚀 ページ遷移を実行します...');
+                    window.location.href = pendingUrl;
+                } else {
+                    console.warn('⚠️ pendingUrl が設定されていません');
+                }
+            }
+
+            cancelBtn.addEventListener('click', hideModal);
+            okBtn.addEventListener('click', proceed);
+            overlay.addEventListener('click', hideModal);
+
+            // キーボード操作
+            document.addEventListener('keydown', (ev)=>{
+                if(modal.style.display !== 'block') return;
+                if(ev.key === 'Escape') hideModal();
+                if(ev.key === 'Enter') proceed();
+            });
+
+            console.log('✅ Point confirm script initialized');
+        })();
     </script>
     
 {% endblock %}

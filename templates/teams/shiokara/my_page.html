@@ -21,4 +21,198 @@
   {% endif %}
 
   <p>※ 将来的にここに「お気に入り企業」や「カレンダー」を追加する想定です。</p>
+
+<!-- ======================== -->
+<!-- ポイント機能チュートリアル -->
+<!-- ======================== -->
+<style>
+    #mypage-tut-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        z-index: 9998;
+        display: none;
+    }
+
+    .mypage-tut-highlight {
+        position: relative;
+        z-index: 9999 !important;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 6px rgba(255,255,255,0.05) inset;
+        transform: translateZ(0) scale(1.02);
+        transition: box-shadow 180ms ease, transform 180ms ease;
+        outline: 3px solid rgba(76,175,80,0.95);
+        border-radius: 8px;
+    }
+
+    #mypage-tut-tooltip {
+        position: fixed;
+        z-index: 10000;
+        max-width: 320px;
+        background: #fff;
+        color: #222;
+        border-radius: 8px;
+        box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+        padding: 12px;
+        display: none;
+        font-size: 0.95rem;
+    }
+
+    #mypage-tut-tooltip #mypage-tut-controls {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 8px;
+    }
+
+    #mypage-tut-tooltip button {
+        background: #f3f3f3;
+        border: 1px solid #ddd;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    #mypage-tut-start-btn {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 10001;
+        background: linear-gradient(180deg, #4CAF50, #45a049);
+        color: #fff;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width:640px) {
+        #mypage-tut-tooltip { max-width: 260px; font-size: 0.9rem; }
+        #mypage-tut-start-btn { right: 12px; bottom: 12px; font-size: 0.85rem; }
+    }
+</style>
+
+<div id="mypage-tut-overlay" aria-hidden="true"></div>
+<div id="mypage-tut-tooltip" aria-hidden="true" role="dialog" aria-label="ポイント機能説明">
+    <div id="mypage-tut-content"></div>
+    <div id="mypage-tut-controls">
+        <button id="mypage-tut-prev" type="button">戻る</button>
+        <button id="mypage-tut-next" type="button">次へ</button>
+        <button id="mypage-tut-close" type="button">閉じる</button>
+    </div>
+</div>
+
+<button id="mypage-tut-start-btn" aria-label="ポイント機能のチュートリアルを開始">💡 ポイント情報</button>
+
+<script>
+    (function(){
+        const steps = [
+            {
+                sel: 'h1',
+                title: 'マイページへようこそ',
+                body: 'ここはあなたのプロフィールと、最も重要な「ポイント」が表示されるページです。'
+            },
+            {
+                sel: 'li:has(> strong)',
+                title: 'ポイント表示',
+                body: 'このサイトではポイント制度を採用しています。現在のポイント数がここに表示されます。'
+            },
+            {
+                sel: 'ul',
+                title: 'ポイントの使い方',
+                body: '企業詳細ページを見るたびに1ポイント消費されます。同じ企業は2回目以降、ポイント不要です。'
+            },
+            {
+                sel: 'p',
+                title: 'ポイントを獲得しよう',
+                body: '口コミを投稿すると5ポイント獲得できます。積極的に投稿して、ポイントを増やしましょう！'
+            },
+            {
+                sel: 'h1',
+                title: 'ポイント機能のまとめ',
+                body: '初期値：10pt | 消費：企業詳細-1pt | 獲得：口コミ投稿+5pt'
+            }
+        ];
+
+        let idx = 0;
+        const overlay = document.getElementById('mypage-tut-overlay');
+        const tooltip = document.getElementById('mypage-tut-tooltip');
+        const content = document.getElementById('mypage-tut-content');
+        const btnPrev = document.getElementById('mypage-tut-prev');
+        const btnNext = document.getElementById('mypage-tut-next');
+        const btnClose = document.getElementById('mypage-tut-close');
+        const startBtn = document.getElementById('mypage-tut-start-btn');
+
+        function showStep(i){
+            document.querySelectorAll('.mypage-tut-highlight').forEach(el=>el.classList.remove('mypage-tut-highlight'));
+            tooltip.style.display = 'none';
+            overlay.style.display = 'block';
+
+            const step = steps[i];
+            if(!step) { endTutorial(); return; }
+            const target = document.querySelector(step.sel);
+            content.innerHTML = '<strong>'+step.title+'</strong><div style="margin-top:6px;">'+step.body+'</div>';
+
+            if(target){
+                target.classList.add('mypage-tut-highlight');
+                const r = target.getBoundingClientRect();
+                const tt = tooltip;
+                const margin = 100;
+                let top = window.scrollY + r.bottom + margin;
+                let left = window.scrollX + r.left;
+                left = Math.min(Math.max(left, 8 + window.scrollX), window.scrollX + document.documentElement.clientWidth - tt.offsetWidth - 8);
+                tt.style.top = top + 'px';
+                tt.style.left = left + 'px';
+                tt.style.display = 'block';
+                btnNext.focus();
+            } else {
+                const tt = tooltip;
+                tt.style.top = (window.scrollY + window.innerHeight/2 - 80) + 'px';
+                tt.style.left = (window.scrollX + (window.innerWidth - tt.offsetWidth)/2) + 'px';
+                tt.style.display = 'block';
+            }
+
+            btnPrev.disabled = (i===0);
+            btnNext.textContent = (i === steps.length -1) ? '完了' : '次へ';
+            idx = i;
+        }
+
+        function nextStep(){
+            if(idx < steps.length -1) showStep(idx+1);
+            else endTutorial();
+        }
+        function prevStep(){ if(idx>0) showStep(idx-1); }
+
+        function startTutorial(){
+            showStep(0);
+            overlay.style.display = 'block';
+            document.body.classList.add('mypage-tut-in-progress');
+        }
+
+        function endTutorial(){
+            overlay.style.display = 'none';
+            tooltip.style.display = 'none';
+            document.querySelectorAll('.mypage-tut-highlight').forEach(el=>el.classList.remove('mypage-tut-highlight'));
+            document.body.classList.remove('mypage-tut-in-progress');
+        }
+
+        btnNext.addEventListener('click', nextStep);
+        btnPrev.addEventListener('click', prevStep);
+        btnClose.addEventListener('click', endTutorial);
+        overlay.addEventListener('click', endTutorial);
+        startBtn.addEventListener('click', startTutorial);
+
+        document.addEventListener('keydown', (ev)=>{
+            if(!document.body.classList.contains('mypage-tut-in-progress')) return;
+            if(ev.key === 'Escape') endTutorial();
+            if(ev.key === 'ArrowRight' || ev.key === 'Enter') nextStep();
+            if(ev.key === 'ArrowLeft') prevStep();
+        });
+
+        window.__mypage_tut_start = startTutorial;
+    })();
+</script>
 {% endblock %}

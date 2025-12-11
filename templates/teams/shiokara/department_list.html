@@ -48,8 +48,8 @@
         {% if departments %}
         <div class="tut-dept-grid">
             {% for dept in departments %}
-            <a class="tut-dept-card"
-               href="{% url 'shiokara:department_detail' dept.short_name %}">
+            <a class="tut-dept-card" data-dept="{{ dept.short_name }}"
+               href="{% url 'shiokara:company_search' %}?dept={{ dept.short_name }}">
                 <div class="tut-dept-accent">
                     <span class="bar-red"></span>
                     <span class="bar-black"></span>
@@ -428,7 +428,7 @@
         const btnNext = document.getElementById('tut-next');
         const btnClose = document.getElementById('tut-close');
         const startBtn = document.getElementById('tut-start-btn');
-        const TUTORIAL_SEEN_URL = "{% url 'shiokara:tutorial_seen' %}";
+        const TUTORIAL_SEEN_URL = "{% url 'shiokara:tutorial_seen' %}?type=dept";
         const AUTO_START = {{ auto_start_tutorial|yesno:"true,false" }};
 
         function getCookie(name) {
@@ -469,10 +469,9 @@
                 // position tooltip near target
                 const r = target.getBoundingClientRect();
                 const tt = tooltip;
-                // prefer above unless not enough space
-                const margin = 8;
-                let top = window.scrollY + r.top - tt.offsetHeight - margin;
-                if(top < window.scrollY + 8) top = window.scrollY + r.bottom + margin;
+                // 赤枠の下に25pxずらして表示
+                const margin = 25;
+                let top = window.scrollY + r.bottom + margin;
                 let left = window.scrollX + r.left;
                 // keep inside viewport
                 left = Math.min(Math.max(left, 8 + window.scrollX), window.scrollX + document.documentElement.clientWidth - tt.offsetWidth - 8);
@@ -543,5 +542,23 @@
         // expose start for developers
         window.__tut_start = startTutorial;
     })();
+
+    // 学科カードクリック時に初回訪問フラグをセット
+    document.addEventListener('DOMContentLoaded', function(){
+        const deptCards = document.querySelectorAll('.tut-dept-card');
+        deptCards.forEach(card => {
+            card.addEventListener('click', function(e){
+                // セッションに first_visit_search フラグをセット後にリダイレクト
+                const dept = this.dataset.dept;
+                if(dept){
+                    // JavaScriptでセッション設定はできないので、リンク先に first_visit_search パラメータを付加
+                    const url = new URL(this.href, window.location.origin);
+                    url.searchParams.set('first_visit', '1');
+                    window.location.href = url.toString();
+                    e.preventDefault();
+                }
+            });
+        });
+    });
 </script>
 {% endblock %}

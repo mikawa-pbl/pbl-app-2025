@@ -166,4 +166,200 @@
     })();
   </script>
 {% endif %}
+
+<!-- ======================== -->
+<!-- ポイント機能チュートリアル -->
+<!-- ======================== -->
+<style>
+    /* ポイントチュートリアル用スタイル */
+    #points-tut-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        z-index: 9998;
+        display: none;
+    }
+
+    .points-tut-highlight {
+        position: relative;
+        z-index: 9999 !important;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 6px rgba(255,255,255,0.05) inset;
+        transform: translateZ(0) scale(1.02);
+        transition: box-shadow 180ms ease, transform 180ms ease;
+        outline: 3px solid rgba(203,0,0,0.95);
+        border-radius: 8px;
+    }
+
+    #points-tut-tooltip {
+        position: fixed;
+        z-index: 10000;
+        max-width: 320px;
+        background: #fff;
+        color: #222;
+        border-radius: 8px;
+        box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+        padding: 12px;
+        display: none;
+        font-size: 0.95rem;
+    }
+
+    #points-tut-tooltip #points-tut-controls {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 8px;
+    }
+
+    #points-tut-tooltip button {
+        background: #f3f3f3;
+        border: 1px solid #ddd;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    #points-tut-start-btn {
+        position: fixed;
+        left: 18px;
+        bottom: 18px;
+        z-index: 10001;
+        background: linear-gradient(180deg, #4CAF50, #45a049);
+        color: #fff;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width:640px) {
+        #points-tut-tooltip { max-width: 260px; font-size: 0.9rem; }
+        #points-tut-start-btn { left: 12px; bottom: 12px; font-size: 0.85rem; }
+    }
+</style>
+
+<div id="points-tut-overlay" aria-hidden="true"></div>
+<div id="points-tut-tooltip" aria-hidden="true" role="dialog" aria-label="ポイント機能説明">
+    <div id="points-tut-content"></div>
+    <div id="points-tut-controls">
+        <button id="points-tut-prev" type="button">戻る</button>
+        <button id="points-tut-next" type="button">次へ</button>
+        <button id="points-tut-close" type="button">閉じる</button>
+    </div>
+</div>
+
+<button id="points-tut-start-btn" aria-label="ポイント機能のチュートリアルを開始">💚 ポイント機能</button>
+
+<script>
+    (function(){
+        const steps = [
+            {
+                sel: 'header',
+                title: 'ポイント表示',
+                body: 'ヘッダーの右上に現在のポイント数が表示されます。このサイトではポイントで企業情報を閲覧できます。'
+            },
+            {
+                sel: 'h1',
+                title: '企業詳細ページ',
+                body: 'このページを見るのに1ポイント消費しました。同じ企業をもう一度訪れる場合、ポイントは消費されません。'
+            },
+            {
+                sel: 'a[href*="company_experience_post"]',
+                title: '口コミ投稿で獲得',
+                body: 'このボタンから口コミを投稿すると、5ポイント獲得できます。ポイントを増やして、もっと多くの企業情報を見ましょう！'
+            },
+            {
+                sel: 'h2',
+                title: '口コミ一覧',
+                body: '他の学生の口コミが表示されます。企業選びの参考にしてください。'
+            }
+        ];
+
+        let idx = 0;
+        const overlay = document.getElementById('points-tut-overlay');
+        const tooltip = document.getElementById('points-tut-tooltip');
+        const content = document.getElementById('points-tut-content');
+        const btnPrev = document.getElementById('points-tut-prev');
+        const btnNext = document.getElementById('points-tut-next');
+        const btnClose = document.getElementById('points-tut-close');
+        const startBtn = document.getElementById('points-tut-start-btn');
+
+        function showStep(i){
+            document.querySelectorAll('.points-tut-highlight').forEach(el=>el.classList.remove('points-tut-highlight'));
+            tooltip.style.display = 'none';
+            overlay.style.display = 'block';
+
+            const step = steps[i];
+            if(!step) { endTutorial(); return; }
+            const target = document.querySelector(step.sel);
+            content.innerHTML = '<strong>'+step.title+'</strong><div style="margin-top:6px;">'+step.body+'</div>';
+
+            if(target){
+                target.classList.add('points-tut-highlight');
+                const r = target.getBoundingClientRect();
+                const tt = tooltip;
+                const margin = 100;
+                let top = window.scrollY + r.bottom + margin;
+                let left = window.scrollX + r.left;
+                left = Math.min(Math.max(left, 8 + window.scrollX), window.scrollX + document.documentElement.clientWidth - tt.offsetWidth - 8);
+                tt.style.top = top + 'px';
+                tt.style.left = left + 'px';
+                tt.style.display = 'block';
+                btnNext.focus();
+            } else {
+                const tt = tooltip;
+                tt.style.top = (window.scrollY + window.innerHeight/2 - 80) + 'px';
+                tt.style.left = (window.scrollX + (window.innerWidth - tt.offsetWidth)/2) + 'px';
+                tt.style.display = 'block';
+            }
+
+            btnPrev.disabled = (i===0);
+            btnNext.textContent = (i === steps.length -1) ? '完了' : '次へ';
+            idx = i;
+        }
+
+        function nextStep(){
+            if(idx < steps.length -1) showStep(idx+1);
+            else endTutorial();
+        }
+        function prevStep(){ if(idx>0) showStep(idx-1); }
+
+        function startTutorial(){
+            showStep(0);
+            overlay.style.display = 'block';
+            document.body.classList.add('points-tut-in-progress');
+        }
+
+        function endTutorial(){
+            overlay.style.display = 'none';
+            tooltip.style.display = 'none';
+            document.querySelectorAll('.points-tut-highlight').forEach(el=>el.classList.remove('points-tut-highlight'));
+            document.body.classList.remove('points-tut-in-progress');
+        }
+
+        btnNext.addEventListener('click', nextStep);
+        btnPrev.addEventListener('click', prevStep);
+        btnClose.addEventListener('click', endTutorial);
+        overlay.addEventListener('click', endTutorial);
+        startBtn.addEventListener('click', startTutorial);
+
+        document.addEventListener('keydown', (ev)=>{
+            if(!document.body.classList.contains('points-tut-in-progress')) return;
+            if(ev.key === 'Escape') endTutorial();
+            if(ev.key === 'ArrowRight' || ev.key === 'Enter') nextStep();
+            if(ev.key === 'ArrowLeft') prevStep();
+        });
+
+        // 初回ポイント消費時は自動起動
+        const FIRST_POINT_USAGE = {{ first_point_usage|yesno:"true,false" }};
+        if(FIRST_POINT_USAGE){
+            setTimeout(()=>{ startTutorial(); }, 300);
+        }
+
+        window.__points_tut_start = startTutorial;
+    })();
+</script>
 {% endblock %}

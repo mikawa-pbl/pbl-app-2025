@@ -84,13 +84,51 @@ def append_person_to_fixture(person: Person) -> None:
             "lab_field": person.lab_field,
             "password": person.password,
             "created_at": person.created_at.isoformat(),
-            "seen_tutorial": person.seen_tutorial,
+            "seen_dept_tutorial": person.seen_dept_tutorial,
+            "seen_search_tutorial": person.seen_search_tutorial,
+            "seen_points_tutorial": person.seen_points_tutorial,
             "points": person.points,
         },
     }
 
     data.append(obj)
 
+    PERSON_FIXTURE_PATH.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+def update_person_in_fixture(person: Person) -> None:
+    """既存の Person をフィクスチャで更新する（チュートリアル表示済み etc）"""
+    
+    if not PERSON_FIXTURE_PATH.exists():
+        return
+    
+    try:
+        text = PERSON_FIXTURE_PATH.read_text(encoding="utf-8")
+        data = json.loads(text) if text.strip() else []
+    except json.JSONDecodeError:
+        return
+    
+    # 該当する pk を持つ Person を探して更新
+    for obj in data:
+        if obj.get("pk") == person.pk and obj.get("model") == "shiokara.person":
+            obj["fields"].update({
+                "student_id": person.student_id,
+                "course": person.course,
+                "grade": person.grade,
+                "department_name": person.department_name,
+                "lab_field": person.lab_field,
+                "password": person.password,
+                "created_at": person.created_at.isoformat(),
+                "seen_dept_tutorial": person.seen_dept_tutorial,
+                "seen_search_tutorial": person.seen_search_tutorial,
+                "seen_points_tutorial": person.seen_points_tutorial,
+                "points": person.points,
+            })
+            break
+    
     PERSON_FIXTURE_PATH.write_text(
         json.dumps(data, ensure_ascii=False, indent=2),
         encoding="utf-8",
@@ -223,7 +261,7 @@ def department_list(request):
     }
     # チュートリアルの自動起動判定（ログイン中かつ未表示の場合）
     person = get_current_person(request)
-    context["auto_start_tutorial"] = bool(person and not getattr(person, "seen_tutorial", False))
+    context["auto_start_tutorial"] = bool(person and not getattr(person, "seen_dept_tutorial", False))
     return render_with_person(request, "teams/shiokara/department_list.html", context)
 
 
@@ -232,6 +270,10 @@ def tutorial_seen(request):
     """
     フロントからチュートリアルを表示済みにするために呼ばれる API。
     POST で呼び出すことを想定。
+    
+    クエリパラメータ:
+    - type: 'dept' (学科別企業一覧), 'search' (企業検索), 'points' (ポイント) 
+    デフォルトは 'search'
     """
     if request.method != "POST":
         return JsonResponse({"ok": False, "error": "POST required"}, status=405)
@@ -240,36 +282,28 @@ def tutorial_seen(request):
     if not person:
         return JsonResponse({"ok": False, "error": "not authenticated"}, status=403)
 
+    # チュートリアルの種類を取得（デフォルトは 'search'）
+    tutorial_type = request.GET.get('type', 'search').strip()
+    
+    # 更新するフィールドを決定
+    if tutorial_type == 'dept':
+        update_field = 'seen_dept_tutorial'
+    elif tutorial_type == 'points':
+        update_field = 'seen_points_tutorial'
+    else:  # 'search' or その他
+        update_field = 'seen_search_tutorial'
+    
     # 更新（using DB alias を指定）
-    Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(seen_tutorial=True)
+    Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(**{update_field: True})
+    
+    # DB から最新の person データを取得して persons.json にも保存
+    updated_person = Person.objects.using(DB_ALIAS).get(pk=person.pk)
+    update_person_in_fixture(updated_person)
+    
     # セッション内の person は次回取得時に DB から刷新されるためそのままで良い
-    return JsonResponse({"ok": True})
+    return JsonResponse({"ok": True, "type": tutorial_type})
 
 
-def department_detail(request, short_name):
-    """
-    学科別 企業一覧ページ
-    例: /shiokara/departments/cs/
-    """
-    department = get_object_or_404(
-        Department.objects.using(DB_ALIAS),
-        short_name=short_name,
-    )
-    companies = department.companies.all()
-
-    # 閲覧済み企業一覧（ログイン中のみ）
-    person = get_current_person(request)
-    if person:
-        viewed_company_ids = list(CompanyView.objects.using(DB_ALIAS).filter(person=person).values_list('company_id', flat=True))
-    else:
-        viewed_company_ids = []
-
-    context = {
-        "department": department,
-        "companies": companies,
-        "viewed_company_ids": viewed_company_ids,
-    }
-    return render_with_person(request, "teams/shiokara/department_detail.html", context)
 
 
 # =========================
@@ -395,11 +429,21 @@ def company_search(request):
     else:
         viewed_company_ids = []
 
+    # 企業検索ページ初回訪問判定
+    first_visit_search = request.GET.get('first_visit') == '1'
+
+    # チュートリアルの自動起動判定（ログイン中かつ未表示の場合）
+    auto_start_tutorial = bool(person and not getattr(person, "seen_search_tutorial", False))
+
     context = {
         "query": query,
         "departments": departments,
         "companies": companies,
         "viewed_company_ids": viewed_company_ids,
+        "viewed_company_ids_json": json.dumps(viewed_company_ids),
+        "first_visit_search": first_visit_search,
+        "auto_start_tutorial": auto_start_tutorial,
+        "person": person,
 
         # テンプレ側で選択状態を再現する用
         "dept_short": dept_short,
@@ -434,12 +478,16 @@ def company_detail(request, pk):
 
     # 既にこのユーザーがこの企業を閲覧済みかを確認
     viewed_exists = CompanyView.objects.using(DB_ALIAS).filter(person=person, company=company).exists()
+    first_point_usage = False
     if not viewed_exists:
         # 1ポイント消費（条件付きで安全に更新）
         updated = Person.objects.using(DB_ALIAS).filter(pk=person.pk, points__gte=1).update(points=F('points') - 1)
         if not updated:
             # まれに同時更新で失敗した場合
             return render_with_person(request, "teams/shiokara/company_detail_locked.html", {"company": company})
+
+        # 初回ポイント消費判定
+        first_point_usage = True
 
         # 閲覧履歴を作成（以後この企業はポイントを消費しない）
         try:
@@ -469,6 +517,7 @@ def company_detail(request, pk):
         "avg_rating": avg_rating,
         "sort": sort,
         "points_awarded": points_awarded,
+        "first_point_usage": first_point_usage,
     }
     return render_with_person(request, "teams/shiokara/company_detail.html", context)
 

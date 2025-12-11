@@ -15,8 +15,6 @@ urlpatterns = [
 
     # 既存
     path("", views.department_list, name="department_list"),
-    path("departments/<str:short_name>/",
-         views.department_detail, name="department_detail"),
     path("search/", views.company_search, name="company_search"),
     path("company/<int:pk>/", views.company_detail, name="company_detail"),
     path("company/<int:pk>/post/",

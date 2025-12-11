@@ -112,8 +112,10 @@ class Person(models.Model):
     password = models.CharField("パスワード", max_length=128)
 
     created_at = models.DateTimeField(auto_now_add=True)
-    # 初回チュートリアル表示済みフラグ
-    seen_tutorial = models.BooleanField("チュートリアル表示済み", default=False)
+    # チュートリアル表示済みフラグ（各ページごと）
+    seen_dept_tutorial = models.BooleanField("学科別企業一覧チュートリアル表示済み", default=False)
+    seen_search_tutorial = models.BooleanField("企業検索チュートリアル表示済み", default=False)
+    seen_points_tutorial = models.BooleanField("ポイントチュートリアル表示済み", default=False)
     # ポイント（初期値 10）
     points = models.IntegerField("ポイント", default=10)
 

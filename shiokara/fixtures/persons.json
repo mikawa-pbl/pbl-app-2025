@@ -1,0 +1,20 @@
+[
+  {
+    "model": "shiokara.person",
+    "pk": 1,
+    "fields": {
+      "student_id": "343",
+      "course": "B",
+      "grade": 2,
+      "department_name": "2系",
+      "lab_field": "集積電子システムコース",
+      "gender": "male",
+      "password": "1234",
+      "created_at": "2025-12-12T07:34:37.670015+00:00",
+      "seen_dept_tutorial": true,
+      "seen_search_tutorial": false,
+      "seen_points_tutorial": false,
+      "points": 10
+    }
+  }
+]

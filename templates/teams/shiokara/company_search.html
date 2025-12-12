@@ -155,7 +155,7 @@
 
     </section>
 
-    <section class="result-section" data-viewed-ids='{{ viewed_company_ids_json|safe }}'>
+    <section class="result-section" data-viewed-ids='{{ viewed_company_ids_json|safe }}' data-fav-ids='{{ favorite_company_ids_json|safe }}'>
         {% if companies %}
             <p class="result-summary">
                 {{ companies|length }} 件の企業が見つかりました
@@ -175,14 +175,22 @@
                 {% for company in companies %}
                 <article class="company-card">
                     <header class="company-card-header">
-                        <h2 class="company-name">
-                                <a class="detail-link" href="{% url 'shiokara:company_detail' company.pk %}">
-                                    {{ company.name }}
-                                </a>
-                                {% if person and company.pk not in viewed_company_ids %}
-                                    <span class="unviewed-lock" title="未閲覧">🔏</span>
-                                {% endif %}
-                            </h2>
+                                                <h2 class="company-name">
+                                                                <a class="detail-link" href="{% url 'shiokara:company_detail' company.pk %}">
+                                                                        {{ company.name }}
+                                                                </a>
+                                                                {% if person and company.pk not in viewed_company_ids %}
+                                                                        <span class="unviewed-lock" title="未閲覧">🔏</span>
+                                                                {% endif %}
+                                                                {% if person %}
+                                                                    <form method="post" action="{% url 'shiokara:company_favorite' company.pk %}" class="fav-form" style="display:inline-block; margin-left:8px;">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit" class="fav-btn" aria-pressed="{% if company.pk in favorite_company_ids %}true{% else %}false{% endif %}">
+                                                                            {% if company.pk in favorite_company_ids %}★{% else %}☆{% endif %}
+                                                                        </button>
+                                                                    </form>
+                                                                {% endif %}
+                                                        </h2>
 
                         {% if company.departments.all %}
                         <div class="company-depts">
@@ -499,6 +507,18 @@
         text-decoration: underline;
     }
 
+    /* お気に入りボタン */
+    .fav-btn {
+        border: none;
+        background: transparent;
+        font-size: 1.05rem;
+        cursor: pointer;
+        color: #f5a623;
+        line-height: 1;
+        padding: 2px 6px;
+    }
+    .fav-btn[aria-pressed="true"] { color: #ffb400; }
+
     .company-depts {
         display: flex;
         flex-wrap: wrap;
@@ -630,6 +650,37 @@
         }
     }
 </style>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    // AJAX トグル処理
+    document.querySelectorAll('.fav-form').forEach(function(form){
+        form.addEventListener('submit', function(ev){
+            ev.preventDefault();
+            var btn = form.querySelector('.fav-btn');
+            if(!btn) return;
+            var url = form.action;
+            var csrftoken = form.querySelector('input[name=csrfmiddlewaretoken]')?.value;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken,
+                },
+            }).then(function(resp){
+                return resp.json();
+            }).then(function(data){
+                if(data && data.ok){
+                    if(data.added){ btn.textContent = '★'; btn.setAttribute('aria-pressed','true'); }
+                    else { btn.textContent = '☆'; btn.setAttribute('aria-pressed','false'); }
+                }
+            }).catch(function(){
+                // フォールバック: フルポストで再送
+                form.submit();
+            });
+        });
+    });
+});
+</script>
 <script>
     /**
      * 学科 short_name → 系番号（1〜5）

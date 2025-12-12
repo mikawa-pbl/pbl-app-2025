@@ -247,7 +247,15 @@ def my_page(request):
     if not person:
         return redirect("shiokara:login")
 
-    return render_with_person(request, "teams/shiokara/my_page.html", {"person": person})
+    # リフレッシュして favorites を取得
+    try:
+        refreshed = Person.objects.using(DB_ALIAS).get(pk=person.pk)
+        favorites = refreshed.favorites.all()
+    except Exception:
+        refreshed = person
+        favorites = []
+
+    return render_with_person(request, "teams/shiokara/my_page.html", {"person": refreshed, "favorites": favorites})
 
 
 # =========================
@@ -433,8 +441,11 @@ def company_search(request):
     person = get_current_person(request)
     if person:
         viewed_company_ids = list(CompanyView.objects.using(DB_ALIAS).filter(person=person).values_list('company_id', flat=True))
+        # お気に入り企業一覧（ログイン中のみ）
+        favorite_company_ids = list(Person.objects.using(DB_ALIAS).filter(pk=person.pk).values_list('favorites__pk', flat=True))
     else:
         viewed_company_ids = []
+        favorite_company_ids = []
 
     # 企業検索ページ初回訪問判定
     first_visit_search = request.GET.get('first_visit') == '1'
@@ -451,6 +462,8 @@ def company_search(request):
         "first_visit_search": first_visit_search,
         "auto_start_tutorial": auto_start_tutorial,
         "person": person,
+        "favorite_company_ids": favorite_company_ids,
+        "favorite_company_ids_json": json.dumps(favorite_company_ids),
 
         # テンプレ側で選択状態を再現する用
         "dept_short": dept_short,
@@ -526,6 +539,8 @@ def company_detail(request, pk):
         "points_awarded": points_awarded,
         "first_point_usage": first_point_usage,
         "seen_points_tutorial": getattr(person, "seen_points_tutorial", False) if person else False,
+        # このユーザーがこの企業をお気に入り登録しているか
+        "is_favorite": bool(person and Person.objects.using(DB_ALIAS).filter(pk=person.pk, favorites__pk=company.pk).exists()),
     }
     return render_with_person(request, "teams/shiokara/company_detail.html", context)
 
@@ -620,6 +635,38 @@ def company_experience_post(request, pk):
     context = {"company": company, "error": error, **initial}
     return render_with_person(request, "teams/shiokara/company_experience_post.html", context)
 
+
+@csrf_exempt
+def toggle_favorite(request, pk):
+    """
+    企業のお気に入りを追加/削除する。POST を想定。
+    非 AJAX の場合は企業詳細へリダイレクトする。
+    """
+    company = get_object_or_404(Company.objects.using(DB_ALIAS), pk=pk)
+    person = get_current_person(request)
+    if not person:
+        return redirect("shiokara:login")
+
+    # リフレッシュ
+    person = Person.objects.using(DB_ALIAS).get(pk=person.pk)
+
+    # トグル
+    exists = person.favorites.filter(pk=company.pk).exists()
+    try:
+        if exists:
+            person.favorites.remove(company)
+            added = False
+        else:
+            person.favorites.add(company)
+            added = True
+    except Exception:
+        added = not exists
+
+    # AJAX リクエストには JSON を返す
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({"ok": True, "added": added})
+
+    return redirect("shiokara:company_detail", pk=company.pk)
 
 def append_review_to_fixture(review: CompanyReview) -> None:
     """投稿されたレビューを JSON フィクスチャに 1 件追記する"""

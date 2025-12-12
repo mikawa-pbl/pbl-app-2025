@@ -20,7 +20,24 @@
     <p>ログイン情報が見つかりませんでした。</p>
   {% endif %}
 
-  <p>※ 将来的にここに「お気に入り企業」や「カレンダー」を追加する想定です。</p>
+    <h2>お気に入り企業</h2>
+        {% if favorites %}
+        <ul id="favorites-list">
+            {% for c in favorites %}
+                <li data-company-id="{{ c.pk }}">
+                    <a href="{% url 'shiokara:company_detail' c.pk %}">{{ c.name }}</a>
+                    <form method="post" action="{% url 'shiokara:company_favorite' c.pk %}" class="fav-form-inline" style="display:inline-block; margin-left:8px;">
+                        {% csrf_token %}
+                        <button type="submit" class="fav-remove-btn">★ お気に入り解除</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>お気に入りはまだ登録されていません。</p>
+    {% endif %}
+
+    <p>※ 上で表示されるのはログイン中に登録したお気に入り企業です。</p>
 
 <!-- ======================== -->
 <!-- ポイント機能チュートリアル -->
@@ -214,5 +231,23 @@
 
         window.__mypage_tut_start = startTutorial;
     })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.fav-form-inline').forEach(function(form){
+        form.addEventListener('submit', function(ev){
+            ev.preventDefault();
+            var li = form.closest('li');
+            var csrftoken = form.querySelector('input[name=csrfmiddlewaretoken]')?.value;
+            fetch(form.action, { method: 'POST', headers: { 'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': csrftoken } })
+                .then(r=>r.json()).then(function(data){
+                    if(data && data.ok){
+                        // お気に入り解除ならリストから削除
+                        if(!data.added && li){ li.remove(); }
+                    }
+                }).catch(function(){ form.submit(); });
+        });
+    });
+});
 </script>
 {% endblock %}

@@ -4,6 +4,13 @@
 {% block content %}
 <h1>{{ company.name }}</h1>
 
+<form method="post" action="{% url 'shiokara:company_favorite' company.pk %}" class="fav-form" style="margin-top:8px; margin-bottom:12px; display:inline-block;">
+  {% csrf_token %}
+  <button type="submit" class="fav-btn" aria-pressed="{% if is_favorite %}true{% else %}false{% endif %}">
+    {% if is_favorite %}★ お気に入り解除{% else %}☆ お気に入りに追加{% endif %}
+  </button>
+</form>
+
 <p>ここは {{ company.name }} の体験談・インターン情報などを載せる予定のページです。</p>
 
 <ul>
@@ -367,4 +374,24 @@
         window.__points_tut_start = startTutorial;
     })();
 </script>
-{% endblock %}
+        {% comment %} Favorite toggle AJAX handler for company detail {% endcomment %}
+        <script>
+        document.addEventListener('DOMContentLoaded', function(){
+          var form = document.querySelector('.fav-form');
+          if(!form) return;
+          form.addEventListener('submit', function(ev){
+            ev.preventDefault();
+            var btn = form.querySelector('.fav-btn');
+            var csrftoken = form.querySelector('input[name=csrfmiddlewaretoken]')?.value;
+            fetch(form.action, { method: 'POST', headers: { 'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': csrftoken } })
+              .then(r=>r.json()).then(function(data){
+                if(data && data.ok){
+                  if(data.added){ btn.textContent = '★ お気に入り解除'; btn.setAttribute('aria-pressed','true'); }
+                  else { btn.textContent = '☆ お気に入りに追加'; btn.setAttribute('aria-pressed','false'); }
+                }
+              }).catch(function(){ form.submit(); });
+          });
+        });
+        </script>
+
+        {% endblock %}

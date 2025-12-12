@@ -17,6 +17,7 @@ urlpatterns = [
     path("", views.department_list, name="department_list"),
     path("search/", views.company_search, name="company_search"),
     path("company/<int:pk>/", views.company_detail, name="company_detail"),
+    path("company/<int:pk>/favorite/", views.toggle_favorite, name="company_favorite"),
     path("company/<int:pk>/post/",
          views.company_experience_post,
          name="company_experience_post"),

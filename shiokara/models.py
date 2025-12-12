@@ -123,6 +123,13 @@ class Person(models.Model):
     seen_points_tutorial = models.BooleanField("ポイントチュートリアル表示済み", default=False)
     # ポイント（初期値 10）
     points = models.IntegerField("ポイント", default=10)
+    # お気に入り企業（多対多）。空でも良い
+    favorites = models.ManyToManyField(
+        'Company',
+        related_name='favorited_by',
+        verbose_name='お気に入り企業',
+        blank=True,
+    )
 
     class Meta:
         verbose_name = "学生"

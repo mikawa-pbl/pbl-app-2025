@@ -355,8 +355,13 @@
 
         // 初回ポイント消費時は自動起動
         const FIRST_POINT_USAGE = {{ first_point_usage|yesno:"true,false" }};
-        if(FIRST_POINT_USAGE){
+        const SEEN_POINTS_TUTORIAL = {{ seen_points_tutorial|yesno:"true,false" }};
+        console.log('🔍 FIRST_POINT_USAGE:', FIRST_POINT_USAGE, 'SEEN_POINTS_TUTORIAL:', SEEN_POINTS_TUTORIAL);
+        if(FIRST_POINT_USAGE && !SEEN_POINTS_TUTORIAL){
+            console.log('🚀 Points Tutorial will auto-start...');
             setTimeout(()=>{ startTutorial(); }, 300);
+        } else {
+            console.log('✅ Points Tutorial auto-start is disabled');
         }
 
         window.__points_tut_start = startTutorial;

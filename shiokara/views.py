@@ -518,6 +518,7 @@ def company_detail(request, pk):
         "sort": sort,
         "points_awarded": points_awarded,
         "first_point_usage": first_point_usage,
+        "seen_points_tutorial": getattr(person, "seen_points_tutorial", False) if person else False,
     }
     return render_with_person(request, "teams/shiokara/company_detail.html", context)
 

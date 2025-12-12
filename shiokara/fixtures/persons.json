@@ -3,34 +3,14 @@
     "model": "shiokara.person",
     "pk": 1,
     "fields": {
-      "student_id": "233317",
-      "course": "M",
-      "grade": 1,
-      "department_name": "3系",
-      "lab_field": "メディア・ロボット情報学分野",
-      "gender": "male",
-      "password": "1234",
-      "created_at": "2025-12-12T07:33:49.798023+00:00",
-      "seen_dept_tutorial": true,
-      "seen_search_tutorial": true,
-      "seen_points_tutorial": true,
-      "points": 300
-    }
-  }
-]
-[
-  {
-    "model": "shiokara.person",
-    "pk": 1,
-    "fields": {
-      "student_id": "343",
+      "student_id": "12345678",
       "course": "B",
-      "grade": 2,
+      "grade": 3,
       "department_name": "2系",
       "lab_field": "集積電子システムコース",
       "gender": "male",
       "password": "1234",
-      "created_at": "2025-12-12T07:34:37.670015+00:00",
+      "created_at": "2025-12-12T08:03:30.496097+00:00",
       "seen_dept_tutorial": true,
       "seen_search_tutorial": false,
       "seen_points_tutorial": false,

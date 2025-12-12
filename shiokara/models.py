@@ -76,8 +76,7 @@ class CompanyReview(models.Model):
         choices=GENDER_CHOICES,
         blank=True,
     )
-
-    high_school = models.CharField("高校名", max_length=100, blank=True)
+    # 高校名は今後不要のため削除
     comment = models.TextField("自由記述欄", blank=True)
 
     RATING_CHOICES = [(i, f"{i}") for i in range(1, 6)]
@@ -109,6 +108,12 @@ class Person(models.Model):
     grade = models.PositiveSmallIntegerField("学年")  # 1,2,3,...
     department_name = models.CharField("学科・専攻", max_length=50)  # 1系,2系... でもOK
     lab_field = models.CharField("研究分野", max_length=100)
+    GENDER_CHOICES = [
+        ("male", "男性"),
+        ("female", "女性"),
+        ("other", "その他"),
+    ]
+    gender = models.CharField("性別", max_length=10, choices=GENDER_CHOICES, blank=True)
     password = models.CharField("パスワード", max_length=128)
 
     created_at = models.DateTimeField(auto_now_add=True)

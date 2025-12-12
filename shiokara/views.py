@@ -82,6 +82,7 @@ def append_person_to_fixture(person: Person) -> None:
             "grade": person.grade,
             "department_name": person.department_name,
             "lab_field": person.lab_field,
+            "gender": getattr(person, 'gender', ''),
             "password": person.password,
             "created_at": person.created_at.isoformat(),
             "seen_dept_tutorial": person.seen_dept_tutorial,
@@ -120,6 +121,7 @@ def update_person_in_fixture(person: Person) -> None:
                 "grade": person.grade,
                 "department_name": person.department_name,
                 "lab_field": person.lab_field,
+                "gender": getattr(person, 'gender', ''),
                 "password": person.password,
                 "created_at": person.created_at.isoformat(),
                 "seen_dept_tutorial": person.seen_dept_tutorial,
@@ -189,6 +191,7 @@ def register_view(request):
         "department_name": "",
         "lab_field": "",
         "password": "",
+        "gender": "",
     }
 
     if request.method == "POST":
@@ -199,6 +202,8 @@ def register_view(request):
         lab_field = request.POST.get("lab_field", "").strip()
         password = request.POST.get("password", "").strip()
 
+        gender = request.POST.get("gender", "").strip()
+
         initial.update(
             student_id=student_id,
             course=course,
@@ -206,6 +211,7 @@ def register_view(request):
             department_name=department_name,
             lab_field=lab_field,
             password=password,
+            gender=gender,
         )
 
         # --- バリデーション ---
@@ -221,6 +227,7 @@ def register_view(request):
                 grade=int(grade),
                 department_name=department_name,
                 lab_field=lab_field,
+                gender=gender,
                 password=password,
             )
             append_person_to_fixture(person)
@@ -532,15 +539,26 @@ def company_experience_post(request, pk):
     if not person:
         return redirect("shiokara:login")
 
+    # 初期値はログイン中の person 情報から取る（手入力を減らす）
     initial = {
         "grade": "",
         "department_name": "",
         "lab_field": "",
         "gender": "no_answer",
-        "high_school": "",
         "comment": "",
         "rating": "",
     }
+    # ログインユーザーの情報があればプリセット
+    try:
+        refreshed = Person.objects.using(DB_ALIAS).get(pk=person.pk)
+        initial.update({
+            "grade": f"{refreshed.course}{refreshed.grade}",
+            "department_name": refreshed.department_name,
+            "lab_field": refreshed.lab_field,
+            "gender": getattr(refreshed, "gender", "no_answer") or "no_answer",
+        })
+    except Exception:
+        pass
     error = None
 
     if request.method == "POST":
@@ -548,7 +566,7 @@ def company_experience_post(request, pk):
         department_name = request.POST.get("department_name", "").strip()
         lab_field = request.POST.get("lab_field", "").strip()
         gender = request.POST.get("gender", "").strip() or "no_answer"
-        high_school = request.POST.get("high_school", "").strip()
+        # 高校名は不要になったため取得しない
         comment = request.POST.get("comment", "").strip()
         rating_str = request.POST.get("rating", "").strip()
 
@@ -557,7 +575,6 @@ def company_experience_post(request, pk):
             "department_name": department_name,
             "lab_field": lab_field,
             "gender": gender,
-            "high_school": high_school,
             "comment": comment,
             "rating": rating_str,
         })
@@ -587,7 +604,6 @@ def company_experience_post(request, pk):
                     department_name=department_name,
                     lab_field=lab_field,
                     gender=gender,
-                    high_school=high_school,
                     comment=comment,
                     rating=rating,
                 )
@@ -626,7 +642,6 @@ def append_review_to_fixture(review: CompanyReview) -> None:
             "department_name": review.department_name,
             "lab_field": review.lab_field,
             "gender": review.gender,
-            "high_school": review.high_school,
             "comment": review.comment,
             "rating": review.rating,
             "created_at": review.created_at.isoformat(),

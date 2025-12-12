@@ -57,11 +57,7 @@
         </label>
     </p>
 
-    <p>
-        <label for="id_high_school">高校名:</label><br>
-        <input id="id_high_school" type="text" name="high_school" style="width: 100%;"
-               value="{{ high_school }}">
-    </p>
+    <!-- 高校名は不要のため削除しました -->
 
     <p>
         <label for="id_comment">自由記述欄:</label><br>
@@ -70,13 +66,53 @@
 
     <p>
         <label>評価（★1〜5）:</label><br>
-        {% for i in "12345"|make_list %}
-          <label style="margin-right: 8px;">
-            <input type="radio" name="rating" value="{{ i }}"
-                   {% if rating == i %}checked{% endif %}>
-            ★{{ i }}
-          </label>
-        {% endfor %}
+        <input type="hidden" name="rating" id="id_rating" value="{{ rating }}">
+        <div id="star_rating" class="stars" role="radiogroup" aria-label="評価">
+          <button type="button" class="star" data-value="1" aria-label="1">★</button>
+          <button type="button" class="star" data-value="2" aria-label="2">★</button>
+          <button type="button" class="star" data-value="3" aria-label="3">★</button>
+          <button type="button" class="star" data-value="4" aria-label="4">★</button>
+          <button type="button" class="star" data-value="5" aria-label="5">★</button>
+        </div>
+        <style>
+          .stars { display: inline-block; }
+          .star { font-size: 28px; color: #ccc; background: none; border: none; padding: 0 4px; cursor: pointer; }
+          .star.filled { color: #f5b301; }
+          .star:focus { outline: 2px solid #99c; }
+        </style>
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            const stars = Array.from(document.querySelectorAll('#star_rating .star'));
+            const input = document.getElementById('id_rating');
+            let selected = parseInt(input.value) || 0;
+
+            function render(hover) {
+              stars.forEach((s, idx) => {
+                const v = idx + 1;
+                if (hover) {
+                  s.classList.toggle('filled', v <= hover);
+                } else {
+                  s.classList.toggle('filled', v <= selected);
+                }
+              });
+            }
+
+            stars.forEach((s, idx) => {
+              const v = idx + 1;
+              s.addEventListener('mouseover', () => render(v));
+              s.addEventListener('focus', () => render(v));
+              s.addEventListener('mouseout', () => render(0));
+              s.addEventListener('blur', () => render(0));
+              s.addEventListener('click', () => { selected = v; input.value = v; render(0); });
+              s.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selected = v; input.value = v; render(0); }
+              });
+            });
+
+            // 初期表示
+            render(0);
+          });
+        </script>
     </p>
 
     <p>

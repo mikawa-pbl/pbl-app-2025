@@ -1,8 +1,15 @@
 {% extends "teams/shiokara/base.html" %}
+{% load static %}
 
 {% block title %}マイページ - 就活支援サービス{% endblock %}
 
 {% block content %}
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" with active_page='my_page' %}
+
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
   <h1>マイページ</h1>
 
   {% if person %}
@@ -250,4 +257,6 @@ document.addEventListener('DOMContentLoaded', function(){
     });
 });
 </script>
+    </div>
+</div>
 {% endblock %}

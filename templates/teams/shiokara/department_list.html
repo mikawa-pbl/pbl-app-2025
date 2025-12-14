@@ -3,20 +3,24 @@
 {% load static %}
 
 {% block content %}
-<div class="tut-dept-page">
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" with active_page='department_list' %}
 
-    <header class="tut-page-header">
-        <div class="tut-logo-box">
-            <img src="{% static 'image/mark_daigakumei_yoko_high.jpg' %}"
-                 alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
-        </div>
-        <div class="tut-page-title">
-            <h1>学科別 企業一覧</h1>
-            <p class="tut-page-lead">
-                学科ごとに、インターン・見学・共同研究などを受け入れている企業を一覧できます。
-            </p>
-        </div>
-    </header>
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
+        <header class="tut-page-header">
+            <div class="tut-logo-box">
+                <img src="{% static 'image/mark_gikanavi.png' %}"
+                     alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
+            </div>
+            <div class="tut-page-title">
+                <h1>学科別 企業一覧</h1>
+                <p class="tut-page-lead">
+                    学科ごとに、インターン・見学・共同研究などを受け入れている企業を一覧できます。
+                </p>
+            </div>
+        </header>
 
     <section class="tut-search-section">
         <h2>企業をキーワードで探す</h2>
@@ -42,55 +46,50 @@
         </form>
     </section>
 
-    <section class="tut-dept-section">
-        <h2>学科から探す</h2>
+        <section class="tut-dept-section">
+            <h2>学科から探す</h2>
 
-        {% if departments %}
-        <div class="tut-dept-grid">
-            {% for dept in departments %}
-            <a class="tut-dept-card" data-dept="{{ dept.short_name }}"
-               href="{% url 'shiokara:company_search' %}?dept={{ dept.short_name }}">
-                <div class="tut-dept-accent">
-                    <span class="bar-red"></span>
-                    <span class="bar-black"></span>
-                </div>
-                <div class="tut-dept-body">
-                    <div class="tut-dept-header">
-                        <span class="tut-dept-name">{{ dept.name }}</span>
-                        <span class="tut-dept-count">{{ dept.companies.count }} 社</span>
+            {% if departments %}
+            <div class="tut-dept-grid">
+                {% for dept in departments %}
+                <a class="tut-dept-card" data-dept="{{ dept.short_name }}"
+                   href="{% url 'shiokara:company_search' %}?dept={{ dept.short_name }}">
+                    <div class="tut-dept-accent">
+                        <span class="bar-red"></span>
+                        <span class="bar-black"></span>
                     </div>
-                    <p class="tut-dept-meta">
-                        学科コード: {{ dept.short_name }}
-                    </p>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
-        {% else %}
-        <p class="tut-empty">学科が登録されていません。</p>
-        {% endif %}
-    </section>
-
+                    <div class="tut-dept-body">
+                        <div class="tut-dept-header">
+                            <span class="tut-dept-name">{{ dept.name }}</span>
+                            <span class="tut-dept-count">{{ dept.companies.count }} 社</span>
+                        </div>
+                        <p class="tut-dept-meta">
+                            学科コード: {{ dept.short_name }}
+                        </p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="tut-empty">学科が登録されていません。</p>
+            {% endif %}
+        </section>
+    </div>
 </div>
 
 {# --- 豊橋技科大ロゴの色に合わせた簡易スタイル --- #}
 <style>
     :root {
         /* ロゴの色に近い色 */
-        --tut-red:   #cb0000;
-        --tut-black: #231816;
-        --tut-gray:  #4a4f4f;
-        --tut-light: #f5f7f7;
-    }
-
-    .tut-dept-page {
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 24px 16px 40px;
-        color: var(--tut-gray);
+        --tut-red:   #CC0000;
+        --tut-black: #000000;
+        --tut-gray:  #42413F;
+        --tut-light: #F5F5F5;
+        --white:     #FFFFFF;
     }
 
     .tut-page-header {
+        background-color: var(--white);
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -297,9 +296,6 @@
     }
 
     @media (max-width: 640px) {
-        .tut-dept-page {
-            padding: 16px 12px 32px;
-        }
         .tut-page-header {
             flex-direction: column;
             align-items: flex-start;

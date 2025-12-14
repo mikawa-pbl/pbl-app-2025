@@ -1,0 +1,124 @@
+/* サイドバーナビゲーション共通スタイル */
+.tut-page-wrapper {
+    background-color: #FFFFFF;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 16px 40px;
+    color: #42413F;
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+/* サイドバー */
+.tut-sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background-color: #F5F5F5;
+    border-radius: 8px;
+    padding: 16px;
+    position: sticky;
+    top: 74px; /* ヘッダーの高さを考慮 */
+    max-height: calc(100vh - 98px);
+    overflow-y: auto;
+}
+
+.tut-sidebar-title {
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #000000;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #CC0000;
+}
+
+.tut-sidebar-section {
+    margin-top: 24px;
+}
+
+.tut-sidebar-menu,
+.tut-sidebar-submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tut-sidebar-item {
+    margin-bottom: 4px;
+}
+
+.tut-sidebar-item a {
+    display: block;
+    padding: 10px 12px;
+    text-decoration: none;
+    color: #42413F;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.tut-sidebar-item a:hover {
+    background-color: #fff;
+    color: #CC0000;
+}
+
+.tut-sidebar-item.active a {
+    background-color: #CC0000;
+    color: #fff;
+    font-weight: 600;
+}
+
+.tut-sidebar-subitem {
+    margin-bottom: 2px;
+}
+
+.tut-sidebar-subitem a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #42413F;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.tut-sidebar-subitem a:hover {
+    background-color: #fff;
+    color: #CC0000;
+}
+
+.tut-sidebar-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    background-color: #fff;
+    color: #CC0000;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* メインコンテンツエリア */
+.tut-main-content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* レスポンシブ */
+@media (max-width: 980px) {
+    .tut-page-wrapper {
+        flex-direction: column;
+    }
+    .tut-sidebar {
+        width: 100%;
+        position: static;
+        max-height: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .tut-page-wrapper {
+        padding: 16px 12px 32px;
+    }
+}

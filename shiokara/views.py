@@ -42,12 +42,15 @@ def get_current_person(request):
 
 def render_with_person(request, template_name, context=None):
     """
-    どの画面でも person をテンプレートに渡すためのラッパー。
-    context_processors をいじらずに person を渡すための実装。
+    どの画面でも person と departments をテンプレートに渡すためのラッパー。
+    context_processors をいじらずに person と departments を渡すための実装。
     """
     if context is None:
         context = {}
     context["person"] = get_current_person(request)
+    # 全ページでサイドバーに表示するために departments を追加
+    if "departments" not in context:
+        context["departments"] = Department.objects.using(DB_ALIAS).prefetch_related("companies").all()
     return render(request, template_name, context)
 
 
@@ -701,3 +704,11 @@ def append_review_to_fixture(review: CompanyReview) -> None:
         json.dumps(data, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+
+
+def sitemap(request):
+    """
+    サイトマップページ。
+    サイト全体の構造を表示する。
+    """
+    return render_with_person(request, "teams/shiokara/sitemap.html")

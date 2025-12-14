@@ -2,20 +2,24 @@
 {% load static %}
 
 {% block content %}
-<div class="company-search-page">
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" with active_page='company_search' %}
 
-    <header class="tut-page-header page-header">
-        <div class="tut-logo-box">
-            <img src="{% static 'image/mark_daigakumei_yoko_high.jpg' %}"
-                 alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
-        </div>
-        <div class="tut-page-title">
-            <h1>企業検索</h1>
-            <p class="tut-page-lead page-lead">
-                キーワードや学科を指定して、インターン受け入れ企業や見学可能な企業を検索できます。💩ああいい天気
-            </p>
-        </div>
-    </header>
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
+        <header class="tut-page-header page-header">
+            <div class="tut-logo-box">
+                <img src="{% static 'image/mark_gikanavi.png' %}"
+                     alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
+            </div>
+            <div class="tut-page-title">
+                <h1>企業検索</h1>
+                <p class="tut-page-lead page-lead">
+                    キーワードや学科を指定して、インターン受け入れ企業や見学可能な企業を検索できます。
+                </p>
+            </div>
+        </header>
 
     <section class="search-section">
         <form id="company-search-form" method="get" action="{% url 'shiokara:company_search' %}">
@@ -31,11 +35,6 @@
                                value="{{ query }}"
                                placeholder="企業名・業種・キーワードなど">
                     </div>
-                    <p class="field-hint">
-                        例：<span class="hint-chip">Web</span>
-                        <span class="hint-chip">製造</span>
-                        <span class="hint-chip">AI</span>
-                    </p>
                 </div>
 
                 <div class="search-field">
@@ -85,15 +84,6 @@
                             </option>
                         </select>
                     </div>
-                </div>
-
-                <div class="search-actions">
-                    <button type="submit" class="search-button">
-                        検索
-                    </button>
-                    <a href="{% url 'shiokara:company_search' %}" class="reset-link">
-                        条件をリセット
-                    </a>
                 </div>
             </div>
 
@@ -150,6 +140,15 @@
                     </label>
                 </div>
             </div>
+
+            <div class="search-button-container">
+                <a href="{% url 'shiokara:company_search' %}" class="reset-link">
+                    条件をリセット
+                </a>
+                <button type="submit" class="search-button">
+                    検索
+                </button>
+            </div>
         </form>
 
 
@@ -173,7 +172,7 @@
 
             <div class="company-list">
                 {% for company in companies %}
-                <article class="company-card">
+                <article class="company-card" data-detail-url="{% url 'shiokara:company_detail' company.pk %}" tabindex="0" role="button">
                     <header class="company-card-header">
                                                 <h2 class="company-name">
                                                                 <a class="detail-link" href="{% url 'shiokara:company_detail' company.pk %}">
@@ -245,13 +244,16 @@
 {# ★ 企業検索ページ専用の簡易スタイル（TUT ロゴ色に合わせたヘッダー追加） #}
 <style>
     :root {
-        --tut-red:   #cb0000;
-        --tut-black: #231816;
-        --tut-gray:  #4a4f4f;
-        --tut-light: #f5f7f7;
+        /* ロゴの色に近い色 */
+        --tut-red:   #CC0000;
+        --tut-black: #000000;
+        --tut-gray:  #42413F;
+        --tut-light: #F5F5F5;
+        --white:     #FFFFFF;
     }
 
     .company-search-page {
+        background-color: var(--white);
         max-width: 960px;
         margin: 0 auto;
         padding: 24px 16px 40px;
@@ -266,6 +268,7 @@
 
     /* TUT風ヘッダー */
     .tut-page-header {
+        background-color: var(--white);
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -273,6 +276,8 @@
         padding-bottom: 12px;
         border-bottom: 3px solid var(--tut-red);
         margin-bottom: 18px;
+        padding: 16px 20px 18px;
+        border-radius: 12px;
     }
 
     .tut-logo-box {
@@ -319,7 +324,7 @@
     }
 
     .search-section {
-        background-color: #f7f7f7;
+        background-color: var(--tut-light);
         border-radius: 12px;
         padding: 16px 20px 18px;
         margin-bottom: 18px;
@@ -388,18 +393,19 @@
         background-color: #fff;
     }
 
-    .search-actions {
+    .search-button-container {
         display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        margin-top: 12px;
     }
 
     .search-button {
         border: none;
         border-radius: 999px;
         padding: 8px 22px;
-        font-size: 0.95rem;
+        font-size: 1.2rem;
         font-weight: 600;
         background-color: #e53935;
         color: #fff;
@@ -477,6 +483,7 @@
         padding: 12px 14px 10px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
         transition: box-shadow 0.15s ease, transform 0.15s ease;
+        cursor: pointer;
     }
 
     .company-card:hover {
@@ -638,10 +645,10 @@
             grid-template-columns: minmax(0, 1fr);
         }
 
-        .search-actions {
+        .search-button-container {
             flex-direction: row;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: flex-end;
         }
 
         .filter-row {
@@ -1236,5 +1243,35 @@ document.addEventListener('DOMContentLoaded', function(){
             console.log('✅ Point confirm script initialized');
         })();
     </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('.company-card').forEach(function(card){
+            card.addEventListener('click', function(e){
+                // 既存の "公式サイトを開く" やフォーム、および非詳細リンクのクリックを妨げない
+                if(e.target.closest('a.site-link')) return;
+                if(e.target.closest('form')) return;
+                if(e.target.closest('button')) return;
+                var nearestAnchor = e.target.closest('a');
+                if(nearestAnchor && !nearestAnchor.classList.contains('detail-link')) return;
+
+                var detail = card.querySelector('a.detail-link');
+                if(detail){
+                    // detail の既存のクリックハンドラ（ポイント確認等）を利用する
+                    detail.click();
+                }
+            });
+
+            // キーボードでも Enter / Space で詳細へ遷移
+            card.addEventListener('keydown', function(e){
+                if(e.key === 'Enter' || e.key === ' '){
+                    var detail = card.querySelector('a.detail-link');
+                    if(detail){ detail.click(); e.preventDefault(); }
+                }
+            });
+        });
+    });
+    </script>
+    </div>
+</div>
     
 {% endblock %}

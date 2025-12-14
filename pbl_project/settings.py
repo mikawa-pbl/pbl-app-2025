@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'authz',
     'team_USL',
     'team_kitajaki',
     'shiokara',
@@ -70,6 +71,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "pbl_project.middleware.TeamPrefixAuthorizationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -82,6 +84,12 @@ TEMPLATES = [
         "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": False,
         "OPTIONS": {
+            # テンプレートは BASE_DIR/templates に集約しつつ、
+            # contrib アプリ（admin/auth など）の組み込みテンプレートも読み込めるようにする。
+            "loaders": [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
+            ],
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
@@ -211,6 +219,23 @@ DATABASES = {
 
 # app_labelごとにDBを振り分けるルーター
 DATABASE_ROUTERS = ["routers.TeamPerAppRouter"]
+
+# 認証（ログイン/ログアウト）
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+# URLプレフィックスによる認可（チーム/アプリ境界）
+# パス先頭のセグメントがアプリ名（例: /team_USL/...）に一致したとき、
+# ログイン必須＋同名Group所属（またはsuperuser）を要求する。
+# `None`（デフォルト）: routers.TeamPerAppRouter.app_to_db に登録された全アプリを保護
+# list指定（例: ["shiokara", "team_USL"]）: 指定したアプリだけ保護
+TEAM_AUTHZ_PROTECTED_APP_LABELS = ["team_terrace"]
+TEAM_AUTHZ_EXEMPT_PREFIXES = [
+    "/admin/",
+    "/accounts/",
+    "/static/",
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

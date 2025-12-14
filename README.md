@@ -64,6 +64,45 @@ uv run python manage.py runserver
 - `/team-a/` → Team A Index
 - `/team-b/` → Team B Index
 
+------------------------------------------------------------------------
+
+## 🔐 認証/認可（お試し）
+
+本プロジェクトでは Django 標準認証（`django.contrib.auth`）を使い、ユーザー/セッションは `default` DB で一元管理しつつ、
+各チームアプリ配下（例: `/team_USL/`）へのアクセス可否を **Group（グループ）** で分ける構成を試せます。
+
+トップページ（`/`）右上にもログイン/ログアウト導線があります。
+
+### 1) ログインURL
+
+- ログイン: `/accounts/login/`
+- ログアウト: `/accounts/logout/`
+
+### 2) チーム用グループの作成
+
+チームアプリと同名の Group（例: `team_USL`）を作成し、ユーザーを所属させます。
+
+一括作成（推奨）:
+```bash
+python manage.py sync_team_groups
+```
+
+### 3) admin でユーザーをグループに所属させる
+
+1. `python manage.py createsuperuser` で管理ユーザー作成
+2. `/admin/` にログイン
+3. Users から対象ユーザーを開き、Groups にチーム名（例: `team_USL`）を追加
+
+### 4) アクセス制御の仕様（ミドルウェア）
+
+- `/admin/` と `/accounts/` と `/` は除外
+- それ以外で、URLの先頭セグメントが「保護対象アプリ名」に一致する場合:
+  - 未ログイン → ログイン画面へリダイレクト
+  - ログイン済みでも、同名Group所属（またはsuperuser）でない → 403
+
+保護対象アプリ名は `pbl_project/settings.py` の `TEAM_AUTHZ_PROTECTED_APP_LABELS` で指定できます。
+`None` の場合は、`routers.py` に登録されている全チームアプリが対象になります。
+
 ### DB
 
 ```bash
@@ -96,8 +135,11 @@ python manage.py dbshell --database=team_b
 │   ├── urls.py              # 全体URLルーティング
 │   └── wsgi.py
 ├── routers.py               # DBルーター（app→DB割当）
+├── authz/                   # 認可補助（Group一括作成コマンドなど）
 ├── templates/               # ★テンプレートはここに集約
 │   ├── top.html             # 全体トップページ
+│   ├── registration/
+│   │   └── login.html        # ログイン画面（/accounts/login/）
 │   └── team_a/
 │       └── members.html
 ├── docs/                    # ドキュメント類
@@ -131,8 +173,9 @@ python manage.py dbshell --database=team_b
 
 ## ⚠️ 運用上の注意点
 
-- **テンプレートは必ず `templates/` 配下に配置**してください。
-    各アプリ配下の `templates/` は参照されません (`APP_DIRS=False`)。
+- **原則としてテンプレートは `templates/` 配下に配置**してください。
+    本プロジェクトはテンプレートをプロジェクト直下で集約する方針です。
+    なお、Django標準の admin/auth などが持つ組み込みテンプレートは読み込めるように設定されています。
 
 - **チームごとにSQLiteを分離**しています。
 

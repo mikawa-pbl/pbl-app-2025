@@ -3,9 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Project Portal</title>
+    <style>
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .authbox {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .authbox form {
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Project Portal Site</h1>
+    <div class="topbar">
+        <h1>Project Portal Site</h1>
+        <div class="authbox">
+            {% if user.is_authenticated %}
+                <span>ログイン中: {{ user.get_username }}</span>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit">ログアウト</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">ログイン</a>
+            {% endif %}
+        </div>
+    </div>
+
     <p>各チームのページはこちら:</p>
     <ul>
         {% for team in teams %}

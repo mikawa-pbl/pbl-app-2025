@@ -1,7 +1,14 @@
 {# templates/teams/shiokara/company_experience_post.html #}
 {% extends "teams/shiokara/base.html" %}
+{% load static %}
 
 {% block content %}
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" %}
+
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
 <h1>{{ company.name }} の口コミを投稿</h1>
 
 <p>
@@ -123,4 +130,6 @@
 <p>
   <a href="{% url 'shiokara:company_detail' company.pk %}">← 企業詳細ページに戻る</a>
 </p>
+    </div>
+</div>
 {% endblock %}

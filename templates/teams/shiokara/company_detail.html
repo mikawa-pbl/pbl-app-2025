@@ -1,7 +1,14 @@
 {# templates/teams/shiokara/company_detail.html #}
 {% extends "teams/shiokara/base.html" %}
+{% load static %}
 
 {% block content %}
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" %}
+
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
 <h1>{{ company.name }}</h1>
 
 <form method="post" action="{% url 'shiokara:company_favorite' company.pk %}" class="fav-form" style="margin-top:8px; margin-bottom:12px; display:inline-block;">
@@ -393,5 +400,7 @@
           });
         });
         </script>
+    </div>
+</div>
 
         {% endblock %}

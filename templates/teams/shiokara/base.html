@@ -5,20 +5,36 @@
 <head>
   <meta charset="UTF-8">
   <title>PBL 就活サイト</title>
+  <style>
+    {% include "teams/shiokara/includes/sidebar_styles.css" %}
+  </style>
 </head>
 
-<body>
+<body style="margin:0; padding-top:50px; background-image: url('{% static 'image/background_gikanavi.png' %}'); background-size: cover; background-repeat: no-repeat; background-position: center center; background-attachment: fixed;">
   <!-- ▼ ヘッダー（左上に人アイコン） -->
   <header
     style="
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding:8px 16px;
-      border-bottom:1px solid #ddd;
+      padding:5px 16px;
+      border-bottom:15px solid #cc0000;
+      background-color:#f5f7f7;
+      z-index:1000;
     "
   >
-    <!-- 左側：人アイコン＋ログイン系 -->
+    <!-- 左側：サービス名（クリックでホームへ） -->
+    <div>
+      <a href="{% url 'shiokara:department_list' %}" style="text-decoration:none;">
+        <img src="{% static 'image/mark_gikanavi_nocp.png' %}" alt="PBL 就活サイト" style="height:32px; object-fit:contain;" />
+      </a>
+    </div>
+
+    <!-- 右側：人アイコン＋ログイン系 -->
     <div style="display:flex; align-items:center; gap:8px;">
         {% if person %}
         <!-- ログイン中：アイコン＋学籍番号（マイページへのリンク）＋ポイント -->
@@ -46,13 +62,6 @@
         </a>
       {% endif %}
     </div>
-
-        <!-- 右側：サービス名（クリックでホームへ） -->
-        <div>
-          <a href="{% url 'shiokara:department_list' %}" style="text-decoration:none; font-weight:bold;">
-            PBL 就活サイト
-          </a>
-        </div>
     
   </header>
 

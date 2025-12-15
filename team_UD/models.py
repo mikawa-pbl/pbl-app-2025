@@ -57,6 +57,7 @@ class Memo(models.Model):
     interview_details = models.TextField(blank=True, default='')  # 面接の詳細メモ
 
     # メモ内容
+    title = models.CharField(max_length=100, blank=True, default='')  # メモのタイトル
     content = models.TextField()  # メモの内容
 
     # 日時フィールド

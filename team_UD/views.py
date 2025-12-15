@@ -19,6 +19,8 @@ def calendar_view(request):
     if "user_id" not in request.session:
         return redirect("team_UD:login")
     
+    user_id = request.session["user_id"]
+    
     # 現在の年月を取得（またはパラメータから）
     today = datetime.now()
 
@@ -53,6 +55,21 @@ def calendar_view(request):
         .order_by("start_time")
     )
 
+    # 今月のメモを取得
+    memos = (
+        Memo.objects.using("team_UD")
+        .filter(date__year=year, date__month=month, account_id=user_id)
+        .select_related("company")
+    )
+
+    # メモを日付でグループ化
+    memos_by_date = {}
+    for memo in memos:
+        date_key = memo.date.day
+        if date_key not in memos_by_date:
+            memos_by_date[date_key] = []
+        memos_by_date[date_key].append(memo)
+
     # カレンダーの日付データを生成
     cal = calendar.monthcalendar(year, month)
     calendar_days = []
@@ -62,7 +79,7 @@ def calendar_view(request):
             if day == 0:
                 # 前月または次月の日付（空欄）
                 calendar_days.append(
-                    {"day": "", "is_other_month": True, "is_today": False, "events": []}
+                    {"day": "", "is_other_month": True, "is_today": False, "events": [], "memos": []}
                 )
             else:
                 # 今月の日付
@@ -71,6 +88,9 @@ def calendar_view(request):
 
                 # その日のイベントを取得
                 day_events = [e for e in events if e.start_time.day == day]
+                
+                # その日のメモを取得
+                day_memos = memos_by_date.get(day, [])
 
                 calendar_days.append(
                     {
@@ -78,6 +98,7 @@ def calendar_view(request):
                         "is_other_month": False,
                         "is_today": is_today,
                         "events": day_events,
+                        "memos": day_memos,
                     }
                 )
 
@@ -134,6 +155,7 @@ def get_memo_by_date(request, year, month, day):
             memo_list = [
                 {
                     "id": memo.id,
+                    "title": memo.title,
                     "date": memo.date.strftime("%Y-%m-%d"),
                     "company_id": memo.company.id if memo.company else None,
                     "company_name": memo.company.name if memo.company else "",
@@ -164,6 +186,7 @@ def save_memo(request):
             user_id = request.session["user_id"]
             data = json.loads(request.body)
             date_str = data.get("date")
+            title = data.get("title", "").strip()[:100]  # 最大100文字に制限
             content = data.get("content", "")  # デフォルト値を空文字に設定
             company_id = data.get("company_id")
             interview_stage = data.get("interview_stage", "")
@@ -193,6 +216,7 @@ def save_memo(request):
             if memo_id:
                 # 既存のメモを更新（自分のメモのみ）
                 memo = Memo.objects.using("team_UD").get(id=memo_id, account_id=user_id)
+                memo.title = title
                 memo.content = content
                 memo.date = target_date
                 memo.company = company
@@ -206,6 +230,7 @@ def save_memo(request):
                 account = Account.objects.using("team_UD").get(id=user_id)
                 memo = Memo(
                     account=account,
+                    title=title,
                     date=target_date,
                     content=content,
                     company=company,
@@ -219,6 +244,7 @@ def save_memo(request):
             return JsonResponse(
                 {
                     "id": memo.id,
+                    "title": memo.title,
                     "content": memo.content,
                     "company_id": memo.company.id if memo.company else None,
                     "company_name": memo.company.name if memo.company else "",

@@ -88,6 +88,7 @@
         }
         .calendar-day {
             min-height: 100px;
+            max-height: 120px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             padding: 10px;
@@ -95,6 +96,7 @@
             transition: all 0.3s;
             cursor: pointer;
             position: relative;
+            overflow: hidden;
         }
         .calendar-day:hover {
             background: #f8f9ff;
@@ -130,18 +132,23 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            max-width: 100%;
+            display: block;
         }
-        
-        /* メモインジケータ */
-        .memo-indicator {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
+
+        /* メモ表示スタイル */
+        .memo-item-display {
             background: #51cf66;
             color: white;
-            font-size: 0.7em;
-            padding: 2px 6px;
-            border-radius: 10px;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-top: 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+            max-width: 100%;
         }
         
         /* モーダルのスタイル */
@@ -505,9 +512,13 @@
                  onclick="openMemoModal(this)">
                 <div class="day-number">{{ day.day }}</div>
                 {% for event in day.events %}
-                <div class="event-item" title="{{ event.title }}">{{ event.title }}</div>
+                <div class="event-item" title="{{ event.title }}">{{ event.title|truncatechars:15 }}</div>
                 {% endfor %}
-                <div class="memo-indicator" style="display: none;">📝</div>
+                {% for memo in day.memos %}
+                <div class="memo-item-display" title="{% if memo.title %}{{ memo.title }}{% else %}{{ memo.interview_stage }}{% endif %}">
+                    {% if memo.title %}{{ memo.title|truncatechars:15 }}{% else %}{{ memo.interview_stage|truncatechars:15 }}{% endif %}
+                </div>
+                {% endfor %}
             </div>
             {% endfor %}
         </div>
@@ -534,6 +545,12 @@
             <div class="memo-list" id="modalMemoList"></div>
             <button id="addMemoBtn" class="add-memo-btn" onclick="showMemoForm()">➕ メモを追加する</button>
             <div class="memo-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modalMemoTitle">メモタイトル (最大100文字)</label>
+                        <input type="text" id="modalMemoTitle" placeholder="メモのタイトル（任意）" maxlength="100">
+                    </div>
+                </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="modalCompanyName">会社名 <span class="required-mark">*</span><span class="data-collection-mark">†</span></label>
@@ -645,16 +662,6 @@
 
         // ページ読み込み時に各日付のメモを確認してインジケータを表示
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.calendar-day:not(.other-month)').forEach(function(dayElement) {
-                const year = dayElement.dataset.year;
-                const month = dayElement.dataset.month;
-                const day = dayElement.dataset.day;
-                
-                if (day) {
-                    checkMemoExists(year, month, day, dayElement);
-                }
-            });
-            
             // 会社名検索機能の初期化
             initCompanySearch();
             
@@ -849,20 +856,6 @@
             document.getElementById('companyDropdown').classList.remove('active');
         }
 
-        function checkMemoExists(year, month, day, dayElement) {
-            fetch(`/team_UD/api/memo/${year}/${month}/${day}/`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.memos && data.memos.length > 0) {
-                        const indicator = dayElement.querySelector('.memo-indicator');
-                        if (indicator) {
-                            indicator.style.display = 'block';
-                        }
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
         function openMemoModal(element) {
             currentYear = parseInt(element.dataset.year);
             currentMonth = parseInt(element.dataset.month);
@@ -916,6 +909,7 @@
         function clearModalForm() {
             editingMemoId = null;  // 編集モードを解除
             originalMemoDate = null;  // 元の日付情報をクリア
+            document.getElementById('modalMemoTitle').value = '';
             document.getElementById('modalCompanyName').value = '';
             document.getElementById('modalCompanyId').value = '';
             document.getElementById('modalInterviewStage').value = '';
@@ -976,6 +970,7 @@
                             memoItem.innerHTML = `
                                 <div class="memo-item-header">
                                     <div>
+                                        ${memo.title ? `<div style="font-weight: bold; color: #667eea; margin-bottom: 8px;">📌 ${escapeHtml(memo.title)}</div>` : ''}
                                         ${badges}
                                         ${badgeHtml}
                                     </div>
@@ -1011,6 +1006,7 @@
         }
 
         function saveModalMemo() {
+            const memoTitle = document.getElementById('modalMemoTitle').value.trim();
             const companyName = document.getElementById('modalCompanyName').value.trim();
             const companyId = document.getElementById('modalCompanyId').value;
             const interviewStage = document.getElementById('modalInterviewStage').value;
@@ -1047,6 +1043,7 @@
             }
 
             const requestBody = {
+                title: memoTitle,
                 date: dateStr,
                 company_id: parseInt(companyId),
                 interview_stage: interviewStage,
@@ -1073,14 +1070,8 @@
                 if (data.error) {
                     alert('エラー: ' + data.error);
                 } else {
-                    // フォームを非表示にして追加ボタンを表示
-                    hideMemoForm();
-
-                    // メモを再読み込み後、インジケータを更新
-                    loadModalMemos(() => {
-                        // インジケータを更新（元の日付と新しい日付の両方）
-                        updateMemoIndicators(dateStr);
-                    });
+                    // 画面をリロード
+                    location.reload();
                 }
             })
             .catch(error => {
@@ -1096,6 +1087,7 @@
             originalMemoDate = memo.date;
 
             // フォームに既存データを入力
+            document.getElementById('modalMemoTitle').value = memo.title || '';
             document.getElementById('modalCompanyName').value = memo.company_name;
             document.getElementById('modalCompanyId').value = memo.company_id || '';
             document.getElementById('modalInterviewStage').value = memo.interview_stage;
@@ -1131,59 +1123,14 @@
                 if (data.error) {
                     alert('エラー: ' + data.error);
                 } else {
-                    // 編集中のメモが削除された場合はフォームをクリア
-                    if (editingMemoId === memoId) {
-                        hideMemoForm();
-                    }
-                    // メモを再読み込み後、インジケータを更新
-                    loadModalMemos(() => {
-                        updateMemoIndicator();
-                    });
+                    // 画面をリロード
+                    location.reload();
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 alert('メモの削除に失敗しました');
             });
-        }
-
-        function updateMemoIndicator() {
-            const dayElement = document.querySelector(
-                `.calendar-day[data-year="${currentYear}"][data-month="${currentMonth}"][data-day="${currentDay}"]`
-            );
-            if (dayElement) {
-                checkMemoExists(currentYear, currentMonth, currentDay, dayElement);
-            }
-        }
-        
-        function updateMemoIndicators(newDateStr) {
-            // 現在のモーダルの日付を更新
-            updateMemoIndicator();
-            
-            // 編集モードで日付が変更された場合、元の日付も更新
-            if (originalMemoDate && originalMemoDate !== newDateStr) {
-                const [origYear, origMonth, origDay] = originalMemoDate.split('-').map(Number);
-                const origDayElement = document.querySelector(
-                    `.calendar-day[data-year="${origYear}"][data-month="${origMonth}"][data-day="${origDay}"]`
-                );
-                if (origDayElement) {
-                    checkMemoExists(origYear, origMonth, origDay, origDayElement);
-                }
-            }
-            
-            // 新しい日付が現在のモーダルの日付と異なる場合も更新
-            const [newYear, newMonth, newDay] = newDateStr.split('-').map(Number);
-            if (newYear !== currentYear || newMonth !== currentMonth || newDay !== currentDay) {
-                const newDayElement = document.querySelector(
-                    `.calendar-day[data-year="${newYear}"][data-month="${newMonth}"][data-day="${newDay}"]`
-                );
-                if (newDayElement) {
-                    checkMemoExists(newYear, newMonth, newDay, newDayElement);
-                }
-            }
-            
-            // 編集完了後は元の日付情報をクリア
-            originalMemoDate = null;
         }
 
         function escapeHtml(text) {

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>{{ post.title }}</title>
+</head>
+<body>
+  <h1>{{ post.title }}</h1>
+  <p>イベント日: {{ post.date|date:"Y年n月j日" }}</p>
+
+  {% if post.tags.exists %}
+    <p>
+      {% for tag in post.tags.all %}
+        <span class="tag">#{{ tag.name }}</span>{% if not forloop.last %} {% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
+
+  <div>
+    {{ post.body }}
+  </div>
+
+  <p>
+    <a href="{% url 'ssk:post_list' %}">一覧へ戻る</a>
+    &nbsp;|&nbsp;
+    <a href="{% url 'ssk:post_edit' post.pk %}">編集</a>
+  </p>
+
+  <form method="post" action="{% url 'ssk:post_delete' post.pk %}" onsubmit="return confirm('この投稿を削除してもよいですか？');">
+    {% csrf_token %}
+    <button type="submit">削除</button>
+  </form>
+</body>
+</html>

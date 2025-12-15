@@ -1,5 +1,9 @@
 {# teams/ssk/post_form.html #}
-<h1>新規投稿</h1>
+{% if post %}
+  <h1>投稿を編集</h1>
+{% else %}
+  <h1>新規投稿</h1>
+{% endif %}
 
 <form method="post">
   {% csrf_token %}
@@ -38,5 +42,6 @@
   {{ form.tags_text }}
 </p>
 
-<button type="submit">投稿</button>
+<button type="submit">{% if post %}更新{% else %}投稿{% endif %}</button>
+<input type="button" value="一覧へ戻る" onclick="location.href='{% url 'ssk:post_list' %}'">
 </form>

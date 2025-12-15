@@ -4,17 +4,32 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from .models import Member
 from .models import Product
-
+import django.db.models as models
 
 def index(request):
-    products = Product.objects.order_by("-id")  # newest first
+    # Get search query from GET parameters
+    search_query = request.GET.get('search', '').strip()
+    
+    # Filter products by search query if provided
+    if search_query:
+        products = Product.objects.filter(
+            models.Q(title__icontains=search_query) | 
+            models.Q(description__icontains=search_query)
+        ).order_by("-id")
+    else:
+        products = Product.objects.order_by("-id")  # newest first
+    
     # add formatted_price for template (e.g. "¥1,234")
     for p in products:
         try:
             p.formatted_price = f"¥{int(p.price):,}"
         except Exception:
             p.formatted_price = f"¥{p.price}"
-    return render(request, "teams/team_giryulink/index.html", {"products": products})
+    
+    return render(request, "teams/team_giryulink/index.html", {
+        "products": products,
+        "search_query": search_query,
+    })
 
 
 def members(request):

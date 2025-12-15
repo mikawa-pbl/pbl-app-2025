@@ -19,8 +19,8 @@
         .site { max-width: 960px; margin: 0 auto; padding: 12px; }
         header { 
             display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
+            flex-direction: column;
+            gap: 12px;
             padding: 12px 8px;
             background: #fff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.08);
@@ -29,7 +29,70 @@
             top: 0;
             z-index: 100;
         }
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
         h1 { margin: 0; font-size: 1.3rem; }
+        
+        /* Search Bar */
+        .search-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .search-input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: #f9fafb;
+            transition: all 0.2s ease;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #1e88e5;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(30,136,229,0.1);
+        }
+        .search-btn, .clear-search-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .search-btn {
+            background: #1e88e5;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(30,136,229,0.3);
+        }
+        .search-btn:hover {
+            background: #1565c0;
+        }
+        .clear-search-btn {
+            background: #f5f5f5;
+            color: #666;
+            display: none;
+        }
+        .clear-search-btn.active {
+            display: block;
+        }
+        .clear-search-btn:hover {
+            background: #e0e0e0;
+        }
+        .search-results-info {
+            font-size: 0.9rem;
+            color: #666;
+            padding: 0 4px;
+        }
         
         /* Controls - 手机优化表单 */
         .controls { margin: 12px 0; display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
@@ -213,6 +276,16 @@
         @media (min-width: 640px) {
             .site { padding: 24px; }
             h1 { font-size: 1.6rem; }
+            header {
+                flex-direction: row;
+                align-items: center;
+            }
+            .header-top {
+                width: auto;
+            }
+            .search-form {
+                max-width: 400px;
+            }
             .products { 
                 grid-template-columns: repeat(3, 1fr);
                 gap: 20px;
@@ -351,7 +424,27 @@
 <body>
 <div class="site">
     <header>
-        <h1>Furu-Trade</h1>
+        <div class="header-top">
+            <h1>Furu-Trade</h1>
+        </div>
+        <!-- Search Bar -->
+        <form class="search-form" method="get" action="{% url 'team_giryulink:index' %}">
+            <input 
+                type="text" 
+                name="search" 
+                class="search-input" 
+                placeholder="商品を検索..." 
+                value="{{ search_query }}" 
+                id="searchInput"
+                aria-label="商品を検索">
+            <button type="submit" class="search-btn">🔍 検索</button>
+            <button type="button" class="clear-search-btn{% if search_query %} active{% endif %}" id="clearSearch">✕</button>
+        </form>
+        {% if search_query %}
+        <div class="search-results-info">
+            「{{ search_query }}」の検索結果: {{ products|length }}件
+        </div>
+        {% endif %}
     </header>
 
     <!-- Controls: Add product button + form (positioned above product list) -->
@@ -442,6 +535,29 @@
             const imagePreview = document.getElementById('imagePreview');
             const previewImg = document.getElementById('previewImg');
             const removeImageBtn = document.getElementById('removeImage');
+
+            // Search functionality
+            const clearSearchBtn = document.getElementById('clearSearch');
+            const searchInput = document.getElementById('searchInput');
+
+            if (clearSearchBtn) {
+                clearSearchBtn.addEventListener('click', function() {
+                    searchInput.value = '';
+                    // Redirect to index without search parameter
+                    window.location.href = '{% url "team_giryulink:index" %}';
+                });
+            }
+
+            // Show/hide clear button based on input
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    if (this.value.trim()) {
+                        clearSearchBtn.classList.add('active');
+                    } else {
+                        clearSearchBtn.classList.remove('active');
+                    }
+                });
+            }
 
             imageInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];

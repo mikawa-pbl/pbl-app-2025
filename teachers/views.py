@@ -8,7 +8,7 @@ from .forms import PaperForm
 # 一覧
 def paper_list(request):
     papers = Paper.objects.all().order_by('-year', 'title')
-    return render(request, 'teams/teachers/paper_list.html', {'paper': papers})
+    return render(request, 'teams/teachers/paper_list.html', {'papers': papers})
 
 # 詳細
 def paper_detail(request, pk):

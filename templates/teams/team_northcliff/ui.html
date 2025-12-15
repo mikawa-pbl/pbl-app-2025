@@ -200,7 +200,7 @@
                 const isUnlocked = state.userFacilityAccess.has(facility.id);
 
                 if (isUnlocked) {
-                    // 閲覧後の状態
+                    // 閲覧後の状態（コメントは後から安全に追加）
                     const statusDisplay = statusMap[facility.latest_status] || '情報なし';
                     cardContent += `
                         <div>
@@ -222,6 +222,31 @@
 
                 facilityCard.innerHTML = cardContent;
                 facilityList.appendChild(facilityCard);
+
+                // --- アンロック済みであればコメントを安全に追加（textContent を使う） ---
+                if (isUnlocked && Array.isArray(facility.recent_comments) && facility.recent_comments.length > 0) {
+                    const commentsContainer = document.createElement('div');
+                    commentsContainer.className = 'mt-3 space-y-3';
+
+                    facility.recent_comments.forEach(c => {
+                        const cWrap = document.createElement('div');
+                        cWrap.className = 'p-3 bg-gray-50 rounded-md';
+
+                        const cText = document.createElement('p');
+                        cText.className = 'text-sm text-gray-700';
+                        cText.textContent = c.comment || '';
+
+                        const cTime = document.createElement('p');
+                        cTime.className = 'text-xs text-gray-500 mt-1';
+                        cTime.textContent = c.time_ago || '';
+
+                        cWrap.appendChild(cText);
+                        cWrap.appendChild(cTime);
+                        commentsContainer.appendChild(cWrap);
+                    });
+
+                    facilityCard.appendChild(commentsContainer);
+                }
             });
         }
 

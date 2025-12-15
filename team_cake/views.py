@@ -68,6 +68,19 @@ def registration_goods(request):
     return render(request, 'teams/team_cake/registrationGoods.html', {'form': form})
 
 
+def delete_good(request, pk):
+    if request.method == 'POST':
+        try:
+            good = Good.objects.using('team_cake').get(pk=pk)
+            good.delete()
+        except Exception:
+            conn = connections['team_cake']
+            with conn.cursor() as cur:
+                cur.execute('DELETE FROM team_cake_good WHERE id = %s', [pk])
+        return redirect('team_cake:index')
+    return redirect('team_cake:index')
+
+
 def serve_template_image(request, filename: str):
     """
     Serve files placed under templates/teams/team_cake/images/ at

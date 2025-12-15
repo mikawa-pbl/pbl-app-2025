@@ -6,23 +6,29 @@
 </p>
 
 <table border="1">
-  <tr>
-    <th>ID</th>
-    <th>題目</th>
-    <th>著者</th>
-    <th>年</th>
-    <th>掲載誌</th>
-  </tr>
-  {% for paper in papers %}
-  <tr>
-    <td>{{ paper.id }}</td>
-    <td><a href="{% url 'teachers:paper_detail' paper.pk %}">{{ paper.title }}</a></td>
-    <td>{{ paper.author }}</td>
-    <td>{{ paper.year }}</td>
-    <td>{{ paper.booktitle }}</td>
-  </tr>
-  {% empty %}
-  <tr><td colspan="5">登録されている論文はありません。</td></tr>
-  {% endfor %}
-</table>
+  <thead>
+    <tr>
+      <th><a href="?sort=title&dir={% if sort == 'title' and dir == 'asc' %}desc{% else %}asc{% endif %}">題目</a></th>
+      <th><a href="?sort=author&dir={% if sort == 'author' and dir == 'asc' %}desc{% else %}asc{% endif %}">著者</a></th>
+      <th><a href="?sort=year&dir={% if sort == 'year' and dir == 'asc' %}desc{% else %}asc{% endif %}">年</a></th>
+      <th><a href="?sort=booktitle&dir={% if sort == 'booktitle' and dir == 'asc' %}desc{% else %}asc{% endif %}">掲載誌</a></th>
+      <th><a href="?sort=submitter&dir={% if sort == 'submitter' and dir == 'asc' %}desc{% else %}asc{% endif %}">登録者</a></th>
+      <th><a href="?sort=submit_time&dir={% if sort == 'submit_time' and dir == 'asc' %}desc{% else %}asc{% endif %}">登録時刻</a></th>
+    </tr>
+  </thead>
 
+  <tbody>
+    {% for paper in papers %}
+      <tr>
+        <td><a href="{% url 'teachers:paper_detail' paper.pk %}">{{ paper.title }}</a></td>
+        <td>{{ paper.author }}</td>
+        <td>{{ paper.year }}</td>
+        <td>{{ paper.booktitle }}</td>
+        <td>{{ paper.submitter }}</td>
+        <td>{{ paper.submit_time|date:"Y-m-d H:i" }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6">論文はまだありません。</td></tr>
+    {% endfor %}
+  </tbody>
+</table>

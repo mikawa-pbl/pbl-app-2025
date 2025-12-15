@@ -7,31 +7,8 @@ from .forms import PaperForm
 
 # 一覧
 def paper_list(request):
-    # 許可するソート項目（URLの?sort=... をDBのフィールド名にマップ）
-    sort_map = {
-        'title': 'title',
-        'author': 'author',
-        'year': 'year',
-        'booktitle': 'booktitle',
-        'submitter': 'submitter',
-        'submit_time': 'submit_time',
-    }
-
-    sort_key = request.GET.get('sort', 'year')   # デフォルト
-    direction = request.GET.get('dir', 'desc')   # 'asc' or 'desc'
-
-    order_field = sort_map.get(sort_key, 'year')
-    if direction == 'desc':
-        order_field = '-' + order_field
-
-    papers = Paper.objects.all().order_by(order_field, 'title')
-
-    context = {
-        'papers': papers,
-        'sort': sort_key,
-        'dir': direction,
-    }
-    return render(request, 'teams/teachers/paper_list.html', context)
+    papers = Paper.objects.all().order_by('-year', 'title')
+    return render(request, 'teams/teachers/paper_list.html', {'papers': papers})
 
 # 詳細
 def paper_detail(request, pk):

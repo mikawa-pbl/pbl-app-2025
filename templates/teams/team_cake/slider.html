@@ -28,12 +28,14 @@
     </div>
 
     <!-- Indicators -->
-    <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+    <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
         {% for good in slider_goods %}
-        <button class="w-3 h-3 rounded-full bg-white opacity-50 hover:opacity-100 transition-opacity"
+        <button
+            class="carousel-indicator w-4 h-4 rounded-full bg-[#F5E829] border border-gray-300 opacity-50 hover:opacity-100 transition-all duration-300"
             onclick="goToSlide({{ forloop.counter0 }})"></button>
         {% empty %}
-        <button class="w-3 h-3 rounded-full bg-white opacity-100"></button>
+        <button
+            class="carousel-indicator w-4 h-4 rounded-full bg-[#F5E829] border border-gray-300 opacity-50 transition-all duration-300"></button>
         {% endfor %}
     </div>
 </div>
@@ -42,6 +44,7 @@
     let currentSlide = 0;
     const slidesContainer = document.getElementById('carousel-slides');
     const slideCount = {{ slider_goods| length }} || 1;
+    const indicators = document.querySelectorAll('.carousel-indicator');
 
     function goToSlide(index) {
         currentSlide = index;
@@ -55,7 +58,20 @@
 
     function updateCarousel() {
         slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+        indicators.forEach((indicator, index) => {
+            if (index === currentSlide) {
+                indicator.classList.remove('opacity-50', 'scale-100');
+                indicator.classList.add('opacity-100', 'scale-125', 'ring-2', 'ring-white', 'shadow-lg');
+            } else {
+                indicator.classList.remove('opacity-100', 'scale-125', 'ring-2', 'ring-white', 'shadow-lg');
+                indicator.classList.add('opacity-50', 'scale-100');
+            }
+        });
     }
+
+    // Initialize indicators
+    updateCarousel();
 
     if (slideCount > 1) {
         setInterval(nextSlide, 6000);

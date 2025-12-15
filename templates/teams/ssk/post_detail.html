@@ -22,7 +22,7 @@
 
       {% if post.date %}
         <p style="color:#374151;margin:0 0 8px 0;">イベント日: {{ post.date|date:"Y年n月j日" }}
-          {% if post.start_time %}・{{ post.start_time|time:"H:i" }}{% if post.end_time %} - {{ post.end_time|time:"H:i" }}{% endif %}{% endif %}
+          {% if post.end_date %} 〜 {{ post.end_date|date:"Y年n月j日" }}{% endif %}
         </p>
       {% else %}
         <p style="color:#374151;margin:0 0 8px 0;">イベント日: 未設定</p>

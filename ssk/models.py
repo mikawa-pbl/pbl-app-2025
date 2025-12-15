@@ -12,10 +12,9 @@ class Tag(models.Model):
 
 class Post(models.Model):
     title = models.CharField("タイトル", max_length=100)
-    # 日付は DateField、時刻は開始/終了で指定（任意）
-    date = models.DateField("イベント日", null=True, blank=True)
-    start_time = models.TimeField("開始時刻", null=True, blank=True)
-    end_time = models.TimeField("終了時刻", null=True, blank=True)
+    # 日付は開始日 (date)、必要に応じて終了日(end_date) を指定して区間にできる
+    date = models.DateField("イベント日（開始）", null=True, blank=True)
+    end_date = models.DateField("イベント日（終了）", null=True, blank=True)
 
     body = models.TextField("本文", blank=True)
     tags = models.ManyToManyField(Tag, related_name="posts", blank=True)

@@ -10,9 +10,12 @@
   <style>
     /* Modern simple UI */
     :root{
-      --bg:#f6f8fa; --card:#ffffff; --muted:#6b7280;
-      --accent:#2563eb; --accent-contrast:#fff; --tag:#e6f0ff;
+      --bg:#f6f8fa; --card:#ffffff; --muted:#4b5563;
+      --accent:#1d4ed8; --accent-contrast:#fff; --tag:#e6f0ff;
       --radius:10px;
+      /* vivid palette */
+      --c0:#f59e0b; --c1:#10b981; --c2:#7c3aed; --c3:#06b6d4;
+      --c4:#ef4444; --c5:#ea580c; --c6:#0ea5a4; --c7:#a21caf;
     }
     body{font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:#111; margin:0; padding:24px;}
     .container{max-width:980px;margin:0 auto;}
@@ -50,6 +53,29 @@
     }
     .fab:hover{ transform:translateY(-3px); box-shadow:0 10px 24px rgba(15,23,42,0.22); }
     .fab:focus{ outline:3px solid rgba(37,99,235,0.16); }
+
+    /* range entry styling: thicker border + tinted background for visibility */
+    .card.range { border-left-width:6px; border-left-style:solid; box-shadow:0 10px 26px rgba(15,23,42,0.08); }
+    .range-badge { background:rgba(0,0,0,0.03); font-weight:700; padding:6px 10px; border-radius:999px; font-size:0.85rem; margin-left:8px; }
+
+    /* palette for range colors (vivid + subtle tint backgrounds) */
+    .card.range.color-0 { border-left-color:var(--c0); background: rgba(245,158,11,0.08); }
+    .card.range.color-1 { border-left-color:var(--c1); background: rgba(16,185,129,0.08); }
+    .card.range.color-2 { border-left-color:var(--c2); background: rgba(124,58,237,0.08); }
+    .card.range.color-3 { border-left-color:var(--c3); background: rgba(6,182,212,0.08); }
+    .card.range.color-4 { border-left-color:var(--c4); background: rgba(239,68,68,0.08); }
+    .card.range.color-5 { border-left-color:var(--c5); background: rgba(234,88,12,0.08); }
+    .card.range.color-6 { border-left-color:var(--c6); background: rgba(14,165,164,0.08); }
+    .card.range.color-7 { border-left-color:var(--c7); background: rgba(162,26,175,0.08); }
+    /* badge color tweaks to match stronger borders */
+    .card.range.color-0 .range-badge { background: rgba(245,158,11,0.12); color:#7a2e00; }
+    .card.range.color-1 .range-badge { background: rgba(16,185,129,0.12); color:#054e37; }
+    .card.range.color-2 .range-badge { background: rgba(124,58,237,0.12); color:#3d1066; }
+    .card.range.color-3 .range-badge { background: rgba(6,182,212,0.12); color:#064e57; }
+    .card.range.color-4 .range-badge { background: rgba(239,68,68,0.12); color:#5b0e0e; }
+    .card.range.color-5 .range-badge { background: rgba(234,88,12,0.12); color:#5a2a06; }
+    .card.range.color-6 .range-badge { background: rgba(14,165,164,0.12); color:#064e49; }
+    .card.range.color-7 .range-badge { background: rgba(162,26,175,0.12); color:#47083d; }
 
     @media (max-width:600px){ .panel{padding:12px;} .card{padding:10px;} }
   </style>
@@ -102,25 +128,30 @@
 
     <section>
       <h2 style="margin:8px 0 12px 0;">日付あり</h2>
-      {# 日ごとにまとめる #}
-      {% regroup dated_posts by date|date:"Y年n月j日" as day_list %}
+      {# 日ごとにまとめる（expanded_posts による日単位の展開） #}
+      {% regroup expanded_posts by display_date|date:"Y年n月j日" as day_list %}
       <div class="months">
         {% for day in day_list %}
           <div>
             <h3 style="margin:0 0 8px 0;font-size:1rem;">{{ day.grouper }}</h3>
             <div style="display:flex;flex-direction:column;gap:8px;">
-              {% for post in day.list %}
-                <article class="card">
-                  <a class="title" href="{% url 'ssk:post_detail' post.pk %}">{{ post.title }}</a>
-                  <div class="meta">
-                    {% for tag in post.tags.all %}
-                      <span class="tag-pill">#{{ tag.name }}</span>
-                    {% endfor %}
-                    {% if post.date %}
-                      <span>{{ post.date|date:"n/j" }}</span>
-                      {% if post.start_time %}
-                        <span>・{{ post.start_time|time:"H:i" }}{% if post.end_time %} - {{ post.end_time|time:"H:i" }}{% endif %}</span>
+              {% for entry in day.list %}
+                {# entry.post, entry.display_date, entry.is_range, entry.color_index #}
+                <article class="card {% if entry.is_range %}range color-{{ entry.color_index }}{% endif %}">
+                  <a class="title" href="{% url 'ssk:post_detail' entry.post.pk %}">{{ entry.post.title }}</a>
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                    <div class="meta" style="flex:1">
+                      {% for tag in entry.post.tags.all %}
+                        <span class="tag-pill">#{{ tag.name }}</span>
+                      {% endfor %}
+                      {% if entry.is_range %}
+                        <span>{{ entry.post.date|date:"n/j" }} 〜 {{ entry.post.end_date|date:"n/j" }}</span>
+                      {% else %}
+                        <span>{{ entry.display_date|date:"n/j" }}</span>
                       {% endif %}
+                    </div>
+                    {% if entry.is_range %}
+                      <div class="range-badge">期間</div>
                     {% endif %}
                   </div>
                 </article>

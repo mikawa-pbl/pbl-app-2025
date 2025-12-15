@@ -3,6 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Post, Tag
 from .forms import PostForm
 from django.db.models import Count
+from types import SimpleNamespace
+from datetime import timedelta
 
 def post_list(request):
     # 複数タグ選択対応 + AND/OR 切替
@@ -32,8 +34,61 @@ def post_list(request):
     dated_posts = posts.filter(date__isnull=False).order_by("date", "created_at")
     undated_posts = posts.filter(date__isnull=True).order_by("-created_at")
 
+    # Assign a color index to each post interval so overlapping intervals get different colors.
+    # Greedy coloring: keep track of last end date for each color, reuse color when it does not overlap.
+    post_color = {}
+    color_ends = []  # list of end dates per color
+    # Build list of unique posts with intervals, sorted by start date
+    intervals = []
+    for p in dated_posts:
+        start = p.date
+        end = p.end_date if getattr(p, "end_date", None) else start
+        if end is None or end < start:
+            end = start
+        intervals.append((p, start, end))
+    intervals.sort(key=lambda x: (x[1], x[2] or x[1], x[0].created_at))
+
+    for (p, start, end) in intervals:
+        # find a color whose last end is < start (no overlap)
+        assigned = None
+        for idx, last_end in enumerate(color_ends):
+            if last_end < start:
+                assigned = idx
+                color_ends[idx] = end
+                break
+        if assigned is None:
+            assigned = len(color_ends)
+            color_ends.append(end)
+        post_color[p.pk] = assigned
+
+    # Expand ranged posts into entries for each date in their interval, attach color_index
+    expanded_posts = []
+    for post in dated_posts:
+        start = post.date
+        end = post.end_date if getattr(post, "end_date", None) else start
+        # if end_date is before start, treat as single day
+        if end is None or end < start:
+            end = start
+        d = start
+        is_range = (end > start)
+        # color index (default 0 if not assigned)
+        color_idx = post_color.get(post.pk, 0)
+        while d <= end:
+            expanded_posts.append(SimpleNamespace(display_date=d, post=post, is_range=is_range, color_index=color_idx))
+            d += timedelta(days=1)
+
+    # sort entries by display_date, with range entries shown first,
+    # then by post.start date / created_at to keep a stable order
+    expanded_posts.sort(key=lambda e: (
+        e.display_date,
+        0 if e.is_range else 1,                 # range entries first
+        e.post.date or e.post.created_at,
+        e.post.created_at
+    ))
+
     return render(request, "teams/ssk/post_list.html", {
-        "dated_posts": dated_posts,
+        "dated_posts": dated_posts,           # original queryset (kept if needed)
+        "expanded_posts": expanded_posts,     # flattened entries for per-day display
         "undated_posts": undated_posts,
         "tags": tags,
         "selected_tag_ids": selected_tag_ids,
@@ -45,12 +100,11 @@ def post_create(request):
     if request.method == "POST":
         form = PostForm(request.POST)
         if form.is_valid():
-            # date + start_time/end_time saved separately
+            # date (start) + optional end_date saved separately
             post = Post(
                 title=form.cleaned_data["title"],
                 date=form.cleaned_data.get("date"),
-                start_time=form.cleaned_data.get("start_time"),
-                end_time=form.cleaned_data.get("end_time"),
+                end_date=form.cleaned_data.get("end_date"),
                 body=form.cleaned_data["body"],
             )
             post.save()
@@ -83,7 +137,8 @@ def post_create(request):
     else:
         form = PostForm()
 
-    return render(request, "teams/ssk/post_form.html", {"form": form})
+    all_tag_names = list(Tag.objects.order_by("name").values_list("name", flat=True))
+    return render(request, "teams/ssk/post_form.html", {"form": form, "all_tag_names": all_tag_names})
 
 
 def post_detail(request, pk):
@@ -129,11 +184,9 @@ def post_edit(request, pk):
     if request.method == "POST":
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
-            # Do not allow changing password on edit (password only set at create)
             post.title = form.cleaned_data["title"]
             post.date = form.cleaned_data.get("date")
-            post.start_time = form.cleaned_data.get("start_time")
-            post.end_time = form.cleaned_data.get("end_time")
+            post.end_date = form.cleaned_data.get("end_date")
             post.body = form.cleaned_data["body"]
             post.save()
 
@@ -163,16 +216,15 @@ def post_edit(request, pk):
         # 現在のタグから tags_text を事前入力（"#name #name" 形式で表示）
         tags_initial = " ".join("#" + t.name for t in post.tags.all())
         initial = {"tags_text": tags_initial}
-        # prefill date/start_time/end_time when available
+        # prefill date/end_date when available
         if post.date is not None:
             initial["date"] = post.date
-        if post.start_time is not None:
-            initial["start_time"] = post.start_time
-        if post.end_time is not None:
-            initial["end_time"] = post.end_time
+        if getattr(post, "end_date", None) is not None:
+            initial["end_date"] = post.end_date
         form = PostForm(instance=post, initial=initial)
 
-    return render(request, "teams/ssk/post_form.html", {"form": form, "post": post})
+    all_tag_names = list(Tag.objects.order_by("name").values_list("name", flat=True))
+    return render(request, "teams/ssk/post_form.html", {"form": form, "post": post, "all_tag_names": all_tag_names})
 
 
 def post_delete(request, pk):

@@ -4,10 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ログイン - nanakorobiyaoki</title>
+    <title>新規登録 - TUT Connect</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 
     <style>
         :root {
@@ -31,44 +30,31 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            padding: 20px;
         }
 
-        .login-card {
+        .register-card {
             background: #fff;
             padding: 40px;
             border-radius: var(--border-radius);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             width: 100%;
-            max-width: 400px;
-            text-align: center;
+            max-width: 500px;
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .card-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card-title {
             font-size: 1.5rem;
             font-weight: 700;
             color: #1a237e;
-            margin-bottom: 30px;
-            gap: 10px;
-        }
-
-        .logo-icon {
-            background: #b71c1c;
-            color: white;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            font-size: 1.5rem;
         }
 
         .form-group {
             margin-bottom: 20px;
-            text-align: left;
         }
 
         .form-label {
@@ -79,11 +65,12 @@
             color: #555;
         }
 
+        /* Django form rendering styles */
         input[type="text"],
         input[type="password"],
         input[type="email"],
         input[type="number"],
-        input[type="date"],
+        input[type="url"],
         textarea,
         select {
             width: 100%;
@@ -94,100 +81,89 @@
             outline: none;
             transition: border-color 0.2s;
             font-family: inherit;
+            margin-bottom: 5px;
+            /* for help text spacing */
         }
 
-        input:focus {
+        input:focus,
+        textarea:focus,
+        select:focus {
             border-color: var(--primary-color);
+        }
+
+        .helptext {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 4px;
+            display: block;
+        }
+
+        ul.errorlist {
+            list-style: none;
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
         }
 
         .btn-primary {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px;
+            padding: 14px;
             width: 100%;
             border-radius: 8px;
             font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
             transition: background 0.2s;
+            margin-top: 10px;
         }
 
         .btn-primary:hover {
             opacity: 0.9;
         }
 
-        .error-msg {
-            color: #d32f2f;
-            background: #ffebee;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
         .links {
             margin-top: 20px;
+            text-align: center;
             font-size: 0.9rem;
-            color: #666;
         }
 
         .links a {
             color: var(--primary-color);
             text-decoration: none;
-            font-weight: 500;
-        }
-
-        .links a:hover {
-            text-decoration: underline;
-        }
-
-        hr {
-            border: none;
-            border-top: 1px solid #eee;
-            margin: 25px 0;
         }
     </style>
 </head>
 
 <body>
-    <div class="login-card">
-        <div class="logo">
-            <div class="logo-icon">T</div>
-            TUT Connect
+    <div class="register-card">
+        <div class="card-header">
+            <h1 class="card-title">アカウント作成</h1>
         </div>
 
         <form method="post">
             {% csrf_token %}
-
-            {% if form.non_field_errors %}
-            <div class="error-msg">
-                {% for error in form.non_field_errors %}
-                <div>{{ error }}</div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
+            <!-- Manually render or loop for better control if needed, but generic loop works for "Unified UI" request -->
+            {% for field in form %}
             <div class="form-group">
-                <label class="form-label" for="{{ form.user_id.id_for_label }}">ユーザーID</label>
-                {{ form.user_id }}
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                <span class="helptext">{{ field.help_text }}</span>
+                {% endif %}
+                {{ field.errors }}
             </div>
-            <div class="form-group">
-                <label class="form-label" for="{{ form.password.id_for_label }}">パスワード</label>
-                {{ form.password }}
-            </div>
+            {% endfor %}
 
-            <button type="submit" class="btn-primary">ログイン</button>
+            <button type="submit" class="btn-primary">登録する</button>
         </form>
 
         <div class="links">
-            初めての方は <a href="{% url 'nanakorobiyaoki:user_register' %}">新規登録</a>
-        </div>
-
-        <hr>
-        <div class="links" style="font-size: 0.8rem;">
-            <a href="/nanakorobiyaoki/members/" style="color: #999;">メンバー一覧</a>
+            <a href="{% url 'nanakorobiyaoki:index' %}">ログイン画面に戻る</a>
         </div>
     </div>
 </body>

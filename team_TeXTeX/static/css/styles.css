@@ -2,20 +2,20 @@
 body {
   margin: 0;
   font-family: sans-serif;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 /* ======================================= */
 /* 共通ヘッダーと基本レイアウト */
 /* ======================================= */
 #header {
-  background-color: #333; 
+  background-color: #333;
   color: white;
   padding: 10px 20px;
   display: flex;
-  align-items: center; 
-  justify-content: center; 
-  height: 50px; 
+  align-items: center;
+  justify-content: center;
+  height: 50px;
 }
 
 #header h1 {
@@ -23,8 +23,8 @@ body {
 }
 
 #container {
-  display: flex; 
-  height: calc(100vh - 50px); 
+  display: flex;
+  height: calc(100vh - 50px);
 }
 
 /* ======================================= */
@@ -39,12 +39,12 @@ body {
 /* ハンバーガーアイコン (三本線) のスタイル */
 #sidebar-icon {
   position: absolute;
-  top: 15px; 
-  right: 15px; 
+  top: 15px;
+  right: 15px;
   width: 30px;
   height: 30px;
   cursor: pointer;
-  z-index: 100; 
+  z-index: 100;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
@@ -54,15 +54,15 @@ body {
 #sidebar-icon span {
   display: block;
   height: 3px;
-  background: white; 
+  background: white;
   border-radius: 3px;
   transition: all 0.3s;
-  transform-origin: center; 
+  transform-origin: center;
 }
 
 /* 初期状態（checked）でアイコンを×マークに設定 */
 #sidebar-icon span:nth-child(1) {
-  transform: translateY(10px) rotate(45deg); 
+  transform: translateY(10px) rotate(45deg);
 }
 #sidebar-icon span:nth-child(2) {
   opacity: 0;
@@ -73,7 +73,7 @@ body {
 
 /* 非チェック状態（閉じる状態）でハンバーガーアイコンに戻す */
 #sidebar-toggle:not(:checked) ~ #sidebar-icon span:nth-child(1) {
-  transform: translateY(0) rotate(0deg); 
+  transform: translateY(0) rotate(0deg);
 }
 #sidebar-toggle:not(:checked) ~ #sidebar-icon span:nth-child(2) {
   opacity: 1;
@@ -87,16 +87,29 @@ body {
 /* ======================================= */
 #tex-preview-popup {
     position: absolute;
-    z-index: 200; 
+    z-index: 200;
     border: 1px solid #333;
     background-color: #fff;
     padding: 5px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     border-radius: 4px;
-    pointer-events: none; 
-    right: 220px; 
-    top: 0; 
+    pointer-events: none;
+    right: 220px;
+    top: 0;
 }
 #tex-preview-image {
     display: block;
+}
+
+.copyable-cell {
+    /* マウスカーソルをポインターに変更してクリックできることを示す */
+    cursor: pointer;
+    /* クリック可能であることを強調するために枠線や背景色を薄く設定 */
+    border-bottom: 1px dotted #aaa;
+    padding: 5px;
+}
+
+.copyable-cell:hover {
+    /* ホバー時に背景色を少し変える */
+    background-color: #f0f0f0;
 }

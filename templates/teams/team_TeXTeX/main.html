@@ -20,7 +20,7 @@
   </script>
 </head>
 <body>
-  
+
   <!-- サイドバー開閉用のチェックボックスとアイコン -->
   <input type="checkbox" id="sidebar-toggle" checked>
   <label for="sidebar-toggle" id="sidebar-icon">
@@ -28,7 +28,7 @@
     <span></span>
     <span></span>
   </label>
-  
+
   <header id="header">
     <h1>TeXTeX</h1>
   </header>
@@ -41,7 +41,7 @@
       <form id="search-form">
         <input type="search" id="search-box" placeholder="検索...">
       </form>
-      
+
       <!-- 全て開く/閉じるボタン -->
       <div id="sidebar-controls">
         <button id="expand-all">全て開く</button>
@@ -62,16 +62,26 @@
         </details>
         {% endfor %}
       </div>
-      
+
     </nav>
 
     <!-- 主要コンテンツ領域 (order: 1 で左側) -->
     <main id="main-content">
+      <button onclick="fetchData('users')">ユーザー一覧を表示</button>
+      <button onclick="fetchData('products')">製品一覧を表示</button>
 
-      
+      <table id="dataTable">
+        <thead>
+          <tr><th>ID</th><th>名前</th><th>詳細</th></tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+      </table>
+
+
     </main>
   </div>
-  
+
   <!-- TeX画像ポップアップエリア -->
   <div id="tex-preview-popup" style="display: none;">
     <img id="tex-preview-image" src="" alt="LaTeX Preview">
@@ -80,5 +90,6 @@
   <!-- JavaScriptファイルを読み込み -->
   <script src="{% static 'scripts/sidebar_logic.js' %}"></script>
   <script src="{% static 'scripts/preview_logic.js' %}"></script>
-  
+  <script src="{% static 'scripts/copy_logic.js' %}"></script>
+
 </body></html>

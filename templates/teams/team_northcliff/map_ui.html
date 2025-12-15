@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>豊橋技術科学大学 キャンパスマップ (距離計算機能付き)</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { height: 100vh; width: 100%; }
+
+        .popup-btn {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background-color: #800000;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .popup-btn:hover { background-color: #a00000; }
+        
+        .info-text { font-size: 14px; line-height: 1.5; }
+        
+        /* 距離表示のデザイン */
+        .dist-badge {
+            display: inline-block;
+            background: #eee;
+            color: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 5px;
+            border: 1px solid #ccc;
+        }
+
+        /* GPSボタン */
+        .leaflet-control-gps {
+            background-color: white;
+            width: 34px;
+            height: 34px;
+            border-bottom: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 34px;
+            font-size: 20px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+        }
+        .leaflet-control-gps:hover { background-color: #f4f4f4; }
+
+        .comment-wrap { padding:6px 8px; background:#f8f8f8; border-radius:6px; margin-top:6px; }
+        .comment-time { font-size:12px; color:#666; margin-top:4px; }
+        .status-label { font-weight:700; }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        // 地図の初期化
+        var map = L.map('map').setView([34.701663, 137.408313], 17);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // ★ 現在地を保存しておく変数
+        var currentLatLng = null;
+
+        // ステータスマップ（ui.html と揃える）
+        var statusMap = {
+            'empty': '🟢 空いている',
+            'moderate': '🟡 やや混雑',
+            'crowded': '🔴 混雑'
+        };
+
+        // 施設情報キャッシュ（APIから取得）
+        var facilitiesByName = {}; // name -> facility object
+        var facilitiesById = {}; // id -> facility object
+
+        async function loadFacilities() {
+            try {
+                const res = await fetch('/team_northcliff/api/facilities/');
+                if (!res.ok) throw new Error('施設情報取得失敗');
+                const data = await res.json();
+                if (Array.isArray(data.facilities)) {
+                    data.facilities.forEach(f => {
+                        facilitiesByName[f.name] = f;
+                        facilitiesById[f.id] = f;
+                    });
+                }
+            } catch (e) {
+                console.error('施設情報取得エラー:', e);
+            }
+        }
+
+        // --- 共通関数: ポップアップの中身を動的に作る ---
+        function generatePopupContentElement(layer, facility, fallbackTitle, fallbackDesc) {
+            // create container element to avoid HTML injection
+            var container = document.createElement('div');
+            container.className = 'info-text';
+
+            // distance badge
+            var distText = "📍 (GPS未取得)";
+            if (currentLatLng) {
+                var meters = map.distance(currentLatLng, layer.getLatLng());
+                if (meters >= 1000) {
+                    distText = "🚶 現在地から " + (meters / 1000).toFixed(2) + " km";
+                } else {
+                    distText = "🚶 現在地から " + Math.round(meters) + " m";
+                }
+            }
+            var distBadge = document.createElement('span');
+            distBadge.className = 'dist-badge';
+            distBadge.textContent = distText;
+            container.appendChild(distBadge);
+            container.appendChild(document.createElement('br'));
+
+            // title
+            var titleEl = document.createElement('b');
+            titleEl.textContent = facility && facility.name ? facility.name : fallbackTitle;
+            container.appendChild(titleEl);
+            container.appendChild(document.createElement('br'));
+
+            // last post / status
+            if (facility) {
+                var lastPost = document.createElement('div');
+                lastPost.style.marginTop = '6px';
+                var lpText = '最終投稿： ' + (facility.last_post_time || '情報なし');
+                lastPost.textContent = lpText;
+                container.appendChild(lastPost);
+
+                var statusDiv = document.createElement('div');
+                statusDiv.style.marginTop = '6px';
+                var statusLabel = document.createElement('span');
+                statusLabel.className = 'status-label';
+                var statusDisplay = statusMap[facility.latest_status] || '情報なし';
+                statusLabel.textContent = '現在の状況：' + ' ';
+                statusDiv.appendChild(statusLabel);
+
+                var statusValue = document.createElement('span');
+                statusValue.textContent = statusDisplay;
+                statusDiv.appendChild(statusValue);
+                container.appendChild(statusDiv);
+
+                // recent comments (API already returns up to 3 latest comments within 10min)
+                if (Array.isArray(facility.recent_comments) && facility.recent_comments.length > 0) {
+                    facility.recent_comments.forEach(function(c) {
+                        var cWrap = document.createElement('div');
+                        cWrap.className = 'comment-wrap';
+                        var cText = document.createElement('div');
+                        cText.textContent = c.comment || '';
+                        cText.style.whiteSpace = 'pre-wrap';
+                        cWrap.appendChild(cText);
+                        var cTime = document.createElement('div');
+                        cTime.className = 'comment-time';
+                        cTime.textContent = c.time_ago || '';
+                        cWrap.appendChild(cTime);
+                        container.appendChild(cWrap);
+                    });
+                }
+            } else {
+                // fallback description
+                var descEl = document.createElement('div');
+                descEl.style.marginTop = '6px';
+                descEl.textContent = fallbackDesc || '';
+                container.appendChild(descEl);
+            }
+
+            // "最新情報を取得" ボタン (リンク) - UI側と同じラベル
+            var link = document.createElement('a');
+            link.className = 'popup-btn';
+            link.target = '_blank';
+            // リンク先はチーム UI に飛ばす（適宜 username を使うサイトのトップへ）
+            link.href = '/team_northcliff/'; 
+            link.textContent = '最新情報を取得';
+            container.appendChild(link);
+
+            return container;
+        }
+
+        // --- マーカーの設置 (loadFacilities後に作成) ---
+        function addMarkers() {
+            // 1. 附属図書館
+            var libraryLatLng = L.latLng(34.70084228819001, 137.41008130531003);
+            var libraryMarker = L.marker(libraryLatLng).addTo(map);
+            libraryMarker.bindPopup(function() {
+                var f = facilitiesByName['附属図書館'] || facilitiesByName['図書館'] || facilitiesById[Object.keys(facilitiesById)[0]];
+                return generatePopupContentElement(libraryMarker, f, "附属図書館", "最終投稿： --");
+            });
+
+            // 2. （北岡研究室は非表示: 要求どおりここでは追加しない）
+
+            // 3. 北駐車場 -> L.marker に変更
+            var northParkLatLng = L.latLng(34.7030802064815, 137.40754813094193);
+            var northParkMarker = L.marker(northParkLatLng, {icon: L.icon({iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png', iconSize:[25,41], iconAnchor:[12,41]})}).addTo(map);
+            northParkMarker.bindPopup(function() {
+                var f = facilitiesByName['北駐車場'] || facilitiesByName['北 駐車場'] || facilitiesByName['駐車場'] || null;
+                return generatePopupContentElement(northParkMarker, f, "北駐車場", "最終投稿： --");
+            });
+
+            // 4. 食堂（追加）
+            var cafeteriaLatLng = L.latLng(34.700797551357624, 137.40906746128755);
+            var cafeteriaMarker = L.marker(cafeteriaLatLng).addTo(map);
+            cafeteriaMarker.bindPopup(function() {
+                var f = facilitiesByName['食堂'] || facilitiesByName['学食'] || facilitiesByName['食堂／学食'] || null;
+                return generatePopupContentElement(cafeteriaMarker, f, "食堂", "最終投稿： --");
+            });
+
+            // 5. 追加: バス停（指定座標）
+            var busStopLatLng = L.latLng(34.70088331851511, 137.41275196588953);
+            var busStopMarker = L.marker(busStopLatLng).addTo(map);
+            busStopMarker.bindPopup(function() {
+                var f = facilitiesByName['バス停'] || facilitiesByName['バス停留所'] || null;
+                return generatePopupContentElement(busStopMarker, f, "バス停", "最終投稿： --");
+            });
+        }
+
+        // --- GPS関連機能 ---
+        var currentLocMarker = null;
+        var currentLocCircle = null;
+
+        function onLocationFound(e) {
+            currentLatLng = e.latlng;
+
+            var radius = e.accuracy;
+
+            if (currentLocMarker) { map.removeLayer(currentLocMarker); }
+            if (currentLocCircle) { map.removeLayer(currentLocCircle); }
+
+            currentLocMarker = L.circleMarker(e.latlng, {
+                color: '#fff', weight: 2, fillColor: '#007bff', fillOpacity: 1, radius: 8
+            }).addTo(map).bindPopup("現在地");
+
+            currentLocCircle = L.circle(e.latlng, radius, {
+                color: '#007bff', fillColor: '#007bff', fillOpacity: 0.1, weight: 1
+            }).addTo(map);
+        }
+
+        function onLocationError(e) {
+            alert("位置情報を取得できませんでした。\n" + e.message);
+        }
+
+        map.on('locationfound', onLocationFound);
+        map.on('locationerror', onLocationError);
+
+        // --- GPSボタン ---
+        var GpsControl = L.Control.extend({
+            options: { position: 'topleft' },
+            onAdd: function(map) {
+                var container = L.DomUtil.create('div', 'leaflet-control-gps leaflet-bar');
+                container.innerHTML = '📍';
+                container.onclick = function(e) {
+                    L.DomEvent.stopPropagation(e);
+                    map.locate({setView: true, maxZoom: 17}); 
+                }
+                return container;
+            }
+        });
+        map.addControl(new GpsControl());
+
+        // 初期処理: 施設情報を読み込んでからマーカー設置
+        (async function init() {
+            await loadFacilities();
+            addMarkers();
+        })();
+    </script>
+</body>
+</html>

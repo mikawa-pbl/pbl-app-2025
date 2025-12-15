@@ -4,111 +4,195 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>施設予約カレンダー</title>
-    
+
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js'></script>
-    
+
     <style>
-        /* カレンダーの基本的なスタイル */
-        body {
-            font-family: sans-serif;
-            padding: 20px;
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f6f9; }
+
+        /* ステータス色設定 */
+        .status-pending-signature { background-color: #f1c40f; border-color: #f1c40f; color: #000; }
+        .status-pending-approval { background-color: #e67e22; border-color: #e67e22; color: #fff; }
+        .status-approved { background-color: #27ae60; border-color: #27ae60; color: #fff; }
+        .status-rejected { background-color: #c0392b; border-color: #c0392b; color: #fff; }
+
+        /* ヘッダー */
+        .header-container {
+            display: flex; justify-content: space-between; align-items: center;
+            background: white; padding: 15px 25px; border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px;
         }
-        #calendar {
-            max-width: 1100px;
-            margin: 0 auto;
+        .header-titles h1 { margin: 0; font-size: 1.5rem; color: #2c3e50; }
+        .header-titles p { margin: 5px 0 0; font-size: 0.9rem; color: #7f8c8d; font-weight: bold; }
+
+        .user-info { display: flex; align-items: center; gap: 15px; position: relative; }
+        .role-badge {
+            padding: 8px 15px; border-radius: 20px;
+            background-color: #eef2f7; font-weight: bold; color: #333;
+            font-size: 0.9rem; display: inline-block;
+        }
+        .btn-logout {
+            padding: 8px 15px; border-radius: 20px;
+            background-color: #95a5a6; color: white;
+            text-decoration: none; font-weight: bold; font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+        .btn-logout:hover { background-color: #7f8c8d; }
+
+        /* 通知アイコン */
+        .notification-wrapper { position: relative; cursor: pointer; }
+        .bell-icon { font-size: 1.5rem; }
+        .badge {
+            position: absolute; top: -5px; right: -5px;
+            background: #e74c3c; color: white; border-radius: 50%;
+            padding: 2px 6px; font-size: 0.75rem; font-weight: bold;
         }
 
-        /* 予約状況（ステータス）に応じて色を変えるCSS */
-        .status-pending {
-            background-color: #f39c12; /* オレンジ (申請中) */
-            border-color: #f39c12;
+        /* 通知ポップアップ */
+        #notification-popup {
+            display: none; position: absolute; top: 40px; right: 0;
+            width: 350px; background: white; border: 1px solid #ddd;
+            border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            z-index: 1000; max-height: 400px; overflow-y: auto;
         }
-        .status-approved {
-            background-color: #00a65a; /* 緑 (承認済み) */
-            border-color: #00a65a;
-        }
-        .status-rejected {
-            background-color: #dd4b39; /* 赤 (却下) */
-            border-color: #dd4b39;
-            color: #fff; /* 文字色を白に */
-        }
-        
-        /* ⬇️ ダイアログ用のスタイルを追加 ⬇️ */
-        #reservation-dialog {
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            min-width: 350px; /* ダイアログの最小幅 */
-        }
-        #reservation-dialog::backdrop {
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-        #reservation-form div {
-            margin-bottom: 15px;
-        }
-        #reservation-form label {
-            display: inline-block;
-            width: 80px;
+        .notification-item { padding: 15px; border-bottom: 1px solid #eee; }
+        .notification-item:last-child { border-bottom: none; }
+        .notif-msg { font-size: 0.9rem; margin-bottom: 10px; line-height: 1.4; }
+        .notif-actions { display: flex; gap: 10px; margin-top: 5px; }
+
+        .btn-action { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; color: white; }
+        .btn-sign { background-color: #f39c12; }
+        .btn-approve { background-color: #27ae60; }
+        .btn-reject { background-color: #c0392b; }
+        .btn-check { background-color: #3498db; }
+
+        .comment-input { width: 100%; box-sizing: border-box; margin-top: 5px; padding: 5px; font-size: 0.85rem; }
+
+        /* カレンダー */
+        #calendar { max-width: 1100px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+
+        /* カレンダーボタンの強調 */
+        .fc-button-active {
+            background-color: #2c3e50 !important;
+            border-color: #2c3e50 !important;
+            color: white !important;
             font-weight: bold;
         }
-        #reservation-form input,
-        #reservation-form select {
-            padding: 5px;
-            width: 200px;
-            box-sizing: border-box;
-        }
-        #dialog-actions {
-            text-align: right;
-            margin-top: 20px;
-        }
-        #dialog-actions button {
-            margin-left: 10px;
-            padding: 8px 12px;
-            cursor: pointer;
-        }
+
+        /* ダイアログ */
+        dialog { border: none; border-radius: 8px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 400px; }
+        dialog::backdrop { background-color: rgba(0, 0, 0, 0.5); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .dialog-buttons { text-align: right; margin-top: 20px; }
+        .btn-submit { background-color: #3498db; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-close { background-color: #aaa; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; }
     </style>
 </head>
 <body>
 
-    {% csrf_token %} <h1>大学 施設予約システム</h1>
-    <p>予約申請状況カレンダー</p>
+    {% csrf_token %}
+
+    <div class="header-container">
+        <div class="header-titles">
+            <h1>大学 施設予約システム</h1>
+            <p>Easy Booking : TUT Edition</p>
+        </div>
+
+        <div class="user-info">
+            <div class="notification-wrapper" id="notification-btn">
+                <span class="bell-icon">🔔</span>
+                {% if notifications %}
+                    <span class="badge">{{ notifications.count }}</span>
+                {% endif %}
+
+                <div id="notification-popup">
+                    {% if notifications %}
+                        {% for notif in notifications %}
+                            <div class="notification-item">
+                                <div class="notif-msg">{{ notif.message }}</div>
+
+                                {% if user_role == 'signer' and notif.reservation.status == 'pending_signature' %}
+                                    <div class="notif-actions">
+                                        <button class="btn-action btn-sign"
+                                            onclick="processNotification({{ notif.reservation.id }}, {{ notif.id }}, 'sign')">
+                                            承認（署名）
+                                        </button>
+                                        <button class="btn-action btn-reject"
+                                            onclick="processNotification({{ notif.reservation.id }}, {{ notif.id }}, 'sign_reject')">
+                                            却下
+                                        </button>
+                                    </div>
+
+                                {% elif user_role == 'approver' and notif.reservation.status == 'pending_approval' %}
+                                    <input type="text" id="comment-{{ notif.id }}" class="comment-input" placeholder="コメント（任意）">
+                                    <div class="notif-actions">
+                                        <button class="btn-action btn-approve"
+                                            onclick="processNotification({{ notif.reservation.id }}, {{ notif.id }}, 'approve')">
+                                            承認
+                                        </button>
+                                        <button class="btn-action btn-reject"
+                                            onclick="processNotification({{ notif.reservation.id }}, {{ notif.id }}, 'reject')">
+                                            却下
+                                        </button>
+                                    </div>
+
+                                {% elif user_role == 'applicant' %}
+                                    <div class="notif-actions">
+                                        <button class="btn-action btn-check"
+                                            onclick="processNotification({{ notif.reservation.id }}, {{ notif.id }}, 'dismiss')">
+                                            確認（OK）
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="notification-item" style="text-align:center; color:#999;">通知はありません</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <span class="role-badge">{{ user_role_display }}</span>
+            <a href="{% url 'team_scim:logout' %}" class="btn-logout">ログアウト</a>
+        </div>
+    </div>
 
     <div id='calendar'></div>
 
-
     <dialog id="reservation-dialog">
+        <h3 style="margin-top:0;">予約申請</h3>
         <form id="reservation-form">
-            <h3 id="dialog-title">予約申請</h3>
-            
-            <div>
-                <label for="facility-select">施設:</label>
-                <select id="facility-select" name="facility_name" required>
-                    <option value="">施設を選択してください</option>
-                    
+            <div class="form-group">
+                <label>施設:</label>
+                <select id="facility-select" required>
+                    <option value="">選択してください</option>
                     {% for facility in facilities %}
                         <option value="{{ facility }}">{{ facility }}</option>
                     {% endfor %}
                 </select>
             </div>
-            
-            <div>
-                <label for="start-time">開始時間:</label>
-                <input type="time" id="start-time" name="start_time" step="1800" required> </div>
-            
-            <div>
-                <label for="end-time">終了時間:</label>
-                <input type="time" id="end-time" name="end_time" step="1800" required>
+            <div class="form-group">
+                <label>責任者（署名依頼先）:</label>
+                <input type="text" id="signer-input" placeholder="例: 山田先生" required>
+            </div>
+            <div class="form-group">
+                <label>開始時間:</label>
+                <input type="time" id="start-time" step="1800" value="09:00" required>
+            </div>
+            <div class="form-group">
+                <label>終了時間:</label>
+                <input type="time" id="end-time" step="1800" value="10:00" required>
             </div>
         </form>
-        
-        <div id="dialog-actions">
-            <button type="button" id="close-dialog-btn">閉じる</button>
-            <button type="button" id="submit-reservation-btn">予約申請する</button>
+        <div class="dialog-buttons">
+            <button type="button" class="btn-close" id="close-dialog-btn">閉じる</button>
+            <button type="button" class="btn-submit" id="submit-reservation-btn">申請する</button>
         </div>
     </dialog>
+
     <script>
-        // CSRFトークン取得関数
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -125,116 +209,137 @@
         }
         const csrftoken = getCookie('csrftoken');
 
+        // 通知ポップアップの開閉
+        document.getElementById('notification-btn').addEventListener('click', function(e) {
+            if (e.target.closest('#notification-popup')) return;
+            const popup = document.getElementById('notification-popup');
+            popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
+        });
 
-        // FullCalendarのスクリプト
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#notification-btn')) {
+                document.getElementById('notification-popup').style.display = 'none';
+            }
+        });
+
+        function processNotification(resId, notifId, action) {
+            let comment = '';
+            const commentInput = document.getElementById('comment-' + notifId);
+            if (commentInput) {
+                comment = commentInput.value;
+            }
+
+            if (action !== 'dismiss') {
+                if (!confirm('この操作を実行しますか？')) return;
+            }
+
+            fetch("{% url 'team_scim:process_notification' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({
+                    'reservation_id': resId,
+                    'notification_id': notifId,
+                    'action': action,
+                    'comment': comment
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(action !== 'dismiss') { alert(data.message); }
+                if (data.status === 'success') { location.reload(); }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('エラーが発生しました');
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var eventsData = {{ events_json|safe }};
-            
-            // ダイアログ要素を取得
+
             const dialog = document.getElementById('reservation-dialog');
-            const dialogTitle = document.getElementById('dialog-title');
             const closeDialogBtn = document.getElementById('close-dialog-btn');
-            const submitReservationBtn = document.getElementById('submit-reservation-btn');
+            const submitBtn = document.getElementById('submit-reservation-btn');
+
             const facilitySelect = document.getElementById('facility-select');
+            const signerInput = document.getElementById('signer-input');
             const startTimeInput = document.getElementById('start-time');
             const endTimeInput = document.getElementById('end-time');
 
-            // クリックされた日付を保持する変数
             let clickedDateStr = null;
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth', 
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                locale: 'ja', 
+                initialView: 'dayGridMonth',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+                locale: 'ja',
+                timeZone: 'Asia/Tokyo', // JS側のタイムゾーン指定
                 events: eventsData,
 
-                // (既存) イベントクリック時の動作
+                // イベントクリック: 詳細表示 (修正箇所)
                 eventClick: function(info) {
-                    alert(
-                        '施設: ' + info.event.title + '\n' +
-                        '申請者: ' + info.event.extendedProps.applicant + '\n' +
-                        '開始: ' + info.event.start.toLocaleString() + '\n' +
-                        '終了: ' + info.event.end.toLocaleString()
-                    );
+                    const props = info.event.extendedProps;
+
+                    // ⬇️ ここでサーバーから受け取った整形済み文字列 (str_start, str_end) を使う
+                    // 存在しない場合(古いデータ)はJS計算にフォールバック
+                    const startStr = props.str_start ? props.str_start : info.event.start.toLocaleString();
+                    const endStr = props.str_end ? props.str_end : info.event.end.toLocaleString();
+
+                    let msg = `【${info.event.title}】\n` +
+                              `申請者: ${props.applicant}\n` +
+                              `責任者: ${props.signer}\n` +
+                              `日時: ${startStr} ～ ${endStr}\n` +
+                              `状況: ${props.status_display}`;
+
+                    if(props.comment && props.comment.trim() !== "") {
+                        msg += `\nコメント: ${props.comment}`;
+                    }
+                    alert(msg);
                 },
 
-                // (変更) 日付セルクリックでダイアログを開く
                 dateClick: function(info) {
-                    // クリックされた日付を保持
-                    clickedDateStr = info.dateStr; 
-                    
-                    // ダイアログのタイトルを更新
-                    dialogTitle.textContent = `${clickedDateStr} の予約申請`;
-                    
-                    // フォームをリセット
+                    clickedDateStr = info.dateStr;
                     facilitySelect.value = "";
-                    startTimeInput.value = "09:00"; // デフォルト値を設定
-                    endTimeInput.value = "10:00";   // デフォルト値を設定
-
-                    // ダイアログを表示
+                    signerInput.value = "";
+                    startTimeInput.value = "09:00";
+                    endTimeInput.value = "10:00";
                     dialog.showModal();
                 }
             });
-            
+
             calendar.render();
 
-            // --- ダイアログのボタンの動作 ---
+            closeDialogBtn.addEventListener('click', () => dialog.close());
 
-            // 「閉じる」ボタン
-            closeDialogBtn.addEventListener('click', function() {
-                dialog.close();
-            });
-
-            // 「予約申請する」ボタン
-            submitReservationBtn.addEventListener('click', function() {
-                
-                // フォームから値を取得
-                const reservationData = {
-                    date_str: clickedDateStr, // 保持しておいた日付
+            submitBtn.addEventListener('click', function() {
+                const data = {
+                    date_str: clickedDateStr,
                     facility_name: facilitySelect.value,
+                    signer_name: signerInput.value,
                     start_time: startTimeInput.value,
                     end_time: endTimeInput.value
                 };
 
-                // 必須項目の簡易チェック
-                if (!reservationData.facility_name || !reservationData.start_time || !reservationData.end_time) {
-                    alert('施設、開始時間、終了時間をすべて選択してください。');
+                if (!data.facility_name || !data.signer_name || !data.start_time || !data.end_time) {
+                    alert('すべての項目を入力してください。');
                     return;
                 }
 
-                // バックエンド(Django)にデータを送信
-                fetch("{% url 'team_scim:create_reservation' %}", { 
+                fetch("{% url 'team_scim:create_reservation' %}", {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken 
-                    },
-                    body: JSON.stringify(reservationData) // フォームデータをJSONに
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                    body: JSON.stringify(data)
                 })
-                .then(response => response.json().then(data => ({ status: response.status, body: data })))
-                .then(data => {
-                    // バックエンドからのレスポンスを処理
-                    // data.status は HTTPステータス (200, 409, 400 など)
-                    // data.body は Djangoが返したJSON ( {status: 'success', ...} や {status: 'error', ...} )
-                    
-                    alert(data.body.message); // サーバーからのメッセージを必ず表示
-
-                    if (data.status === 200 && data.body.status === 'success') {
-                        // 成功
-                        calendar.addEvent(data.body.newEvent); // カレンダーに即時反映
-                        dialog.close(); // ダイアログを閉じる
+                .then(response => response.json())
+                .then(res => {
+                    alert(res.message);
+                    if (res.status === 'success') {
+                        location.reload();
                     }
-                    // 失敗時 (400, 409, 500) は、メッセージを表示するだけ
-                    // (ダイアログは閉じないので、ユーザーが時間等を修正できる)
                 })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                    alert('通信エラーが発生しました。');
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('通信エラー');
                 });
             });
         });

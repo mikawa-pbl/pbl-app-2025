@@ -26,12 +26,46 @@
         plugins: [],
       };
     </script>
+    <style>
+    html, body {
+        background-color: #FBFEF9;
+        margin: 0;
+        padding: 0;
+    }
+
+    .back-btn {
+      position: fixed;
+      top: 128px;
+      left: 32px;
+      font-size: 48px;
+      color: #649CE4;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 9999;
+    }
+    .back-btn:focus { outline: none; }
+  </style>
+  <script>
+    // 元いた場所に戻る（安全版）
+    function goBack() {
+      if (window.history.length > 1) {
+        history.back();
+      } else if (document.referrer) {
+        window.location.href = document.referrer;
+      } else {
+        window.location.href = "{% url 'takenoko:main' %}";
+      }
+    }
+  </script>
   </head>
   <body>
     {% include "teams/takenoko/Components/header.html" %}
-    <div style="position: absolute; margin: 32px;">
-      <button type="submit" ><i class="fas fa-arrow-alt-circle-left" style="font-size: 64px; color: #649CE4"></i></button>
-    </div>
+    <!-- 戻る -->
+    <button type="button" class="back-btn" onclick="goBack()" aria-label="戻る">
+      <i class="fas fa-arrow-alt-circle-left"></i>
+    </button>
     <div style="position: relative; width:1184px; margin: 64px auto;">
         <div style="position: relative;">
             <div style="position: absolute; display: grid; grid-template-columns: 1fr; row-gap: 20px;">

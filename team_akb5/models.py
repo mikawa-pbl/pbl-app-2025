@@ -23,16 +23,21 @@ class StatusReport(models.Model):
         choices=STATUS_CHOICES
     )
 
-    LOCATION_CHOICES = [
-        ('A', 'A棟'),
-        ('B', 'B棟'),
-        ('C', 'C棟'),
-        ('D', 'D棟'),
+    FLOOR_CHOICES = [
+        (1, '1階'),
+        (2, '2階'),
+        (3, '3階'),
+        (4, '4階'),
+        (5, '5階'),
+        (6, '6階'),
+        (7, '7階'),
+        (8, '8階'),
+        (9, '9階'),
     ]
-    location = models.CharField(
-        verbose_name='場所',
-        max_length=1,
-        choices=LOCATION_CHOICES
+    floor = models.IntegerField(
+        verbose_name='階',
+        choices=FLOOR_CHOICES,
+        default=1
     )
 
     description = models.TextField(
@@ -66,4 +71,4 @@ class StatusReport(models.Model):
     def __str__(self):
         # Explicitly define the Tokyo timezone
         tokyo_tz = pytz.timezone('Asia/Tokyo')
-        return f'[{self.get_location_display()}] {self.get_symptom_display()} ({self.timestamp.astimezone(tokyo_tz).strftime("%Y-%m-%d %H:%M")})'
+        return f'[{self.floor}階] {self.get_symptom_display()} ({self.timestamp.astimezone(tokyo_tz).strftime("%Y-%m-%d %H:%M")})'

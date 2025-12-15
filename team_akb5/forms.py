@@ -5,10 +5,15 @@ import pytz
 
 class StatusReportForm(forms.ModelForm):
     
+    floor = forms.ChoiceField(
+        choices=StatusReport.FLOOR_CHOICES,
+        label='階',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     class Meta:
         model = StatusReport
-
-        fields = ['symptom', 'location', 'description', 'timestamp', 'latitude', 'longitude']
+        fields = ['symptom', 'floor', 'description', 'timestamp', 'latitude', 'longitude']
         
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
@@ -28,6 +33,7 @@ class StatusReportForm(forms.ModelForm):
         self.fields['timestamp'].required = False
         tokyo_tz = pytz.timezone("Asia/Tokyo")
         self.fields['timestamp'].initial = timezone.localtime(timezone.now()).astimezone(tokyo_tz).strftime('%Y-%m-%dT%H:%M')
+        self.fields['floor'].initial = 1
 
     def clean_timestamp(self):
         timestamp = self.cleaned_data.get('timestamp')

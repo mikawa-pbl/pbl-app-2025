@@ -2,45 +2,85 @@
 
 {% block title %}ネットワーク状況の投稿{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+    #map {
+        height: 400px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-    <h1>ネットワーク状況の投稿</h1>
-    <p>ネットワークの「遅い」「つながらない」などの状況を報告してください。</p>
-    <p><button id="get-location">現在位置を取得</button></p>
+<h1>ネットワーク状況の投稿</h1>
+<p>ネットワークの「遅い」「つながらない」などの状況を報告してください。</p>
+<p>地図をクリックして、位置情報を選択してください。</p>
+<div id="map"></div>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">投稿する</button>
-    </form>
-    
-    <hr>
-    <a href="{% url 'team_akb5:admin' %}">一覧に戻る</a>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">投稿する</button>
+</form>
 
+<hr>
+<a href="{% url 'team_akb5:admin' %}">一覧に戻る</a>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', (event) => {
-    const getLocationButton = document.getElementById('get-location');
-    const latitudeInput = document.getElementById('id_latitude');
-    const longitudeInput = document.getElementById('id_longitude');
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const latitudeInput = document.getElementById('id_latitude');
+        const longitudeInput = document.getElementById('id_longitude');
 
-    if (getLocationButton && latitudeInput && longitudeInput) {
-        getLocationButton.addEventListener('click', () => {
-            if ('geolocation' in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        latitudeInput.value = position.coords.latitude;
-                        longitudeInput.value = position.coords.longitude;
-                        alert(`位置情報を取得しました: Latitude ${position.coords.latitude}, Longtitude ${position.coords.longitude}`);
-                    },
-                    (error) => {
-                        console.error("Error getting location: ", error);
-                        alert("位置情報の取得に失敗しました。");
-                    }
-                );
-            } else {
-                alert("このブラウザは位置情報取得に対応していません。");
+        // Map coordinates
+        const lat1 = 34.70315;
+        const lon1 = 137.40365;
+        const lat2 = 34.70047;
+        const lon2 = 137.41189;
+
+        // Initialize map and set bounds
+        const map = L.map('map').fitBounds([
+            [lat1, lon1],
+            [lat2, lon2]
+        ]);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        let marker;
+        let isDragged = false;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const lat = urlParams.get('lat');
+        const lng = urlParams.get('lng');
+
+        if (lat && lng) {
+            const initialLatLng = L.latLng(lat, lng);
+            latitudeInput.value = lat;
+            longitudeInput.value = lng;
+            marker = L.marker(initialLatLng).addTo(map);
+            map.setView(initialLatLng, 15);
+        }
+
+        map.on('mousedown', function (e) {
+            isDragged = false;
+        });
+
+        map.on('mousemove', function (e) {
+            isDragged = true;
+        });
+
+        map.on('click', function (e) {
+            if (!isDragged) {
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+                marker = L.marker(e.latlng).addTo(map);
+                latitudeInput.value = e.latlng.lat;
+                longitudeInput.value = e.latlng.lng;
             }
         });
-    }
-});
+    });
 </script>
 {% endblock %}

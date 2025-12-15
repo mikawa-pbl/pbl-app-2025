@@ -4,41 +4,42 @@
 {% block title %}ネットワーク状況一覧 - User{% endblock %}
 
 {% block content %}
-    <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
 
-    <h1>ネットワーク状況一覧</h1>
-    <p>
-        <a href="{% url 'team_akb5:status_report_form' %}" role="button">＋ 新規投稿する</a>
-    </p>
 
-    <hr>
+<h1>ネットワーク状況一覧</h1>
+<div id="map" style="height: 400px; margin-bottom: 20px;"></div>
+<p>
+    <a href="{% url 'team_akb5:status_report_form' %}" role="button">＋ 新規投稿する</a>
+</p>
 
-    <table>
-        <thead>
-            <tr>
-                <th>発生時刻</th>
-                <th>場所</th>
-                <th>症状</th>
-                <th>詳細</th>
-                <th>投稿日時</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for report in reports %}
-            <tr>
-                <td>{{ report.timestamp|timezone:"Asia/Tokyo"|date:"Y/m/d H:i" }}</td>
-                <td>{{ report.get_location_display }}</td>
-                <td>{{ report.get_symptom_display }}</td>
-                <td>{{ report.description|linebreaksbr }}</td>
-                <td>{{ report.created_at|timezone:"Asia/Tokyo"|date:"Y/m/d H:i" }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5">現在、報告はありません。</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<hr>
+
+<table>
+    <thead>
+        <tr>
+            <th>発生時刻</th>
+            <th>階</th>
+            <th>症状</th>
+            <th>詳細</th>
+            <th>投稿日時</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for report in reports %}
+        <tr>
+            <td>{{ report.timestamp|timezone:"Asia/Tokyo"|date:"Y/m/d H:i" }}</td>
+            <td>{{ report.floor }}階</td>
+            <td>{{ report.get_symptom_display }}</td>
+            <td>{{ report.description|linebreaksbr }}</td>
+            <td>{{ report.created_at|timezone:"Asia/Tokyo"|date:"Y/m/d H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">現在、報告はありません。</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
 
 {% block scripts %}
@@ -63,30 +64,30 @@
         }).addTo(map);
 
         // GeoJSON data from Django context
-        const reportsData = {{reports_geojson|safe}};
+        const reportsData = {{ reports_geojson| safe}};
 
-        // Add markers to the map
-        L.geoJSON(reportsData, {
-            onEachFeature: function (feature, layer) {
-                if (feature.properties) {
-                    let popupContent = ``;
-                    if (feature.properties.symptom) {
-                        popupContent += `<strong>症状:</strong> ${feature.properties.symptom}<br>`;
-                    }
-                    if (feature.properties.location) {
-                        popupContent += `<strong>場所:</strong> ${feature.properties.location}<br>`;
-                    }
-                    if (feature.properties.description) {
-                        popupContent += `<strong>詳細:</strong> ${feature.properties.description}<br>`;
-                    }
-                    if (feature.properties.timestamp) {
-                        const date = new Date(feature.properties.timestamp);
-                        popupContent += `<strong>発生時刻:</strong> ${date.toLocaleString('ja-JP')}`;
-                    }
-                    layer.bindPopup(popupContent);
+    // Add markers to the map
+    L.geoJSON(reportsData, {
+        onEachFeature: function (feature, layer) {
+            if (feature.properties) {
+                let popupContent = ``;
+                if (feature.properties.symptom) {
+                    popupContent += `<strong>症状:</strong> ${feature.properties.symptom}<br>`;
                 }
+                if (feature.properties.floor) {
+                    popupContent += `<strong>階:</strong> ${feature.properties.floor}階<br>`;
+                }
+                if (feature.properties.description) {
+                    popupContent += `<strong>詳細:</strong> ${feature.properties.description}<br>`;
+                }
+                if (feature.properties.timestamp) {
+                    const date = new Date(feature.properties.timestamp);
+                    popupContent += `<strong>発生時刻:</strong> ${date.toLocaleString('ja-JP')}`;
+                }
+                layer.bindPopup(popupContent);
             }
-        }).addTo(map);
+        }
+    }).addTo(map);
     });
 </script>
 {% endblock %}

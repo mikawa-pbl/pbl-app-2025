@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
-from django.db.models import Avg # ★ Avgをインポート
+from django.db.models import Avg,F# ★ Avgをインポート
 
 from .models import Member, MenuRating # ★ MenuRating をインポート
+
 
 from .menu_pdf import get_today_menu, get_this_week_menu
 
@@ -123,3 +124,28 @@ def rate_menu(request):
         "error_message": error_message,
     }
     return render(request, "teams/team_kitajaki/rate_menu.html", context)
+
+def menu_ranking(request):
+    """
+    メニューの評価ランキングを表示するビュー
+    """
+    # メニュー名ごとにグループ化し、味と量の平均値を算出
+    qs = MenuRating.objects.values('menu_name').annotate(
+        avg_taste=Avg('taste_score'),
+        avg_volume=Avg('volume_score')
+    ).annotate(
+        # 総合得点 = (味平均 + 量平均) / 2
+        overall_score=(F('avg_taste') + F('avg_volume')) / 2.0
+    )
+
+    # 各部門のトップ5を取得 (降順)
+    ranking_overall = qs.order_by('-overall_score')[:5]
+    ranking_taste = qs.order_by('-avg_taste')[:5]
+    ranking_volume = qs.order_by('-avg_volume')[:5]
+
+    context = {
+        'ranking_overall': ranking_overall,
+        'ranking_taste': ranking_taste,
+        'ranking_volume': ranking_volume,
+    }
+    return render(request, 'teams/team_kitajaki/menu_ranking.html', context)

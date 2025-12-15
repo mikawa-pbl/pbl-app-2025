@@ -105,7 +105,7 @@
       
       {% if average_scores %}
         <div class="score-block" style="margin-top: -30px; margin-bottom: 50px;">
-          <h2 style="font-size: 1.1rem; color: #444;">みんなの評価（{{ average_scores.count }}件）</h2>
+          <h2 style="font-size: 1.1rem; color: #444;">みんなの評価（{{ average_scores.count }}件）上をクリックで評価</h2>
           <p style="font-size: 1.2rem; font-weight: bold; color: #333;">
             味: <span style="color: #d9534f;">{{ average_scores.avg_taste }}</span>/5点
             |
@@ -152,6 +152,11 @@
 
     <p class="back-link">
       <a href="{% url 'team_kitajaki:index' %}">トップに戻る</a>
+    </p>
+    <p style="text-align: center; margin: 20px 0;">
+      <a href="{% url 'team_kitajaki:menu_ranking' %}" style="display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">
+          🏆 人気メニューランキングを見る
+      </a>
     </p>
   </div>
 </body>

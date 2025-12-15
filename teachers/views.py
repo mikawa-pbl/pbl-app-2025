@@ -7,8 +7,31 @@ from .forms import PaperForm
 
 # 一覧
 def paper_list(request):
-    papers = Paper.objects.all().order_by('-year', 'title')
-    return render(request, 'teams/teachers/paper_list.html', {'papers': papers})
+    # 許可するソート項目（URLの?sort=... をDBのフィールド名にマップ）
+    sort_map = {
+        'title': 'title',
+        'author': 'author',
+        'year': 'year',
+        'booktitle': 'booktitle',
+        'submitter': 'submitter',
+        'submit_time': 'submit_time',
+    }
+
+    sort_key = request.GET.get('sort', 'year')   # デフォルト
+    direction = request.GET.get('dir', 'desc')   # 'asc' or 'desc'
+
+    order_field = sort_map.get(sort_key, 'year')
+    if direction == 'desc':
+        order_field = '-' + order_field
+
+    papers = Paper.objects.all().order_by(order_field, 'title')
+
+    context = {
+        'papers': papers,
+        'sort': sort_key,
+        'dir': direction,
+    }
+    return render(request, 'teams/teachers/paper_list.html', context)
 
 # 詳細
 def paper_detail(request, pk):
@@ -32,7 +55,7 @@ def paper_update(request, pk):
     if request.method == 'POST':
         form = PaperForm(request.POST, request.FILES, instance=paper)
         if form.is_valid():
-            paper = form.save()
+            form.save()
             return redirect('teachers:paper_detail', pk=paper.pk)
     else:
         form = PaperForm(instance=paper)
@@ -49,6 +72,24 @@ def paper_delete(request, pk):
 # 検索
 def paper_search(request):
     query = request.GET.get('q', '')
+
+    # 一覧と同じ sort 設定
+    sort_map = {
+        'title': 'title',
+        'author': 'author',
+        'year': 'year',
+        'booktitle': 'booktitle',
+        'submitter': 'submitter',
+        'submit_time': 'submit_time',
+    }
+
+    sort_key = request.GET.get('sort', 'year')
+    direction = request.GET.get('dir', 'desc')
+
+    order_field = sort_map.get(sort_key, 'year')
+    if direction == 'desc':
+        order_field = '-' + order_field
+
     results = Paper.objects.all()
 
     if query:
@@ -56,9 +97,10 @@ def paper_search(request):
             Q(title__icontains=query) |
             Q(author__icontains=query) |
             Q(booktitle__icontains=query) |
-            Q(doi__icontains=query) |
-            Q(url__icontains=query) |
             Q(keywords__icontains=query) |
+            Q(year__icontains=query) |
+            Q(submitter__icontains=query) |
+            Q(submit_time__icontains=query) |
             Q(imp_overview__icontains=query) |
             Q(imp_comparison__icontains=query) |
             Q(imp_idea__icontains=query) |
@@ -68,7 +110,13 @@ def paper_search(request):
             Q(note__icontains=query)
         )
 
-    return render(request, 'teams/teachers/paper_search.html', {
+    results = results.order_by(order_field, 'title')
+
+    context = {
         'query': query,
         'results': results,
-    })
+        'sort': sort_key,
+        'dir': direction,
+    }
+    return render(request, 'teams/teachers/paper_search.html', context)
+

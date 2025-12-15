@@ -1,61 +1,118 @@
-<h1>{{ paper.title }}</h1>
+{% extends "teams/teachers/base.html" %}
+{% block title %}{{ paper.title }} | Paper DB{% endblock %}
 
-<p><strong>ID:</strong> {{ paper.id }}</p>
-<p><strong>著者:</strong> {{ paper.author }}</p>
-<p><strong>掲載誌:</strong> {{ paper.booktitle }}</p>
-<p><strong>年:</strong> {{ paper.year }}</p>
-<p><strong>DOI:</strong> {{ paper.doi }}</p>
-<p><strong>URL:</strong> <a href="{{ paper.url }}" target="_blank">{{ paper.url }}</a></p>
-<p><strong>登録者:</strong> {{ paper.submitter }}</p>
-<p><strong>登録時刻:</strong> {{ paper.submit_time }}</p>
-<p><strong>キーワード:</strong> {{ paper.keywords }}</p>
+{% block content %}
+  <div class="grid">
+    <div class="card">
+      <div style="display:flex; gap:10px; align-items:flex-start; justify-content:space-between;">
+        <div>
+          <h2 style="font-size:20px; margin:0 0 6px;">{{ paper.title }}</h2>
+          <div class="muted" style="font-size:13px;">
+            {{ paper.author }} ・ {{ paper.year }} ・ {{ paper.booktitle }}
+          </div>
+        </div>
+        <span class="badge">ID: {{ paper.id }}</span>
+      </div>
 
-<h2>どんな論文か</h2>
-<p>{{ paper.imp_overview|linebreaksbr }}</p>
+      <div class="section">
+        <h3>メタ情報</h3>
+        <div class="meta">
+          <div class="k">DOI</div><div>{{ paper.doi }}</div>
+          <div class="k">URL</div><div><a href="{{ paper.url }}" target="_blank">{{ paper.url }}</a></div>
+          <div class="k">登録者</div><div>{{ paper.submitter }}</div>
+          <div class="k">登録時刻</div><div>{{ paper.submit_time|date:"Y-m-d H:i" }}</div>
+          <div class="k">キーワード</div><div>{{ paper.keywords|default:"—" }}</div>
+        </div>
+      </div>
 
-<h2>先行研究との比較</h2>
-<p>{{ paper.imp_comparison|linebreaksbr }}</p>
+      <div class="section">
+        <h3>どんな論文か</h3>
+        <div class="text">{{ paper.imp_overview|linebreaksbr }}</div>
+      </div>
 
-<h2>技術や手法の中心的アイデア</h2>
-<p>{{ paper.imp_idea|linebreaksbr }}</p>
+      <div class="section">
+        <h3>先行研究との比較</h3>
+        <div class="text">{{ paper.imp_comparison|linebreaksbr }}</div>
+      </div>
 
-<h2>有効性の検証方法と結果</h2>
-<p>{{ paper.imp_usefulness|linebreaksbr }}</p>
+      <div class="section">
+        <h3>中心的アイデア</h3>
+        <div class="text">{{ paper.imp_idea|linebreaksbr }}</div>
+      </div>
 
-<h2>議論（利点，欠点，制限）</h2>
-<p>{{ paper.imp_discussion|linebreaksbr }}</p>
+      <div class="section">
+        <h3>有効性（検証方法と結果）</h3>
+        <div class="text">{{ paper.imp_usefulness|linebreaksbr }}</div>
+      </div>
 
-{% if paper.imp_relation %}
-<h2>自身の研究との関連性</h2>
-<p>{{ paper.imp_relation|linebreaksbr }}</p>
-{% endif %}
+      <div class="section">
+        <h3>議論（利点・欠点・制限）</h3>
+        <div class="text">{{ paper.imp_discussion|linebreaksbr }}</div>
+      </div>
 
-{% if paper.note %}
-<h2>その他</h2>
-<p>{{ paper.note|linebreaksbr }}</p>
-{% endif %}
+      {% if paper.imp_relation %}
+      <div class="section">
+        <h3>自身の研究との関連性</h3>
+        <div class="text">{{ paper.imp_relation|linebreaksbr }}</div>
+      </div>
+      {% endif %}
 
-<h2>関連ファイル</h2>
-<ul>
-  {% if paper.paper_file %}
-  <li>論文PDF: <a href="{{ paper.paper_file.url }}" target="_blank">開く</a></li>
-  {% endif %}
+      {% if paper.note %}
+      <div class="section">
+        <h3>その他</h3>
+        <div class="text">{{ paper.note|linebreaksbr }}</div>
+      </div>
+      {% endif %}
 
-  {% if paper.rc_slide %}
-  <li>輪講スライド: <a href="{{ paper.rc_slide.url }}" target="_blank">開く</a></li>
-  {% endif %}
+      <div class="footer-actions">
+        <a class="btn primary" href="{% url 'teachers:paper_update' paper.pk %}">編集</a>
+        <a class="btn danger" href="{% url 'teachers:paper_delete' paper.pk %}">削除</a>
+      </div>
+    </div>
 
-  {% if paper.paper_figure %}
-  <li>画像ファイル:
-    <a href="{{ paper.paper_figure.url }}" target="_blank">ファイルを開く</a><br>
-    <!-- 画像ならブラウザ上に表示される -->
-    <img src="{{ paper.paper_figure.url }}" alt="論文画像" style="max-width:400px; height:auto;">
-  </li>
-  {% endif %}
-</ul>
+    <div class="card">
+      <h2>添付ファイル</h2>
 
-<p>
-  <a href="{% url 'teachers:paper_update' paper.pk %}">この論文を修正</a> |
-  <a href="{% url 'teachers:paper_delete' paper.pk %}">この論文を削除</a> |
-  <a href="{% url 'teachers:paper_list' %}">一覧に戻る</a>
-</p>
+      <div class="filebox section" style="border-top:none; padding-top:0;">
+        {% if paper.paper_file %}
+          <div><span class="k muted">論文PDF</span><br>
+            <a class="btn" href="{{ paper.paper_file.url }}" target="_blank">開く</a>
+          </div>
+        {% else %}
+          <div class="muted">論文PDF：なし</div>
+        {% endif %}
+      </div>
+
+      <div class="filebox section">
+        {% if paper.rc_slide %}
+          <div><span class="k muted">輪講スライド</span><br>
+            <a class="btn" href="{{ paper.rc_slide.url }}" target="_blank">開く</a>
+          </div>
+        {% else %}
+          <div class="muted">輪講スライド：なし</div>
+        {% endif %}
+      </div>
+
+      <div class="filebox section">
+        {% if paper.paper_figure %}
+          <div><span class="k muted">画像ファイル</span><br>
+            <a class="btn" href="{{ paper.paper_figure.url }}" target="_blank">ファイルを開く</a>
+          </div>
+
+          {# 画像拡張子のときだけ img 表示 #}
+          {% with u=paper.paper_figure.url|lower %}
+            {% if u|slice:"-4:" == ".png" or u|slice:"-4:" == ".jpg" or u|slice:"-5:" == ".jpeg" %}
+              <div style="margin-top:10px;">
+                <img class="figure" src="{{ paper.paper_figure.url }}" alt="figure">
+              </div>
+            {% else %}
+              <div class="help">※PDFの場合はリンクから開いてください</div>
+            {% endif %}
+          {% endwith %}
+        {% else %}
+          <div class="muted">画像ファイル：なし</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Papers{% endblock %}</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#1f2937;        /* 濃いグレー */
+      --muted:#6b7280;       /* 薄いグレー */
+      --line:#e5e7eb;        /* 罫線 */
+      --accent:#2563eb;     /* 青 */
+      --accent2:#059669;    /* 緑 */
+      --danger:#dc2626;
+    }
+    *{box-sizing:border-box}
+   body{
+      margin:0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    color:var(--text);
+    }
+
+    h2, h3 { color:#1e3a8a; }
+
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .container{max-width:1100px; margin:0 auto; padding:24px}
+    .topbar{
+        display:flex;
+        gap:12px;
+        align-items:center;
+        justify-content:space-between;
+        padding:14px 18px;
+        background:#ffffff;
+        border:1px solid var(--line);
+        border-radius:14px;
+    }
+    .brand{display:flex; flex-direction:column; gap:2px}
+    .brand h1{font-size:16px; margin:0}
+    .brand p{font-size:12px; margin:0; color:var(--muted)}
+    .nav{display:flex; gap:10px; flex-wrap:wrap}
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:#ffffff;
+  color:var(--text);
+  font-size:13px;
+}
+
+    .btn:hover{
+        background:#f3f4f6;
+    }
+    .btn.primary{
+        background: var(--accent);
+        border-color: var(--accent);
+        color:#ffffff;
+    }
+    .btn.primary:hover{
+        background:#1d4ed8;
+    }
+    .btn.danger{
+        background:#fee2e2;
+        border-color:#fecaca;
+        color:#991b1b;
+    }
+
+    .grid{display:grid; grid-template-columns: 1.2fr .8fr; gap:16px; margin-top:16px}
+    .card{
+    background: var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.06);
+    }
+    .card h2{margin:0 0 10px; font-size:16px}
+
+
+    .meta{
+        display:grid;
+        grid-template-columns: 140px 1fr;
+        gap:10px 14px;
+        font-size:13px;
+    }
+
+    .meta .k{
+        color:var(--muted);
+        font-weight:500;
+    }
+
+    .badge{display:inline-flex; padding:4px 8px; border-radius:999px; font-size:12px;
+      border:1px solid var(--line); color:var(--muted); background: rgba(255,255,255,.03)
+    }
+    .section{margin-top:14px; padding-top:14px; border-top:1px dashed var(--line); }
+    .section h3{margin:0 0 8px; font-size:14px}
+    .text{color:var(--text); font-size:14px; line-height:1.75}
+    .muted{color:var(--muted)}
+    .field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px}
+    label{font-size:12px; color:var(--muted)}
+
+    input[type="text"], input[type="url"], input[type="number"], textarea, select, input[type="file"]{
+      width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--line);
+      background: rgba(255,255,255,.04); color:var(--text); outline:none;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="number"],
+        textarea,
+        select,
+    input[type="file"]{
+        width:100%;
+        padding:9px 11px;
+        border-radius:10px;
+        border:1px solid var(--line);
+        background:#ffffff;
+        color:var(--text);
+    }
+
+    textarea{
+        min-height:110px;
+    }
+
+    .help{font-size:12px; color:var(--muted)}
+    .errorlist{margin:6px 0 0; padding-left:18px; color: var(--danger); font-size:12px}
+    .footer-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    .filebox{display:flex; flex-direction:column; gap:8px}
+    img.figure{
+        max-width:100%;
+        height:auto;
+        border-radius:10px;
+        border:1px solid var(--line);
+        background:#ffffff;
+    }
+
+    @media (max-width: 900px){
+      .grid{grid-template-columns:1fr}
+      .meta{grid-template-columns: 120px 1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Paper DB</h1>
+        <p class="muted">teachers app</p>
+      </div>
+      <div class="nav">
+        <a class="btn" href="{% url 'teachers:paper_list' %}">一覧</a>
+        <a class="btn" href="{% url 'teachers:paper_search' %}">検索</a>
+        <a class="btn primary" href="{% url 'teachers:paper_create' %}">新規登録</a>
+      </div>
+    </div>
+
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

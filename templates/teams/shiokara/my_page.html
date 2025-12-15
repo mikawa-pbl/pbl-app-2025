@@ -13,16 +13,82 @@
   <h1>マイページ</h1>
 
   {% if person %}
-    <p>{{ person.student_id }} さんの登録情報</p>
-    <ul>
-      <li>学籍番号: {{ person.student_id }}</li>
-      <li>課程: {{ person.course }}</li>
-      <li>学年: {{ person.grade }} 年</li>
-      <li>学科・専攻: {{ person.department_name }}</li>
-      <li>研究分野: {{ person.lab_field }}</li>
-      <li>ポイント: <strong>{{ person.points }}</strong> pt</li>
-      <li>登録日時: {{ person.created_at|date:"Y/m/d H:i" }}</li>
-    </ul>
+    <section style="background: white; padding: 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 24px;">
+      <h2 style="margin-top: 0;">プロフィール設定</h2>
+      
+      <form method="post" enctype="multipart/form-data" style="max-width: 600px;">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px; text-align: center;">
+          {% if person.icon_picture %}
+            <img src="{% static person.icon_picture %}" alt="アイコン" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 3px solid #cc0000;">
+          {% else %}
+            <img src="{% static 'image/person.png' %}" alt="デフォルトアイコン" style="width: 80px; height: 80px; object-fit: cover;">
+          {% endif %}
+          <div style="margin-top: 12px;">
+            <label for="id_icon" style="cursor: pointer; background: #0066cc; color: white; padding: 8px 16px; border-radius: 6px; display: inline-block;">
+              アイコンを選択
+            </label>
+            <input type="file" name="icon" id="id_icon" accept="image/*" style="display: none;" onchange="previewIcon(this)">
+          </div>
+          <small style="display: block; margin-top: 8px; color: #666;">※ 画像ファイル (jpg, png, gif) をアップロード</small>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label for="id_nickname" style="display: block; margin-bottom: 6px; font-weight: 600;">ニックネーム:</label>
+          <input type="text" name="nickname" id="id_nickname" value="{{ person.nickname }}" maxlength="50" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; box-sizing: border-box;">
+          <small style="display: block; margin-top: 4px; color: #666;">※ 未設定の場合は学籍番号が表示されます</small>
+        </div>
+
+        <button type="submit" style="padding: 12px 24px; background: #cc0000; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+          保存
+        </button>
+      </form>
+
+      <script>
+        function previewIcon(input) {
+          if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const img = input.closest('form').querySelector('img');
+              img.src = e.target.result;
+              img.style.width = '100px';
+              img.style.height = '100px';
+              img.style.borderRadius = '50%';
+              img.style.border = '3px solid #cc0000';
+            };
+            reader.readAsDataURL(input.files[0]);
+          }
+        }
+      </script>
+    </section>
+
+    <section style="background: white; padding: 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 24px;">
+      <h2 style="margin-top: 0;">登録情報</h2>
+      <ul style="list-style: none; padding: 0;">
+        <li style="margin-bottom: 12px;"><strong>学籍番号:</strong> {{ person.student_id }}</li>
+        <li style="margin-bottom: 12px;"><strong>課程:</strong> {{ person.get_course_display }}</li>
+        <li style="margin-bottom: 12px;"><strong>学年:</strong> {{ person.grade }} 年</li>
+        <li style="margin-bottom: 12px;"><strong>学科・専攻:</strong> {{ person.department_name }}</li>
+        <li style="margin-bottom: 12px;"><strong>研究分野:</strong> {{ person.lab_field }}</li>
+        <li style="margin-bottom: 12px;"><strong>ポイント:</strong> <strong style="font-size: 1.2rem; color: #cc0000;">{{ person.points }}</strong> pt</li>
+        <li style="margin-bottom: 12px;"><strong>登録日時:</strong> {{ person.created_at|date:"Y/m/d H:i" }}</li>
+      </ul>
+      
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+        <a href="{% url 'shiokara:site_feedback' %}" style="
+          display: inline-block;
+          padding: 10px 20px;
+          background: #0066cc;
+          color: white;
+          text-decoration: none;
+          border-radius: 6px;
+          transition: background 0.2s;
+        " onmouseover="this.style.background='#0055aa'" onmouseout="this.style.background='#0066cc'">
+          💬 サイト要望を送信してポイント獲得
+        </a>
+      </div>
+    </section>
   {% else %}
     <p>ログイン情報が見つかりませんでした。</p>
   {% endif %}

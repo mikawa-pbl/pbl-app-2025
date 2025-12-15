@@ -10,6 +10,8 @@
       "lab_field": "機械・システムデザインコース",
       "gender": "",
       "password": "1234",
+      "nickname": "",
+      "icon_picture": "",
       "created_at": "2025-12-12T08:03:41.881214+00:00",
       "seen_dept_tutorial": true,
       "seen_search_tutorial": true,
@@ -28,11 +30,33 @@
       "lab_field": "分子制御化学分野",
       "gender": "other",
       "password": "1234",
+      "nickname": "",
+      "icon_picture": "",
       "created_at": "2025-12-15T06:06:10.559234+00:00",
       "seen_dept_tutorial": true,
       "seen_search_tutorial": true,
       "seen_points_tutorial": true,
-      "points": 9
+      "points": 8
+    }
+  },
+  {
+    "model": "shiokara.person",
+    "pk": 2,
+    "fields": {
+      "student_id": "233351",
+      "course": "B",
+      "grade": 2,
+      "department_name": "4系",
+      "lab_field": "分子制御化学分野",
+      "gender": "other",
+      "password": "1234",
+      "nickname": "ともちゃん",
+      "icon_picture": "icon_picture/233351.png",
+      "created_at": "2025-12-15T06:06:10.559234+00:00",
+      "seen_dept_tutorial": true,
+      "seen_search_tutorial": true,
+      "seen_points_tutorial": true,
+      "points": 8
     }
   }
 ]

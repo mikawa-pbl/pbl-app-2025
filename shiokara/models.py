@@ -115,6 +115,10 @@ class Person(models.Model):
     ]
     gender = models.CharField("性別", max_length=10, choices=GENDER_CHOICES, blank=True)
     password = models.CharField("パスワード", max_length=128)
+    
+    # ユーザー設定
+    nickname = models.CharField("ニックネーム", max_length=50, blank=True, default="")
+    icon_picture = models.CharField("アイコン画像", max_length=200, blank=True, default="")
 
     created_at = models.DateTimeField(auto_now_add=True)
     # チュートリアル表示済みフラグ（各ページごと）
@@ -152,3 +156,18 @@ class CompanyView(models.Model):
 
     def __str__(self) -> str:
         return f"{self.person.student_id} viewed {self.company.name} at {self.viewed_at.isoformat()}"
+
+
+class SiteFeedback(models.Model):
+    """サイトへの要望・フィードバック。投稿すると1ポイント付与される。"""
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="feedbacks")
+    feedback_text = models.TextField("要望・フィードバック")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "サイト要望"
+        verbose_name_plural = "サイト要望"
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.person.student_id} のフィードバック ({self.created_at.date()})"

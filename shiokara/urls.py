@@ -13,6 +13,7 @@ urlpatterns = [
     path("mypage/", views.my_page, name="my_page"),
     path("tutorial/seen/", views.tutorial_seen, name="tutorial_seen"),
     path("sitemap/", views.sitemap, name="sitemap"),
+    path("feedback/", views.site_feedback, name="site_feedback"),
 
     # 既存
     path("", views.department_list, name="department_list"),

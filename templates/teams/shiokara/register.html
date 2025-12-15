@@ -1,81 +1,224 @@
 {% extends "teams/shiokara/base.html" %}
+{% load static %}
 
 {% block title %}学生情報登録 - 就活支援サービス{% endblock %}
 
 {% block content %}
-<h1>学生情報登録</h1>
+<style>
+    .tut-logo-box {
+        flex: 0 0 auto;
+        order: 2;
+        margin-left: auto;
+    }
 
-<p>
-  学籍番号・学年・研究分野などを入力して <strong>新規登録</strong> してください。<br />
-  すでに登録済みの方は、ログインメニューからログインしてください。
-</p>
+    .tut-page-title {
+        order: 1;
+    }
 
-{% if error %}
-  <p style="color: red;">{{ error }}</p>
-{% endif %}
+    .tut-logo-img {
+        max-height: 56px;
+        width: auto;
+        display: block;
+    }
 
-<form method="post">
-  {% csrf_token %}
+    .tut-page-title h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #42413F;
+    }
 
-  <p>
-    <label for="id_student_id">学籍番号:</label><br />
-    <input type="text" name="student_id" id="id_student_id" />
-  </p>
+    .tut-page-lead {
+        margin: 4px 0 0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
 
-  <p>
-    課程:<br />
-    <label><input type="radio" name="course" value="B" id="id_course_b" /> 学部(B)</label><br />
-    <label><input type="radio" name="course" value="M" id="id_course_m" /> 修士(M)</label><br />
-    <label><input type="radio" name="course" value="D" id="id_course_d" /> 博士(D)</label>
-  </p>
+    .form-field {
+        margin-bottom: 24px;
+    }
 
-  <p>
-    <label for="id_grade">学年:</label><br />
-    <select name="grade" id="id_grade" disabled>
-      <option value="">課程を先に選択してください</option>
-    </select>
-  </p>
+    .form-field label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #333;
+    }
 
-  <p>
-    <label for="id_department_name">学科・専攻:</label><br />
-    <select name="department_name" id="id_department_name" disabled>
-      <option value="">課程を先に選択してください</option>
-      <option value="1系">機械工学(1系)</option>
-      <option value="2系">電気・電子情報工学(2系)</option>
-      <option value="3系">情報・知能工学(3系)</option>
-      <option value="4系">応用化学・生命工学(4系)</option>
-      <option value="5系">建築・都市システム学(5系)</option>
-    </select>
-  </p>
+    .form-field input[type="text"],
+    .form-field input[type="password"],
+    .form-field select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
 
-  <p>
-    <label for="id_lab_field">研究分野:</label><br />
-    <select name="lab_field" id="id_lab_field" disabled>
-      <option value="">学科・専攻を先に選択してください</option>
-    </select>
-  </p>
+    .form-field input:focus,
+    .form-field select:focus {
+        outline: none;
+        border-color: #cc0000;
+        box-shadow: 0 0 0 2px rgba(204, 0, 0, 0.1);
+    }
 
-  <p>
-    <label for="id_gender">性別:</label><br />
-    <select name="gender" id="id_gender">
-      <option value="">選択してください</option>
-      <option value="male">男性</option>
-      <option value="female">女性</option>
-      <option value="other">その他</option>
-    </select>
-  </p>
+    .form-field small {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.85rem;
+        color: #666;
+    }
 
-  <p>
-    <label for="id_password">パスワード:</label><br />
-    <input type="password" name="password" id="id_password" />
-  </p>
+    .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
 
-  <!-- ★ 新規登録専用ボタン + 戻るボタン -->
-  <p>
-    <button type="submit">新規登録</button>
-    <button type="button" onclick="location.href='{% url 'shiokara:login' %}'">戻る</button>
-  </p>
-</form>
+    .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: normal;
+    }
+
+    .error-message {
+        background: #ffebee;
+        color: #c62828;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border-left: 4px solid #c62828;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+    }
+
+    .form-actions button {
+        flex: 1;
+        padding: 12px 24px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .form-actions button[type="submit"] {
+        background: #cc0000;
+        color: white;
+    }
+
+    .form-actions button[type="submit"]:hover {
+        background: #aa0000;
+    }
+
+    .form-actions button[type="button"] {
+        background: #f5f5f5;
+        color: #333;
+        border: 1px solid #ddd;
+    }
+
+    .form-actions button[type="button"]:hover {
+        background: #e8e8e8;
+    }
+
+    @media (max-width: 640px) {
+        .tut-page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .tut-logo-img {
+            max-height: 44px;
+        }
+        .tut-page-title h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" with active_page='register' %}
+
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
+        <header class="tut-page-header page-header">
+            <div class="tut-logo-box">
+                <img src="{% static 'image/mark_gikanavi.png' %}"
+                     alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
+            </div>
+            <div class="tut-page-title">
+                <h1>学生情報登録</h1>
+                <p class="tut-page-lead page-lead">
+                    学籍番号・学年・研究分野などを入力して新規登録してください。
+                </p>
+            </div>
+        </header>
+
+        {% if error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" style="max-width: 700px; margin-top: 24px;">
+            {% csrf_token %}
+
+            <div class="form-field">
+                <label for="id_student_id">学籍番号:</label>
+                <input type="text" name="student_id" id="id_student_id" value="{{ student_id }}" required>
+            </div>
+
+            <div class="form-field">
+                <label>課程:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="course" value="B" id="id_course_b" {% if course == "B" %}checked{% endif %}> 学部(B)</label>
+                    <label><input type="radio" name="course" value="M" id="id_course_m" {% if course == "M" %}checked{% endif %}> 修士(M)</label>
+                    <label><input type="radio" name="course" value="D" id="id_course_d" {% if course == "D" %}checked{% endif %}> 博士(D)</label>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label for="id_grade">学年:</label>
+                <select name="grade" id="id_grade" disabled>
+                    <option value="">課程を先に選択してください</option>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="id_department_name">学科・専攻:</label>
+                <select name="department_name" id="id_department_name" disabled>
+                    <option value="">課程を先に選択してください</option>
+                    <option value="1系">機械工学(1系)</option>
+                    <option value="2系">電気・電子情報工学(2系)</option>
+                    <option value="3系">情報・知能工学(3系)</option>
+                    <option value="4系">応用化学・生命工学(4系)</option>
+                    <option value="5系">建築・都市システム学(5系)</option>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="id_lab_field">研究分野:</label>
+                <select name="lab_field" id="id_lab_field" disabled>
+                    <option value="">学科・専攻を先に選択してください</option>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="id_password">パスワード:</label>
+                <input type="password" name="password" id="id_password" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">新規登録</button>
+                <button type="button" onclick="location.href='{% url 'shiokara:login' %}'">戻る</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {

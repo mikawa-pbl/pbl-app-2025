@@ -10,7 +10,7 @@ from django.conf import settings
 import json
 from pathlib import Path
 
-from .models import Department, Company, CompanyReview, Person, CompanyView
+from .models import Department, Company, CompanyReview, Person, CompanyView, SiteFeedback
 from .forms import PersonLoginForm  # いまは未使用でもOK
 
 
@@ -87,6 +87,8 @@ def append_person_to_fixture(person: Person) -> None:
             "lab_field": person.lab_field,
             "gender": getattr(person, 'gender', ''),
             "password": person.password,
+            "nickname": getattr(person, 'nickname', ''),
+            "icon_picture": getattr(person, 'icon_picture', ''),
             "created_at": person.created_at.isoformat(),
             "seen_dept_tutorial": person.seen_dept_tutorial,
             "seen_search_tutorial": person.seen_search_tutorial,
@@ -250,6 +252,52 @@ def my_page(request):
     if not person:
         return redirect("shiokara:login")
 
+    # POST処理: ニックネームとアイコンの更新
+    if request.method == "POST":
+        nickname = request.POST.get("nickname", "").strip()
+        icon_file = request.FILES.get("icon")
+        
+        # ニックネームを更新
+        if nickname != person.nickname:
+            Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(nickname=nickname)
+        
+        # アイコン画像をアップロード
+        if icon_file:
+            import os
+            from django.conf import settings
+            
+            # ファイル名を生成（学籍番号_元のファイル名）
+            ext = os.path.splitext(icon_file.name)[1]
+            safe_filename = f"{person.student_id}{ext}"
+            
+            # shiokara/static/icon_picture/ に保存
+            icon_dir = Path(settings.BASE_DIR) / "shiokara" / "static" / "icon_picture"
+            icon_dir.mkdir(parents=True, exist_ok=True)
+            icon_path = icon_dir / safe_filename
+            
+            # ファイルを保存
+            with open(icon_path, 'wb+') as destination:
+                for chunk in icon_file.chunks():
+                    destination.write(chunk)
+            
+            # DBに相対パスを保存（staticから見た相対パス）
+            relative_path = f"icon_picture/{safe_filename}"
+            Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(icon_picture=relative_path)
+            
+            # フィクスチャのicon_pictureディレクトリにもコピー
+            fixture_icon_dir = Path(settings.BASE_DIR) / "shiokara" / "fixtures" / "icon_picture"
+            fixture_icon_dir.mkdir(parents=True, exist_ok=True)
+            fixture_icon_path = fixture_icon_dir / safe_filename
+            with open(fixture_icon_path, 'wb+') as destination:
+                icon_path_obj = open(icon_path, 'rb')
+                destination.write(icon_path_obj.read())
+                icon_path_obj.close()
+            
+            # フィクスチャも更新
+            append_person_to_fixture(Person.objects.using(DB_ALIAS).get(pk=person.pk))
+        
+        return redirect("shiokara:my_page")
+
     # リフレッシュして favorites を取得
     try:
         refreshed = Person.objects.using(DB_ALIAS).get(pk=person.pk)
@@ -259,6 +307,50 @@ def my_page(request):
         favorites = []
 
     return render_with_person(request, "teams/shiokara/my_page.html", {"person": refreshed, "favorites": favorites})
+
+
+def site_feedback(request):
+    """
+    サイトへの要望・フィードバックを投稿するページ。
+    投稿すると1ポイント付与される。
+    """
+    person = get_current_person(request)
+    if not person:
+        return redirect("shiokara:login")
+
+    error = None
+    success = False
+
+    if request.method == "POST":
+        feedback_text = request.POST.get("feedback_text", "").strip()
+
+        if not feedback_text:
+            error = "要望を入力してください。"
+        elif len(feedback_text) < 10:
+            error = "要望は10文字以上入力してください。"
+        else:
+            # フィードバックを保存
+            SiteFeedback.objects.using(DB_ALIAS).create(
+                person=person,
+                feedback_text=feedback_text
+            )
+
+            # ポイントを付与（+1）
+            Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(points=F('points') + 1)
+
+            # セッションに付与情報を入れてリダイレクト先でポップアップ表示する
+            request.session['points_awarded'] = 1
+            success = True
+
+    # 既存のフィードバック件数を取得
+    feedback_count = SiteFeedback.objects.using(DB_ALIAS).filter(person=person).count()
+
+    context = {
+        "error": error,
+        "success": success,
+        "feedback_count": feedback_count,
+    }
+    return render_with_person(request, "teams/shiokara/site_feedback.html", context)
 
 
 # =========================
@@ -373,27 +465,27 @@ def company_search(request):
         )
     )
 
-    # キーワード検索
+    # キーワード検索（常にAND条件で適用）
     if query:
         companies = companies.filter(
             Q(name__icontains=query) | Q(description__icontains=query)
         )
 
-    # フィルタ条件を Q のリストとして組み立て
-    filter_qs = []
-
-    # 学科フィルタ（複数指定なら OR）
+    # 学科フィルタ（常にAND条件で適用、複数指定なら OR）
     if dept_shorts:
         q_dept = Q()
         for short in dept_shorts:
             if short:
                 q_dept |= Q(departments__short_name=short)
         if q_dept:
-            filter_qs.append(q_dept)
+            companies = companies.filter(q_dept)
 
-    # 研究室コード（oncampus_briefing に含まれているか）
+    # 研究室コード（常にAND条件で適用）
     if lab_code:
-        filter_qs.append(Q(oncampus_briefing__icontains=lab_code))
+        companies = companies.filter(Q(oncampus_briefing__icontains=lab_code))
+
+    # 企業フィルタ（勤務地、推薦あり、学内説明会あり）のみAND/OR対象
+    company_filter_qs = []
 
     # 勤務地フィルタ
     if area_key:
@@ -402,22 +494,22 @@ def company_search(request):
             q_area = Q()
             for kw in keywords:
                 q_area |= Q(area__icontains=kw)
-            filter_qs.append(q_area)
+            company_filter_qs.append(q_area)
 
     # 推薦あり
     if recommend == "1":
-        filter_qs.append(Q(tut_recommendation=True))
+        company_filter_qs.append(Q(tut_recommendation=True))
 
     # 学内説明会あり（oncampus_briefing が空/NULLでないもの）
     if briefing == "1":
-        filter_qs.append(
+        company_filter_qs.append(
             Q(oncampus_briefing__isnull=False) & ~Q(oncampus_briefing="")
         )
 
-    # AND / OR でまとめて適用
-    if filter_qs:
-        combined_q = filter_qs[0]
-        for q in filter_qs[1:]:
+    # 企業フィルタのみAND / OR でまとめて適用
+    if company_filter_qs:
+        combined_q = company_filter_qs[0]
+        for q in company_filter_qs[1:]:
             if filter_logic == "or":
                 combined_q |= q
             else:

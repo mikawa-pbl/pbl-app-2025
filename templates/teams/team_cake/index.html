@@ -12,7 +12,7 @@
             <!-- <a href="/team_cake/goods/{{ good.id }}/" class="card-link"> -->
             <!-- <a href="#" class="card-link"> -->
             <a href="#" class="card-link"
-                onclick="openModal('{{ good.name }}', '{{ good.price }}', '{{ good.description }}')">
+                onclick="openModal('{{ good.id }}', '{{ good.name }}', '{{ good.price }}', '{{ good.description }}')">
                 <div class="card hoverable">
                     <div class="card-image">
                         {% if good.image_filename %}
@@ -49,6 +49,11 @@
             <p><strong>Price:</strong> ¥<span id="modalPrice"></span></p>
         </div>
         <div class="modal-footer">
+            <a id="editLink" href="#" class="waves-effect waves-light btn-flat">編集</a>
+            <form id="deleteForm" method="post" action="" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="waves-effect waves-red btn-flat red-text">削除</button>
+            </form>
             <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
         </div>
     </div>
@@ -57,12 +62,18 @@
 {% include 'teams/team_cake/footer.html' %}
 
 <script>
-    function openModal(title, price, description) {
+    function openModal(id, title, price, description) {
         if (event) event.preventDefault(); // Prevent default behavior of the link
         document.getElementById('modalTitle').innerText = title;
         document.getElementById('modalDescription').innerText = description;
         document.getElementById('modalPrice').innerText = price;
-        document.getElementById('modalDescription').innerText = description;
+        
+        const deleteForm = document.getElementById('deleteForm');
+        deleteForm.action = `/team_cake/delete_good/${id}/`;
+
+        const editLink = document.getElementById('editLink');
+        editLink.href = `/team_cake/edit_good/${id}/`;
+
         const modal = document.getElementById('detailModal');
         const instance = M.Modal.init(modal);
         instance.open();

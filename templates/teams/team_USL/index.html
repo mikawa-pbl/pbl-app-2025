@@ -219,38 +219,29 @@
 
         <!-- 詳細マップ（フロアマップ） -->
         <!-- 詳細マップ（フロアマップ） -->
+        <!-- 詳細マップ（フロアマップ） -->
         <section class="map-card">
-            <h2 class="map-title">詳細マップ（フロアマップ）</h2>
-            <div class="map-wrapper">
-                <div class="map-wrapper-inner">
+        <h2 class="map-title">詳細マップ（フロアマップ）</h2>
+        <div class="map-wrapper">
+            <div class="map-wrapper-inner">
 
-                    {% if room_number %}
-                        {% with first=room_number|slice:"0:1" %}
+            {% if floor_image_url %}
+                <img src="{{ floor_image_url }}" alt="フロア画像">
 
-                            {% if first == "1" %}
-                                <img src="images/A-1.png" alt="A-1フロア図">
+                {# x,y が取れたときだけ赤点を出す（不要ならこのifごと削除OK） #}
+                {% if x is not None and y is not None %}
+                <div class="cursor-dot" style="left: {{ x }}%; top: {{ y }}%;"></div>
+                {% endif %}
 
-                            {% elif first == "2" %}
-                                <img src="images/A-2.png" alt="A-2フロア図">
+            {% else %}
+                {# 初期表示 or DBで見つからなかった場合のデフォルト #}
+                <img src="images/A-3.png" alt="フロア画像">
+            {% endif %}
 
-                            {% elif first == "3" %}
-                                <img src="images/A-3.png" alt="A-3フロア図">
-
-                            {% else %}
-                                <!-- 想定外の番号 -->
-                                <img src="images/A-3.png" alt="フロア画像">
-                            {% endif %}
-
-                        {% endwith %}
-
-                    {% else %}
-                        <!-- room_number 未入力 -->
-                        <img src="images/A-3.png" alt="フロア画像">
-                    {% endif %}
-
-                </div>
             </div>
+        </div>
         </section>
+
 
     </main>
 </div>

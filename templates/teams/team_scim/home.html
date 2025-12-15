@@ -11,10 +11,10 @@
         body { font-family: sans-serif; padding: 20px; background-color: #f4f6f9; }
 
         /* ステータス色設定 */
-        .status-pending-signature { background-color: #f1c40f; border-color: #f1c40f; color: #000; } /* 黄色 */
-        .status-pending-approval { background-color: #e67e22; border-color: #e67e22; color: #fff; } /* オレンジ */
-        .status-approved { background-color: #27ae60; border-color: #27ae60; color: #fff; } /* 緑 */
-        .status-rejected { background-color: #c0392b; border-color: #c0392b; color: #fff; } /* 赤 */
+        .status-pending-signature { background-color: #f1c40f; border-color: #f1c40f; color: #000; }
+        .status-pending-approval { background-color: #e67e22; border-color: #e67e22; color: #fff; }
+        .status-approved { background-color: #27ae60; border-color: #27ae60; color: #fff; }
+        .status-rejected { background-color: #c0392b; border-color: #c0392b; color: #fff; }
 
         /* ヘッダー */
         .header-container {
@@ -22,9 +22,22 @@
             background: white; padding: 15px 25px; border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px;
         }
+        .header-titles h1 { margin: 0; font-size: 1.5rem; color: #2c3e50; }
+        .header-titles p { margin: 5px 0 0; font-size: 0.9rem; color: #7f8c8d; font-weight: bold; }
+
         .user-info { display: flex; align-items: center; gap: 15px; position: relative; }
-        .role-badge { padding: 5px 12px; border-radius: 20px; background-color: #eef2f7; font-weight: bold; color: #333; }
-        .logout-link { color: #c0392b; text-decoration: none; font-size: 0.9rem; }
+        .role-badge {
+            padding: 8px 15px; border-radius: 20px;
+            background-color: #eef2f7; font-weight: bold; color: #333;
+            font-size: 0.9rem; display: inline-block;
+        }
+        .btn-logout {
+            padding: 8px 15px; border-radius: 20px;
+            background-color: #95a5a6; color: white;
+            text-decoration: none; font-weight: bold; font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+        .btn-logout:hover { background-color: #7f8c8d; }
 
         /* 通知アイコン */
         .notification-wrapper { position: relative; cursor: pointer; }
@@ -46,14 +59,25 @@
         .notification-item:last-child { border-bottom: none; }
         .notif-msg { font-size: 0.9rem; margin-bottom: 10px; line-height: 1.4; }
         .notif-actions { display: flex; gap: 10px; margin-top: 5px; }
+
         .btn-action { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; color: white; }
         .btn-sign { background-color: #f39c12; }
         .btn-approve { background-color: #27ae60; }
         .btn-reject { background-color: #c0392b; }
+        .btn-check { background-color: #3498db; }
+
         .comment-input { width: 100%; box-sizing: border-box; margin-top: 5px; padding: 5px; font-size: 0.85rem; }
 
         /* カレンダー */
         #calendar { max-width: 1100px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+
+        /* カレンダーボタンの強調 */
+        .fc-button-active {
+            background-color: #2c3e50 !important;
+            border-color: #2c3e50 !important;
+            color: white !important;
+            font-weight: bold;
+        }
 
         /* ダイアログ */
         dialog { border: none; border-radius: 8px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 400px; }
@@ -71,7 +95,10 @@
     {% csrf_token %}
 
     <div class="header-container">
-        <h1>大学 施設予約システム</h1>
+        <div class="header-titles">
+            <h1>大学 施設予約システム</h1>
+            <p>Easy Booking : TUT Edition</p>
+        </div>
 
         <div class="user-info">
             <div class="notification-wrapper" id="notification-btn">
@@ -90,7 +117,11 @@
                                     <div class="notif-actions">
                                         <button class="btn-action btn-sign"
                                             onclick="processNotification({{ notif.reservation.id }}, {{ notif.id }}, 'sign')">
-                                            承認（署名する）
+                                            承認（署名）
+                                        </button>
+                                        <button class="btn-action btn-reject"
+                                            onclick="processNotification({{ notif.reservation.id }}, {{ notif.id }}, 'sign_reject')">
+                                            却下
                                         </button>
                                     </div>
 
@@ -106,6 +137,14 @@
                                             却下
                                         </button>
                                     </div>
+
+                                {% elif user_role == 'applicant' %}
+                                    <div class="notif-actions">
+                                        <button class="btn-action btn-check"
+                                            onclick="processNotification({{ notif.reservation.id }}, {{ notif.id }}, 'dismiss')">
+                                            確認（OK）
+                                        </button>
+                                    </div>
                                 {% endif %}
                             </div>
                         {% endfor %}
@@ -116,7 +155,7 @@
             </div>
 
             <span class="role-badge">{{ user_role_display }}</span>
-            <a href="{% url 'team_scim:logout' %}" class="logout-link">ログアウト</a>
+            <a href="{% url 'team_scim:logout' %}" class="btn-logout">ログアウト</a>
         </div>
     </div>
 
@@ -172,37 +211,31 @@
 
         // 通知ポップアップの開閉
         document.getElementById('notification-btn').addEventListener('click', function(e) {
-            // ポップアップ内のクリックなら閉じない
             if (e.target.closest('#notification-popup')) return;
-
             const popup = document.getElementById('notification-popup');
             popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
         });
 
-        // 外部クリックで通知を閉じる
         document.addEventListener('click', function(e) {
             if (!e.target.closest('#notification-btn')) {
                 document.getElementById('notification-popup').style.display = 'none';
             }
         });
 
-        // --- 通知アクション処理 (署名・承認・却下) ---
         function processNotification(resId, notifId, action) {
-            // 承認・却下の場合はコメントを取得
             let comment = '';
             const commentInput = document.getElementById('comment-' + notifId);
             if (commentInput) {
                 comment = commentInput.value;
             }
 
-            if (!confirm('この操作を実行しますか？')) return;
+            if (action !== 'dismiss') {
+                if (!confirm('この操作を実行しますか？')) return;
+            }
 
             fetch("{% url 'team_scim:process_notification' %}", {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrftoken
-                },
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
                 body: JSON.stringify({
                     'reservation_id': resId,
                     'notification_id': notifId,
@@ -212,17 +245,14 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
-                if (data.status === 'success') {
-                    location.reload(); // ステータス変更を反映するためリロード
-                }
+                if(action !== 'dismiss') { alert(data.message); }
+                if (data.status === 'success') { location.reload(); }
             })
             .catch(error => {
                 console.error('Error:', error);
                 alert('エラーが発生しました');
             });
         }
-
 
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
@@ -232,7 +262,6 @@
             const closeDialogBtn = document.getElementById('close-dialog-btn');
             const submitBtn = document.getElementById('submit-reservation-btn');
 
-            // フォーム要素
             const facilitySelect = document.getElementById('facility-select');
             const signerInput = document.getElementById('signer-input');
             const startTimeInput = document.getElementById('start-time');
@@ -244,27 +273,32 @@
                 initialView: 'dayGridMonth',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
                 locale: 'ja',
+                timeZone: 'Asia/Tokyo', // JS側のタイムゾーン指定
                 events: eventsData,
 
-                // イベントクリック: 詳細表示
+                // イベントクリック: 詳細表示 (修正箇所)
                 eventClick: function(info) {
                     const props = info.event.extendedProps;
+
+                    // ⬇️ ここでサーバーから受け取った整形済み文字列 (str_start, str_end) を使う
+                    // 存在しない場合(古いデータ)はJS計算にフォールバック
+                    const startStr = props.str_start ? props.str_start : info.event.start.toLocaleString();
+                    const endStr = props.str_end ? props.str_end : info.event.end.toLocaleString();
+
                     let msg = `【${info.event.title}】\n` +
                               `申請者: ${props.applicant}\n` +
                               `責任者: ${props.signer}\n` +
-                              `日時: ${info.event.start.toLocaleString()} ～ ${info.event.end.toLocaleString()}\n` +
+                              `日時: ${startStr} ～ ${endStr}\n` +
                               `状況: ${props.status_display}`;
 
-                    if(props.comment) {
+                    if(props.comment && props.comment.trim() !== "") {
                         msg += `\nコメント: ${props.comment}`;
                     }
                     alert(msg);
                 },
 
-                // 日付クリック: 申請ダイアログ表示
                 dateClick: function(info) {
                     clickedDateStr = info.dateStr;
-                    // フォームリセット
                     facilitySelect.value = "";
                     signerInput.value = "";
                     startTimeInput.value = "09:00";
@@ -277,12 +311,11 @@
 
             closeDialogBtn.addEventListener('click', () => dialog.close());
 
-            // 予約申請処理
             submitBtn.addEventListener('click', function() {
                 const data = {
                     date_str: clickedDateStr,
                     facility_name: facilitySelect.value,
-                    signer_name: signerInput.value, // 責任者名
+                    signer_name: signerInput.value,
                     start_time: startTimeInput.value,
                     end_time: endTimeInput.value
                 };
@@ -301,8 +334,7 @@
                 .then(res => {
                     alert(res.message);
                     if (res.status === 'success') {
-                        calendar.addEvent(res.newEvent);
-                        dialog.close();
+                        location.reload();
                     }
                 })
                 .catch(err => {

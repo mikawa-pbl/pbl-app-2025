@@ -35,6 +35,11 @@ class Company(models.Model):
     accepts_jitsumu_kunren = models.BooleanField("実務訓練受け入れ", default=False)
     tut_recommendation = models.BooleanField("技科大推薦", default=False)
     oncampus_briefing = models.CharField("説明会対象分野", max_length=100, blank=True, null=True)
+    
+    # インターン・選考の日程情報
+    internship_start_date = models.DateField("インターン開始日", blank=True, null=True)
+    internship_deadline = models.DateField("インターン締切日", blank=True, null=True)
+    last_year_selection_start_date = models.DateField("前年度選考開始日", blank=True, null=True)
 
     # 1社が複数学科向けという想定（多対多）
     departments = models.ManyToManyField(

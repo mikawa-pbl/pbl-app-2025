@@ -1,75 +1,98 @@
 {% extends 'teams/team_TMR/base.html' %}
 
-{% block title %}ロードマップ一覧{% endblock %}
+{% block title %}ロードマップ (年間計画){% endblock %}
 
 {% block content %}
-<div class="flex justify-between items-center mb-6">
-    <h2 class="text-2xl font-bold text-gray-800">ロードマップ (年間計画)</h2>
-    <a href="{% url 'roadmap_create' %}"
-       class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-        項目を追加
-    </a>
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">ロードマップ (年間計画)</h2>
+        <a href="{% url 'roadmap_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition">
+            + 計画を追加
+        </a>
+    </div>
+
+    <div id="gantt_chart_div" class="w-full bg-white shadow rounded-lg overflow-hidden" style="min-height: 400px;">
+        <div class="p-10 text-center text-gray-400">
+            読み込み中...
+        </div>
+    </div>
+
+    <div id="no_data_message" class="hidden mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
+        <p class="font-bold">⚠️ チャートに表示できるデータがありません</p>
+        <p class="text-sm mt-1">
+            「+ 計画を追加」から、必ず<span class="font-bold text-red-600">「開始日」と「終了日」を入力して</span>作成してください。<br>
+            日付が入っていないデータはグラフに表示されません。
+        </p>
+    </div>
 </div>
 
-<div class="overflow-x-auto bg-white rounded-lg shadow border border-gray-200">
-    <table class="min-w-full leading-normal table-fixed">
-        <thead>
-            <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
-                <th class="py-3 px-2 text-left w-1/4 border-r border-gray-300">項目名</th>
-                <!-- 1月〜12月のヘッダー -->
-                {% for i in "123456789012"|make_list %}
-                    <th class="py-3 px-1 text-center w-12 border-r border-gray-200">{{ forloop.counter }}月</th>
-                {% endfor %}
-                <th class="py-3 px-2 text-center w-20">操作</th>
-            </tr>
-        </thead>
-        <tbody class="text-gray-600 text-sm font-light">
-            {% for item in gantt_data %}
-            <tr class="border-b border-gray-200 hover:bg-gray-50">
-                <!-- 項目名と詳細 -->
-                <td class="py-3 px-4 text-left border-r border-gray-200 overflow-hidden">
-                    <div class="font-bold text-gray-800 truncate">{{ item.obj.title }}</div>
-                    <div class="text-xs text-gray-500 truncate">{{ item.obj.content|truncatechars:20 }}</div>
-                </td>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['gantt']});
+    google.charts.setOnLoadCallback(drawChart);
 
-                <!-- 1月〜12月のセル -->
-                {% for is_active in item.months %}
-                <td class="py-3 px-1 text-center border-r border-gray-100 relative">
-                    {% if is_active %}
-                        <!-- 予定がある月は青いバーを表示 -->
-                        <div class="absolute inset-y-2 inset-x-0 bg-blue-500 rounded opacity-75"></div>
-                    {% endif %}
-                </td>
-                {% endfor %}
-
-                <!-- 操作ボタン -->
-                <td class="py-3 px-2 text-center">
-                    <div class="flex item-center justify-center space-x-2">
-                        <a href="{% url 'roadmap_edit' item.obj.pk %}" class="text-blue-600 hover:text-blue-900">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                            </svg>
-                        </a>
-                        <a href="{% url 'roadmap_delete' item.obj.pk %}" class="text-red-600 hover:text-red-900">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </a>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="14" class="py-4 text-center text-gray-500">
-                    ロードマップが登録されていません。「項目を追加」から計画を作成しましょう。
-                </td>
-            </tr>
+    function drawChart() {
+        // DjangoのデータをJS用に変換
+        var chartData = [
+            {% for roadmap in object_list %}
+                {% if roadmap.start_date and roadmap.end_date %}
+                [
+                    "{{ roadmap.id }}",            // ID
+                    "{{ roadmap.title|escapejs }}", // タイトル
+                    "null",                        // リソース（分類）
+                    new Date("{{ roadmap.start_date|date:'Y-m-d' }}"), // 開始日
+                    new Date("{{ roadmap.end_date|date:'Y-m-d' }}"),   // 終了日
+                    null,  // 期間（自動計算）
+                    0,     // 進捗（0%）
+                    null   // 依存関係
+                ],
+                {% endif %}
             {% endfor %}
-        </tbody>
-    </table>
-</div>
+        ];
 
-<div class="mt-4 text-xs text-gray-500 text-right">
-    ※ 期間を設定すると、該当する月に青いバーが表示されます。
-</div>
+        // データがない場合の処理
+        if (chartData.length === 0) {
+            document.getElementById('gantt_chart_div').style.display = 'none';
+            document.getElementById('no_data_message').classList.remove('hidden');
+            return;
+        }
+
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Task ID');
+        data.addColumn('string', 'Task Name');
+        data.addColumn('string', 'Resource');
+        data.addColumn('date', 'Start Date');
+        data.addColumn('date', 'End Date');
+        data.addColumn('number', 'Duration');
+        data.addColumn('number', 'Percent Complete');
+        data.addColumn('string', 'Dependencies');
+
+        data.addRows(chartData);
+
+        var options = {
+            height: (chartData.length * 45) + 50, // データの数に合わせて高さを自動調整
+            gantt: {
+                trackHeight: 40,
+                barCornerRadius: 4,
+                palette: [
+                    { "color": "#2563eb", "dark": "#1d4ed8", "light": "#60a5fa" }
+                ]
+            }
+        };
+
+        var chart = new google.visualization.Gantt(document.getElementById('gantt_chart_div'));
+        
+        // クリックしたら編集画面へ遷移
+        google.visualization.events.addListener(chart, 'select', function() {
+            var selection = chart.getSelection();
+            if (selection.length > 0) {
+                var row = selection[0].row;
+                var id = data.getValue(row, 0); // IDを取得
+                window.location.href = "/team_TMR/roadmaps/" + id + "/edit/";
+            }
+        });
+
+        chart.draw(data, options);
+    }
+</script>
 {% endblock %}

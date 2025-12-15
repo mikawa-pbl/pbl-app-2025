@@ -6,7 +6,17 @@
 </head>
 <body>
   <h1>{{ post.title }}</h1>
-  <p>イベント日: {{ post.date|date:"Y年n月j日" }}</p>
+
+  {% if post.date %}
+    <p>イベント日: {{ post.date|date:"Y年n月j日" }}
+      {% if post.start_time %}
+        {{ post.start_time|time:"H:i" }}
+        {% if post.end_time %} - {{ post.end_time|time:"H:i" }}{% endif %}
+      {% endif %}
+    </p>
+  {% else %}
+    <p>イベント日: 未設定</p>
+  {% endif %}
 
   {% if post.tags.exists %}
     <p>
@@ -23,7 +33,11 @@
   <p>
     <a href="{% url 'ssk:post_list' %}">一覧へ戻る</a>
     &nbsp;|&nbsp;
-    <a href="{% url 'ssk:post_edit' post.pk %}">編集</a>
+    {% if post.password_hash %}
+      <a href="{% url 'ssk:post_unlock' post.pk %}">編集</a>
+    {% else %}
+      <a href="{% url 'ssk:post_edit' post.pk %}">編集</a>
+    {% endif %}
   </p>
 
   <form method="post" action="{% url 'ssk:post_delete' post.pk %}" onsubmit="return confirm('この投稿を削除してもよいですか？');">

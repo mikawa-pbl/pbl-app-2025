@@ -26,8 +26,13 @@ def post_list(request):
     selected_mode = mode
     tags = Tag.objects.order_by("name")
 
+    # 分割: 日付あり / 日付なし をテンプレートで別表示できるようにする
+    dated_posts = posts.filter(date__isnull=False).order_by("date", "created_at")
+    undated_posts = posts.filter(date__isnull=True).order_by("-created_at")
+
     return render(request, "teams/ssk/post_list.html", {
-        "posts": posts,
+        "dated_posts": dated_posts,
+        "undated_posts": undated_posts,
         "tags": tags,
         "selected_tag_ids": selected_tag_ids,
         "selected_mode": selected_mode,
@@ -37,18 +42,24 @@ def post_list(request):
 def post_create(request):
     if request.method == "POST":
         form = PostForm(request.POST)
-    
-            
         if form.is_valid():
-            # ① Post 本体を保存
+            # date + start_time/end_time saved separately
             post = Post(
                 title=form.cleaned_data["title"],
-                date=form.cleaned_data["date"],
+                date=form.cleaned_data.get("date"),
+                start_time=form.cleaned_data.get("start_time"),
+                end_time=form.cleaned_data.get("end_time"),
                 body=form.cleaned_data["body"],
             )
             post.save()
 
-            # ② タグ文字列をパースして ManyToMany に紐づけ
+            # set password if provided (only on create)
+            pwd = form.cleaned_data.get("password")
+            if pwd:
+                post.set_password(pwd)
+                post.save()
+
+            # タグ文字列をパースして ManyToMany に紐づけ (既存処理)
             tags_text = form.cleaned_data.get("tags_text", "")
             names = []
 
@@ -66,13 +77,12 @@ def post_create(request):
                 tag, created = Tag.objects.get_or_create(name=name)
                 post.tags.add(tag)
 
-            # ③ 保存できたら一覧ページへ戻る
             return redirect("ssk:post_list")
-
     else:
         form = PostForm()
 
     return render(request, "teams/ssk/post_form.html", {"form": form})
+
 
 def post_detail(request, pk):
     """
@@ -81,22 +91,57 @@ def post_detail(request, pk):
     post = get_object_or_404(Post.objects.prefetch_related("tags"), pk=pk)
     return render(request, "teams/ssk/post_detail.html", {"post": post})
 
-def post_edit(request, pk):
+def post_unlock(request, pk):
     """
-    Edit an existing post.
+    Prompt for password before allowing edit. Sets a session flag when correct.
     """
     post = get_object_or_404(Post, pk=pk)
+    # If no password is set, go straight to edit.
+    if not post.password_hash:
+        return redirect("ssk:post_edit", pk=pk)
+
+    error = None
+    if request.method == "POST":
+        pwd = request.POST.get("password", "")
+        if post.check_password(pwd):
+            # mark unlocked in session
+            request.session[f"unlocked_post_{pk}"] = True
+            # redirect to edit page
+            return redirect("ssk:post_edit", pk=pk)
+        else:
+            error = "パスワードが間違っています。"
+
+    return render(request, "teams/ssk/post_unlock.html", {
+        "post": post,
+        "error": error,
+    })
+
+
+def post_edit(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+
+    # require unlock if post has a password
+    if post.password_hash and not request.session.get(f"unlocked_post_{pk}"):
+        return redirect("ssk:post_unlock", pk=pk)
 
     if request.method == "POST":
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
-            # update core fields
+            # Do not allow changing password on edit (password only set at create)
             post.title = form.cleaned_data["title"]
-            post.date = form.cleaned_data["date"]
+            post.date = form.cleaned_data.get("date")
+            post.start_time = form.cleaned_data.get("start_time")
+            post.end_time = form.cleaned_data.get("end_time")
             post.body = form.cleaned_data["body"]
             post.save()
 
-            # parse tags_text and replace post.tags
+            # clear the unlock flag after a successful edit (optional)
+            try:
+                del request.session[f"unlocked_post_{pk}"]
+            except KeyError:
+                pass
+
+            # タグ文字列をパースして post.tags を更新
             tags_text = form.cleaned_data.get("tags_text", "")
             names = []
             for raw in tags_text.replace("　", " ").split():
@@ -113,9 +158,17 @@ def post_edit(request, pk):
 
             return redirect("ssk:post_detail", pk=post.pk)
     else:
-        # prefill tags_text from current tags (show as "#name #name")
+        # 現在のタグから tags_text を事前入力（"#name #name" 形式で表示）
         tags_initial = " ".join("#" + t.name for t in post.tags.all())
-        form = PostForm(instance=post, initial={"tags_text": tags_initial})
+        initial = {"tags_text": tags_initial}
+        # prefill date/start_time/end_time when available
+        if post.date is not None:
+            initial["date"] = post.date
+        if post.start_time is not None:
+            initial["start_time"] = post.start_time
+        if post.end_time is not None:
+            initial["end_time"] = post.end_time
+        form = PostForm(instance=post, initial=initial)
 
     return render(request, "teams/ssk/post_form.html", {"form": form, "post": post})
 

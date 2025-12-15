@@ -8,7 +8,6 @@
 <form method="post">
   {% csrf_token %}
 
-{# ★ ここを追加 ★ #}
 {% if form.errors %}
   <div style="color:red; margin-bottom: 1em;">
     {% for field in form %}
@@ -29,7 +28,27 @@
 
 <p>
   {{ form.date.label_tag }}<br>
-  {{ form.date }}  {# ← ここが年・月・日セレクトになる #}
+  {{ form.date }}
+  <small>（任意）</small>
+</p>
+
+{# password: only shown when creating a new post (cannot change later) #}
+{% if not post %}
+<p>
+  {{ form.password.label_tag }}<br>
+  {{ form.password }}
+  <small>（任意：作成時のみ設定）</small>
+</p>
+{% endif %}
+
+<p>
+  {{ form.start_time.label_tag }}<br>
+  {{ form.start_time }}
+  <small>（任意）</small>
+  〜
+  {{ form.end_time.label_tag }}<br>
+  {{ form.end_time }}
+  <small>（任意）</small>
 </p>
 
 <p>

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.hashers import make_password, check_password
 
 class Tag(models.Model):
     # 例: "授業", "休講", "〇〇サークル", "A研究室", "授業名A" など
@@ -11,14 +12,39 @@ class Tag(models.Model):
 
 class Post(models.Model):
     title = models.CharField("タイトル", max_length=100)
-    date = models.DateField("イベント日")  # 掲示板に並べる基準の日付
+    # 日付は DateField、時刻は開始/終了で指定（任意）
+    date = models.DateField("イベント日", null=True, blank=True)
+    start_time = models.TimeField("開始時刻", null=True, blank=True)
+    end_time = models.TimeField("終了時刻", null=True, blank=True)
+
     body = models.TextField("本文", blank=True)
     tags = models.ManyToManyField(Tag, related_name="posts", blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    # hashed edit-password (optional). 空ならパスワード保護なし
+    password_hash = models.CharField("編集パスワード(ハッシュ)", max_length=128, blank=True, default="")
 
     class Meta:
         ordering = ["date", "created_at"]  # 日付順に並べる
 
     def __str__(self):
         return self.title
+
+    def set_password(self, raw_password):
+        if raw_password:
+            self.password_hash = make_password(raw_password)
+        else:
+            self.password_hash = ""
+
+    def has_password(self):
+        return bool(self.password_hash)
+
+    def check_password(self, raw_password):
+        """
+        Return True if post is not password-protected or raw_password matches.
+        """
+        if not self.password_hash:
+            return True
+        if raw_password is None:
+            return False
+        return check_password(raw_password, self.password_hash)

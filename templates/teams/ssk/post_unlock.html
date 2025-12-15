@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>投稿の編集（パスワード入力）</title>
+</head>
+<body>
+  <h1>投稿を編集するにはパスワードを入力してください</h1>
+
+  {% if error %}
+    <div style="color:red">{{ error }}</div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <p>
+      <label>パスワード:<br>
+      <input type="password" name="password" autocomplete="off"></label>
+    </p>
+    <p>
+      <button type="submit">送信</button>
+      <a href="{% url 'ssk:post_detail' post.pk %}">キャンセル</a>
+    </p>
+  </form>
+</body>
+</html>

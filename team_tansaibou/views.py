@@ -307,7 +307,7 @@ def register_sale(request):
                         )
 
                 messages.success(request, f'販売を登録しました（合計: ¥{total_amount:,}、商品数: {len(cart_data)}）')
-                return redirect('team_tansaibou:sale_list')
+                return redirect('team_tansaibou:register_sale')
 
         except json.JSONDecodeError:
             messages.error(request, 'カートデータの形式が不正です')

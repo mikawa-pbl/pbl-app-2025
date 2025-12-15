@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import views
+from . import api_views
 
 app_name = "team_tansaibou"
 urlpatterns = [
@@ -31,6 +32,14 @@ urlpatterns = [
     # 担当者管理
     path('members/', views.member_list, name='member_list'),
     path('members/add/', views.member_add, name='member_add'),
-    path('members/<int:pk>/edit/', views.member_edit, name='member_edit'),
-    path('members/<int:pk>/delete/', views.member_delete, name='member_delete'),
+    path('members/<int:member_id>/edit/', views.member_edit, name='member_edit'),
+    path('members/<int:member_id>/delete/', views.member_delete, name='member_delete'),
+
+    # ダッシュボードAPI
+    path('api/dashboard/today-sales/', api_views.today_sales, name='api_today_sales'),
+    path('api/dashboard/hourly-stats/', api_views.hourly_stats, name='api_hourly_stats'),
+    path('api/dashboard/yearly-comparison/', api_views.yearly_comparison, name='api_yearly_comparison'),
+    path('api/dashboard/daily-comparison/', api_views.daily_comparison, name='api_daily_comparison'),
+    path('api/dashboard/product-ranking/', api_views.product_ranking, name='api_product_ranking'),
+    path('api/dashboard/stock-prediction/', api_views.stock_prediction, name='api_stock_prediction'),
 ]

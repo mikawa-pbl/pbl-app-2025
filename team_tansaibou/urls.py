@@ -4,8 +4,15 @@ from . import views
 
 app_name = "team_tansaibou"
 urlpatterns = [
+    # 認証
+    path('signup/', views.signup, name='signup'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+
     # レジ画面（ホーム）
-    path('', views.register_sale, name='index'),  # ホームを販売登録画面に
+    path('', views.register_sale, name='index'),
+    path('register/', views.register_sale, name='register_sale'),
 
     # 販売関連
     path('sales/', views.sale_list, name='sale_list'),
@@ -21,6 +28,9 @@ urlpatterns = [
     path('product-sets/add/', views.productset_add, name='productset_add'),
     path('product-sets/<int:productset_id>/edit/', views.productset_edit, name='productset_edit'),
 
-    # その他
-    path('members/', views.members, name='members'),
+    # 担当者管理
+    path('members/', views.member_list, name='member_list'),
+    path('members/add/', views.member_add, name='member_add'),
+    path('members/<int:member_id>/edit/', views.member_edit, name='member_edit'),
+    path('members/<int:member_id>/delete/', views.member_delete, name='member_delete'),
 ]

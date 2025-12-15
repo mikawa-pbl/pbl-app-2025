@@ -1,10 +1,61 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
+from django.utils.text import slugify
+from django.contrib.auth.hashers import make_password, check_password
 from decimal import Decimal
+import uuid
+
+
+class Store(models.Model):
+    """模擬店モデル（独自認証対応）"""
+    username = models.CharField('ログインID', max_length=50, unique=True)
+    password = models.CharField('パスワード', max_length=128)
+    name = models.CharField('店舗名', max_length=100)
+    slug = models.SlugField('識別子', max_length=50, unique=True)
+    description = models.TextField('説明', blank=True)
+    is_active = models.BooleanField('有効', default=True)
+    created_at = models.DateTimeField('作成日時', auto_now_add=True)
+    updated_at = models.DateTimeField('更新日時', auto_now=True)
+
+    class Meta:
+        verbose_name = '店舗'
+        verbose_name_plural = '店舗'
+
+    def __str__(self):
+        return self.name
+
+    def set_password(self, raw_password):
+        """パスワードをハッシュ化して設定"""
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        """パスワードを検証"""
+        return check_password(raw_password, self.password)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name, allow_unicode=True)
+            if not base_slug:
+                base_slug = str(uuid.uuid4())[:8]
+            slug = base_slug
+            counter = 1
+            while Store.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
 
 
 class Member(models.Model):
+    store = models.ForeignKey(
+        Store,
+        on_delete=models.CASCADE,
+        related_name='members',
+        verbose_name='店舗',
+        null=True,
+        blank=True
+    )
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
 
@@ -14,6 +65,14 @@ class Member(models.Model):
 
 class Product(models.Model):
     """個別商品"""
+    store = models.ForeignKey(
+        Store,
+        on_delete=models.CASCADE,
+        related_name='products',
+        verbose_name='店舗',
+        null=True,
+        blank=True
+    )
     name = models.CharField(
         max_length=100,
         verbose_name='商品名'
@@ -55,6 +114,14 @@ class Product(models.Model):
 
 class ProductSet(models.Model):
     """セット商品"""
+    store = models.ForeignKey(
+        Store,
+        on_delete=models.CASCADE,
+        related_name='product_sets',
+        verbose_name='店舗',
+        null=True,
+        blank=True
+    )
     name = models.CharField(
         max_length=100,
         verbose_name='セット名'
@@ -202,6 +269,14 @@ class Transaction(models.Model):
         ('other', 'その他'),
     ]
 
+    store = models.ForeignKey(
+        Store,
+        on_delete=models.CASCADE,
+        related_name='transactions',
+        verbose_name='店舗',
+        null=True,
+        blank=True
+    )
     transaction_date = models.DateTimeField(
         verbose_name='販売日時'
     )

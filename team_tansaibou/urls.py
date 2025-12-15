@@ -31,6 +31,6 @@ urlpatterns = [
     # 担当者管理
     path('members/', views.member_list, name='member_list'),
     path('members/add/', views.member_add, name='member_add'),
-    path('members/<int:member_id>/edit/', views.member_edit, name='member_edit'),
-    path('members/<int:member_id>/delete/', views.member_delete, name='member_delete'),
+    path('members/<int:pk>/edit/', views.member_edit, name='member_edit'),
+    path('members/<int:pk>/delete/', views.member_delete, name='member_delete'),
 ]

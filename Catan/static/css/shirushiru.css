@@ -13,16 +13,34 @@ body {
     background: #e3e3e3;
     padding: 12px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     font-size: 18px;
     border: 1px solid #aaa;
     border-radius: 4px;
     margin-bottom: 20px;
+    gap: 12px;
 }
 
 .title {
     font-weight: bold;
+}
+
+.slack-text-btn {
+    display: inline-block;
+    margin-left: 12px;
+    padding: 4px 14px;
+    background: #611f69;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.slack-text-btn:hover {
+    background: #7c299b;
 }
 
 .user-name {
@@ -93,17 +111,8 @@ td {
     vertical-align: middle;
 }
 
-/* 話しかけステータスのスタイル */
-.status-ok {
-    color: #28a745;
-    font-weight: bold;
-    font-size: 18px;
-}
-
-.status-ng {
-    color: #dc3545;
-    font-weight: bold;
-    font-size: 18px;
+.detail {
+    text-decoration: underline;
 }
 
 /* 研究室にいる場合の行の色 */

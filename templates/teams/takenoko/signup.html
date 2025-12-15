@@ -2,25 +2,27 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     html, body {
-        background-color: #FBFEF9;
-        margin: 0;
-        padding: 0;
+      background-color: #FBFEF9;
+      margin: 0;
+      padding: 0;
+      font-family: "Noto Sans JP", sans-serif;
     }
 
+    /* 戻るボタン */
     .back-btn {
-      position: fixed;
+      position: relative;
       top: 32px;
       left: 32px;
       font-size: 48px;
-      color: #F96796;
+      color: #649CE4;
       background: none;
       border: none;
       cursor: pointer;
@@ -28,6 +30,190 @@
       z-index: 9999;
     }
     .back-btn:focus { outline: none; }
+
+    /* ===== ページ中央寄せコンテナ ===== */
+    .page {
+      width: 100%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 576px;
+      background: #FBFEF9;
+      border-radius: 24px;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 18px;
+      color: #111;
+    }
+
+    .field { margin-bottom: 16px; }
+
+    .label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+      text-align: left;
+    }
+
+    .input, .select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(100,156,228,0.35);
+      background: white;
+      box-sizing: border-box;
+      font-size: 16px;
+      outline: none;
+    }
+
+    /* ===== selectをinput寄せにする ===== */
+    .select-wrap { position: relative; width: 100%; }
+
+    .select-wrap .select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background: white;
+      border: 1.5px solid rgba(100,156,228,0.35);
+      border-radius: 14px;
+      padding: 12px 44px 12px 14px;
+      font-size: 16px;
+      line-height: 1.2;
+      cursor: pointer;
+    }
+
+    .select-wrap::after {
+      content: "\f078"; /* fa-chevron-down */
+      font-family: "Font Awesome 5 Free";
+      font-weight: 900;
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #649CE4;
+      pointer-events: none;
+      font-size: 14px;
+    }
+
+    .select-wrap .select:focus,
+    .input:focus {
+      border-color: rgba(100,156,228,0.8);
+      box-shadow: 0 0 0 4px rgba(100,156,228,0.15);
+    }
+
+    .select-wrap .select:invalid { color: #888; }
+
+    /* ===== ユーザーアイコン（プレビュー） ===== */
+    .avatar-column {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start; 
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 999px;
+      border: 2px solid rgba(100,156,228,0.35);
+      background: white;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .avatar .empty {
+      font-size: 34px;
+      color: rgba(100,156,228,0.9);
+    }
+
+    .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      background: #649CE4;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .file-input { display: none; }
+
+    .avatar-note {
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* ===== メール @tut.jp 固定の見た目 ===== */
+    .email-row {
+      display: flex;
+      width: 100%;
+      gap: 10px;
+      align-items: center;
+    }
+    .email-local {
+      flex: 1;
+      min-width: 0;
+    }
+    .email-suffix {
+      flex: 0 0 auto;
+      padding: 12px 14px;
+      border-radius: 14px;
+      color: #2b4b78;
+      font-size: 16px;
+      font-weight: 700;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    /* ===== 送信ボタン ===== */
+    .actions {
+      margin-top: 22px;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    .submit-btn {
+      width: 100%;
+      border: none;
+      background: #F96796;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 18px;
+      padding: 14px 16px;
+      cursor: pointer;
+    }
+
+    @media (min-width: 768px) {
+      .card { padding: 28px; }
+      .title { font-size: 22px; }
+    }
   </style>
 
   <script>
@@ -41,13 +227,204 @@
         window.location.href = "{% url 'takenoko:main' %}";
       }
     }
+
+    function $(id){ return document.getElementById(id); }
+
+    // ===== アイコンプレビュー =====
+    function previewAvatar(file) {
+      const img = $("avatarImg");
+      const empty = $("avatarEmpty");
+      if (!file) {
+        img.src = "";
+        img.style.display = "none";
+        empty.style.display = "block";
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      img.src = url;
+      img.style.display = "block";
+      empty.style.display = "none";
+    }
+
+    // ===== 学籍番号：数字だけ =====
+    function normalizeStudentId() {
+      const el = $("student_id");
+      el.value = el.value.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+      el.value = el.value.replace(/[^0-9]/g, "");
+    }
+
+    // ===== メール：ローカル部のみ（@を打たせない） =====
+    function normalizeEmailLocal() {
+      const el = $("email_local");
+      el.value = el.value.replace(/[＠]/g, "@");
+      if (el.value.includes("@")) el.value = el.value.split("@")[0];
+      el.value = el.value.replace(/\s/g, "");
+    }
+
+    // ===== 送信前に email を結合 =====
+    function beforeSubmit(e) {
+      const local = $("email_local").value.trim();
+      if (!local) {
+        e.preventDefault();
+        $("email_local").focus();
+        return false;
+      }
+      $("email").value = local + "@tut.jp";
+      return true;
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      // avatar
+      $("avatar").addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        previewAvatar(file);
+      });
+
+      // student id / email local
+      $("student_id").addEventListener("input", normalizeStudentId);
+      $("email_local").addEventListener("input", normalizeEmailLocal);
+
+      // form submit
+      $("signupForm").addEventListener("submit", beforeSubmit);
+
+      // 初期：空アイコン
+      previewAvatar(null);
+    });
   </script>
 </head>
 
 <body>
+  {% include "teams/takenoko/Components/header.html" %}
+
   <!-- 戻る -->
   <button type="button" class="back-btn" onclick="goBack()" aria-label="戻る">
     <i class="fas fa-arrow-alt-circle-left"></i>
   </button>
+
+  <main class="page">
+    <section class="card">
+      <h1 class="title">新規登録</h1>
+
+      <form action="{% url 'takenoko:main' %}" id="signupForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- ユーザーアイコン（ボタンは下） -->
+        <div class="field">
+          <label class="label">ユーザーアイコン</label>
+
+          <div class="avatar-column">
+            <div class="avatar">
+              <img id="avatarImg" alt="ユーザーアイコン" style="display:none;">
+              <div id="avatarEmpty" class="empty"><i class="fas fa-user-circle"></i></div>
+            </div>
+
+            <label class="upload-btn" for="avatar">
+              <i class="fas fa-camera"></i> 画像を選ぶ
+            </label>
+            <input
+              id="avatar"
+              name="avatar"
+              class="file-input"
+              type="file"
+              accept="image/*"
+            />
+          </div>
+        </div>
+
+        <!-- ニックネーム -->
+        <div class="field">
+          <label class="label" for="nickname">ニックネーム</label>
+          <input id="nickname" name="nickname" class="input" type="text" required placeholder="例：たけのこ太郎" />
+        </div>
+
+        <!-- メールアドレス（末尾 @tut.jp 固定） -->
+        <div class="field">
+          <label class="label" for="email_local">メールアドレス</label>
+          <div class="email-row">
+            <input
+              id="email_local"
+              class="input email-local"
+              type="text"
+              inputmode="email"
+              autocomplete="email"
+              required
+              placeholder="例：yamada.taro.tx"
+            />
+            <div class="email-suffix">@tut.jp</div>
+          </div>
+          <input type="hidden" id="email" name="email" value="" />
+        </div>
+
+        <!-- 専攻（1〜5系・未定） -->
+        <div class="field">
+          <label class="label" for="major">専攻</label>
+          <div class="select-wrap">
+            <select id="major" name="major" class="select" required>
+              <option value="" selected disabled>選択してください</option>
+              <option value="1">1系</option>
+              <option value="2">2系</option>
+              <option value="3">3系</option>
+              <option value="4">4系</option>
+              <option value="5">5系</option>
+              <option value="0">未定</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 学年 -->
+        <div class="field">
+          <label class="label" for="grade">学年</label>
+          <div class="select-wrap">
+            <select id="grade" name="grade" class="select" required>
+              <option value="" selected disabled>選択してください</option>
+              <option value="b1">学部1年</option>
+              <option value="b2">学部2年</option>
+              <option value="b3">学部3年</option>
+              <option value="b4">学部4年</option>
+              <option value="m1">修士1年</option>
+              <option value="m2">修士2年</option>
+              <option value="d">博士</option>
+              <option value="other">その他</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 学籍番号 -->
+        <div class="field">
+          <label class="label" for="student_id">学籍番号</label>
+          <input
+            id="student_id"
+            name="student_id"
+            class="input"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            required
+            placeholder="例：201101"
+          />
+        </div>
+
+        <!-- パスワード -->
+        <div class="field">
+          <label class="label" for="password">パスワード</label>
+          <input
+            id="password"
+            name="password"
+            class="input"
+            type="password"
+            required
+            minlength="8"
+            placeholder="8文字以上（推奨：英数混在）"
+            autocomplete="new-password"
+          />
+        </div>
+
+        <!-- 登録ボタン -->
+        <div class="actions">
+          <button type="submit" class="submit-btn">登録する</button>
+        </div>
+      </form>
+    </section>
+  </main>
 </body>
 </html>

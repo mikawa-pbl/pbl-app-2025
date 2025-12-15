@@ -1,0 +1,37 @@
+<div class="slider">
+    <ul class="slides">
+        {% for good in slider_goods %}
+        <li>
+            {% if good.image_filename %}
+                <img src="{% url 'team_cake:cake_image' good.image_filename %}">
+            {% else %}
+                <img src="https://placehold.co/800x400?text={{ good.name }}">
+            {% endif %}
+            <div class="caption center-align">
+                <h3 class="white-text" style="text-shadow: 2px 2px 4px #000000;">{{ good.name }}</h3>
+                <h5 class="light grey-text text-lighten-3" style="text-shadow: 1px 1px 2px #000000;">{{ good.description|default:""|truncatechars:50 }}</h5>
+                <h5 class="light grey-text text-lighten-3" style="text-shadow: 1px 1px 2px #000000;">¥{{ good.price }}</h5>
+            </div>
+        </li>
+        {% empty %}
+        <li>
+            <img src="https://placehold.co/800x400?text=No+Cakes+Yet">
+            <div class="caption center-align">
+                <h3>Welcome to Team Cake!</h3>
+                <h5 class="light grey-text text-lighten-3">Register some goods to see them here.</h5>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var elems = document.querySelectorAll('.slider');
+        var instances = M.Slider.init(elems, {
+            height: 400,
+            indicators: true,
+            interval: 6000
+        });
+    });
+</script>

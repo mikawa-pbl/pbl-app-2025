@@ -352,11 +352,45 @@
                             </div>
                         </div>
 
-                        {% if user.introduction %}
-                        <div class="bio-section">
-                            {{ user.introduction|linebreaksbr }}
+                        <div class="profile-details"
+                            style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                            <h3 style="font-size: 1.1rem; margin-bottom: 20px; color: #333;">詳細プロフィール</h3>
+                            <dl style="display: grid; grid-template-columns: 140px 1fr; gap: 15px; font-size: 0.95rem;">
+                                <dt style="color: #888; font-weight: 500;">一言</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.one_word|default:"-"|linebreaksbr }}</dd>
+
+                                <dt style="color: #888; font-weight: 500;">学年</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.grade|default:"-" }}</dd>
+
+                                <dt style="color: #888; font-weight: 500;">学科</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.department|default:"-" }}</dd>
+
+                                <dt style="color: #888; font-weight: 500;">年齢</dt>
+                                <dd style="margin: 0; color: #333;">{% if user.age %}{{ user.age }}歳
+                                    {% else %}-{% endif %}</dd>
+
+                                <dt style="color: #888; font-weight: 500;">性別</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.gender|default:"-" }}</dd>
+
+                                <dt style="color: #888; font-weight: 500;">所属サークル</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.club|default:"-" }}</dd>
+
+                                <dt style="color: #888; font-weight: 500;">GitHub</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.github_account|default:"-" }}</dd>
+
+                                <dt style="color: #888; font-weight: 500;">趣味</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.hobby|default:"-" }}</dd>
+
+                                <dt style="color: #888; font-weight: 500;">出身</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.birthplace|default:"-" }}</dd>
+
+                                <dt style="color: #888; font-weight: 500;">誕生日</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.birth_date|default:"-" }}</dd>
+
+                                <dt style="color: #888; font-weight: 500;">交際ステータス</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.relationship_status|default:"-" }}</dd>
+                            </dl>
                         </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>

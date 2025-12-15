@@ -102,7 +102,6 @@
     .login-btn:hover { background-color: #f24f84; }
 
     .register-link {
-      text-align: center;
       margin-top: 8px;
       pointer-events: auto; /* ★リンクも押せるように */
     }
@@ -169,8 +168,8 @@
           <input type="submit" value="ログイン" class="login-btn">
         </div>
 
-        <div class="register-link">
-          <a href="{% url 'takenoko:signup' %}">新規登録はこちら</a>
+        <div class="form-block register-link">
+          <a href="{% url 'takenoko:signup' %}">＋新規登録はこちら</a>
         </div>
       </form>
     </div>

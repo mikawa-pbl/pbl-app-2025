@@ -346,6 +346,54 @@ def sale_list(request):
     return render(request, 'teams/team_tansaibou/sale_list.html', context)
 
 
+@tansaibou_login_required
+def sale_edit(request, pk):
+    """販売履歴編集"""
+    store = request.current_store
+    try:
+        transaction = Transaction.objects.using(DB).select_related('recorded_by').get(id=pk, store=store)
+    except Transaction.DoesNotExist:
+        messages.error(request, '販売履歴が見つかりません')
+        return redirect('team_tansaibou:sale_list')
+
+    if request.method == 'POST':
+        try:
+            transaction_date = request.POST.get('transaction_date')
+            payment_method = request.POST.get('payment_method')
+            recorded_by_id = request.POST.get('recorded_by')
+            notes = request.POST.get('notes', '')
+
+            if not all([transaction_date, payment_method, recorded_by_id]):
+                messages.error(request, '必須項目を全て入力してください')
+            else:
+                # 編集ログを備考に追記
+                now = timezone.localtime(timezone.now())
+                editor = Member.objects.using(DB).get(id=recorded_by_id)
+                edit_log = f"\n[{now.strftime('%m/%d %H:%M')} {editor.name}により編集]"
+
+                transaction.transaction_date = transaction_date
+                transaction.payment_method = payment_method
+                transaction.recorded_by_id = recorded_by_id
+                transaction.notes = notes + edit_log
+                transaction.save(using=DB)
+
+                messages.success(request, '販売履歴を更新しました')
+                return redirect('team_tansaibou:sale_list')
+
+        except Member.DoesNotExist:
+            messages.error(request, '担当者が見つかりません')
+        except Exception as e:
+            messages.error(request, f'エラーが発生しました: {str(e)}')
+
+    context = {
+        'store': store,
+        'transaction': transaction,
+        'members': Member.objects.using(DB).filter(store=store),
+        'payment_methods': Transaction.PAYMENT_METHOD_CHOICES,
+    }
+    return render(request, 'teams/team_tansaibou/sale_edit.html', context)
+
+
 # ===== 商品管理 =====
 
 @tansaibou_login_required

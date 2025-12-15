@@ -17,6 +17,7 @@ urlpatterns = [
 
     # 販売関連
     path('sales/', views.sale_list, name='sale_list'),
+    path('sales/<int:pk>/edit/', views.sale_edit, name='sale_edit'),
 
     # 商品管理
     path('products/', views.product_list, name='product_list'),

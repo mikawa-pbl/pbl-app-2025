@@ -76,6 +76,18 @@ tr:hover {
 .toggle-items:hover {
     text-decoration: underline;
 }
+.btn-edit {
+    display: inline-block;
+    padding: 4px 10px;
+    background-color: #6c757d;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 12px;
+}
+.btn-edit:hover {
+    background-color: #5a6268;
+}
 {% endblock %}
 
 {% block content %}
@@ -99,6 +111,7 @@ tr:hover {
             <th>合計金額</th>
             <th>備考</th>
             <th>詳細</th>
+            <th>操作</th>
         </tr>
     </thead>
     <tbody>
@@ -121,9 +134,12 @@ tr:hover {
                     ▼ 詳細を見る
                 </a>
             </td>
+            <td>
+                <a href="{% url 'team_tansaibou:sale_edit' transaction.id %}" class="btn-edit">編集</a>
+            </td>
         </tr>
         <tr class="items-row" id="items-{{ transaction.id }}">
-            <td colspan="6">
+            <td colspan="7">
                 <table class="items-table">
                     <thead>
                         <tr>

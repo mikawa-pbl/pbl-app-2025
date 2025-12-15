@@ -148,10 +148,18 @@
                 options.body = JSON.stringify(data);
             }
             const response = await fetch(url, options);
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.status}`);
+            // try parse JSON body regardless of status
+            let json = null;
+            try {
+                json = await response.json();
+            } catch (e) {
+                // ignore parse error
             }
-            return await response.json();
+            if (!response.ok) {
+                const msg = (json && json.error) ? json.error : `API Error: ${response.status}`;
+                throw new Error(msg);
+            }
+            return json;
         }
 
         // --- 初期データ読み込み ---
@@ -347,8 +355,13 @@
                 render();
                 closeModal(postModal);
             } catch (error) {
-                console.error('投稿エラー:', error);
-                alert('投稿に失敗しました');
+                // クールタイムのサーバーメッセージを優先して表示
+                if (error && error.message && error.message.includes('１０分以内に同一の施設情報を投稿することはできません')) {
+                    alert('１０分以内に同一の施設情報を投稿することはできません');
+                } else {
+                    console.error('投稿エラー:', error);
+                    alert('投稿に失敗しました');
+                }
             }
         });
 

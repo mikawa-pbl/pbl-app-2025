@@ -107,11 +107,18 @@ td {
 }
 
 /* 研究室にいる場合の行の色 */
-#user-row.in-lab {
+/* #user-row.in-lab {
     background-color: #e3f2fd;
 }
 
 #user-row.in-lab td {
+    background-color: #e3f2fd;
+} */
+.in-lab {
+    background-color: #e3f2fd;
+}
+
+.in-lab td {
     background-color: #e3f2fd;
 }
 

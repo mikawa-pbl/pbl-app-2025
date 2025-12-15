@@ -65,66 +65,6 @@ def members(request):
     qs = Member.objects.using(DB_ALIAS).all()
     return render(request, 'teams/mori_doragon_yuhi_machi/members.html', {'members': qs})
 
-
-
-
-
-# def add_place(request):
-#     """
-#     新しい場所 (Place) をデータベースに追加するビュー
-#     - GET: 場所名を入力するフォームを表示
-#     - POST: フォームデータを取得し、新しいPlaceオブジェクトを作成して保存
-#     """
-
-#     # 1. 全メンバーを「現在の場所」情報と一緒に取得 (select_relatedで効率化)
-#     #    .order_by('name') で名前順に並べます
-#     all_members = Member.objects.using(DB_ALIAS).select_related('current_place').order_by('name')
-    
-#     # 2. フォーム用に、全場所のリストも取得
-#     all_places = Place.objects.using(DB_ALIAS).order_by('name')
-
-#     # 3. テンプレートに渡すデータ（コンテキスト）
-#     context = {
-#         'all_members': all_members,  # メンバー一覧 (更新フォーム兼用)
-#         'all_places': all_places,    # フォームの<option>用
-#     }
-
-#     if request.method == 'POST':
-#         # 1. POSTデータから場所名を取得
-#         # フォームの入力フィールドのname属性が 'place_name' であると仮定
-#         place_name = request.POST.get('place_name') 
-        
-#         # 2. 場所名が空でないかバリデーション
-#         if place_name:
-#             # 3. 新しいPlaceオブジェクトを作成
-#             new_place = Place(name=place_name)
-            
-#             # 4. 指定されたデータベースエイリアスを使用して保存 (追加)
-#             new_place.save(using=DB_ALIAS)
-            
-#             # 5. 保存後、一覧画面などにリダイレクト
-#             # 'mori_doragon_yuhi_machi:index' はあなたが定義したURL名に合わせる
-#             return redirect('mori_doragon_yuhi_machi:index') 
-#         else:
-#             # エラーメッセージをテンプレートに渡す処理などを追加できます
-#             context = {
-#                 'error_message': '場所名を入力してください。', 
-#                 'all_members': all_members,  # メンバー一覧 (更新フォーム兼用)
-#                 'all_places': all_places,    # フォームの<option>用
-#             }
-#             return render(request, 'teams/mori_doragon_yuhi_machi/add_place.html', context)
-    
-#     else:
-#         # GETリクエストの場合: フォームを表示するテンプレートをレンダリング
-#         # このテンプレート (add_place.html) は別途作成が必要です
-#         return render(request, 'teams/mori_doragon_yuhi_machi/add_place.html', context)
-
-# (あなたのアプリ名)/views.py
-
-# ... (既存のインポートと定義: DB_ALIAS) ...
-
-# ... (index, update_location ビューなど) ...
-
 def add_place(request):
     """
     新しい場所 (Place) をデータベースに追加するビュー
@@ -199,3 +139,64 @@ def delete_place(request):
 
     # 4. 削除後、一覧画面などにリダイレクト
     return redirect('mori_doragon_yuhi_machi:index')
+
+def add_member(request):
+    """
+    新しいメンバー (Member) をデータベースに追加するビュー
+    """
+    
+    # テンプレート表示用の基本データ（エラー時や一覧表示用）
+    all_members = Member.objects.using(DB_ALIAS).select_related('current_place').order_by('name')
+    base_context = {
+        'all_members': all_members,
+    }
+    
+    if request.method == 'POST':
+        # 1. フォームから名前を取得 (空白除去)
+        member_name = request.POST.get('member_name', '').strip()
+        member_photo = request.FILES.get('member_photo')
+        
+        # 2. 空チェック
+        if not member_name:
+            context = base_context.copy()
+            context['error_message'] = 'メンバー名を入力してください。'
+            return render(request, 'teams/mori_doragon_yuhi_machi/add_member.html', context)
+
+        # 3. 重複チェック (大文字小文字を区別せず検索)
+        if Member.objects.using(DB_ALIAS).filter(name__iexact=member_name).exists():
+            context = base_context.copy()
+            context['error_message'] = f'エラー: メンバー「{member_name}」はすでに登録済みです。'
+            return render(request, 'teams/mori_doragon_yuhi_machi/add_member.html', context)
+
+        # 4. 作成と保存
+        new_member = Member(name=member_name, photo=member_photo)
+        new_member.save(using=DB_ALIAS)
+        
+        # 5. 保存後、トップページ(index)に戻る
+        # (続けて追加したい場合は 'mori_doragon_yuhi_machi:add_member' にリダイレクトでもOK)
+        return redirect('mori_doragon_yuhi_machi:add_member')
+    
+    else:
+        # GETリクエスト: フォームを表示
+        return render(request, 'teams/mori_doragon_yuhi_machi/add_member.html', base_context)
+    
+@require_POST
+def delete_member(request):
+    """
+    指定されたIDのメンバー (Member) をデータベースから削除する処理
+    """
+    try:
+        # 1. POSTデータから削除対象のメンバーIDを取得
+        member_id = request.POST.get('member_id')
+
+        # 2. IDに基づいてMemberオブジェクトを取得
+        member_to_delete = get_object_or_404(Member.objects.using(DB_ALIAS), id=member_id)
+
+        # 3. 削除を実行
+        member_to_delete.delete(using=DB_ALIAS)
+
+    except Exception as e:
+        print(f"メンバーの削除中にエラーが発生しました: {e}")
+
+    # 4. 削除後は「メンバー追加画面」に戻ることで、連続して整理しやすくする
+    return redirect('mori_doragon_yuhi_machi:add_member')

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Agileca Members</title>
+</head>
+
+<body>
+    <h1>建物名検索</h1>
+    
+    <form action="" method="GET">
+        <input type="text" name="q" placeholder="検索キーワードを入力" value="{{ query }}">
+        <button type="submit">検索</button>
+    </form>
+
+    <hr>
+
+    {% if rooms %}
+        <h3>検索結果 ({{ rooms.count }} 件)</h3>
+        <ul>
+            {% for room in rooms %}
+                <li>
+                    <strong>{{ room.room_name }}</strong> 
+                    <p>{{ room.building.name }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% elif query %}
+        <p>「{{ query }}」に一致する記事は見つかりませんでした。</p>
+    <!-- {% else %} -->
+        <!-- <p>キーワードを入力して検索してください。</p> -->
+    {% endif %}
+
+</body>

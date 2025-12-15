@@ -95,7 +95,22 @@
         }
         
         /* Controls - 手机优化表单 */
-        .controls { margin: 12px 0; display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+        .controls { 
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+            background: #fff;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .controls.show {
+            transform: translateY(0);
+        }
         .add-btn { 
             background: #1e88e5; 
             color: #fff; 
@@ -109,13 +124,12 @@
             box-shadow: 0 2px 4px rgba(30,136,229,0.3);
         }
         .add-form { 
-            display: none; 
+            display: flex; 
             flex-direction: column;
             gap: 10px; 
             background: #fff; 
             padding: 16px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 12px 12px 0 0;
             width: 100%;
         }
         .add-form input, .add-form textarea { 
@@ -447,12 +461,10 @@
         {% endif %}
     </header>
 
-    <!-- Controls: Add product button + form (positioned above product list) -->
-    <div class="controls" aria-hidden="false">
-        <button class="add-btn" id="toggleAdd">＋ 新しい商品を追加</button>
-
+    <!-- Add product form (hidden by default, shown when footer button clicked) -->
+    <div class="controls" id="addProductSection">
         <!-- server-backed form: POSTs to add product view -->
-        <form class="add-form" id="addForm" method="post" action="{% url 'team_giryulink:add_product' %}" aria-label="Add product form" style="display:none;" enctype="multipart/form-data">
+        <form class="add-form" id="addForm" method="post" action="{% url 'team_giryulink:add_product' %}" aria-label="Add product form" enctype="multipart/form-data">
             {% csrf_token %}
             <input id="pTitle" name="title" type="text" placeholder="商品名" required aria-label="商品名">
             <input id="pPrice" name="price" type="number" placeholder="価格 (¥)" min="0" required aria-label="価格">
@@ -511,30 +523,28 @@
         </div>
 
         <script>
-            // small behaviour: toggle form and cancel (keeps client UX)
-            const toggleAdd = document.getElementById('toggleAdd');
-            const addForm = document.getElementById('addForm');
-            const addCancel = document.getElementById('addCancel');
-            const pTitle = document.getElementById('pTitle');
-
-            toggleAdd.addEventListener('click', () => {
-                const visible = addForm.style.display === 'flex' || addForm.style.display === 'block';
-                addForm.style.display = visible ? 'none' : 'flex';
-                if (!visible) { addForm.style.display = 'flex'; pTitle.focus(); }
-            });
-            addCancel.addEventListener('click', () => {
-                addForm.style.display = 'none';
-                addForm.reset();
-                // Reset image preview
-                document.getElementById('imagePreview').style.display = 'none';
-                document.getElementById('previewImg').src = '';
-            });
-
             // Image upload preview
             const imageInput = document.getElementById('pImage');
             const imagePreview = document.getElementById('imagePreview');
             const previewImg = document.getElementById('previewImg');
             const removeImageBtn = document.getElementById('removeImage');
+            const addCancel = document.getElementById('addCancel');
+            const addProductSection = document.getElementById('addProductSection');
+            const addForm = document.getElementById('addForm');
+
+            // Cancel button functionality
+            if (addCancel) {
+                addCancel.addEventListener('click', (e) => {
+                    e.preventDefault(); // 防止页面跳转
+                    addProductSection.classList.remove('show');
+                    // 延迟重置表单，等待动画完成
+                    setTimeout(() => {
+                        addForm.reset();
+                        imagePreview.style.display = 'none';
+                        previewImg.src = '';
+                    }, 300);
+                });
+            }
 
             // Search functionality
             const clearSearchBtn = document.getElementById('clearSearch');
@@ -656,8 +666,27 @@
     </main>
 
     <footer>
-        <p><a href="/team_giryulink/members/">メンバー一覧</a></p>
+        <button class="add-btn" id="footerAddBtn" style="width: 100%; max-width: 100%; margin: 0;">＋ 新しい商品を追加</button>
     </footer>
 </div>
+
+<script>
+    // Initialize footer button after DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        const footerAddBtn = document.getElementById('footerAddBtn');
+        const addProductSection = document.getElementById('addProductSection');
+        
+        if (footerAddBtn && addProductSection) {
+            footerAddBtn.addEventListener('click', (e) => {
+                e.preventDefault(); // 防止页面跳转
+                addProductSection.classList.add('show');
+                // 延迟聚焦，等待动画完成
+                setTimeout(() => {
+                    document.getElementById('pTitle').focus();
+                }, 300);
+            });
+        }
+    });
+</script>
 </body>
 </html>

@@ -14,6 +14,7 @@
   <div class="container">
     <div class="header">
       <div class="title">在室状況アプリ</div>
+      <a href="#" class="slack-text-btn" title="Slackへ遷移">Slack</a>
       <div class="user-name">
         ゲスト
       </div>
@@ -26,25 +27,25 @@
         <th>名前</th>
         <th>場所</th>
         <th>コメント</th>
-        <th>🗣️</th>
+        <th></th>
       </tr>
       <tr class="in-lab">
         <td>佐藤</td>
         <td>研究室（M2）C3-503</td>
         <td>論文執筆中</td>
-        <td><span class="status-ok">✅</span></td>
+        <td><span class="detail">詳細</span></td>
       </tr>
       <tr>
         <td>鈴木</td>
         <td>自宅</td>
         <td>リモート作業</td>
-        <td><span class="status-ng">❌</span></td>
+        <td><span class="detail">詳細</span></td>
       </tr>
       <tr>
         <td>高橋</td>
         <td>学内</td>
         <td>図書館にいます</td>
-        <td><span class="status-ok">✅</span></td>
+        <td><span class="detail">詳細</span></td>
       </tr>
     </table>
 
@@ -55,31 +56,32 @@
         <th>名前</th>
         <th>場所</th>
         <th>コメント</th>
-        <th>🗣️</th>
+        <th></th>
       </tr>
       <tr class="in-lab">
         <td>田中</td>
         <td>研究室（B4,M1）C3-502</td>
         <td>実験中</td>
-        <td><span class="status-ok">✅</span></td>
+        <td><span class="detail">詳細</span></td>
       </tr>
       <tr>
         <td>伊藤</td>
         <td>授業</td>
         <td>15時まで授業</td>
-        <td><span class="status-ng">❌</span></td>
+        <td><span class="detail">詳細</span></td>
       </tr>
       <tr class="in-lab">
         <td>渡辺</td>
         <td>3Dプリンタの部屋 C3-511</td>
         <td>造形中</td>
-        <td><span class="status-ok">✅</span></td>
+        <td><span class="detail">詳細</span></td>
       </tr>
       <tr id="user-row">
         <td id="user-name-cell">ゲスト</td>
         <td id="user-location-cell">-</td>
         <td id="user-comment-cell">-</td>
-        <td id="user-status-cell">-</td>
+        <!--<td id="user-status-cell">-</td>-->
+        <td><span class="detail">詳細</span></td>
       </tr>
     </table>
 
@@ -90,25 +92,25 @@
         <th>名前</th>
         <th>場所</th>
         <th>コメント</th>
-        <th>🗣️</th>
+        <th></th>
       </tr>
       <tr class="in-lab">
         <td>中村</td>
         <td>研究室（B4,M1）C3-502</td>
         <td>プログラミング中</td>
-        <td><span class="status-ok">✅</span></td>
+        <td><span class="detail">詳細</span></td>
       </tr>
       <tr>
         <td>小林</td>
         <td>自宅</td>
         <td>体調不良</td>
-        <td><span class="status-ng">❌</span></td>
+        <td><span class="detail">詳細</span></td>
       </tr>
       <tr class="in-lab">
         <td>加藤</td>
         <td>ゼミ室 C3-513</td>
         <td>ミーティング</td>
-        <td><span class="status-ok">✅</span></td>
+        <td><span class="detail">詳細</span></td>
       </tr>
     </table>
 
@@ -146,6 +148,24 @@
       <div class="dialog-buttons">
         <button onclick="closeDialog()">キャンセル</button>
         <button onclick="saveStatus()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ユーザ詳細ダイアログ -->
+  <div id="detailDialog" class="dialog-overlay">
+    <div class="dialog-box">
+      <button class="dialog-close" onclick="closeDetailDialog()" aria-label="閉じる">✖</button>
+      <!-- 一番上に最終更新時刻（小さめ・中央表示） -->
+      <div class="dialog-updated">最終更新: <span id="detail-updated">-</span></div>
+      <div class="dialog-content">
+        <p><strong>学年:</strong> <span id="detail-grade">-</span></p>
+        <p><strong>名前:</strong> <span id="detail-name">-</span></p>
+        <p><strong>場所:</strong> <span id="detail-location">-</span></p>
+        <p><strong>コメント:</strong> <span id="detail-comment">-</span></p>
+      </div>
+      <div class="dialog-footer">
+        <button class="slack-dm-btn" onclick="/* フロントのみ: 実装は不要 */">Slack（DM）へ移動</button>
       </div>
     </div>
   </div>

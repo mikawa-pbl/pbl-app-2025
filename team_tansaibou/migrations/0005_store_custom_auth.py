@@ -6,13 +6,8 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def check_and_migrate_store(apps, schema_editor):
-    """既存のStoreテーブルがあれば、新しいカラムを追加してデータを移行"""
-    from django.db import connection
-    from django.contrib.auth.hashers import make_password
-
-    db_alias = schema_editor.connection.alias
-
+def add_columns_to_existing_store(apps, schema_editor):
+    """既存のStoreテーブルがあれば、新しいカラムを追加（モデル参照なし）"""
     # テーブルが存在するか確認
     with schema_editor.connection.cursor() as cursor:
         cursor.execute("""
@@ -54,7 +49,13 @@ def check_and_migrate_store(apps, schema_editor):
                 ADD COLUMN is_active BOOLEAN DEFAULT 1
             """)
 
-    # 既存データにusername/passwordを設定
+
+def migrate_existing_store_data(apps, schema_editor):
+    """既存データにusername/passwordを設定"""
+    from django.contrib.auth.hashers import make_password
+
+    db_alias = schema_editor.connection.alias
+
     Store = apps.get_model('team_tansaibou', 'Store')
     for store in Store.objects.using(db_alias).all():
         changed = False
@@ -71,7 +72,7 @@ def check_and_migrate_store(apps, schema_editor):
             store.save(using=db_alias)
 
 
-def reverse_check(apps, schema_editor):
+def reverse_noop(apps, schema_editor):
     pass
 
 
@@ -82,11 +83,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # まずPythonでテーブルの状態を確認し、必要に応じてカラムを追加
-        migrations.RunPython(check_and_migrate_store, reverse_check),
+        # 1. 既存テーブルがあれば新カラムを追加（SQLのみ、モデル参照なし）
+        migrations.RunPython(add_columns_to_existing_store, reverse_noop),
 
-        # 新規インストールの場合のみCreateModelが効く
-        # 既存テーブルがある場合は上のRunPythonで対応済み
+        # 2. 新規インストールの場合のみCreateModelが効く
+        #    既存テーブルがある場合は上のRunPythonで対応済み
         migrations.CreateModel(
             name='Store',
             fields=[
@@ -125,4 +126,6 @@ class Migration(migrations.Migration):
             name='store',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='transactions', to='team_tansaibou.store', verbose_name='店舗'),
         ),
+        # 3. 既存データにusername/passwordを設定（CreateModel後に実行）
+        migrations.RunPython(migrate_existing_store_data, reverse_noop),
     ]

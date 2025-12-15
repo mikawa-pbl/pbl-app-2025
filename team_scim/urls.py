@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 app_name = "team_scim"
+
 urlpatterns = [
     path('', views.index, name='index'),
     path('login/', views.login_view, name='login'),
@@ -9,4 +10,5 @@ urlpatterns = [
     path('members/', views.members, name='members'),
     path('home/', views.home_view, name='home'),
     path('create_reservation/', views.create_reservation_view, name='create_reservation'),
+    path('process_notification/', views.process_notification_view, name='process_notification'),
 ]

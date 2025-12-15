@@ -51,11 +51,6 @@
         </div>
     </main>
 
-    <!-- (D) 情報投稿ボタン (FAB) -->
-    <button id="open-post-modal-btn" class="fixed z-20 flex items-center justify-center w-14 h-14 bg-green-500 text-white rounded-full shadow-lg bottom-6 right-6 hover:bg-green-600 transition duration-300">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-    </button>
-
     <!-- (C) ポイント消費確認モーダル -->
     <div id="confirm-modal" class="fixed inset-0 z-50 items-center justify-center hidden p-4 bg-black bg-opacity-50 modal-overlay">
         <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-xl modal-content">
@@ -75,11 +70,13 @@
     <!-- (D) 情報投稿モーダル -->
     <div id="post-modal" class="fixed inset-0 z-50 items-center justify-center hidden p-4 bg-black bg-opacity-50 modal-overlay">
         <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-xl modal-content">
-            <h3 class="text-lg font-bold text-gray-900">混雑状況を投稿</h3>
+            <h3 id="post-modal-title" class="text-lg font-bold text-gray-900">混雑状況を投稿</h3>
             <div class="mt-4 space-y-4">
-                <select id="post-facility" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <option value="" disabled selected>施設を選択</option>
-                </select>
+                <div id="post-facility-container">
+                    <select id="post-facility" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="" disabled selected>施設を選択</option>
+                    </select>
+                </div>
                 <select id="post-status" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     <option value="" disabled selected>混雑状況を選択</option>
                     <option value="empty">🟢 空いている</option>
@@ -114,6 +111,7 @@
             facilities: [],
             targetFacilityId: null,
             userFacilityAccess: new Set(),
+            postLockedFacilityId: null, // ロックされた投稿先
         };
 
         // --- DOM要素 ---
@@ -123,10 +121,11 @@
         const cancelUnlockBtn = document.getElementById('cancel-unlock-btn');
         const confirmUnlockBtn = document.getElementById('confirm-unlock-btn');
         const postModal = document.getElementById('post-modal');
-        const openPostModalBtn = document.getElementById('open-post-modal-btn');
         const cancelPostBtn = document.getElementById('cancel-post-btn');
         const confirmPostBtn = document.getElementById('confirm-post-btn');
         const postFacilitySelect = document.getElementById('post-facility');
+        const postFacilityContainer = document.getElementById('post-facility-container');
+        const postModalTitle = document.getElementById('post-modal-title');
         const postStatusSelect = document.getElementById('post-status');
         const postCommentInput = document.getElementById('post-comment');
 
@@ -217,14 +216,24 @@
                         </div>
                     `;
                 } else {
-                    // ポイント消費ボタン
+                    // ポイント消費ボタン と 投稿ボタン を横並びで表示
                     cardContent += `
-                        <button 
-                            class="w-full px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition duration-300"
-                            data-id="${facility.id}"
-                        >
-                            最新情報を取得 (1P消費)
-                        </button>
+                        <div class="flex space-x-2">
+                            <button 
+                                class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition duration-300"
+                                data-action="unlock"
+                                data-id="${facility.id}"
+                            >
+                                最新情報を取得 (1P消費)
+                            </button>
+                            <button 
+                                class="flex-none px-3 py-2 font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition duration-300"
+                                data-action="post"
+                                data-facility-id="${facility.id}"
+                            >
+                                投稿する
+                            </button>
+                        </div>
                     `;
                 }
 
@@ -276,16 +285,36 @@
         // --- イベントリスナー ---
 
         facilityList.addEventListener('click', async (event) => {
-            if (event.target.tagName === 'BUTTON' && event.target.dataset.id) {
-                const facilityId = parseInt(event.target.dataset.id);
+            const btn = event.target.closest('button');
+            if (!btn) return;
 
+            const action = btn.dataset.action;
+            if (action === 'unlock') {
+                const facilityId = parseInt(btn.dataset.id);
                 if (state.points <= 0) {
                     alert('ポイントが足りません');
                     return;
                 }
-
                 state.targetFacilityId = facilityId;
                 openModal(confirmModal);
+                return;
+            }
+
+            if (action === 'post') {
+                const facilityId = parseInt(btn.dataset.facilityId);
+                // 該当施設のみ投稿できるようにロックしてモーダルを開く
+                state.postLockedFacilityId = facilityId;
+                postFacilitySelect.value = String(facilityId);
+                postFacilitySelect.disabled = true; // 選択不可にする
+                // 選択要素を非表示にして、代わりにタイトルに施設名を表示
+                if (postFacilityContainer) postFacilityContainer.style.display = 'none';
+                const facilityObj = state.facilities.find(f => f.id === facilityId);
+                const facilityName = facilityObj ? facilityObj.name : '施設';
+                if (postModalTitle) postModalTitle.textContent = `${facilityName}の混雑状況を投稿`;
+                postStatusSelect.value = '';
+                postCommentInput.value = '';
+                openModal(postModal);
+                return;
             }
         });
 
@@ -314,19 +343,21 @@
             state.targetFacilityId = null;
         });
 
-        openPostModalBtn.addEventListener('click', () => {
-            postFacilitySelect.value = '';
-            postStatusSelect.value = '';
-            postCommentInput.value = '';
-            openModal(postModal);
-        });
-
         cancelPostBtn.addEventListener('click', () => {
+            // キャンセル時はロック解除してモーダルを閉じる
+            if (state.postLockedFacilityId !== null) {
+                postFacilitySelect.disabled = false;
+                state.postLockedFacilityId = null;
+                postFacilitySelect.value = '';
+                if (postFacilityContainer) postFacilityContainer.style.display = ''; // 表示に戻す
+                if (postModalTitle) postModalTitle.textContent = '混雑状況を投稿';
+            }
             closeModal(postModal);
         });
 
         confirmPostBtn.addEventListener('click', async () => {
-            const facilityId = parseInt(postFacilitySelect.value);
+            // 投稿先はロックがあればそれを使い、なければ選択値を使う
+            const facilityId = state.postLockedFacilityId !== null ? state.postLockedFacilityId : parseInt(postFacilitySelect.value);
             const status = postStatusSelect.value;
             const comment = postCommentInput.value.trim();
 
@@ -352,6 +383,15 @@
                 const facilitiesData = await apiCall('/team_northcliff/api/facilities/');
                 state.facilities = facilitiesData.facilities;
 
+                // 成功時はロック解除してモーダルを閉じる
+                if (state.postLockedFacilityId !== null) {
+                    postFacilitySelect.disabled = false;
+                    state.postLockedFacilityId = null;
+                    postFacilitySelect.value = '';
+                    if (postFacilityContainer) postFacilityContainer.style.display = ''; // 表示に戻す
+                    if (postModalTitle) postModalTitle.textContent = '混雑状況を投稿';
+                }
+
                 render();
                 closeModal(postModal);
             } catch (error) {
@@ -362,6 +402,7 @@
                     console.error('投稿エラー:', error);
                     alert('投稿に失敗しました');
                 }
+                // 失敗時はモーダルはそのまま（ロックは維持）
             }
         });
 

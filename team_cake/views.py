@@ -68,6 +68,53 @@ def registration_goods(request):
     return render(request, 'teams/team_cake/registrationGoods.html', {'form': form})
 
 
+def edit_good(request, pk):
+    try:
+        good = Good.objects.using('team_cake').get(pk=pk)
+    except Exception:
+        raise Http404("Good not found")
+
+    if request.method == 'POST':
+        form = GoodsForm(request.POST, request.FILES, instance=good)
+        if form.is_valid():
+            good = form.save(commit=False)
+
+            uploaded = request.FILES.get('image')
+            if uploaded:
+                base_dir = Path(__file__).resolve().parent
+                images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
+                images_dir.mkdir(parents=True, exist_ok=True)
+
+                orig_name = uploaded.name
+                ext = ''
+                if '.' in orig_name:
+                    ext = '.' + orig_name.split('.')[-1]
+                filename = f"{uuid.uuid4().hex}{ext}"
+                dest_path = (images_dir / filename).resolve()
+
+                if not str(dest_path).startswith(str(images_dir)):
+                    raise Http404("Invalid target path")
+
+                with open(dest_path, 'wb') as out:
+                    for chunk in uploaded.chunks():
+                        out.write(chunk)
+
+                # Delete old image
+                if good.image_filename:
+                    old_image_path = images_dir / good.image_filename
+                    if old_image_path.exists():
+                        old_image_path.unlink()
+
+                good.image_filename = filename
+
+            good.save(using='team_cake')
+            return redirect('team_cake:index')
+    else:
+        form = GoodsForm(instance=good)
+    
+    return render(request, 'teams/team_cake/registrationGoods.html', {'form': form, 'is_edit': True})
+
+
 def delete_good(request, pk):
     if request.method == 'POST':
         try:

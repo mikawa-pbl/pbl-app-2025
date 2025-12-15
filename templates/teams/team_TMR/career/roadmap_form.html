@@ -12,22 +12,35 @@
 
     <!-- Title -->
     <div>
-        <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.title.label }}:</label>
+        <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700">タイトル:</label>
         <input type="text" name="{{ form.title.name }}" id="{{ form.title.id_for_label }}"
                value="{{ form.title.value|default_if_none:'' }}"
                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                required>
     </div>
 
+    <!-- Date Range -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label for="{{ form.start_date.id_for_label }}" class="block text-sm font-medium text-gray-700">開始日:</label>
+            <input type="date" name="{{ form.start_date.name }}" id="{{ form.start_date.id_for_label }}"
+                   value="{{ form.start_date.value|date:'Y-m-d'|default_if_none:'' }}"
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div>
+            <label for="{{ form.end_date.id_for_label }}" class="block text-sm font-medium text-gray-700">終了日:</label>
+            <input type="date" name="{{ form.end_date.name }}" id="{{ form.end_date.id_for_label }}"
+                   value="{{ form.end_date.value|date:'Y-m-d'|default_if_none:'' }}"
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+    </div>
+
     <!-- Content -->
     <div>
-        <label for="{{ form.content.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.content.label }}:</label>
-        <textarea name="{{ form.content.name }}" id="{{ form.content.id_for_label }}" rows="10"
+        <label for="{{ form.content.id_for_label }}" class="block text-sm font-medium text-gray-700">詳細:</label>
+        <textarea name="{{ form.content.name }}" id="{{ form.content.id_for_label }}" rows="5"
                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   required>{{ form.content.value|default_if_none:'' }}</textarea>
-        {% if form.content.help_text %}
-            <p class="text-gray-500 text-sm mt-1">{{ form.content.help_text|safe }}</p>
-        {% endif %}
     </div>
 
     <div>

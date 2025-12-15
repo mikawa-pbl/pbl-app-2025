@@ -105,7 +105,7 @@ tr:hover {
         {% for transaction in transactions %}
         <tr>
             <td>{{ transaction.transaction_date }}</td>
-            <td>{{ transaction.recorded_by.last_name }} {{ transaction.recorded_by.first_name }}</td>
+            <td>{{ transaction.recorded_by.name }}</td>
             <td>
                 <span class="payment-method">
                     {{ transaction.get_payment_method_display }}

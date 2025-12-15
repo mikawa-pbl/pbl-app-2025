@@ -125,10 +125,17 @@
                         <a href="{% url 'team_tansaibou:productset_add' %}">セット商品登録</a>
                     </div>
                 </li>
-                <li><a href="{% url 'team_tansaibou:sale_list' %}">販売履歴</a></li>
-                {% if user.is_authenticated %}
                 <li class="dropdown">
-                    <a href="#">{{ user.username }} ▼</a>
+                    <a href="#">担当者管理 ▼</a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'team_tansaibou:member_list' %}">担当者一覧</a>
+                        <a href="{% url 'team_tansaibou:member_add' %}">担当者登録</a>
+                    </div>
+                </li>
+                <li><a href="{% url 'team_tansaibou:sale_list' %}">販売履歴</a></li>
+                {% if store %}
+                <li class="dropdown">
+                    <a href="#">{{ store.name }} ▼</a>
                     <div class="dropdown-menu">
                         <a href="{% url 'team_tansaibou:dashboard' %}">ダッシュボード</a>
                         <form action="{% url 'team_tansaibou:logout' %}" method="post" style="margin: 0;">

@@ -24045,12 +24045,13 @@ function NN(pl) {
             "fill-color": "#DFD0D8"
           }
         }
-      ],
-      glyphs: "https://glyphs.geolonia.com/{fontstack}/{range}.pbf"
+      ]
+      // glyphs: 'https://glyphs.geolonia.com/{fontstack}/{range}.pbf',
     },
     bounds: Ss,
     maxBounds: In,
-    attributionControl: !1
+    attributionControl: !1,
+    localIdeographFontFamily: "sans-serif"
   });
   return Rs.addControl(new Na.ScaleControl(), "bottom-left"), Rs.addControl(
     new Na.AttributionControl({

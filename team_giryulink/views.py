@@ -1,4 +1,5 @@
 # Create your views here.
+import os
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from .models import Member
@@ -54,7 +55,13 @@ def add_product(request):
 
 @require_POST
 def delete_product(request, pk):
-    """Delete product and redirect back to index."""
+    """Delete product and its associated image file, then redirect back to index."""
     product = get_object_or_404(Product, pk=pk)
+    
+    # Delete the image file from the file system if it exists
+    if product.image:
+        if os.path.isfile(product.image.path):
+            os.remove(product.image.path)
+    
     product.delete()
     return redirect("team_giryulink:index")

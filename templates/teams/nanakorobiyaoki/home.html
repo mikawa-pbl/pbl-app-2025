@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ホーム - nanakorobiyaoki</title>
+</head>
+
+<body>
+    <h1>ホーム</h1>
+    <p>ようこそ、{{ request.session.user_id }} さん (<a href="{% url 'nanakorobiyaoki:logout' %}">ログアウト</a>)</p>
+
+    <hr>
+    <h2>参加しているコミュニティ</h2>
+    <ul>
+        {% for community in joined_communities %}
+        <li>
+            <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}">
+                {% if community.image %}
+                <img src="{{ community.image.url }}" alt="{{ community.name }}" width="30"
+                    style="vertical-align: middle;">
+                {% endif %}
+                {{ community.name }}
+            </a>
+        </li>
+        {% empty %}
+        <li>参加しているコミュニティはありません。</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+    <h2>すべてのコミュニティ</h2>
+    <p><a href="{% url 'nanakorobiyaoki:community_create' %}">新しいコミュニティを作成</a></p>
+    <ul>
+        {% for community in communities %}
+        <li>
+            <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}">{{ community.name }}</a>
+            <small>({{ community.members.count }} メンバー)</small>
+        </li>
+        {% empty %}
+        <li>コミュニティはまだありません。</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+</body>
+
+</html>

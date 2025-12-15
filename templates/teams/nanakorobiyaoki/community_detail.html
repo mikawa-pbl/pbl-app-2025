@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ community.name }} - nanakorobiyaoki</title>
+</head>
+
+<body>
+    <h1>{{ community.name }}</h1>
+    {% if community.image %}
+    <p><img src="{{ community.image.url }}" alt="{{ community.name }}" width="200"></p>
+    {% endif %}
+    <p>{{ community.description|linebreaksbr }}</p>
+
+    <p>
+        <a href="{% url 'nanakorobiyaoki:community_list' %}">一覧に戻る</a> |
+        参加メンバー: {{ community.members.count }}人
+    </p>
+
+    {% if not is_member %}
+    <p><a href="{% url 'nanakorobiyaoki:community_join' community.id %}">このコミュニティに参加する</a></p>
+    {% else %}
+
+    <hr>
+    <h2>掲示板</h2>
+
+    <h3>投稿する</h3>
+    <form action="{% url 'nanakorobiyaoki:post_create' community.id %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <p>
+            <label for="id_content">内容:</label><br>
+            <textarea name="content" id="id_content" rows="3" cols="40"></textarea>
+        </p>
+        <p>
+            <label for="id_image">画像:</label>
+            <input type="file" name="image" id="id_image">
+        </p>
+        <button type="submit">投稿</button>
+    </form>
+
+    <h3>投稿一覧</h3>
+    <ul>
+        {% for post in posts %}
+        <li>
+            <strong>{{ post.author.name }}</strong> ({{ post.created_at }})<br>
+            {{ post.content|linebreaksbr }}
+            {% if post.image %}
+            <br><img src="{{ post.image.url }}" width="100">
+            {% endif %}
+            <br>
+            <a href="{% url 'nanakorobiyaoki:post_detail' post.id %}">コメントを見る/書く ({{ post.comments.count }}件)</a>
+        </li>
+        {% empty %}
+        <li>投稿はまだありません。</li>
+        {% endfor %}
+    </ul>
+
+    {% endif %}
+</body>
+
+</html>

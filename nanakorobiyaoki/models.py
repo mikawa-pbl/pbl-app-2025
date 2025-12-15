@@ -87,3 +87,32 @@ class MyPage(models.Model):
 
     def __str__(self):
         return self.name # ページの名前がその人の名前になる
+
+class Community(models.Model):
+    name = models.CharField(max_length=100, verbose_name="コミュニティ名")
+    description = models.TextField(verbose_name="説明", blank=True, null=True)
+    image = models.ImageField(upload_to='communities/', blank=True, null=True, verbose_name="画像")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
+    members = models.ManyToManyField(MyPage, related_name='communities', verbose_name="参加メンバー")
+
+    def __str__(self):
+        return self.name
+
+class Post(models.Model):
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='posts', verbose_name="コミュニティ")
+    author = models.ForeignKey(MyPage, on_delete=models.CASCADE, related_name='posts', verbose_name="投稿者")
+    content = models.TextField(verbose_name="内容")
+    image = models.ImageField(upload_to='posts/', blank=True, null=True, verbose_name="画像")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="投稿日時")
+
+    def __str__(self):
+        return f"{self.community.name} - {self.author.name} ({self.created_at})"
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments', verbose_name="投稿")
+    author = models.ForeignKey(MyPage, on_delete=models.CASCADE, related_name='comments', verbose_name="コメント者")
+    content = models.TextField(verbose_name="内容")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="投稿日時")
+
+    def __str__(self):
+        return f"Comment by {self.author.name}"

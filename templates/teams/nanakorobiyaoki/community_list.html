@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>コミュニティ一覧 - nanakorobiyaoki</title>
+</head>
+
+<body>
+    <h1>コミュニティ一覧</h1>
+    <p><a href="{% url 'nanakorobiyaoki:index' %}">トップページへ</a></p>
+
+    {% if request.session.user_id %}
+    <p><a href="{% url 'nanakorobiyaoki:community_create' %}">新しいコミュニティを作成</a></p>
+    {% endif %}
+
+    <ul>
+        {% for community in communities %}
+        <li>
+            <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}">
+                {% if community.image %}
+                <img src="{{ community.image.url }}" alt="{{ community.name }}" width="50">
+                {% endif %}
+                {{ community.name }}
+            </a>
+            <small>({{ community.members.count }} メンバー)</small>
+        </li>
+        {% empty %}
+        <li>コミュニティはまだありません。</li>
+        {% endfor %}
+    </ul>
+</body>
+
+</html>

@@ -38,3 +38,25 @@ class MyPageEditForm(forms.ModelForm):
         widgets = {
             'birth_date': forms.DateInput(attrs={'type': 'date'}),
         }
+
+class LoginForm(forms.Form):
+    user_id = forms.CharField(label='ユーザーID', max_length=100)
+    password = forms.CharField(label='パスワード', widget=forms.PasswordInput)
+
+from .models import Community, Post, Comment
+
+class CommunityForm(forms.ModelForm):
+    class Meta:
+        model = Community
+        fields = ['name', 'description', 'image']
+
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['content', 'image']
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
+

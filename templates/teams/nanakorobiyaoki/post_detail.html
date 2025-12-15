@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>投稿詳細 - nanakorobiyaoki</title>
+</head>
+
+<body>
+    <h1>投稿詳細</h1>
+    <p><a href="{% url 'nanakorobiyaoki:community_detail' post.community.id %}">コミュニティに戻る</a></p>
+
+    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 20px;">
+        <strong>{{ post.author.name }}</strong> ({{ post.created_at }})<br>
+        {{ post.content|linebreaksbr }}
+        {% if post.image %}
+        <br><img src="{{ post.image.url }}" width="300">
+        {% endif %}
+    </div>
+
+    <h2>コメント</h2>
+    <ul>
+        {% for comment in comments %}
+        <li>
+            <strong>{{ comment.author.name }}</strong> ({{ comment.created_at }})<br>
+            {{ comment.content|linebreaksbr }}
+        </li>
+        {% empty %}
+        <li>コメントはまだありません。</li>
+        {% endfor %}
+    </ul>
+
+    <h3>コメントする</h3>
+    <form action="{% url 'nanakorobiyaoki:comment_create' post.id %}" method="post">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <button type="submit">送信</button>
+    </form>
+</body>
+
+</html>

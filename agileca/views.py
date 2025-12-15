@@ -35,6 +35,9 @@ def classrooms(request):
     qs = Classroom.objects.using('agileca').all()  # ← team_terrace DBを明示
     return render(request, 'teams/agileca/classroom.html', {'classrooms': qs})
 
+def gikamap2(request):
+    return render(request, "teams/agileca/gikamap2.html")
+
 # 建物名検索
 def search_by_buildings(request):
     # 1. request.GET から検索キーワードを取得

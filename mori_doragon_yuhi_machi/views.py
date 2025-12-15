@@ -69,55 +69,111 @@ def members(request):
 
 
 
+# def add_place(request):
+#     """
+#     新しい場所 (Place) をデータベースに追加するビュー
+#     - GET: 場所名を入力するフォームを表示
+#     - POST: フォームデータを取得し、新しいPlaceオブジェクトを作成して保存
+#     """
+
+#     # 1. 全メンバーを「現在の場所」情報と一緒に取得 (select_relatedで効率化)
+#     #    .order_by('name') で名前順に並べます
+#     all_members = Member.objects.using(DB_ALIAS).select_related('current_place').order_by('name')
+    
+#     # 2. フォーム用に、全場所のリストも取得
+#     all_places = Place.objects.using(DB_ALIAS).order_by('name')
+
+#     # 3. テンプレートに渡すデータ（コンテキスト）
+#     context = {
+#         'all_members': all_members,  # メンバー一覧 (更新フォーム兼用)
+#         'all_places': all_places,    # フォームの<option>用
+#     }
+
+#     if request.method == 'POST':
+#         # 1. POSTデータから場所名を取得
+#         # フォームの入力フィールドのname属性が 'place_name' であると仮定
+#         place_name = request.POST.get('place_name') 
+        
+#         # 2. 場所名が空でないかバリデーション
+#         if place_name:
+#             # 3. 新しいPlaceオブジェクトを作成
+#             new_place = Place(name=place_name)
+            
+#             # 4. 指定されたデータベースエイリアスを使用して保存 (追加)
+#             new_place.save(using=DB_ALIAS)
+            
+#             # 5. 保存後、一覧画面などにリダイレクト
+#             # 'mori_doragon_yuhi_machi:index' はあなたが定義したURL名に合わせる
+#             return redirect('mori_doragon_yuhi_machi:index') 
+#         else:
+#             # エラーメッセージをテンプレートに渡す処理などを追加できます
+#             context = {
+#                 'error_message': '場所名を入力してください。', 
+#                 'all_members': all_members,  # メンバー一覧 (更新フォーム兼用)
+#                 'all_places': all_places,    # フォームの<option>用
+#             }
+#             return render(request, 'teams/mori_doragon_yuhi_machi/add_place.html', context)
+    
+#     else:
+#         # GETリクエストの場合: フォームを表示するテンプレートをレンダリング
+#         # このテンプレート (add_place.html) は別途作成が必要です
+#         return render(request, 'teams/mori_doragon_yuhi_machi/add_place.html', context)
+
+# (あなたのアプリ名)/views.py
+
+# ... (既存のインポートと定義: DB_ALIAS) ...
+
+# ... (index, update_location ビューなど) ...
+
 def add_place(request):
     """
     新しい場所 (Place) をデータベースに追加するビュー
     - GET: 場所名を入力するフォームを表示
-    - POST: フォームデータを取得し、新しいPlaceオブジェクトを作成して保存
+    - POST: フォームデータを取得し、重複をチェックした後、新しいPlaceオブジェクトを作成して保存
     """
-
-    # 1. 全メンバーを「現在の場所」情報と一緒に取得 (select_relatedで効率化)
-    #    .order_by('name') で名前順に並べます
-    all_members = Member.objects.using(DB_ALIAS).select_related('current_place').order_by('name')
     
-    # 2. フォーム用に、全場所のリストも取得
+    # テンプレートに渡すための基本データを取得（エラー時にも必要）
+    # indexビューと同じ処理
+    all_members = Member.objects.using(DB_ALIAS).select_related('current_place').order_by('name')
     all_places = Place.objects.using(DB_ALIAS).order_by('name')
-
-    # 3. テンプレートに渡すデータ（コンテキスト）
-    context = {
-        'all_members': all_members,  # メンバー一覧 (更新フォーム兼用)
-        'all_places': all_places,    # フォームの<option>用
+    base_context = {
+        'all_members': all_members,
+        'all_places': all_places,
     }
-
+    
     if request.method == 'POST':
-        # 1. POSTデータから場所名を取得
-        # フォームの入力フィールドのname属性が 'place_name' であると仮定
-        place_name = request.POST.get('place_name') 
+        # 1. POSTデータから場所名を取得し、前後の空白を除去
+        place_name = request.POST.get('place_name', '').strip() 
         
         # 2. 場所名が空でないかバリデーション
-        if place_name:
-            # 3. 新しいPlaceオブジェクトを作成
-            new_place = Place(name=place_name)
-            
-            # 4. 指定されたデータベースエイリアスを使用して保存 (追加)
-            new_place.save(using=DB_ALIAS)
-            
-            # 5. 保存後、一覧画面などにリダイレクト
-            # 'mori_doragon_yuhi_machi:index' はあなたが定義したURL名に合わせる
-            return redirect('mori_doragon_yuhi_machi:index') 
-        else:
-            # エラーメッセージをテンプレートに渡す処理などを追加できます
-            context = {
-                'error_message': '場所名を入力してください。', 
-                'all_members': all_members,  # メンバー一覧 (更新フォーム兼用)
-                'all_places': all_places,    # フォームの<option>用
-            }
+        if not place_name:
+            # 場所名が空の場合
+            context = base_context.copy()
+            context['error_message'] = '場所名を入力してください。'
             return render(request, 'teams/mori_doragon_yuhi_machi/add_place.html', context)
+
+        # ★ 3. 重複チェックの追加 ★
+        # 大文字・小文字を区別せず、同じ名前の場所がすでに存在するか検索 (Djangoの__iexactを使用)
+        if Place.objects.using(DB_ALIAS).filter(name__iexact=place_name).exists():
+            # 重複が見つかった場合
+            context = base_context.copy()
+            context['error_message'] = f'エラー: 場所「{place_name}」はすでに登録済みです。'
+            return render(request, 'teams/mori_doragon_yuhi_machi/add_place.html', context)
+
+        # 4. 新しいPlaceオブジェクトを作成
+        new_place = Place(name=place_name)
+        
+        # 5. 指定されたデータベースエイリアスを使用して保存 (追加)
+        new_place.save(using=DB_ALIAS)
+        
+        # 6. 保存後、一覧画面などにリダイレクト
+        return redirect('mori_doragon_yuhi_machi:add_place') 
     
     else:
         # GETリクエストの場合: フォームを表示するテンプレートをレンダリング
-        # このテンプレート (add_place.html) は別途作成が必要です
-        return render(request, 'teams/mori_doragon_yuhi_machi/add_place.html', context)
+        return render(request, 'teams/mori_doragon_yuhi_machi/add_place.html', base_context)
+
+# ... (delete_place ビューなど、既存のコードはそのまま) ...
 
 
 @require_POST

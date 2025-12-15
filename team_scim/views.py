@@ -129,7 +129,7 @@ def create_reservation_view(request):
         if not all([date_str, start_time_str, end_time_str, facility_name, signer_name]):
             return JsonResponse({'status': 'error', 'message': '必須項目が不足しています。'}, status=400)
 
-        tz = pytz.timezone(settings.TIME_ZONE)
+        tz = pytz.timezone('Asia/Tokyo')
         try:
             start_dt = tz.localize(datetime.strptime(f"{date_str} {start_time_str}", "%Y-%m-%d %H:%M"))
             end_dt = tz.localize(datetime.strptime(f"{date_str} {end_time_str}", "%Y-%m-%d %H:%M"))

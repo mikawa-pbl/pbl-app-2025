@@ -44,15 +44,33 @@ def facilities_view(request):
     """施設一覧と最新の投稿情報を取得"""
     facilities = Facility.objects.using("team_northcliff").all()
     result = []
+    now = timezone.now()
+    ten_minutes_ago = now - timedelta(minutes=10)
     
     for facility in facilities:
-        latest_post = facility.posts.using("team_northcliff").first()  # 最新の投稿を取得
+        # 最新の投稿（ステータス表示用）
+        latest_post = facility.posts.using("team_northcliff").order_by('-created_at').first()
+        
+        # 過去10分以内のコメントを最大3件取得（最新順）
+        recent_posts_qs = Post.objects.using("team_northcliff").filter(
+            facility=facility,
+            created_at__gte=ten_minutes_ago
+        ).order_by('-created_at')[:3]
+        
+        recent_comments = []
+        for p in recent_posts_qs:
+            if p.comment:
+                recent_comments.append({
+                    'comment': p.comment,
+                    'time_ago': format_time_diff(p.created_at),
+                })
         
         result.append({
             'id': facility.id,
             'name': facility.name,
             'latest_status': latest_post.status if latest_post else 'empty',
             'last_post_time': format_time_diff(latest_post.created_at if latest_post else None),
+            'recent_comments': recent_comments,  # 追加
         })
     
     return JsonResponse({'facilities': result})

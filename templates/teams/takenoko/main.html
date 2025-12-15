@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script>
-      /** @type {import('tailwindcss').Config} */
       tailwind.config = {
         theme: {
           extend: {
@@ -27,37 +27,208 @@
         plugins: [],
       };
     </script>
+
+    <style>
+      html, body {
+        background-color: #FBFEF9;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* ===========================
+         検索バー
+      ============================*/
+      .search-container {
+        position: relative;
+        width: 880px;
+        height: 56px;
+        margin: 32px auto;
+        padding: 0 32px;
+        border-radius: 32px;
+        background-color: #8C8EFC;
+      }
+
+      .search-bar {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+
+      .search-bar input {
+        background: transparent;
+        border: none;
+        outline: none;
+        width: 100%;
+        height: 100%;
+        padding-right: 48px; /* アイコン分の余白 */
+        font-size: 16px;
+        color: white;
+      }
+
+      .search-bar input::placeholder {
+        color: white;
+        opacity: 1; /* Safari対策 */
+      }
+
+      .search-bar button {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+
+      .search-bar i {
+        font-size: 24px;
+        color: white;
+      }
+
+      /* ===========================
+         ボックス＋円のエリア全体
+         （item-grid と同じ幅で中央寄せ）
+      ============================*/
+      .feature-area {
+        position: relative;
+        width: 1120px;
+        margin: 32px auto;
+        height: 48px; /* ボックスと円の高さに合わせる */
+      }
+
+      /* ===========================
+          96x48 ボックスのコンテナ
+          → ここだけで中央揃え
+      ============================*/
+      .feature-box-container {
+        width: 880px;         /* 検索バーと同じ幅 */
+        margin: 0 auto;       /* 親(1120px)の中で中央揃え */
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 16px;
+        align-items: center;
+        height: 48px;
+      }
+
+      /* 各ボックス */
+      .feature-box {
+        width: 96px;
+        height: 48px;
+        background-color: #FBFEF9;
+        color: #649CE4;
+        font-size: 16px;
+        border-radius: 16px;
+        border: 2px solid #649CE4; 
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .feature-box i {
+        font-size: 16px;
+      }
+      .feature-box p {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      /* 右端の円（ボックス列に“沿う”ように配置） */
+      .feature-circle {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        /* 親(1120px)の中央から、ボックス幅(880)の半分 + 16px だけ右へ */
+        left: 50%;
+        margin-left: calc(880px / 2 + 16px);
+        width: 48px;
+        height: 48px;
+        background-color: #649CE4;
+        border-radius: 50%;
+        color:white;
+      }
+
+      /* ===========================
+         アイテムグリッド
+      ============================*/
+      .item-grid-wrapper {
+        position: relative;
+        width: 1120px;
+        margin: 64px auto;
+      }
+
+      .item-grid {
+        position: absolute;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 32px;
+      }
+
+      /* ===========================
+         右下の追加ボタン
+      ============================*/
+      .fab {
+        position: fixed;
+        bottom: 64px;
+        right: 64px;
+      }
+
+      .fab i {
+        font-size: 96px;
+        color: #F96796;
+      }
+    </style>
+
   </head>
+
   <body>
     {% include "teams/takenoko/Components/header.html" %}
-    <div style="position: relative; width: 880px; height: 56px; margin: 32px auto; padding: 0px 32px; border-radius: 32px; background-color:#8C8EFC;">
-      <form class="search-bar" method="get" action="" style="position: absolute; margin-top: 16px;">
-        <input
-          type="text"
-          size="64"
-          name="q"
-          placeholder="何をお探しですか？"
-          style="background: transparent; border: none; outline: none; width: auto;"
-        >
-        <button type="submit" ><i class="fas fa-search" style="margin: auto; font-size: 24px; color: white;"></i></button>
+
+    <!-- ===== 検索バー ===== -->
+    <div class="search-container">
+      <form class="search-bar" method="get" action="">
+        <input type="text" name="q" placeholder="何をお探しですか？">
+        <button type="submit">
+          <i class="fas fa-search"></i>
+        </button>
       </form>
-    </div>  
-    <div style="position: relative; width:1120px; margin: 64px auto;"> 
-      <div style="position: absolute; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;">
-        {% include "teams/takenoko/Components/item_card.html" %}
-        {% include "teams/takenoko/Components/item_card.html" %}
-        {% include "teams/takenoko/Components/item_card.html" %}
-        {% include "teams/takenoko/Components/item_card.html" %}
-        {% include "teams/takenoko/Components/item_card.html" %}
-        {% include "teams/takenoko/Components/item_card.html" %}
+    </div>
+
+    <!-- ===== 96x48 のボックス 8 個（中央）＋ 右に円 ===== -->
+    <div class="feature-area">
+      <div class="feature-box-container">
+        <button class="feature-box"><i class="fas fa-book"></i><p>書籍</p></button>
+        <button class="feature-box"><i class="fas fa-paint-roller"></i><p>日用品</p></button>
+        <button class="feature-box"><i class="fas fa-desktop"></i><p>家電</p></button>
+        <button class="feature-box"><i class="fas fa-bed"></i><p>家具</p></button>
+        <button class="feature-box"><i class="fas fa-tshirt"></i><p>服飾</p></button>
+        <button class="feature-box"><i class="fas fa-box-open"></i><p>雑貨</p></button>
+        <button class="feature-box"><i class="fas fa-motorcycle"></i><p>乗り物</p></button>
+        <button class="feature-box"><i class="fas fa-file-alt"></i><p>過去問</p></button>
+      </div>
+
+      <!-- ボックスコンテナに沿った位置に配置された円 -->
+      <button class="feature-circle">¥0</button>
+    </div>
+
+    <!-- ===== アイテム一覧 ===== -->
+    <div class="item-grid-wrapper">
+      <div class="item-grid">
+        <a href="{% url 'takenoko:product_details' %}">{% include "teams/takenoko/Components/item_card.html" %}</a>
         {% include "teams/takenoko/Components/item_card.html" %}
         {% include "teams/takenoko/Components/item_card.html" %}
         {% include "teams/takenoko/Components/item_card.html" %}
         {% include "teams/takenoko/Components/item_card.html" %}
       </div>
-    </div>  
-    <div style="position: fixed; bottom: 64px; right: 64px;">
-      <a href="{% url 'takenoko:product_details' %}"><i class="fas fa-plus-circle" style="font-size: 96px; color: #F96796;"></i></a>
     </div>
+
+    <!-- ===== 右下の追加ボタン ===== -->
+    <div class="fab">
+      <a href="{% url 'takenoko:item_create' %}">
+        <i class="fas fa-plus-circle"></i>
+      </a>
+    </div>
+
   </body>
 </html>

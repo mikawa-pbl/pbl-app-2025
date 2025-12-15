@@ -163,6 +163,7 @@ td {
     padding: 20px;
     width: 320px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    position: relative;
 }
 
 .dialog-header {
@@ -206,4 +207,48 @@ td {
 
 .dialog-buttons button:hover {
     background: #e0e0e0;
+}
+
+/* ダイアログ右上の閉じるボタン */
+.dialog-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.dialog-close:hover {
+    color: #333;
+}
+
+/* 詳細ダイアログ下部のフッタとSlackボタン */
+.dialog-footer {
+    text-align: center;
+    margin-top: 8px;
+}
+
+.slack-dm-btn {
+    padding: 8px 16px;
+    background: #611f69; /* ヘッダボタンに合わせた色 */
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.slack-dm-btn:hover {
+    background: #7c299b;
+}
+
+/* ダイアログ上部の最終更新表示（小さめ・中央） */
+.dialog-updated {
+    font-size: 12px;
+    text-align: center;
+    color: #666;
+    margin-bottom: 6px;
 }

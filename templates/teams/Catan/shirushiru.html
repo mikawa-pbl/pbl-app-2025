@@ -80,7 +80,8 @@
         <td id="user-name-cell">ゲスト</td>
         <td id="user-location-cell">-</td>
         <td id="user-comment-cell">-</td>
-        <td id="user-status-cell">-</td>
+        <!--<td id="user-status-cell">-</td>-->
+        <td><span class="detail">詳細</span></td>
       </tr>
     </table>
 
@@ -147,6 +148,24 @@
       <div class="dialog-buttons">
         <button onclick="closeDialog()">キャンセル</button>
         <button onclick="saveStatus()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ユーザ詳細ダイアログ -->
+  <div id="detailDialog" class="dialog-overlay">
+    <div class="dialog-box">
+      <button class="dialog-close" onclick="closeDetailDialog()" aria-label="閉じる">✖</button>
+      <!-- 一番上に最終更新時刻（小さめ・中央表示） -->
+      <div class="dialog-updated">最終更新: <span id="detail-updated">-</span></div>
+      <div class="dialog-content">
+        <p><strong>学年:</strong> <span id="detail-grade">-</span></p>
+        <p><strong>名前:</strong> <span id="detail-name">-</span></p>
+        <p><strong>場所:</strong> <span id="detail-location">-</span></p>
+        <p><strong>コメント:</strong> <span id="detail-comment">-</span></p>
+      </div>
+      <div class="dialog-footer">
+        <button class="slack-dm-btn" onclick="/* フロントのみ: 実装は不要 */">Slack（DM）へ移動</button>
       </div>
     </div>
   </div>

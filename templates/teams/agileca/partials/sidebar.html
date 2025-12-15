@@ -3,7 +3,16 @@
   <ul>
     <li><a href="{% url 'agileca:index' %}">トップページ</a></li>
     <li>
-      <a href="{% url 'agileca:search_by_buildings' %}">施設名から検索</a>
+      <a href="{% url 'agileca:search_buildings' %}">施設名から検索</a>
+    </li>
+    <li>
+      <a href="{% url 'agileca:search_attributes' %}">用途から検索</a>
+    </li>
+    <li>
+      <a href="{% url 'agileca:search_professor' %}">教授名から検索</a>
+    </li>
+    <li>
+      <a href="{% url 'agileca:search_roomname' %}">教室名から検索</a>
     </li>
   </ul>
 </nav>

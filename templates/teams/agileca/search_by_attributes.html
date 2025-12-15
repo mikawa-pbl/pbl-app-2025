@@ -1,12 +1,13 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% extends "teams/agileca/layout/split_base.html" %}
+{% load static %}
 
-<head>
-  <meta charset="UTF-8">
-  <title>Agileca Members</title>
-</head>
+{% block title %}Example{% endblock %}
 
-<body>
+{% block left %}
+  {% include "teams/agileca/partials/sidebar.html" %}
+{% endblock %}
+
+{% block right %}
     <h2>用途で教室を検索</h2>
     
     <form action="{% url 'agileca:search_attributes' %}" method="GET" class="tag-search-form" style="border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: #f9f9f9;">
@@ -75,4 +76,4 @@
         </ul>
     {% else %}
         {% endif %}
-</body>
+{% endblock %}

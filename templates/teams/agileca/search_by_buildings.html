@@ -1,12 +1,13 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% extends "teams/agileca/layout/split_base.html" %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>建物名検索</title>
-</head>
+{% block title %}Example{% endblock %}
 
-<body>
+{% block left %}
+  {% include "teams/agileca/partials/sidebar.html" %}
+{% endblock %}
+
+{% block right %}
     
     <h2>🏢 建物名で教室を検索</h2>
     
@@ -73,6 +74,4 @@
         </ul>
     {% else %}
         {% endif %}
-
-</body>
-</html>
+{% endblock %}

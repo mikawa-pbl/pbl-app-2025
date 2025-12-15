@@ -1,0 +1,35 @@
+    <!-- Modal Structure -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <h4 id="modalTitle"></h4>
+            <p id="modalDescription"></p>
+            <p><strong>Price:</strong> ¥<span id="modalPrice"></span></p>
+        </div>
+        <div class="modal-footer">
+            <a id="editLink" href="#" class="waves-effect waves-light btn-flat">編集</a>
+            <form id="deleteForm" method="post" action="" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="waves-effect waves-red btn-flat red-text">削除</button>
+            </form>
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+        </div>
+    </div>
+
+<script>
+    function openModal(id, title, price, description) {
+        if (event) event.preventDefault(); // Prevent default behavior of the link
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalDescription').innerText = description;
+        document.getElementById('modalPrice').innerText = price;
+        
+        const deleteForm = document.getElementById('deleteForm');
+        deleteForm.action = `/team_cake/delete_good/${id}/`;
+
+        const editLink = document.getElementById('editLink');
+        editLink.href = `/team_cake/edit_good/${id}/`;
+
+        const modal = document.getElementById('detailModal');
+        const instance = M.Modal.init(modal);
+        instance.open();
+    }
+</script>

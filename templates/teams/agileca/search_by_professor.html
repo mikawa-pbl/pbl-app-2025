@@ -3,29 +3,29 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>建物名検索</title>
+    <title>教授名検索</title>
 </head>
 
 <body>
     
-    <h2>🏢 建物名で教室を検索</h2>
+    <h2>👨‍🏫 担当教授名で教室を検索</h2>
     
-    <form action="" method="GET" class="search-form" style="border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: #f9f9f9;">
+    <form action="{% url 'agileca:search_professor' %}" method="GET" class="search-form" style="border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: #f9f9f9;">
         
         <input 
             type="text" 
             name="q" 
-            placeholder="建物名または部屋名で検索" 
+            placeholder="教授名を入力" 
             value="{{ query|default_if_none:'' }}"
             style="padding: 8px; width: 300px; border: 1px solid #ddd; border-radius: 4px;"
         >
         
-        <button type="submit" style="padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        <button type="submit" style="padding: 8px 15px; background-color: #ff4d4d; color: white; border: none; border-radius: 4px; cursor: pointer;">
             検索
         </button>
         
         {% if query %}
-            <a href="{% url 'agileca:search_buildings' %}" style="margin-left: 10px; color: #6c757d; text-decoration: none;">
+            <a href="{% url 'agileca:search_professor' %}" style="margin-left: 10px; color: #6c757d; text-decoration: none;">
                 リセット
             </a>
         {% endif %}
@@ -33,13 +33,11 @@
 
     <hr style="margin-top: 30px; margin-bottom: 20px;">
 
-    <hr style="margin-top: 30px; margin-bottom: 20px;">
-
     {% if rooms %}
         <h3>検索結果 ({{ rooms.count }} 件)</h3>
         <ul style="list-style: none; padding: 0;">
             {% for room in rooms %}
-                <li style="border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-left: 5px solid #007bff; border-radius: 5px;">
+                <li style="border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-left: 5px solid #ff4d4d; border-radius: 5px;">
                     
                     <h4>{{ room.room_name }} ({{ room.floor }}階)</h4>
                     
@@ -71,8 +69,14 @@
                 </li>
             {% endfor %}
         </ul>
+    
+    {% elif query %}
+        <p>「<strong>{{ query }}</strong>」に一致する教室は見つかりませんでした。</p>
+        
     {% else %}
-        {% endif %}
+        <p>教授名を入力して、教室を検索してください。</p>
+        
+    {% endif %}
 
 </body>
 </html>

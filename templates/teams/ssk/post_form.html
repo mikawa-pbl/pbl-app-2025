@@ -1,66 +1,90 @@
 {# teams/ssk/post_form.html #}
-{% if post %}
-  <h1>投稿を編集</h1>
-{% else %}
-  <h1>新規投稿</h1>
-{% endif %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>{% if post %}編集{% else %}新規投稿{% endif %}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial;background:#f6f8fa;margin:24px;}
+    .container{max-width:720px;margin:0 auto;}
+    .form-card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,0.06);}
+    label{display:block;margin-bottom:6px;font-weight:600;}
+    input[type="text"], textarea, select {width:100%;padding:10px;border:1px solid #e6e9ee;border-radius:8px;font-size:1rem}
+    .row{display:flex;gap:12px;align-items:center}
+    .muted{color:#6b7280;font-size:0.9rem}
+    .btn{background:#2563eb;color:#fff;padding:10px 14px;border-radius:10px;border:none;cursor:pointer}
+    .secondary{background:#fff;border:1px solid #e6e9ee;color:#374151;padding:9px 12px;border-radius:10px}
+    .small{font-size:0.9rem;color:#6b7280}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-card">
+      <h1 style="margin-top:0;">{% if post %}投稿を編集{% else %}新規投稿{% endif %}</h1>
 
-<form method="post">
-  {% csrf_token %}
+      <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+          <div style="color:#b91c1c;margin-bottom:12px;">
+            {% for field in form %}
+              {% for error in field.errors %}
+                <div>{{ field.label }}: {{ error }}</div>
+              {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+              <div>{{ error }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
 
-{% if form.errors %}
-  <div style="color:red; margin-bottom: 1em;">
-    {% for field in form %}
-      {% for error in field.errors %}
-        <div>{{ field.label }}: {{ error }}</div>
-      {% endfor %}
-    {% endfor %}
-    {% for error in form.non_field_errors %}
-      <div>{{ error }}</div>
-    {% endfor %}
+        <p>
+          {{ form.title.label_tag }}<br>
+          {{ form.title }}
+        </p>
+
+        <p>
+          {{ form.date.label_tag }}<br>
+          {{ form.date }} <span class="small">（任意）</span>
+        </p>
+
+        {% if not post %}
+        <p>
+          {{ form.password.label_tag }}<br>
+          {{ form.password }}
+          <span class="small">（任意：作成時のみ設定）</span>
+        </p>
+        {% endif %}
+
+        <div class="row" style="margin-bottom:10px;">
+          <div style="flex:1">
+            <label>{{ form.start_time.label }}</label>
+            {{ form.start_time }}
+            <div class="small">（任意）</div>
+          </div>
+          <div style="flex:1">
+            <label>{{ form.end_time.label }}</label>
+            {{ form.end_time }}
+            <div class="small">（任意）</div>
+          </div>
+        </div>
+
+        <p>
+          {{ form.body.label_tag }}<br>
+          {{ form.body }}
+        </p>
+
+        <p>
+          {{ form.tags_text.label_tag }}<br>
+          {{ form.tags_text }}
+        </p>
+
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn" type="submit">{% if post %}更新{% else %}投稿{% endif %}</button>
+          <button type="button" class="secondary" onclick="location.href='{% url 'ssk:post_list' %}'">一覧へ戻る</button>
+        </div>
+      </form>
+    </div>
   </div>
-{% endif %}
-
-<p>
-  {{ form.title.label_tag }}<br>
-  {{ form.title }}
-</p>
-
-<p>
-  {{ form.date.label_tag }}<br>
-  {{ form.date }}
-  <small>（任意）</small>
-</p>
-
-{# password: only shown when creating a new post (cannot change later) #}
-{% if not post %}
-<p>
-  {{ form.password.label_tag }}<br>
-  {{ form.password }}
-  <small>（任意：作成時のみ設定）</small>
-</p>
-{% endif %}
-
-<p>
-  {{ form.start_time.label_tag }}<br>
-  {{ form.start_time }}
-  <small>（任意）</small>
-  〜
-  {{ form.end_time.label_tag }}<br>
-  {{ form.end_time }}
-  <small>（任意）</small>
-</p>
-
-<p>
-  {{ form.body.label_tag }}<br>
-  {{ form.body }}
-</p>
-
-<p>
-  {{ form.tags_text.label_tag }}<br>
-  {{ form.tags_text }}
-</p>
-
-<button type="submit">{% if post %}更新{% else %}投稿{% endif %}</button>
-<input type="button" value="一覧へ戻る" onclick="location.href='{% url 'ssk:post_list' %}'">
-</form>
+</body>
+</html>

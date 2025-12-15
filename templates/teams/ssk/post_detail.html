@@ -3,46 +3,54 @@
 <head>
   <meta charset="utf-8">
   <title>{{ post.title }}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial;background:#f6f8fa;margin:24px;}
+    .container{max-width:760px;margin:0 auto;}
+    .card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,0.06);}
+    .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+    .tag{background:#e6f0ff;color:#0b3a8c;padding:6px 10px;border-radius:999px;font-size:0.9rem;}
+    .actions{margin-top:12px;display:flex;gap:8px;align-items:center;}
+    .btn{background:#2563eb;color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;}
+    .danger{background:#ef4444;}
+  </style>
 </head>
 <body>
-  <h1>{{ post.title }}</h1>
+  <div class="container">
+    <div class="card">
+      <h1 style="margin:0 0 8px 0;">{{ post.title }}</h1>
 
-  {% if post.date %}
-    <p>イベント日: {{ post.date|date:"Y年n月j日" }}
-      {% if post.start_time %}
-        {{ post.start_time|time:"H:i" }}
-        {% if post.end_time %} - {{ post.end_time|time:"H:i" }}{% endif %}
+      {% if post.date %}
+        <p style="color:#374151;margin:0 0 8px 0;">イベント日: {{ post.date|date:"Y年n月j日" }}
+          {% if post.start_time %}・{{ post.start_time|time:"H:i" }}{% if post.end_time %} - {{ post.end_time|time:"H:i" }}{% endif %}{% endif %}
+        </p>
+      {% else %}
+        <p style="color:#374151;margin:0 0 8px 0;">イベント日: 未設定</p>
       {% endif %}
-    </p>
-  {% else %}
-    <p>イベント日: 未設定</p>
-  {% endif %}
 
-  {% if post.tags.exists %}
-    <p>
-      {% for tag in post.tags.all %}
-        <span class="tag">#{{ tag.name }}</span>{% if not forloop.last %} {% endif %}
-      {% endfor %}
-    </p>
-  {% endif %}
+      {% if post.tags.exists %}
+        <div class="tags">
+          {% for tag in post.tags.all %}
+            <span class="tag">#{{ tag.name }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
 
-  <div>
-    {{ post.body }}
+      <div style="margin-top:16px;white-space:pre-wrap;color:#111;">{{ post.body }}</div>
+
+      <div class="actions">
+        <a class="btn" href="{% url 'ssk:post_list' %}">一覧へ戻る</a>
+        {% if post.password_hash %}
+          <a class="btn" href="{% url 'ssk:post_unlock' post.pk %}">編集</a>
+        {% else %}
+          <a class="btn" href="{% url 'ssk:post_edit' post.pk %}">編集</a>
+        {% endif %}
+        <form method="post" action="{% url 'ssk:post_delete' post.pk %}" onsubmit="return confirm('この投稿を削除してもよいですか？');" style="display:inline;">
+          {% csrf_token %}
+          <button class="btn danger" type="submit">削除</button>
+        </form>
+      </div>
+    </div>
   </div>
-
-  <p>
-    <a href="{% url 'ssk:post_list' %}">一覧へ戻る</a>
-    &nbsp;|&nbsp;
-    {% if post.password_hash %}
-      <a href="{% url 'ssk:post_unlock' post.pk %}">編集</a>
-    {% else %}
-      <a href="{% url 'ssk:post_edit' post.pk %}">編集</a>
-    {% endif %}
-  </p>
-
-  <form method="post" action="{% url 'ssk:post_delete' post.pk %}" onsubmit="return confirm('この投稿を削除してもよいですか？');">
-    {% csrf_token %}
-    <button type="submit">削除</button>
-  </form>
 </body>
 </html>

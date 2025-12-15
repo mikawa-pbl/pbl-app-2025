@@ -1,69 +1,114 @@
 {# teams/ssk/post_list.html #}
 {% load tz %}
 
-<h1>イベント一覧</h1>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>イベント一覧</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    /* Modern simple UI */
+    :root{
+      --bg:#f6f8fa; --card:#ffffff; --muted:#6b7280;
+      --accent:#2563eb; --accent-contrast:#fff; --tag:#e6f0ff;
+      --radius:10px;
+    }
+    body{font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:#111; margin:0; padding:24px;}
+    .container{max-width:980px;margin:0 auto;}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    h1{margin:0;font-size:1.6rem;}
+    .actions a.button{background:var(--accent);color:var(--accent-contrast);padding:8px 12px;border-radius:8px;text-decoration:none;}
+    .panel{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(15,23,42,0.06);margin-bottom:16px;}
+    form.filter{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+    .tags-box{display:flex;flex-wrap:wrap;gap:8px;}
+    .tag-pill{background:var(--tag);color:#0b3a8c;padding:4px 8px;border-radius:999px;font-size:0.9rem;}
+    .months{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;}
+    .card{background:var(--card);padding:12px;border-radius:8px;border:1px solid rgba(15,23,42,0.03);}
+    .card a.title{font-weight:600;color:#0f172a;text-decoration:none;}
+    .meta{font-size:0.9rem;color:var(--muted);margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+    .undated{margin-top:12px;}
+    @media (max-width:600px){ .panel{padding:12px;} .card{padding:10px;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>イベント一覧</h1>
+      <div class="actions"><a class="button" href="{% url 'ssk:post_create' %}">新規投稿</a></div>
+    </header>
 
-<p><a href="{% url 'ssk:post_create' %}">新規投稿</a></p>
+    <div class="panel">
+      <form class="filter" method="get" action="{% url 'ssk:post_list' %}">
+        <div style="flex:1 1 60%">
+          <div class="tags-box">
+            {% for tag in tags %}
+              <label class="tag-pill"><input type="checkbox" name="tag" value="{{ tag.id }}" {% if tag.id in selected_tag_ids %}checked{% endif %} style="margin-right:6px;">#{{ tag.name }}</label>
+            {% endfor %}
+          </div>
+        </div>
 
-{# タグ絞り込み UI を複数選択対応に変更 #}
-<form method="get" action="{% url 'ssk:post_list' %}">
-  タグで絞る:
-  {% for tag in tags %}
-    <label style="margin-right:8px;">
-      <input type="checkbox" name="tag" value="{{ tag.id }}" {% if tag.id in selected_tag_ids %}checked{% endif %}>
-      #{{ tag.name }}
-    </label>
-  {% endfor %}
+        <div style="flex:0 0 auto;display:flex;gap:8px;align-items:center;">
+          <label style="font-size:0.9rem;">
+            条件:
+            <select name="mode" style="margin-left:6px;padding:6px;border-radius:8px;border:1px solid #eee;">
+              <option value="and" {% if selected_mode == "and" %}selected{% endif %}>AND</option>
+              <option value="or" {% if selected_mode == "or" %}selected{% endif %}>OR</option>
+            </select>
+          </label>
+          <button type="submit" style="background:var(--accent);color:var(--accent-contrast);border:none;padding:8px 12px;border-radius:8px;">絞り込む</button>
+          <a href="{% url 'ssk:post_list' %}" style="color:var(--muted);text-decoration:none;padding:8px;">クリア</a>
+        </div>
+      </form>
+    </div>
 
-  <!-- フィルター方式の選択 -->
-  <label style="margin-left:12px;">
-    条件:
-    <select name="mode">
-      <option value="and" {% if selected_mode == "and" %}selected{% endif %}>AND（すべてのタグを含む）</option>
-      <option value="or" {% if selected_mode == "or" %}selected{% endif %}>OR（いずれかのタグを含む）</option>
-    </select>
-  </label>
-
-  <button type="submit">絞り込む</button>
-  <a href="{% url 'ssk:post_list' %}">クリア</a>
-</form>
-
-{# 日付ありの投稿を月ごとにまとめる #}
-{% regroup dated_posts by date|date:"Y年n月" as month_list %}
-
-{% for month in month_list %}
-  <h2>{{ month.grouper }}</h2>
-  <ul>
-    {% for post in month.list %}
-      <li>
-        <a href="{% url 'ssk:post_detail' post.pk %}">{{ post.title }}</a>
-        {% for tag in post.tags.all %}
-          <span class="tag">#{{ tag.name }}</span>
+    <section>
+      <h2 style="margin:8px 0 12px 0;">日付あり</h2>
+      {% regroup dated_posts by date|date:"Y年n月" as month_list %}
+      <div class="months">
+        {% for month in month_list %}
+          <div>
+            <h3 style="margin:0 0 8px 0;font-size:1rem;">{{ month.grouper }}</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              {% for post in month.list %}
+                <article class="card">
+                  <a class="title" href="{% url 'ssk:post_detail' post.pk %}">{{ post.title }}</a>
+                  <div class="meta">
+                    {% for tag in post.tags.all %}
+                      <span class="tag-pill">#{{ tag.name }}</span>
+                    {% endfor %}
+                    {% if post.date %}
+                      <span>{{ post.date|date:"n/j" }}</span>
+                      {% if post.start_time %}
+                        <span>・{{ post.start_time|time:"H:i" }}{% if post.end_time %} - {{ post.end_time|time:"H:i" }}{% endif %}</span>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                </article>
+              {% endfor %}
+            </div>
+          </div>
         {% endfor %}
-        {% if post.date %}
-          {{ post.date|date:"n/j" }}
-          {% if post.start_time %}
-            {{ post.start_time|time:"H:i" }}{% if post.end_time %} - {{ post.end_time|time:"H:i" }}{% endif %}
-          {% endif %}
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-{% empty %}
-  <p>まだ投稿がありません。</p>
-{% endfor %}
+      </div>
 
-{# 日付未設定の投稿を別セクションで表示 #}
-{% if undated_posts.exists %}
-  <h2>日付未設定</h2>
-  <ul>
-    {% for post in undated_posts %}
-      <li>
-        <a href="{% url 'ssk:post_detail' post.pk %}">{{ post.title }}</a>
-        {% for tag in post.tags.all %}
-          <span class="tag">#{{ tag.name }}</span>
-        {% endfor %}
-      </li>
-    {% endfor %}
-  </ul>
-{% endif %}
+      {% if undated_posts.exists %}
+        <div class="panel undated">
+          <h3 style="margin:0 0 8px 0;">日付未設定</h3>
+          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
+            {% for post in undated_posts %}
+              <li class="card" style="padding:10px;">
+                <a class="title" href="{% url 'ssk:post_detail' post.pk %}">{{ post.title }}</a>
+                <div class="meta">
+                  {% for tag in post.tags.all %}
+                    <span class="tag-pill">#{{ tag.name }}</span>
+                  {% endfor %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+</body>
+</html>

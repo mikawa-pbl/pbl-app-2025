@@ -21,7 +21,7 @@ def paper_create(request):
         form = PaperForm(request.POST, request.FILES)  # ← FILES が重要
         if form.is_valid():
             paper = form.save()
-            return redirect('paper_detail', pk=paper.pk)
+            return redirect('teachers:paper_detail', pk=paper.pk)
     else:
         form = PaperForm()
     return render(request, 'teams/teachers/paper_form.html', {'form': form})
@@ -33,7 +33,7 @@ def paper_update(request, pk):
         form = PaperForm(request.POST, request.FILES, instance=paper)
         if form.is_valid():
             paper = form.save()
-            return redirect('paper_detail', pk=paper.pk)
+            return redirect('teachers:paper_detail', pk=paper.pk)
     else:
         form = PaperForm(instance=paper)
     return render(request, 'teams/teachers/paper_form.html', {'form': form, 'paper': paper})
@@ -43,7 +43,7 @@ def paper_delete(request, pk):
     paper = get_object_or_404(Paper, pk=pk)
     if request.method == 'POST':
         paper.delete()
-        return redirect('paper_list')
+        return redirect('teachers:paper_list')
     return render(request, 'teams/teachers/paper_confirm_delete.html', {'paper': paper})
 
 # 検索

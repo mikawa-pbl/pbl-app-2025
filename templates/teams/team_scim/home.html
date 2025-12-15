@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>施設予約カレンダー</title>
+    
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js'></script>
+    
+    <style>
+        /* カレンダーの基本的なスタイル */
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        #calendar {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* 予約状況（ステータス）に応じて色を変えるCSS */
+        .status-pending {
+            background-color: #f39c12; /* オレンジ (申請中) */
+            border-color: #f39c12;
+        }
+        .status-approved {
+            background-color: #00a65a; /* 緑 (承認済み) */
+            border-color: #00a65a;
+        }
+        .status-rejected {
+            background-color: #dd4b39; /* 赤 (却下) */
+            border-color: #dd4b39;
+            color: #fff; /* 文字色を白に */
+        }
+        
+        /* ⬇️ ダイアログ用のスタイルを追加 ⬇️ */
+        #reservation-dialog {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 350px; /* ダイアログの最小幅 */
+        }
+        #reservation-dialog::backdrop {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        #reservation-form div {
+            margin-bottom: 15px;
+        }
+        #reservation-form label {
+            display: inline-block;
+            width: 80px;
+            font-weight: bold;
+        }
+        #reservation-form input,
+        #reservation-form select {
+            padding: 5px;
+            width: 200px;
+            box-sizing: border-box;
+        }
+        #dialog-actions {
+            text-align: right;
+            margin-top: 20px;
+        }
+        #dialog-actions button {
+            margin-left: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    {% csrf_token %} <h1>大学 施設予約システム</h1>
+    <p>予約申請状況カレンダー</p>
+
+    <div id='calendar'></div>
+
+
+    <dialog id="reservation-dialog">
+        <form id="reservation-form">
+            <h3 id="dialog-title">予約申請</h3>
+            
+            <div>
+                <label for="facility-select">施設:</label>
+                <select id="facility-select" name="facility_name" required>
+                    <option value="">施設を選択してください</option>
+                    
+                    {% for facility in facilities %}
+                        <option value="{{ facility }}">{{ facility }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="start-time">開始時間:</label>
+                <input type="time" id="start-time" name="start_time" step="1800" required> </div>
+            
+            <div>
+                <label for="end-time">終了時間:</label>
+                <input type="time" id="end-time" name="end_time" step="1800" required>
+            </div>
+        </form>
+        
+        <div id="dialog-actions">
+            <button type="button" id="close-dialog-btn">閉じる</button>
+            <button type="button" id="submit-reservation-btn">予約申請する</button>
+        </div>
+    </dialog>
+    <script>
+        // CSRFトークン取得関数
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+
+        // FullCalendarのスクリプト
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var eventsData = {{ events_json|safe }};
+            
+            // ダイアログ要素を取得
+            const dialog = document.getElementById('reservation-dialog');
+            const dialogTitle = document.getElementById('dialog-title');
+            const closeDialogBtn = document.getElementById('close-dialog-btn');
+            const submitReservationBtn = document.getElementById('submit-reservation-btn');
+            const facilitySelect = document.getElementById('facility-select');
+            const startTimeInput = document.getElementById('start-time');
+            const endTimeInput = document.getElementById('end-time');
+
+            // クリックされた日付を保持する変数
+            let clickedDateStr = null;
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth', 
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                locale: 'ja', 
+                events: eventsData,
+
+                // (既存) イベントクリック時の動作
+                eventClick: function(info) {
+                    alert(
+                        '施設: ' + info.event.title + '\n' +
+                        '申請者: ' + info.event.extendedProps.applicant + '\n' +
+                        '開始: ' + info.event.start.toLocaleString() + '\n' +
+                        '終了: ' + info.event.end.toLocaleString()
+                    );
+                },
+
+                // (変更) 日付セルクリックでダイアログを開く
+                dateClick: function(info) {
+                    // クリックされた日付を保持
+                    clickedDateStr = info.dateStr; 
+                    
+                    // ダイアログのタイトルを更新
+                    dialogTitle.textContent = `${clickedDateStr} の予約申請`;
+                    
+                    // フォームをリセット
+                    facilitySelect.value = "";
+                    startTimeInput.value = "09:00"; // デフォルト値を設定
+                    endTimeInput.value = "10:00";   // デフォルト値を設定
+
+                    // ダイアログを表示
+                    dialog.showModal();
+                }
+            });
+            
+            calendar.render();
+
+            // --- ダイアログのボタンの動作 ---
+
+            // 「閉じる」ボタン
+            closeDialogBtn.addEventListener('click', function() {
+                dialog.close();
+            });
+
+            // 「予約申請する」ボタン
+            submitReservationBtn.addEventListener('click', function() {
+                
+                // フォームから値を取得
+                const reservationData = {
+                    date_str: clickedDateStr, // 保持しておいた日付
+                    facility_name: facilitySelect.value,
+                    start_time: startTimeInput.value,
+                    end_time: endTimeInput.value
+                };
+
+                // 必須項目の簡易チェック
+                if (!reservationData.facility_name || !reservationData.start_time || !reservationData.end_time) {
+                    alert('施設、開始時間、終了時間をすべて選択してください。');
+                    return;
+                }
+
+                // バックエンド(Django)にデータを送信
+                fetch("{% url 'team_scim:create_reservation' %}", { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken 
+                    },
+                    body: JSON.stringify(reservationData) // フォームデータをJSONに
+                })
+                .then(response => response.json().then(data => ({ status: response.status, body: data })))
+                .then(data => {
+                    // バックエンドからのレスポンスを処理
+                    // data.status は HTTPステータス (200, 409, 400 など)
+                    // data.body は Djangoが返したJSON ( {status: 'success', ...} や {status: 'error', ...} )
+                    
+                    alert(data.body.message); // サーバーからのメッセージを必ず表示
+
+                    if (data.status === 200 && data.body.status === 'success') {
+                        // 成功
+                        calendar.addEvent(data.body.newEvent); // カレンダーに即時反映
+                        dialog.close(); // ダイアログを閉じる
+                    }
+                    // 失敗時 (400, 409, 500) は、メッセージを表示するだけ
+                    // (ダイアログは閉じないので、ユーザーが時間等を修正できる)
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    alert('通信エラーが発生しました。');
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

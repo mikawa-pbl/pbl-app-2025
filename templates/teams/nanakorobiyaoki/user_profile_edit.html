@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.name }} のプロフィール編集</title>
+    <style>
+        /* (詳細ページとほぼ同じCSS) */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 30px;
+            display: grid;
+            place-items: center;
+        }
+        .profile-card {
+            width: 100%;
+            max-width: 700px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        .profile-header {
+            padding: 24px 30px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #eee;
+        }
+        .profile-header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        /* === フォーム用のスタイル === */
+        .form-container {
+            padding: 20px 30px 30px 30px;
+        }
+        .form-container p { /* .as_p で生成される <p> タグ用 */
+            margin-bottom: 20px;
+        }
+        .form-container label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+        }
+        .form-container input[type="text"],
+        .form-container input[type="number"],
+        .form-container input[type="date"],
+        .form-container select,
+        .form-container textarea {
+            width: 95%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        .form-container textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .form-container input[type="file"] {
+            font-size: 0.9rem;
+        }
+
+        /* === フッター (ボタン) === */
+        .form-footer {
+            display: flex;
+            justify-content: flex-end; /* ボタンを右寄せ */
+            gap: 10px; /* ボタン間の隙間 */
+            padding: 20px 30px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #eee;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover { background-color: #0056b3; }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover { background-color: #5a6268; }
+
+    </style>
+</head>
+<body>
+
+    <div class="profile-card">
+        
+        <header class="profile-header">
+            <h1>{{ user.name }} のプロフィール編集</h1>
+        </header>
+
+        <form method="post" enctype="multipart/form-data">
+            
+            {% csrf_token %}
+
+            <div class="form-container">
+                {{ form.as_p }}
+            </div>
+
+            <footer class="form-footer">
+                <a href="{% url 'nanakorobiyaoki:user_profile' user.user_id %}" class="btn btn-secondary">
+                    キャンセル
+                </a>
+                
+                <button type="submit" class="btn btn-primary">
+                    更新する
+                </button>
+            </footer>
+
+        </form>
+    </div>
+
+</body>
+</html>

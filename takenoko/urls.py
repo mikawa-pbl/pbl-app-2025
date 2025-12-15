@@ -1,0 +1,14 @@
+from django.urls import path
+from . import views
+
+app_name = "takenoko"
+urlpatterns = [
+    path('', views.main, name='main'),
+    path('members/', views.members, name='members'),
+    path('login/', views.login, name='login'),
+    path('signup/', views.signup, name='signup'),
+    path('item_create/', views.item_create, name='item_create'),
+    path('product_details/', views.product_details, name='product_details'),
+    path('purchased_items/', views.purchased_items, name='purchased_items'),
+    path('listing_items/', views.listing_items, name='listing_items'),
+]

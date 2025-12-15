@@ -1,0 +1,191 @@
+{% extends 'teams/team_tansaibou/base.html' %}
+
+{% block title %}セット商品一覧 - Team Tansaibou{% endblock %}
+
+{% block extra_style %}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+h1 {
+    margin: 0;
+}
+.btn {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+.btn:hover {
+    background-color: #45a049;
+}
+.product-sets {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+.product-set-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.product-set-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 15px;
+}
+.product-set-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+.product-set-price {
+    font-size: 20px;
+    font-weight: bold;
+    color: #4CAF50;
+}
+.product-set-description {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+.components {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+.components-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #555;
+}
+.component-item {
+    padding: 5px 0;
+    color: #666;
+}
+.status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-bottom: 15px;
+}
+.status-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+.status-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.stock-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    margin-left: 10px;
+}
+.stock-good {
+    background-color: #d4edda;
+    color: #155724;
+}
+.stock-low {
+    background-color: #fff3cd;
+    color: #856404;
+}
+.stock-out {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.component-stock {
+    color: #666;
+    font-size: 12px;
+    margin-left: 5px;
+}
+.actions {
+    display: flex;
+    gap: 10px;
+}
+.actions a {
+    flex: 1;
+    padding: 8px;
+    text-align: center;
+    background-color: #FF9800;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+}
+.actions a:hover {
+    background-color: #e68900;
+}
+.no-data {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 8px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>🎁 セット商品一覧</h1>
+    <a href="{% url 'team_tansaibou:productset_add' %}" class="btn">+ セット商品登録</a>
+</div>
+
+{% if product_sets %}
+<div class="product-sets">
+    {% for product_set in product_sets %}
+    <div class="product-set-card">
+        <div class="product-set-header">
+            <div class="product-set-name">{{ product_set.name }}</div>
+            <div class="product-set-price">¥{{ product_set.price|floatformat:0 }}</div>
+        </div>
+
+        <span class="status {% if product_set.is_active %}status-active{% else %}status-inactive{% endif %}">
+            {% if product_set.is_active %}販売中{% else %}停止中{% endif %}
+        </span>
+
+        {% with stock=product_set.get_stock_status %}
+        <span class="stock-badge {% if stock >= 10 %}stock-good{% elif stock > 0 %}stock-low{% else %}stock-out{% endif %}">
+            セット在庫: {{ stock }}個
+        </span>
+        {% endwith %}
+
+        {% if product_set.description %}
+        <div class="product-set-description">{{ product_set.description }}</div>
+        {% endif %}
+
+        <div class="components">
+            <div class="components-title">📦 セット内容と在庫</div>
+            {% for item in product_set.items.all %}
+            <div class="component-item">
+                • {{ item.product.name }} x{{ item.quantity }}個
+                <span class="component-stock">(在庫: {{ item.product.stock }}個)</span>
+            </div>
+            {% empty %}
+            <div class="component-item">構成商品なし</div>
+            {% endfor %}
+        </div>
+
+        <div class="actions">
+            <a href="{% url 'team_tansaibou:productset_edit' product_set.id %}">編集</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="no-data">
+    <p>セット商品が登録されていません</p>
+    <p><a href="{% url 'team_tansaibou:productset_add' %}" class="btn">最初のセット商品を登録する →</a></p>
+</div>
+{% endif %}
+{% endblock %}

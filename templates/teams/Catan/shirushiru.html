@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  {% load static %}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>在室状況アプリ</title>
+  <link rel="stylesheet" href="{% static 'css/shirushiru.css' %}">
+  <script src="{% static 'js/shirushiru.js' %}"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">在室状況アプリ</div>
+      <a href="#" class="slack-text-btn" title="Slackへ遷移">Slack</a>
+      <div class="user-name">
+        ゲスト
+      </div>
+    </div>
+
+    <!-- M2テーブル -->
+    <h3 class="grade-title">M2</h3>
+    <table>
+      <tr>
+        <th>名前</th>
+        <th>場所</th>
+        <th>コメント</th>
+        <th></th>
+      </tr>
+      <tr class="in-lab">
+        <td>佐藤</td>
+        <td>研究室（M2）C3-503</td>
+        <td>論文執筆中</td>
+        <td><span class="detail">詳細</span></td>
+      </tr>
+      <tr>
+        <td>鈴木</td>
+        <td>自宅</td>
+        <td>リモート作業</td>
+        <td><span class="detail">詳細</span></td>
+      </tr>
+      <tr>
+        <td>高橋</td>
+        <td>学内</td>
+        <td>図書館にいます</td>
+        <td><span class="detail">詳細</span></td>
+      </tr>
+    </table>
+
+    <!-- M1テーブル -->
+    <h3 class="grade-title">M1</h3>
+    <table>
+      <tr>
+        <th>名前</th>
+        <th>場所</th>
+        <th>コメント</th>
+        <th></th>
+      </tr>
+      <tr class="in-lab">
+        <td>田中</td>
+        <td>研究室（B4,M1）C3-502</td>
+        <td>実験中</td>
+        <td><span class="detail">詳細</span></td>
+      </tr>
+      <tr>
+        <td>伊藤</td>
+        <td>授業</td>
+        <td>15時まで授業</td>
+        <td><span class="detail">詳細</span></td>
+      </tr>
+      <tr class="in-lab">
+        <td>渡辺</td>
+        <td>3Dプリンタの部屋 C3-511</td>
+        <td>造形中</td>
+        <td><span class="detail">詳細</span></td>
+      </tr>
+      <tr id="user-row">
+        <td id="user-name-cell">ゲスト</td>
+        <td id="user-location-cell">-</td>
+        <td id="user-comment-cell">-</td>
+        <!--<td id="user-status-cell">-</td>-->
+        <td><span class="detail">詳細</span></td>
+      </tr>
+    </table>
+
+    <!-- B4テーブル -->
+    <h3 class="grade-title">B4</h3>
+    <table>
+      <tr>
+        <th>名前</th>
+        <th>場所</th>
+        <th>コメント</th>
+        <th></th>
+      </tr>
+      <tr class="in-lab">
+        <td>中村</td>
+        <td>研究室（B4,M1）C3-502</td>
+        <td>プログラミング中</td>
+        <td><span class="detail">詳細</span></td>
+      </tr>
+      <tr>
+        <td>小林</td>
+        <td>自宅</td>
+        <td>体調不良</td>
+        <td><span class="detail">詳細</span></td>
+      </tr>
+      <tr class="in-lab">
+        <td>加藤</td>
+        <td>ゼミ室 C3-513</td>
+        <td>ミーティング</td>
+        <td><span class="detail">詳細</span></td>
+      </tr>
+    </table>
+
+    <div class="footer">画面イメージ図</div>
+  </div>
+
+  <!-- 在室状況変更ボタン（固定表示） -->
+  <button class="status-button" onclick="openDialog()">✏️ 在室状況変更</button>
+
+  <!-- 在室状況変更ダイアログ -->
+  <div id="statusDialog" class="dialog-overlay">
+    <div class="dialog-box">
+      <div class="dialog-header">在室状況変更</div>
+      <div class="dialog-content">
+        <label for="locationSelect">場所:</label>
+        <select id="locationSelect">
+          <option key="lab1" value="研究室（B4,M1）C3-502">研究室（B4,M1）C3-502</option>
+          <option key="lab2" value="研究室（M2）C3-503">研究室（M2）C3-503</option>
+          <option key="lab3" value="3Dプリンタの部屋 C3-511">3Dプリンタの部屋 C3-511</option>
+          <option key="lab4" value="ゼミ室 C3-513">ゼミ室 C3-513</option>
+          <option key="class" value="授業">授業</option>
+          <option key="oncampus" value="学内">学内</option>
+          <option key="absent" value="不在">不在</option>
+        </select>
+
+        <label for="commentInput">コメント:</label>
+        <input type="text" id="commentInput" placeholder="コメントを入力してください" />
+
+        <label for="talkStatusSelect">話しかけステータス:</label>
+        <select id="talkStatusSelect">
+          <option value="ok">✅ OK（話しかけていい）</option>
+          <option value="ng">❌ NG（話しかけないで）</option>
+        </select>
+      </div>
+      <div class="dialog-buttons">
+        <button onclick="closeDialog()">キャンセル</button>
+        <button onclick="saveStatus()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ユーザ詳細ダイアログ -->
+  <div id="detailDialog" class="dialog-overlay">
+    <div class="dialog-box">
+      <button class="dialog-close" onclick="closeDetailDialog()" aria-label="閉じる">✖</button>
+      <!-- 一番上に最終更新時刻（小さめ・中央表示） -->
+      <div class="dialog-updated">最終更新: <span id="detail-updated">-</span></div>
+      <div class="dialog-content">
+        <p><strong>学年:</strong> <span id="detail-grade">-</span></p>
+        <p><strong>名前:</strong> <span id="detail-name">-</span></p>
+        <p><strong>場所:</strong> <span id="detail-location">-</span></p>
+        <p><strong>コメント:</strong> <span id="detail-comment">-</span></p>
+      </div>
+      <div class="dialog-footer">
+        <button class="slack-dm-btn" onclick="/* フロントのみ: 実装は不要 */">Slack（DM）へ移動</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

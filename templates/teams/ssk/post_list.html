@@ -28,6 +28,29 @@
     .card a.title{font-weight:600;color:#0f172a;text-decoration:none;}
     .meta{font-size:0.9rem;color:var(--muted);margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
     .undated{margin-top:12px;}
+
+    /* Floating action button */
+    .fab{
+      position:fixed;
+      right:20px;
+      bottom:20px;
+      width:56px;
+      height:56px;
+      border-radius:50%;
+      background:var(--accent);
+      color:var(--accent-contrast);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:28px;
+      text-decoration:none;
+      box-shadow:0 6px 18px rgba(15,23,42,0.18);
+      transition:transform .12s ease, box-shadow .12s ease;
+      z-index:1000;
+    }
+    .fab:hover{ transform:translateY(-3px); box-shadow:0 10px 24px rgba(15,23,42,0.22); }
+    .fab:focus{ outline:3px solid rgba(37,99,235,0.16); }
+
     @media (max-width:600px){ .panel{padding:12px;} .card{padding:10px;} }
   </style>
 </head>
@@ -35,16 +58,31 @@
   <div class="container">
     <header>
       <h1>イベント一覧</h1>
-      <div class="actions"><a class="button" href="{% url 'ssk:post_create' %}">新規投稿</a></div>
+      <!-- 新規投稿は右下の FAB に移動 -->
     </header>
 
     <div class="panel">
       <form class="filter" method="get" action="{% url 'ssk:post_list' %}">
         <div style="flex:1 1 60%">
-          <div class="tags-box">
-            {% for tag in tags %}
-              <label class="tag-pill"><input type="checkbox" name="tag" value="{{ tag.id }}" {% if tag.id in selected_tag_ids %}checked{% endif %} style="margin-right:6px;">#{{ tag.name }}</label>
-            {% endfor %}
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <input id="tag-search" type="search" placeholder="タグを検索..." style="padding:8px;border-radius:8px;border:1px solid #eee;width:100%;box-sizing:border-box;margin-bottom:8px;">
+            <div class="tags-box" id="tags-box">
+              {# render all tag checkboxes; show only top-5 by usage unless a tag is selected #}
+              {% for tag in tags %}
+                {% comment %}show tag if in top5 OR selected{% endcomment %}
+                {% if forloop.counter0 < 5 or tag.id in selected_tag_ids %}
+                  <label class="tag-pill tag-item" data-name="{{ tag.name|lower }}">
+                    <input type="checkbox" name="tag" value="{{ tag.id }}" {% if tag.id in selected_tag_ids %}checked{% endif %} style="margin-right:6px;">
+                    #{{ tag.name }}
+                  </label>
+                {% else %}
+                  <label class="tag-pill tag-item hidden" data-name="{{ tag.name|lower }}" style="display:none;">
+                    <input type="checkbox" name="tag" value="{{ tag.id }}" {% if tag.id in selected_tag_ids %}checked{% endif %} style="margin-right:6px;">
+                    #{{ tag.name }}
+                  </label>
+                {% endif %}
+              {% endfor %}
+            </div>
           </div>
         </div>
 
@@ -64,13 +102,14 @@
 
     <section>
       <h2 style="margin:8px 0 12px 0;">日付あり</h2>
-      {% regroup dated_posts by date|date:"Y年n月" as month_list %}
+      {# 日ごとにまとめる #}
+      {% regroup dated_posts by date|date:"Y年n月j日" as day_list %}
       <div class="months">
-        {% for month in month_list %}
+        {% for day in day_list %}
           <div>
-            <h3 style="margin:0 0 8px 0;font-size:1rem;">{{ month.grouper }}</h3>
+            <h3 style="margin:0 0 8px 0;font-size:1rem;">{{ day.grouper }}</h3>
             <div style="display:flex;flex-direction:column;gap:8px;">
-              {% for post in month.list %}
+              {% for post in day.list %}
                 <article class="card">
                   <a class="title" href="{% url 'ssk:post_detail' post.pk %}">{{ post.title }}</a>
                   <div class="meta">
@@ -110,5 +149,53 @@
       {% endif %}
     </section>
   </div>
+
+  <!-- Floating New Post button (FAB) -->
+  <a href="{% url 'ssk:post_create' %}" class="fab" aria-label="新規投稿" title="新規投稿">＋</a>
+
+  {# add simple JS at end of file to handle tag search/filtering #}
+  <script>
+    (function(){
+      const input = document.getElementById('tag-search');
+      if(!input) return;
+      const tagsBox = document.getElementById('tags-box');
+      const items = Array.from(tagsBox.querySelectorAll('.tag-item'));
+
+      function normalize(s){ return (s||'').toString().trim().toLowerCase(); }
+
+      function showTop5UnlessSelected(){
+        items.forEach((el, idx)=>{
+          const checkbox = el.querySelector('input[type="checkbox"]');
+          const selected = checkbox && checkbox.checked;
+          if(idx < 5 || selected){
+            el.style.display = '';
+          } else {
+            el.style.display = 'none';
+          }
+        });
+      }
+
+      input.addEventListener('input', function(e){
+        const q = normalize(e.target.value);
+        if(!q){
+          // empty -> show top5 (and selected)
+          showTop5UnlessSelected();
+          return;
+        }
+        // show items whose data-name includes q
+        items.forEach(el=>{
+          const name = el.getAttribute('data-name') || '';
+          if(name.indexOf(q) !== -1){
+            el.style.display = '';
+          } else {
+            el.style.display = 'none';
+          }
+        });
+      });
+
+      // ensure initial state (in case selected tags exist)
+      showTop5UnlessSelected();
+    })();
+  </script>
 </body>
 </html>

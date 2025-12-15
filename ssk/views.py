@@ -2,6 +2,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Post, Tag
 from .forms import PostForm
+from django.db.models import Count
 
 def post_list(request):
     # 複数タグ選択対応 + AND/OR 切替
@@ -24,7 +25,8 @@ def post_list(request):
 
     selected_tag_ids = tag_ids  # テンプレートでチェックの判定に使う
     selected_mode = mode
-    tags = Tag.objects.order_by("name")
+    # order tags by usage (post count) desc, then name
+    tags = Tag.objects.annotate(num_posts=Count("posts")).order_by("-num_posts", "name")
 
     # 分割: 日付あり / 日付なし をテンプレートで別表示できるようにする
     dated_posts = posts.filter(date__isnull=False).order_by("date", "created_at")

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>新規ユーザー登録</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 400px; margin: 0 auto; }
+        input { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px; margin-top: 20px;}
+        .helptext { font-size: 0.8em; color: #666; display: block; margin-bottom: 10px; }
+        ul { font-size: 0.8em; color: #dc3545; padding-left: 20px; margin-top: 0;}
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center;">新規アカウント作成</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div style="margin-bottom: 15px;">
+                <strong>{{ field.label_tag }}</strong><br>
+                {{ field }}
+                {% if field.help_text %}
+                    <span class="helptext">{{ field.help_text }}</span>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div style="color: red; font-size: 0.9em;">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button type="submit">登録する</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{% url 'team_shouronpou:login' %}">ログイン画面に戻る</a>
+    </div>
+</body>
+</html>

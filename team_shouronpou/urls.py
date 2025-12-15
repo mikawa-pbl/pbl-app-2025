@@ -1,5 +1,7 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
+from .forms import LoginForm
 
 app_name = "team_shouronpou"
 urlpatterns = [
@@ -24,4 +26,11 @@ urlpatterns = [
     
     # 投稿削除 (例: /team_shouronpou/board/post/1/delete/)
     path('board/post/<int:pk>/delete/', views.PostDeleteView.as_view(), name='post_delete'),
+    
+    # ログインなど
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('signup/', views.signup, name='signup'),
+    path('mypage/', views.mypage, name='mypage'),
+    path('mypage/edit/', views.profile_edit, name='profile_edit'),
 ]

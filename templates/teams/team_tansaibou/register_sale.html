@@ -72,6 +72,70 @@ h1 {
 .product-button:hover .product-stock {
     color: white;
 }
+/* 売り切れ表示 */
+.product-button.sold-out {
+    background: #eee;
+    border-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+.product-button.sold-out:hover {
+    background: #eee;
+    color: inherit;
+    border-color: #ccc;
+    transform: none;
+    box-shadow: none;
+}
+.product-button.sold-out .product-price {
+    color: #999;
+}
+.sold-out-badge {
+    display: inline-block;
+    background: #f44336;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* 選択数インジケーター（左下固定） */
+.cart-indicator {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+    display: none;
+    min-width: 180px;
+}
+.cart-indicator.active {
+    display: block;
+    animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+.cart-indicator-count {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.cart-indicator-total {
+    font-size: 14px;
+    opacity: 0.9;
+}
 
 /* カートエリア */
 .cart-section {
@@ -242,6 +306,12 @@ textarea {
 {% endblock %}
 
 {% block content %}
+<!-- 選択数インジケーター -->
+<div class="cart-indicator" id="cartIndicator">
+    <div class="cart-indicator-count" id="indicatorCount">0点</div>
+    <div class="cart-indicator-total" id="indicatorTotal">¥0</div>
+</div>
+
 <div class="pos-container">
     <h1>💰 POSレジ</h1>
 
@@ -250,10 +320,14 @@ textarea {
         <div class="section-title">🛍️ 商品選択</div>
         <div class="product-grid">
             {% for product in products %}
-            <div class="product-button" onclick="addToCart('product', {{ product.id }}, '{{ product.name|escapejs }}', {{ product.current_price }}, {{ product.stock }})">
+            <div class="product-button{% if product.stock == 0 %} sold-out{% endif %}" {% if product.stock > 0 %}onclick="addToCart('product', {{ product.id }}, '{{ product.name|escapejs }}', {{ product.current_price }}, {{ product.stock }})"{% endif %}>
                 <div class="product-name">{{ product.name }}</div>
                 <div class="product-price">¥{{ product.current_price|floatformat:0 }}</div>
+                {% if product.stock == 0 %}
+                <div class="product-stock"><span class="sold-out-badge">売り切れ</span></div>
+                {% else %}
                 <div class="product-stock">在庫: {{ product.stock }}</div>
+                {% endif %}
             </div>
             {% empty %}
             <p style="grid-column: 1/-1; text-align: center; color: #999;">商品が登録されていません</p>
@@ -264,10 +338,14 @@ textarea {
         <div class="section-title" style="margin-top: 20px;">🎁 セット商品</div>
         <div class="product-grid">
             {% for ps in product_sets %}
-            <div class="product-button" onclick="addToCart('product_set', {{ ps.id }}, '{{ ps.name|escapejs }}', {{ ps.price }}, {{ ps.get_stock_status }})">
+            <div class="product-button{% if ps.get_stock_status == 0 %} sold-out{% endif %}" {% if ps.get_stock_status > 0 %}onclick="addToCart('product_set', {{ ps.id }}, '{{ ps.name|escapejs }}', {{ ps.price }}, {{ ps.get_stock_status }})"{% endif %}>
                 <div class="product-name">{{ ps.name }}</div>
                 <div class="product-price">¥{{ ps.price|floatformat:0 }}</div>
+                {% if ps.get_stock_status == 0 %}
+                <div class="product-stock"><span class="sold-out-badge">売り切れ</span></div>
+                {% else %}
                 <div class="product-stock">セット在庫: {{ ps.get_stock_status }}</div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
@@ -425,6 +503,9 @@ function updateCart() {
     const cartTotalSpan = document.getElementById('cart-total');
     const checkoutBtn = document.getElementById('checkout-btn');
     const cartItemsInput = document.getElementById('cart_items_input');
+    const cartIndicator = document.getElementById('cartIndicator');
+    const indicatorCount = document.getElementById('indicatorCount');
+    const indicatorTotal = document.getElementById('indicatorTotal');
 
     if (cart.length === 0) {
         cartItemsDiv.innerHTML = '<div class="cart-empty">商品を選択してください</div>';
@@ -432,6 +513,7 @@ function updateCart() {
         checkoutBtn.disabled = true;
         checkoutBtn.textContent = '会計する（¥0）';
         cartItemsInput.value = '[]';
+        cartIndicator.classList.remove('active');
         return;
     }
 
@@ -470,6 +552,12 @@ function updateCart() {
 
     // カートデータをJSONとしてhidden inputに設定
     cartItemsInput.value = JSON.stringify(cart);
+
+    // 選択数インジケーターを更新
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    indicatorCount.textContent = `${totalItems}点`;
+    indicatorTotal.textContent = `¥${total.toLocaleString()}`;
+    cartIndicator.classList.add('active');
 }
 
 // フォーム送信時にカートが空でないかチェック

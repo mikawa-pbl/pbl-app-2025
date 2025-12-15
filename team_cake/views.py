@@ -72,11 +72,32 @@ def delete_good(request, pk):
     if request.method == 'POST':
         try:
             good = Good.objects.using('team_cake').get(pk=pk)
+            image_filename = good.image_filename
             good.delete()
+
+            if image_filename:
+                base_dir = Path(__file__).resolve().parent
+                images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
+                image_path = images_dir / image_filename
+                if image_path.exists():
+                    image_path.unlink()
+
         except Exception:
             conn = connections['team_cake']
             with conn.cursor() as cur:
-                cur.execute('DELETE FROM team_cake_good WHERE id = %s', [pk])
+                cur.execute('SELECT image_filename FROM team_cake_good WHERE id = %s', [pk])
+                row = cur.fetchone()
+                if row:
+                    image_filename = row[0]
+                    cur.execute('DELETE FROM team_cake_good WHERE id = %s', [pk])
+
+                    if image_filename:
+                        base_dir = Path(__file__).resolve().parent
+                        images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
+                        image_path = images_dir / image_filename
+                        if image_path.exists():
+                            image_path.unlink()
+
         return redirect('team_cake:index')
     return redirect('team_cake:index')
 

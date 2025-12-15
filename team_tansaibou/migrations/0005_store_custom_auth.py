@@ -6,8 +6,8 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def add_columns_to_existing_store(apps, schema_editor):
-    """既存のStoreテーブルがあれば、新しいカラムを追加（モデル参照なし）"""
+def create_or_update_store_table(apps, schema_editor):
+    """Storeテーブルを作成、または既存テーブルに新カラムを追加"""
     # テーブルが存在するか確認
     with schema_editor.connection.cursor() as cursor:
         cursor.execute("""
@@ -17,7 +17,21 @@ def add_columns_to_existing_store(apps, schema_editor):
         table_exists = cursor.fetchone() is not None
 
     if not table_exists:
-        # テーブルが存在しない場合は何もしない（CreateModelで作成される）
+        # テーブルが存在しない場合は作成
+        with schema_editor.connection.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE "team_tansaibou_store" (
+                    "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    "username" varchar(50) NOT NULL UNIQUE,
+                    "password" varchar(128) NOT NULL,
+                    "name" varchar(100) NOT NULL,
+                    "slug" varchar(50) NOT NULL UNIQUE,
+                    "description" text NOT NULL,
+                    "is_active" bool NOT NULL DEFAULT 1,
+                    "created_at" datetime NOT NULL,
+                    "updated_at" datetime NOT NULL
+                )
+            """)
         return
 
     # 既存テーブルのカラムを確認
@@ -48,6 +62,32 @@ def add_columns_to_existing_store(apps, schema_editor):
                 ALTER TABLE team_tansaibou_store
                 ADD COLUMN is_active BOOLEAN DEFAULT 1
             """)
+
+
+def add_store_field_to_table(apps, schema_editor, table_name):
+    """既存テーブルにstore_idカラムを追加（存在しない場合のみ）"""
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute(f"PRAGMA table_info({table_name})")
+        columns = {row[1] for row in cursor.fetchall()}
+
+    if 'store_id' not in columns:
+        with schema_editor.connection.cursor() as cursor:
+            cursor.execute(f"""
+                ALTER TABLE {table_name}
+                ADD COLUMN store_id bigint NULL REFERENCES team_tansaibou_store(id)
+            """)
+
+
+def add_store_fields(apps, schema_editor):
+    """各テーブルにstore_idを追加"""
+    tables = [
+        'team_tansaibou_member',
+        'team_tansaibou_product',
+        'team_tansaibou_productset',
+        'team_tansaibou_transaction',
+    ]
+    for table in tables:
+        add_store_field_to_table(apps, schema_editor, table)
 
 
 def migrate_existing_store_data(apps, schema_editor):
@@ -83,49 +123,62 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # 1. 既存テーブルがあれば新カラムを追加（SQLのみ、モデル参照なし）
-        migrations.RunPython(add_columns_to_existing_store, reverse_noop),
-
-        # 2. 新規インストールの場合のみCreateModelが効く
-        #    既存テーブルがある場合は上のRunPythonで対応済み
-        migrations.CreateModel(
-            name='Store',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('username', models.CharField(max_length=50, unique=True, verbose_name='ログインID')),
-                ('password', models.CharField(max_length=128, verbose_name='パスワード')),
-                ('name', models.CharField(max_length=100, verbose_name='店舗名')),
-                ('slug', models.SlugField(unique=True, verbose_name='識別子')),
-                ('description', models.TextField(blank=True, verbose_name='説明')),
-                ('is_active', models.BooleanField(default=True, verbose_name='有効')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='作成日時')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='更新日時')),
+        # DB操作とState操作を分離
+        # State: DjangoにStoreモデルを認識させる
+        # DB: テーブルが存在しなければ作成、存在すればカラム追加
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.CreateModel(
+                    name='Store',
+                    fields=[
+                        ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                        ('username', models.CharField(max_length=50, unique=True, verbose_name='ログインID')),
+                        ('password', models.CharField(max_length=128, verbose_name='パスワード')),
+                        ('name', models.CharField(max_length=100, verbose_name='店舗名')),
+                        ('slug', models.SlugField(unique=True, verbose_name='識別子')),
+                        ('description', models.TextField(blank=True, verbose_name='説明')),
+                        ('is_active', models.BooleanField(default=True, verbose_name='有効')),
+                        ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='作成日時')),
+                        ('updated_at', models.DateTimeField(auto_now=True, verbose_name='更新日時')),
+                    ],
+                    options={
+                        'verbose_name': '店舗',
+                        'verbose_name_plural': '店舗',
+                    },
+                ),
             ],
-            options={
-                'verbose_name': '店舗',
-                'verbose_name_plural': '店舗',
-            },
+            database_operations=[
+                migrations.RunPython(create_or_update_store_table, reverse_noop),
+            ],
         ),
-        migrations.AddField(
-            model_name='member',
-            name='store',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='members', to='team_tansaibou.store', verbose_name='店舗'),
+        # 各モデルにstoreフィールドを追加
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AddField(
+                    model_name='member',
+                    name='store',
+                    field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='members', to='team_tansaibou.store', verbose_name='店舗'),
+                ),
+                migrations.AddField(
+                    model_name='product',
+                    name='store',
+                    field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='products', to='team_tansaibou.store', verbose_name='店舗'),
+                ),
+                migrations.AddField(
+                    model_name='productset',
+                    name='store',
+                    field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='product_sets', to='team_tansaibou.store', verbose_name='店舗'),
+                ),
+                migrations.AddField(
+                    model_name='transaction',
+                    name='store',
+                    field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='transactions', to='team_tansaibou.store', verbose_name='店舗'),
+                ),
+            ],
+            database_operations=[
+                migrations.RunPython(add_store_fields, reverse_noop),
+            ],
         ),
-        migrations.AddField(
-            model_name='product',
-            name='store',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='products', to='team_tansaibou.store', verbose_name='店舗'),
-        ),
-        migrations.AddField(
-            model_name='productset',
-            name='store',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='product_sets', to='team_tansaibou.store', verbose_name='店舗'),
-        ),
-        migrations.AddField(
-            model_name='transaction',
-            name='store',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='transactions', to='team_tansaibou.store', verbose_name='店舗'),
-        ),
-        # 3. 既存データにusername/passwordを設定（CreateModel後に実行）
+        # 既存データにusername/passwordを設定
         migrations.RunPython(migrate_existing_store_data, reverse_noop),
     ]

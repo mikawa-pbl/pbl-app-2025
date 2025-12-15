@@ -208,3 +208,7 @@ __marimo__/
 
 # UD
 .claude
+
+# 画像アップロード用のフォルダー。中身がGitにPushされないようにIgnore
+#By Team Giryulink
+media/

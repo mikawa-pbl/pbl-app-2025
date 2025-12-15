@@ -248,6 +248,104 @@
                 grid-template-columns: repeat(4, 1fr);
             }
         }
+        
+        /* 图片上传样式 */
+        .image-upload-container {
+            position: relative;
+        }
+        
+        .image-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border: 2px dashed #1e88e5;
+            border-radius: 8px;
+            background: #f0f8ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .image-upload-label:hover {
+            background: #e3f2fd;
+            border-color: #1565c0;
+        }
+        
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        .upload-text {
+            font-size: 0.9rem;
+            color: #1e88e5;
+            font-weight: 600;
+        }
+        
+        .image-preview {
+            position: relative;
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            background: #f9fafb;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(229, 57, 53, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        /* 移动端特定样式 */
+        @media (max-width: 639px) {
+            .upload-icon {
+                font-size: 2.5rem;
+            }
+            .upload-text::after {
+                content: ' (タップして撮影/選択)';
+                font-size: 0.75rem;
+                display: block;
+                margin-top: 4px;
+                color: #666;
+            }
+        }
+        
+        /* 桌面端样式 */
+        @media (min-width: 640px) {
+            .image-upload-label {
+                padding: 24px;
+            }
+            .upload-text::after {
+                content: ' (クリックして選択)';
+                font-size: 0.8rem;
+                display: block;
+                margin-top: 4px;
+                color: #666;
+            }
+        }
     </style>
 </head>
 <body>
@@ -261,11 +359,24 @@
         <button class="add-btn" id="toggleAdd">＋ 新しい商品を追加</button>
 
         <!-- server-backed form: POSTs to add product view -->
-        <form class="add-form" id="addForm" method="post" action="{% url 'team_giryulink:add_product' %}" aria-label="Add product form" style="display:none;">
+        <form class="add-form" id="addForm" method="post" action="{% url 'team_giryulink:add_product' %}" aria-label="Add product form" style="display:none;" enctype="multipart/form-data">
             {% csrf_token %}
             <input id="pTitle" name="title" type="text" placeholder="商品名" required aria-label="商品名">
             <input id="pPrice" name="price" type="number" placeholder="価格 (¥)" min="0" required aria-label="価格">
-            <input id="pImage" name="image" type="url" placeholder="画像URL" aria-label="画像URL">
+            
+            <!-- 图片上传区域 -->
+            <div class="image-upload-container" style="width: 100%;">
+                <label for="pImage" class="image-upload-label">
+                    <span class="upload-icon">📷</span>
+                    <span class="upload-text">写真を選択/撮影</span>
+                </label>
+                <input id="pImage" name="image" type="file" accept="image/*" capture="environment" aria-label="商品画像" style="display: none;">
+                <div id="imagePreview" class="image-preview" style="display: none;">
+                    <img id="previewImg" src="" alt="プレビュー">
+                    <button type="button" class="remove-image" id="removeImage">✕</button>
+                </div>
+            </div>
+            
             <textarea id="pDescription" name="description" placeholder="商品説明" aria-label="商品説明"></textarea>
             <button class="submit" id="addSubmit" type="submit">追加</button>
             <button type="button" class="cancel" id="addCancel">キャンセル</button>
@@ -282,7 +393,11 @@
                     <button class="delete-btn" type="submit" aria-label="削除 {{ p.title }}">削除</button>
                 </form>
                 <a class="card-link" href="{% url 'team_giryulink:product_detail' p.id %}" aria-label="{{ p.title }}">
-                    <img src="{{ p.image|default:'https://via.placeholder.com/600x400?text=No+Image' }}" alt="{{ p.title }}">
+                    {% if p.image %}
+                    <img src="{{ p.image.url }}" alt="{{ p.title }}">
+                    {% else %}
+                    <img src="https://via.placeholder.com/600x400?text=No+Image" alt="{{ p.title }}">
+                    {% endif %}
                     <div class="info">
                         <h2>{{ p.title }}</h2>
                         <div class="price">{{ p.formatted_price }}</div>
@@ -317,6 +432,33 @@
             addCancel.addEventListener('click', () => {
                 addForm.style.display = 'none';
                 addForm.reset();
+                // Reset image preview
+                document.getElementById('imagePreview').style.display = 'none';
+                document.getElementById('previewImg').src = '';
+            });
+
+            // Image upload preview
+            const imageInput = document.getElementById('pImage');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            const removeImageBtn = document.getElementById('removeImage');
+
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        previewImg.src = event.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            removeImageBtn.addEventListener('click', function() {
+                imageInput.value = '';
+                imagePreview.style.display = 'none';
+                previewImg.src = '';
             });
 
             // Confirm before submitting any delete form whose action includes "/delete/"

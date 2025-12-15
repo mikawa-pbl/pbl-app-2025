@@ -377,8 +377,8 @@
                 <!-- Sub menu for current context -->
                 <ul style="padding-left: 40px; margin-top: 5px; list-style: none;">
                     <li style="margin-bottom: 5px;"><a href="#"
-                            style="color: var(--primary-color); font-weight: 700; text-decoration: none; font-size: 0.9rem;">{{
-                            community.name }}</a></li>
+                            style="color: var(--primary-color); font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+                            {{ community.name }}</a></li>
                 </ul>
             </li>
             <li class="nav-item">
@@ -418,8 +418,8 @@
                     <p class="community-desc">{{ community.description|default:"説明文がありません"|linebreaksbr }}</p>
                     <div class="community-meta">
                         <span><span class="material-icons-round"
-                                style="vertical-align: middle; font-size: 16px;">people</span> {{
-                            community.members.count }} メンバー</span>
+                                style="vertical-align: middle; font-size: 16px;">people</span>
+                            {{community.members.count }} メンバー</span>
                         <span>作成日: {{ community.created_at|date:"Y/m/d" }}</span>
                     </div>
 

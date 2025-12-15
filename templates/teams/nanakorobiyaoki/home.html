@@ -425,11 +425,6 @@
                 {% endfor %}
             </ul>
         </ul>
-
-        <div class="footer-card">
-            <strong>学内専用・実名制推奨</strong><br>
-            このSNSは豊橋技術科学大学の学生・教職員のみが利用できます。
-        </div>
     </nav>
 
     <!-- Main Content -->
@@ -480,8 +475,8 @@
                         <!-- 最新の投稿をひとつ取ってくる処理はViewでやるのが理想だが、ここでは簡易的に -->
                         {% with latest_post=community.posts.last %}
                         {% if latest_post %}
-                        <div class="activity-meta">{{ latest_post.author.name }} • {{ latest_post.created_at|date:"n月j日
-                            H:i" }}</div>
+                        <div class="activity-meta">{{ latest_post.author.name }} •
+                            {{ latest_post.created_at|date:"n月j日H:i" }}</div>
                         <div class="activity-content">
                             {{ latest_post.content }}
                         </div>

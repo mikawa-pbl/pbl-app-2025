@@ -242,4 +242,5 @@ def logout_view(request):
     return redirect('nanakorobiyaoki:index')
 
 def community_list(request):
-    return redirect('nanakorobiyaoki:home')
+    communities = Community.objects.all().order_by('-created_at')
+    return render(request, 'teams/nanakorobiyaoki/community_list.html', {'communities': communities})

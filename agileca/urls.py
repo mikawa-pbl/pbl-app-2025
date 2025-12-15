@@ -12,5 +12,6 @@ urlpatterns = [
     path('gikamap/welfare/', views.welfare, name='welfare'),
     path('gikamap/library/', views.library, name='library'),
     path('gikamap/classrooms/', views.classrooms, name='classrooms'),
-    path('gikamap/search_by_buildings/', views.search_by_buildings, name='search_by_buildings')
+    path('gikamap/search_by_buildings/', views.search_by_buildings, name='search_by_buildings'),
+    path("gikamap2/", views.gikamap2, name="gikamap2"),
 ]

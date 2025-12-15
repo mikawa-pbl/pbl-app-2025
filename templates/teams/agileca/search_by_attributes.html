@@ -2,44 +2,46 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <title>建物名検索</title>
+  <meta charset="UTF-8">
+  <title>Agileca Members</title>
 </head>
 
 <body>
+    <h2>用途で教室を検索</h2>
     
-    <h2>🏢 建物名で教室を検索</h2>
-    
-    <form action="" method="GET" class="search-form" style="border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: #f9f9f9;">
+    <form action="{% url 'agileca:search_attributes' %}" method="GET" class="tag-search-form" style="border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: #f9f9f9;">
         
-        <input 
-            type="text" 
-            name="q" 
-            placeholder="建物名または部屋名で検索" 
-            value="{{ query|default_if_none:'' }}"
-            style="padding: 8px; width: 300px; border: 1px solid #ddd; border-radius: 4px;"
-        >
+        <h4>絞り込む属性（AND検索）</h4>
+        <div class="tag-list" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+            
+            {% for attr in all_attributes %}
+                <label style="background-color: #fff; padding: 5px 10px; border: 1px solid #ddd; border-radius: 3px; cursor: pointer;">
+                    <input 
+                        type="checkbox" 
+                        name="attribute_ids" 
+                        value="{{ attr.id }}" 
+                        {% if attr.id|stringformat:"s" in selected_ids %}checked{% endif %}
+                    >
+                    {{ attr.name }}
+                </label>
+            {% endfor %}
+            
+        </div>
         
-        <button type="submit" style="padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-            検索
+        <button type="submit" style="padding: 8px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            選択した属性すべてに一致する教室を検索
         </button>
-        
-        {% if query %}
-            <a href="{% url 'agileca:search_buildings' %}" style="margin-left: 10px; color: #6c757d; text-decoration: none;">
-                リセット
-            </a>
-        {% endif %}
     </form>
 
     <hr style="margin-top: 30px; margin-bottom: 20px;">
 
-    <hr style="margin-top: 30px; margin-bottom: 20px;">
+<hr style="margin-top: 30px; margin-bottom: 20px;">
 
-    {% if rooms %}
-        <h3>検索結果 ({{ rooms.count }} 件)</h3>
+    {% if classrooms %}
+        <h3>検索結果 ({{ classrooms.count }} 件)</h3>
         <ul style="list-style: none; padding: 0;">
-            {% for room in rooms %}
-                <li style="border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-left: 5px solid #007bff; border-radius: 5px;">
+            {% for room in classrooms %}
+                <li style="border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-left: 5px solid #28a745; border-radius: 5px;">
                     
                     <h4>{{ room.room_name }} ({{ room.floor }}階)</h4>
                     
@@ -73,6 +75,4 @@
         </ul>
     {% else %}
         {% endif %}
-
 </body>
-</html>

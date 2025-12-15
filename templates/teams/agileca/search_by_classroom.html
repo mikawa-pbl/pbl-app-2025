@@ -3,19 +3,19 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>建物名検索</title>
+    <title>部屋名検索</title>
 </head>
 
 <body>
     
-    <h2>🏢 建物名で教室を検索</h2>
+    <h2>🚪 部屋名で教室を検索</h2>
     
-    <form action="" method="GET" class="search-form" style="border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: #f9f9f9;">
+    <form action="{% url 'agileca:search_roomname' %}" method="GET" class="search-form" style="border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: #f9f9f9;">
         
         <input 
             type="text" 
             name="q" 
-            placeholder="建物名または部屋名で検索" 
+            placeholder="部屋名を入力" 
             value="{{ query|default_if_none:'' }}"
             style="padding: 8px; width: 300px; border: 1px solid #ddd; border-radius: 4px;"
         >
@@ -25,13 +25,11 @@
         </button>
         
         {% if query %}
-            <a href="{% url 'agileca:search_buildings' %}" style="margin-left: 10px; color: #6c757d; text-decoration: none;">
+            <a href="{% url 'agileca:search_roomname' %}" style="margin-left: 10px; color: #6c757d; text-decoration: none;">
                 リセット
             </a>
         {% endif %}
     </form>
-
-    <hr style="margin-top: 30px; margin-bottom: 20px;">
 
     <hr style="margin-top: 30px; margin-bottom: 20px;">
 
@@ -71,8 +69,14 @@
                 </li>
             {% endfor %}
         </ul>
+    
+    {% elif query %}
+        <p>「<strong>{{ query }}</strong>」に一致する教室は見つかりませんでした。</p>
+        
     {% else %}
-        {% endif %}
+        <p>部屋名を入力して、教室を検索してください。</p>
+        
+    {% endif %}
 
 </body>
 </html>

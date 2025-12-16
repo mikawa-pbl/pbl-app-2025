@@ -1,0 +1,205 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    html, body {
+      background-color: #FBFEF9;
+      margin: 0;
+      padding: 0;
+      font-family: "Noto Sans JP", sans-serif;
+    }
+
+    .match-box {
+      margin: 32px auto;
+      padding: 48px;
+      width: 90%;
+      max-width: 1200px;
+      text-align: center;
+    }
+
+    .match-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .match-desc {
+      font-size: 16px;
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 32px;
+    }
+
+    /* メール表示 */
+    .mail-box {
+      background: white;
+      border-radius: 16px;
+      border: 2px solid #649CE4;
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 360px;
+      margin: 0 auto 40px;
+    }
+
+    .mail-text {
+      font-size: 16px;
+      color: #333;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      background: #FBFEF9;
+      color: #649CE4;
+      border-radius: 32px;
+      padding: 6px 12px;
+      font-size: 20px;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* テンプレート */
+    .template-area {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .template-box {
+      width: 480px;
+      height: 256px;
+      background: white;
+      border-radius: 16px;
+      border: 2px solid #649CE4;
+      padding: 16px;
+      position: relative;
+      text-align: left;
+      overflow-y: auto;
+    }
+
+    .template-text {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .template-copy {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: white;
+      color: #649CE4;
+      border-radius: 10px;
+      padding: 4px 10px;
+      font-size: 20px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .home-btn {
+      display: inline-block;
+      padding: 14px 32px;
+      background-color: #F96796;
+      color: white;
+      text-decoration: none;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+{% include "teams/takenoko/Components/header.html" %}
+
+<div class="match-box">
+
+  <p class="match-title">〇〇さんとの取引マッチングが成立しました。</p>
+  <p class="match-desc">
+    以下のメールアドレスを使ってお話しを進めてみてください。<br>
+    良いお取り引きができることを願っています。
+  </p>
+
+  <!-- メールアドレス -->
+  <div class="mail-box">
+    <span class="mail-text" id="emailText">yamada.taro.tx@tut.jp</span>
+    <button class="copy-btn" onclick="copyText('emailText')">
+      <i class="fas fa-copy"></i>
+    </button>
+  </div>
+
+  <!-- テンプレート -->
+  <div class="template-area">
+
+    <div class="template-box">
+      <button class="template-copy" onclick="copyText('temp1')">
+        <i class="fas fa-copy"></i>
+      </button>
+      <pre id="temp1" class="template-text">件名：HubHub 商品の受け渡しについて（＜名前＞）
+＜出品者＞様
+はじめまして。
+＜商品名＞の取引にてマッチングしました、
+＜課程・専攻＞＜学年＞の＜名前＞と申します。
+
+この度は、下記の点についてご相談したくご連絡しました。
+・金銭のお支払い方法について
+・商品の受け取り場所・日時について
+
+お忙しいところ恐れ入りますが、
+ご都合のよい方法をご教示いただけますと幸いです。
+どうぞよろしくお願いいたします。
+――――――――――――――――――――
+＜名前＞
+＜所属（課程・専攻など）＞
+Email：＜学内メールアドレス＞</pre>
+    </div>
+
+    <div class="template-box">
+      <button class="template-copy" onclick="copyText('temp2')">
+        <i class="fas fa-copy"></i>
+      </button>
+      <pre id="temp2" class="template-text">件名：HubHub 商品の受け渡しについて（＜名前＞）
+＜出品者＞様
+はじめまして。
+＜商品名＞の取引にてマッチングしました、
+＜課程・専攻＞＜学年＞の＜名前＞と申します。
+
+この度は、商品の受け渡しについて
+ご相談したくご連絡しました。
+お忙しいところ恐れ入りますが、
+受け渡し日時・場所をご提案いただけますと幸いです。
+どうぞよろしくお願いいたします。
+――――――――――――――――――――
+＜名前＞
+＜所属（課程・専攻など）＞
+Email：＜学内メールアドレス＞</pre>
+    </div>
+
+  </div>
+
+  <a href="{% url 'takenoko:main' %}" class="home-btn">ホームに戻る</a>
+
+</div>
+
+<script>
+  function copyText(id) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text);
+    alert("コピーしました");
+  }
+</script>
+
+</body>
+</html>

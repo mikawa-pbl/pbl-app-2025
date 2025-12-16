@@ -25,3 +25,18 @@ def signup(request):
 
 def item_create(request):
     return render(request, 'teams/takenoko/item_create.html')
+
+def create_complete(request):
+    return render(request, 'teams/takenoko/create_complete.html')
+
+def start_trading(request):
+    return render(request, 'teams/takenoko/start_trading.html')
+
+def item_delete(request):
+    return render(request, 'teams/takenoko/item_delete.html')
+
+def item_edit(request):
+    return render(request, 'teams/takenoko/item_edit.html')
+
+def edit_complete(request):
+    return render(request, 'teams/takenoko/edit_complete.html')

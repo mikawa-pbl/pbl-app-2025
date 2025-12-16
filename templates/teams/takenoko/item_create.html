@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
 
+
   <style>
     html, body {
       background-color: #FBFEF9;
@@ -123,7 +124,7 @@
       box-shadow: 0 0 0 4px rgba(100,156,228,0.15);
     }
 
-    /* required + 先頭optionが空の時、プレースホルダーっぽく */
+    /* 商品状態はrequiredなのでこれで薄色placeholder化できる */
     .select-wrap .select:invalid {
       color: #888;
     }
@@ -198,9 +199,8 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: #FBFEF9;
-      border: 1px solid #8C8EFC;
-      color: #6B6EE8;
+      background: #EAF2FF;
+      color: #2A5DB0;
       border-radius: 999px;
       padding: 6px 10px;
       font-size: 13px;
@@ -210,7 +210,7 @@
       border: none;
       background: transparent;
       cursor: pointer;
-      color: #6B6EE8;
+      color: #2A5DB0;
       font-size: 14px;
       line-height: 1;
       padding: 0;
@@ -235,7 +235,6 @@
       cursor: pointer;
     }
 
-    /* PCで余白少し増やす */
     @media (min-width: 768px) {
       .card { padding: 28px; }
       .title { font-size: 22px; }
@@ -243,7 +242,6 @@
   </style>
 
   <script>
-    // 元いた場所に戻る（安全版）
     function goBack() {
       if (window.history.length > 1) {
         history.back();
@@ -296,7 +294,14 @@
       renderThumbs();
     }
 
-    // ===== 学年タグ（複数選択） =====
+    // ===== 対象学年タグ select の色（required無しでも薄色placeholder化） =====
+    function updateGradeSelectColor() {
+      const sel = $("gradeSelect");
+      if (!sel) return;
+      sel.style.color = sel.value ? "#333" : "#888";
+    }
+
+    // ===== 対象学年タグ（複数選択） =====
     function addGradeTag() {
       const sel = $("gradeSelect");
       const val = sel.value;
@@ -318,7 +323,8 @@
       chip.innerHTML = `${text}<button type="button" aria-label="削除" onclick="removeGradeTag('${val}')">×</button>`;
       $("gradeChips").appendChild(chip);
 
-      sel.value = ""; // placeholder表示に戻す
+      sel.value = "";
+      updateGradeSelectColor();
     }
 
     function removeGradeTag(val) {
@@ -337,40 +343,21 @@
       if (n > 99999) el.value = "99999";
     }
 
-    // ===== 学年タグが空なら送信させない（見た目統一しつつバリデーション） =====
-    function validateBeforeSubmit(e) {
-      const gradeCount = document.querySelectorAll('input[name="grades"]').length;
-      if (gradeCount === 0) {
-        e.preventDefault();
-        // requiredを付けると :invalid が効いてフォーカスも当てられる
-        const sel = $("gradeSelect");
-        sel.setAttribute("required", "required");
-        sel.reportValidity(); // ブラウザ標準の警告
-        sel.focus();
-        return false;
-      }
-      // gradesがあるならrequiredは不要（追加用selectなので）
-      $("gradeSelect").removeAttribute("required");
-      return true;
-    }
-
     window.addEventListener("DOMContentLoaded", () => {
       renderThumbs();
       $("images").addEventListener("change", (e) => addImages(e.target.files));
       $("price").addEventListener("input", normalizePrice);
 
-      // 初期状態：見た目統一のためrequiredを付けて薄色にする
-      // ただし送信前にgradesがあるかを判定するので安心
-      $("gradeSelect").setAttribute("required", "required");
-
-      $("sellForm").addEventListener("submit", validateBeforeSubmit);
+      // 対象学年タグは任意：送信ブロックなし
+      updateGradeSelectColor();
+      $("gradeSelect").addEventListener("change", updateGradeSelectColor);
     });
   </script>
 </head>
 
 <body>
   {% include "teams/takenoko/Components/header.html" %}
-  <!-- 戻る -->
+
   <button type="button" class="back-btn" onclick="goBack()" aria-label="戻る">
     <i class="fas fa-arrow-alt-circle-left"></i>
   </button>
@@ -379,7 +366,7 @@
     <section class="card">
       <h1 class="title">商品を出品</h1>
 
-      <form id="sellForm" method="post" enctype="multipart/form-data">
+      <form action="{% url 'takenoko:create_complete' %}" id="sellForm" method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
         <!-- 画像（最大5枚） -->
@@ -455,12 +442,13 @@
           </div>
         </div>
 
-        <!-- 対象学年タグ（複数） -->
+        <!-- 対象学年タグ（複数可） ※任意 -->
         <div class="field">
           <label class="label" for="gradeSelect">対象学年タグ（複数可）</label>
 
           <div style="display:flex; gap:10px;">
             <div class="select-wrap" style="flex:1;">
+              <!-- ★requiredなし：空でも送信できる -->
               <select id="gradeSelect" class="select">
                 <option value="" selected disabled>追加する学年を選択</option>
                 <option value="b1">学部1年</option>
@@ -478,7 +466,10 @@
             </button>
           </div>
 
+          <!-- hidden inputs（選んだ分だけ送る。0個なら送られない＝任意） -->
           <div id="gradeHidden"></div>
+
+          <!-- 表示チップ -->
           <div class="chips" id="gradeChips"></div>
         </div>
 

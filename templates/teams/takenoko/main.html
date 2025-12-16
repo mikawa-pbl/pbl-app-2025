@@ -1,234 +1,245 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+<html lang="ja">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
 
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              accent: "var(--accent)",
-              "background-color": "var(--background-color)",
-              "m3syslighton-surface-variant": "var(--m3syslighton-surface-variant)",
-              primary: "var(--primary)",
-              similar: "var(--similar)",
-            },
-            fontFamily: {
-              jp: ['Noto Sans JP', 'sans-serif'],
-            },
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            jp: ['Noto Sans JP', 'sans-serif'],
           },
         },
-        plugins: [],
-      };
-    </script>
+      },
+    };
+  </script>
 
-    <style>
-      html, body {
-        background-color: #FBFEF9;
-        margin: 0;
-        padding: 0;
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: "Noto Sans JP", sans-serif;
+      background-color: #FBFEF9;
+    }
+
+    /* ===========================
+       検索バー
+    ============================*/
+    .search-container {
+      width: min(880px, calc(100% - 64px));
+      height: 56px;
+      margin: 32px auto;
+      padding: 0 32px;
+      border-radius: 32px;
+      background-color: #8C8EFC;
+    }
+
+    .search-bar {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .search-bar input {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding-right: 48px;
+      font-size: 16px;
+      color: white;
+    }
+
+    .search-bar input::placeholder {
+      color: white;
+      opacity: 1;
+    }
+
+    .search-bar button {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .search-bar i {
+      font-size: 24px;
+      color: white;
+    }
+
+    /* ===========================
+       カテゴリボックスエリア
+    ============================*/
+    .feature-area {
+      position: relative;
+      width: min(1120px, calc(100% - 64px));
+      margin: 32px auto;
+      height: 48px;
+    }
+
+    .feature-box-container {
+      width: min(880px, 100%);
+      margin: 0 auto;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      overflow-x: auto; /* スマホで横スクロール */
+      scrollbar-width: none;
+    }
+
+    .feature-box-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .feature-box {
+      flex: 0 0 auto;
+      width: 96px;
+      height: 48px;
+      background-color: #FBFEF9;
+      color: #649CE4;
+      border-radius: 16px;
+      border: 2px solid #649CE4;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .feature-box:hover{
+      background-color: #649CE4;
+      color: white;
+    }
+
+    /* 右端の円 */
+    .feature-circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translateY(-50%);
+      margin-left: calc(min(880px, 100%) / 2 + 16px);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: #649CE4;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===========================
+       アイテムグリッド
+    ============================*/
+    .item-grid-wrapper {
+      width: min(1120px, calc(100% - 64px));
+      margin: 64px auto;
+    }
+
+    .item-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+    }
+
+    .item-grid a:hover {
+        transform: translateY(-2px);
+        transition: transform 120ms ease;
       }
 
-      /* ===========================
-         検索バー
-      ============================*/
-      .search-container {
-        position: relative;
-        width: 880px;
-        height: 56px;
-        margin: 32px auto;
-        padding: 0 32px;
-        border-radius: 32px;
-        background-color: #8C8EFC;
-      }
+    /* ===========================
+       追加ボタン
+    ============================*/
+    .fab {
+      position: fixed;
+      bottom: 64px;
+      right: 64px;
+    }
 
-      .search-bar {
-        position: relative;
-        width: 100%;
-        height: 100%;
-      }
+    .fab i {
+      font-size: 96px;
+      color: #F96796;
+    }
 
-      .search-bar input {
-        background: transparent;
-        border: none;
-        outline: none;
-        width: 100%;
-        height: 100%;
-        padding-right: 48px; /* アイコン分の余白 */
-        font-size: 16px;
-        color: white;
-      }
+    /* ===========================
+       レスポンシブ
+    ============================*/
+    @media (max-width: 1200px) {
+      .item-grid { grid-template-columns: repeat(3, 1fr); }
+    }
 
-      .search-bar input::placeholder {
-        color: white;
-        opacity: 1; /* Safari対策 */
-      }
+    @media (max-width: 900px) {
+      .item-grid { grid-template-columns: repeat(2, 1fr); }
+      .feature-circle { display: none; } /* 崩れ防止 */
+    }
 
-      .search-bar button {
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        cursor: pointer;
-      }
-
-      .search-bar i {
-        font-size: 24px;
-        color: white;
-      }
-
-      /* ===========================
-         ボックス＋円のエリア全体
-         （item-grid と同じ幅で中央寄せ）
-      ============================*/
-      .feature-area {
-        position: relative;
-        width: 1120px;
-        margin: 32px auto;
-        height: 48px; /* ボックスと円の高さに合わせる */
-      }
-
-      /* ===========================
-          96x48 ボックスのコンテナ
-          → ここだけで中央揃え
-      ============================*/
-      .feature-box-container {
-        width: 880px;         /* 検索バーと同じ幅 */
-        margin: 0 auto;       /* 親(1120px)の中で中央揃え */
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 16px;
-        align-items: center;
-        height: 48px;
-      }
-
-      /* 各ボックス */
-      .feature-box {
-        width: 96px;
-        height: 48px;
-        background-color: #FBFEF9;
-        color: #649CE4;
-        font-size: 16px;
-        border-radius: 16px;
-        border: 2px solid #649CE4; 
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-      }
-
-      .feature-box i {
-        font-size: 16px;
-      }
-      .feature-box p {
-        margin: 0;
-        font-size: 16px;
-      }
-
-      /* 右端の円（ボックス列に“沿う”ように配置） */
-      .feature-circle {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        /* 親(1120px)の中央から、ボックス幅(880)の半分 + 16px だけ右へ */
-        left: 50%;
-        margin-left: calc(880px / 2 + 16px);
-        width: 48px;
-        height: 48px;
-        background-color: #649CE4;
-        border-radius: 50%;
-        color:white;
-      }
-
-      /* ===========================
-         アイテムグリッド
-      ============================*/
-      .item-grid-wrapper {
-        position: relative;
-        width: 1120px;
-        margin: 64px auto;
-      }
-
-      .item-grid {
-        position: absolute;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 32px;
-      }
-
-      /* ===========================
-         右下の追加ボタン
-      ============================*/
+    @media (max-width: 560px) {
+      .item-grid { grid-template-columns: 1fr; }
       .fab {
-        position: fixed;
-        bottom: 64px;
-        right: 64px;
+        bottom: 24px;
+        right: 24px;
       }
-
       .fab i {
-        font-size: 96px;
-        color: #F96796;
+        font-size: 72px;
       }
-    </style>
+    }
+  </style>
+</head>
 
-  </head>
+<body class="font-jp">
+  {% include "teams/takenoko/Components/header.html" %}
 
-  <body>
-    {% include "teams/takenoko/Components/header.html" %}
+  <!-- 検索 -->
+  <div class="search-container">
+    <form class="search-bar" method="get">
+      <input type="text" name="q" placeholder="何をお探しですか？">
+      <button type="submit"><i class="fas fa-search"></i></button>
+    </form>
+  </div>
 
-    <!-- ===== 検索バー ===== -->
-    <div class="search-container">
-      <form class="search-bar" method="get" action="">
-        <input type="text" name="q" placeholder="何をお探しですか？">
-        <button type="submit">
-          <i class="fas fa-search"></i>
-        </button>
-      </form>
+  <!-- カテゴリ -->
+  <div class="feature-area">
+    <div class="feature-box-container">
+      <button class="feature-box"><i class="fas fa-book"></i><p>書籍</p></button>
+      <button class="feature-box"><i class="fas fa-paint-roller"></i><p>日用品</p></button>
+      <button class="feature-box"><i class="fas fa-desktop"></i><p>家電</p></button>
+      <button class="feature-box"><i class="fas fa-bed"></i><p>家具</p></button>
+      <button class="feature-box"><i class="fas fa-tshirt"></i><p>服飾</p></button>
+      <button class="feature-box"><i class="fas fa-box-open"></i><p>雑貨</p></button>
+      <button class="feature-box"><i class="fas fa-motorcycle"></i><p>乗り物</p></button>
+      <button class="feature-box"><i class="fas fa-file-alt"></i><p>過去問</p></button>
     </div>
+    <button class="feature-circle">¥0</button>
+  </div>
 
-    <!-- ===== 96x48 のボックス 8 個（中央）＋ 右に円 ===== -->
-    <div class="feature-area">
-      <div class="feature-box-container">
-        <button class="feature-box"><i class="fas fa-book"></i><p>書籍</p></button>
-        <button class="feature-box"><i class="fas fa-paint-roller"></i><p>日用品</p></button>
-        <button class="feature-box"><i class="fas fa-desktop"></i><p>家電</p></button>
-        <button class="feature-box"><i class="fas fa-bed"></i><p>家具</p></button>
-        <button class="feature-box"><i class="fas fa-tshirt"></i><p>服飾</p></button>
-        <button class="feature-box"><i class="fas fa-box-open"></i><p>雑貨</p></button>
-        <button class="feature-box"><i class="fas fa-motorcycle"></i><p>乗り物</p></button>
-        <button class="feature-box"><i class="fas fa-file-alt"></i><p>過去問</p></button>
-      </div>
-
-      <!-- ボックスコンテナに沿った位置に配置された円 -->
-      <button class="feature-circle">¥0</button>
+  <!-- 商品一覧 -->
+  <div class="item-grid-wrapper">
+    <div class="item-grid">
+      <a href="{% url 'takenoko:product_details' %}">{% include "teams/takenoko/Components/item_card.html" %}</a>
+      <a href="{% url 'takenoko:product_details' %}">{% include "teams/takenoko/Components/item_card.html" %}</a>
+      <a href="{% url 'takenoko:product_details' %}">{% include "teams/takenoko/Components/item_card.html" %}</a>
+      <a href="{% url 'takenoko:product_details' %}">{% include "teams/takenoko/Components/item_card.html" %}</a>
     </div>
+  </div>
 
-    <!-- ===== アイテム一覧 ===== -->
-    <div class="item-grid-wrapper">
-      <div class="item-grid">
-        <a href="{% url 'takenoko:product_details' %}">{% include "teams/takenoko/Components/item_card.html" %}</a>
-        {% include "teams/takenoko/Components/item_card.html" %}
-        {% include "teams/takenoko/Components/item_card.html" %}
-        {% include "teams/takenoko/Components/item_card.html" %}
-        {% include "teams/takenoko/Components/item_card.html" %}
-      </div>
-    </div>
-
-    <!-- ===== 右下の追加ボタン ===== -->
-    <div class="fab">
-      <a href="{% url 'takenoko:item_create' %}">
-        <i class="fas fa-plus-circle"></i>
-      </a>
-    </div>
-
-  </body>
+  <!-- 追加 -->
+  <div class="fab">
+    <a href="{% url 'takenoko:item_create' %}">
+      <i class="fas fa-plus-circle"></i>
+    </a>
+  </div>
+</body>
 </html>

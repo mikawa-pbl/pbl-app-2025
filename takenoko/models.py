@@ -1,6 +1,20 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
-from uuid import uuid4  # 追加
+from uuid import uuid4
+import os
+from datetime import datetime
+
+# アバター画像のファイル名を生成する関数
+def avatar_upload_path(instance, filename):
+    """
+    アバター画像の保存パスとファイル名を生成
+    形式: takenoko/avatars/{user_id}_{timestamp}.{拡張子}
+    例: takenoko/avatars/abc123_20231217_143052.jpg
+    """
+    ext = os.path.splitext(filename)[1].lower()  # 拡張子を取得（.jpg など）
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    new_filename = f"{instance.user_id}_{timestamp}{ext}"
+    return os.path.join('takenoko', 'avatars', new_filename)
 
 # --- ユーザー情報 ---
 class TakenokoUser(models.Model):
@@ -9,7 +23,7 @@ class TakenokoUser(models.Model):
     password = models.CharField("パスワードハッシュ", max_length=128)
 
     # プロフィール
-    avatar = models.ImageField("ユーザーアイコン", upload_to='takenoko/avatars/', blank=True, null=True)
+    avatar = models.ImageField("ユーザーアイコン", upload_to=avatar_upload_path, blank=True, null=True)
     nickname = models.CharField("ニックネーム", max_length=50)
     student_id = models.CharField("学籍番号", max_length=20, unique=True, default='unknown')
     MAJOR_CHOICES = [

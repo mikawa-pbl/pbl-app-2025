@@ -1,6 +1,29 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import TakenokoSignupForm
+from .models import TakenokoUser
+
+SESSION_KEY = "takenoko_user_id"
+
+
+def get_current_user(request):
+    user_id = request.session.get(SESSION_KEY)
+    if not user_id:
+        return None
+    try:
+        return TakenokoUser.objects.get(user_id=user_id)
+    except TakenokoUser.DoesNotExist:
+        return None
+
+
+def takenoko_login_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if not get_current_user(request):
+            messages.error(request, "ログインしてください。")
+            return redirect("takenoko:login")
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
 
 def main(request):
     return render(request, 'teams/takenoko/main.html')
@@ -15,6 +38,24 @@ def product_details(request):
     return render(request, 'teams/takenoko/product_details.html')
 
 def login(request):
+    # すでにログイン済みならメインページへリダイレクト
+    if get_current_user(request):
+        return redirect("takenoko:main")
+
+    if request.method == "POST":
+        email = (request.POST.get("email") or "").strip().lower()
+        password = request.POST.get("pass") or ""
+        try:
+            user = TakenokoUser.objects.get(email__iexact=email)
+            if user.check_password(password):
+                request.session[SESSION_KEY] = user.user_id
+                messages.success(request, "ログインしました。")
+                return redirect("takenoko:main")
+            else:
+                messages.error(request, "メールアドレスまたはパスワードが違います。")
+        except TakenokoUser.DoesNotExist:
+            messages.error(request, "メールアドレスまたはパスワードが違います。")
+
     return render(request, 'teams/takenoko/login.html')
 
 def signup(request):
@@ -30,6 +71,7 @@ def signup(request):
         form = TakenokoSignupForm()
     return render(request, 'teams/takenoko/signup.html', {"form": form})
 
+@takenoko_login_required
 def item_create(request):
     return render(request, 'teams/takenoko/item_create.html')
 

@@ -151,7 +151,7 @@
     <img src="{% static 'images/hubhub_title.PNG' %}" alt="logo" class="logo">
 
     <div class="login-container">
-      <form action="{% url 'takenoko:main' %}" method="post">
+      <form action="{% url 'takenoko:login' %}" method="post">
         {% csrf_token %}
 
         <div class="form-block">

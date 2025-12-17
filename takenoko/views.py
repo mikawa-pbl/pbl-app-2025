@@ -165,7 +165,24 @@ def create_complete(request):
 
 @takenoko_login_required
 def start_trading(request):
-    return render(request, 'teams/takenoko/start_trading.html')
+    item_id = request.GET.get('id')
+    if not item_id:
+        messages.error(request, "商品が見つかりません。")
+        return redirect("takenoko:main")
+    
+    item = get_object_or_404(Item, pk=item_id)
+    current_user = get_current_user(request)
+    
+    # 自分の商品は取引開始できない
+    if item.seller == current_user:
+        messages.error(request, "自分の商品は取引開始できません。")
+        return redirect(f"/takenoko/product_details/?id={item_id}")
+    
+    return render(request, 'teams/takenoko/start_trading.html', {
+        "item": item,
+        "seller": item.seller,
+        "current_user": current_user
+    })
 
 @takenoko_login_required
 def item_delete(request):

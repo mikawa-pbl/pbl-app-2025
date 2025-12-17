@@ -231,7 +231,7 @@
           {% endfor %}
         </div>
 
-        <a href="{% url 'takenoko:start_trading' %}">
+        <a href="{% url 'takenoko:start_trading' %}?id={{ item.pk }}">
           <button type="button" class="primary-btn">取引開始</button>
         </a>
       </div>

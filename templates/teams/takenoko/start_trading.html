@@ -132,7 +132,9 @@
     {% include "teams/takenoko/Components/header.html" %}
 
     <div class="match-box">
-      <p class="match-title">〇〇さんとの取引マッチングが成立しました。</p>
+      <p class="match-title">
+        {{ seller.nickname }}さんとの取引マッチングが成立しました。
+      </p>
       <p class="match-desc">
         以下のメールアドレスを使ってお話しを進めてみてください。<br />
         良いお取り引きができることを願っています。
@@ -140,7 +142,7 @@
 
       <!-- メールアドレス -->
       <div class="mail-box">
-        <span class="mail-text" id="emailText">yamada.taro.tx@tut.jp</span>
+        <span class="mail-text" id="emailText">{{ seller.email }}</span>
         <button class="copy-btn" onclick="copyText('emailText')">
           <i class="fas fa-copy"></i>
         </button>
@@ -153,11 +155,11 @@
             <i class="fas fa-copy"></i>
           </button>
           <pre id="temp1" class="template-text">
-件名：HubHub 商品の受け渡しについて（＜名前＞）
-＜出品者＞様
+件名：HubHub 商品の受け渡しについて（{{ current_user.nickname }}）
+{{ seller.nickname }}様
 はじめまして。
-＜商品名＞の取引にてマッチングしました、
-＜課程・専攻＞＜学年＞の＜名前＞と申します。
+{{ item.name }}の取引にてマッチングしました、
+{{ current_user.get_major_display }}{{ current_user.get_grade_display }}の{{ current_user.nickname }}と申します。
 
 この度は、下記の点についてご相談したくご連絡しました。
 ・金銭のお支払い方法について
@@ -167,9 +169,9 @@
 ご都合のよい方法をご教示いただけますと幸いです。
 どうぞよろしくお願いいたします。
 ――――――――――――――――――――
-＜名前＞
-＜所属（課程・専攻など）＞
-Email：＜学内メールアドレス＞</pre
+{{ current_user.nickname }}
+{{ current_user.get_major_display }}{{ current_user.get_grade_display }}
+Email：{{ current_user.email }}</pre
           >
         </div>
 
@@ -178,11 +180,11 @@ Email：＜学内メールアドレス＞</pre
             <i class="fas fa-copy"></i>
           </button>
           <pre id="temp2" class="template-text">
-件名：HubHub 商品の受け渡しについて（＜名前＞）
-＜出品者＞様
+件名：HubHub 商品の受け渡しについて（{{ current_user.nickname }}）
+{{ seller.nickname }}様
 はじめまして。
-＜商品名＞の取引にてマッチングしました、
-＜課程・専攻＞＜学年＞の＜名前＞と申します。
+{{ item.name }}の取引にてマッチングしました、
+{{ current_user.get_major_display }}{{ current_user.get_grade_display }}の{{ current_user.nickname }}と申します。
 
 この度は、商品の受け渡しについて
 ご相談したくご連絡しました。
@@ -190,9 +192,9 @@ Email：＜学内メールアドレス＞</pre
 受け渡し日時・場所をご提案いただけますと幸いです。
 どうぞよろしくお願いいたします。
 ――――――――――――――――――――
-＜名前＞
-＜所属（課程・専攻など）＞
-Email：＜学内メールアドレス＞</pre
+{{ current_user.nickname }}
+{{ current_user.get_major_display }}{{ current_user.get_grade_display }}
+Email：{{ current_user.email }}</pre
           >
         </div>
       </div>

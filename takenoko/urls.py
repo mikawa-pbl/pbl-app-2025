@@ -4,7 +4,6 @@ from . import views
 app_name = "takenoko"
 urlpatterns = [
     path('', views.main, name='main'),
-    path('members/', views.members, name='members'),
     path('login/', views.login, name='login'),
     path('signup/', views.signup, name='signup'),
     path('item_create/', views.item_create, name='item_create'),

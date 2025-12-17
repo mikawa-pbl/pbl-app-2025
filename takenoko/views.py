@@ -1,12 +1,8 @@
 from django.shortcuts import render
-from .models import Member
+from .models import TakenokoUser, Item
 
 def main(request):
     return render(request, 'teams/takenoko/main.html')
-
-def members(request):
-    qs = Member.objects.using('takenoko').all()  # ← team_terrace DBを明示
-    return render(request, 'teams/takenoko/members.html', {'members': qs})
 
 def purchased_items(request):
     return render(request, 'teams/takenoko/purchased_items.html')

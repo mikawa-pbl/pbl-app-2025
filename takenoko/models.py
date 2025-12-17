@@ -116,18 +116,7 @@ class ItemImage(models.Model):
 
 # --- 対象学年 ---
 class TargetGrade(models.Model):
-    GRADE_CHOICES = [
-        ('all', '全学年向け'),
-        ('b1', '学部1年向け'),
-        ('b2', '学部2年向け'),
-        ('b3', '学部3年向け'),
-        ('b4', '学部4年向け'),
-        ('m1', '修士1年向け'),
-        ('m2', '修士2年向け'),
-        ('d', '博士課程向け'),
-    ]
-    
-    code = models.CharField("学年コード", max_length=10, unique=True, primary_key=True, choices=GRADE_CHOICES)
+    code = models.CharField("学年コード", max_length=10, unique=True, primary_key=True)
     display_name = models.CharField("表示名", max_length=100)
 
     class Meta:

@@ -69,11 +69,7 @@ class ItemCreateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # 対象学年: DBが空なら GRADE_CHOICES を使用
-        db_grade_choices = list(TargetGrade.objects.values_list('code', 'display_name'))
-        self.fields['grades'].choices = db_grade_choices if db_grade_choices else list(TargetGrade.GRADE_CHOICES)
-
-        # タグの選択肢（任意）: DBの内容をそのまま使用
+        self.fields['grades'].choices = list(TargetGrade.objects.values_list('code', 'display_name'))
         self.fields['tags'].choices = list(Tag.objects.values_list('name', 'display_name'))
 
     def clean_price(self):

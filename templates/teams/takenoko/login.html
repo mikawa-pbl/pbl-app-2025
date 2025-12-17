@@ -1,188 +1,213 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background-color: #649CE4;
-      font-family: 'Noto Sans JP', sans-serif;
-      height: 100%;
-    }
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #649ce4;
+        font-family: "Noto Sans JP", sans-serif;
+        height: 100%;
+      }
 
-    /* ===== 戻るボタン：固定のまま ===== */
-    .back-btn {
-      position: fixed;
-      top: 32px;
-      left: 32px;
-      font-size: 48px;
-      color: #FBFEF9;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      line-height: 1;
-      z-index: 9999;
-    }
+      /* ===== 戻るボタン：固定のまま ===== */
+      .back-btn {
+        position: fixed;
+        top: 32px;
+        left: 32px;
+        font-size: 48px;
+        color: #fbfef9;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        z-index: 9999;
+      }
 
-    /* ===== ここが肝：全体を中央に置く“枠” =====
+      /* ===== ここが肝：全体を中央に置く“枠” =====
        ※中身のレイアウトは固定座標のまま維持するため、
        この枠の中で absolute を使う。
     */
-    .stage {
-      position: fixed;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 1400px;      /* ★ Macで作った見た目の基準幅（必要なら微調整） */
-      height: 900px;      /* ★ 基準高さ（必要なら微調整） */
-      pointer-events: none; /* ステージ自体はクリックを邪魔しない */
-    }
-
-    /* ロゴ＋フォームはステージ内に配置するので absolute */
-    .logo {
-      position: absolute;
-      top: 0px;
-      left: 32px;
-      width: 832px;
-      height: auto;
-      pointer-events: none;
-    }
-
-    .login-container {
-      position: absolute;
-      left: 864px;
-      top: 320px;
-      pointer-events: auto; /* ★フォームは操作できるように戻す */
-    }
-
-    .form-block {
-      width: 352px;
-      margin-bottom: 24px;
-      text-align: left;
-    }
-
-    .form-block label {
-      display: block;
-      font-size: 20px;
-      margin-bottom: 4px;
-      color: #FBFEF9;
-    }
-
-    .input-field {
-      width: 100%;
-      height: 40px;
-      border-radius: 8px;
-      background-color: #FBFEF9;
-      border: none;
-      font-size: 18px;
-      padding: 0 12px;
-      box-sizing: border-box;
-    }
-
-    .login-btn {
-      width: 100%;
-      height: 48px;
-      border-radius: 8px;
-      background-color: #F96796;
-      color: white;
-      font-size: 20px;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .login-btn:hover { background-color: #f24f84; }
-
-    .register-link {
-      margin-top: 8px;
-      pointer-events: auto; /* ★リンクも押せるように */
-    }
-    .register-link a {
-      color: #FBFEF9;
-      font-size: 16px;
-      text-decoration: underline;
-    }
-    .register-link a:hover { opacity: 0.8; }
-
-    /* ===== 画面が狭い時の“縮小”で崩れ防止 ===== */
-    @media (max-width: 1400px) {
       .stage {
-        width: 100vw;
-        transform: translateX(-50%) scale(calc(100vw / 1400));
-        transform-origin: top center;
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1400px; /* ★ Macで作った見た目の基準幅（必要なら微調整） */
+        height: 900px; /* ★ 基準高さ（必要なら微調整） */
+        pointer-events: none; /* ステージ自体はクリックを邪魔しない */
       }
-    }
-    @media (max-height: 900px) {
-      .stage {
-        height: 100vh;
+
+      /* ロゴ＋フォームはステージ内に配置するので absolute */
+      .logo {
+        position: absolute;
+        top: 0px;
+        left: 32px;
+        width: 832px;
+        height: auto;
+        pointer-events: none;
       }
-    }
-  </style>
 
-  <script>
-    function goBack() {
-      if (window.history.length > 1) {
-        history.back();
-      } else if (document.referrer) {
-        window.location.href = document.referrer;
-      } else {
-        window.location.href = "{% url 'takenoko:main' %}";
+      .login-container {
+        position: absolute;
+        left: 864px;
+        top: 320px;
+        pointer-events: auto; /* ★フォームは操作できるように戻す */
       }
-    }
-  </script>
-</head>
 
-<body>
-  <!-- 戻るは固定 -->
-  <button type="button" class="back-btn" onclick="goBack()" aria-label="戻る">
-    <i class="fas fa-arrow-alt-circle-left"></i>
-  </button>
+      .form-block {
+        width: 352px;
+        margin-bottom: 24px;
+        text-align: left;
+      }
 
-  <!-- 中央寄せしたい要素は stage にまとめる -->
-  <div class="stage">
-    <img src="{% static 'images/hubhub_title.PNG' %}" alt="logo" class="logo">
+      .form-block label {
+        display: block;
+        font-size: 20px;
+        margin-bottom: 4px;
+        color: #fbfef9;
+      }
 
-    <div class="login-container">
-      {% if messages %}
+      .input-field {
+        width: 100%;
+        height: 40px;
+        border-radius: 8px;
+        background-color: #fbfef9;
+        border: none;
+        font-size: 18px;
+        padding: 0 12px;
+        box-sizing: border-box;
+      }
+
+      .login-btn {
+        width: 100%;
+        height: 48px;
+        border-radius: 8px;
+        background-color: #f96796;
+        color: white;
+        font-size: 20px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .login-btn:hover {
+        background-color: #f24f84;
+      }
+
+      .register-link {
+        margin-top: 8px;
+        pointer-events: auto; /* ★リンクも押せるように */
+      }
+      .register-link a {
+        color: #fbfef9;
+        font-size: 16px;
+        text-decoration: underline;
+      }
+      .register-link a:hover {
+        opacity: 0.8;
+      }
+
+      /* ===== 画面が狭い時の“縮小”で崩れ防止 ===== */
+      @media (max-width: 1400px) {
+        .stage {
+          width: 100vw;
+          transform: translateX(-50%) scale(calc(100vw / 1400));
+          transform-origin: top center;
+        }
+      }
+      @media (max-height: 900px) {
+        .stage {
+          height: 100vh;
+        }
+      }
+    </style>
+
+    <script>
+      function goBack() {
+        if (window.history.length > 1) {
+          history.back();
+        } else if (document.referrer) {
+          window.location.href = document.referrer;
+        } else {
+          window.location.href = "{% url 'takenoko:main' %}";
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <!-- 戻るは固定 -->
+    <button type="button" class="back-btn" onclick="goBack()" aria-label="戻る">
+      <i class="fas fa-arrow-alt-circle-left"></i>
+    </button>
+
+    <!-- 中央寄せしたい要素は stage にまとめる -->
+    <div class="stage">
+      <img
+        src="{% static 'images/hubhub_title.PNG' %}"
+        alt="logo"
+        class="logo"
+      />
+
+      <div class="login-container">
+        {% if messages %}
         <div class="messages">
           {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-              {{ message }}
-            </div>
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
           {% endfor %}
         </div>
-      {% endif %}
+        {% endif %}
 
-      <form action="{% url 'takenoko:login' %}" method="post">
-        {% csrf_token %}
+        <form action="{% url 'takenoko:login' %}" method="post">
+          {% csrf_token %}
 
-        <div class="form-block">
-          <label for="email">メールアドレス</label>
-          <input type="email" id="email" name="email" class="input-field" required>
-        </div>
+          <div class="form-block">
+            <label for="email">メールアドレス</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="input-field"
+              required
+            />
+          </div>
 
-        <div class="form-block">
-          <label for="pass">パスワード</label>
-          <input type="password" id="pass" name="pass" class="input-field" required>
-        </div>
+          <div class="form-block">
+            <label for="pass">パスワード</label>
+            <input
+              type="password"
+              id="pass"
+              name="pass"
+              class="input-field"
+              required
+            />
+          </div>
 
-        <div class="form-block">
-          <input type="submit" value="ログイン" class="login-btn">
-        </div>
+          <div class="form-block">
+            <input type="submit" value="ログイン" class="login-btn" />
+          </div>
 
-        <div class="form-block register-link">
-          <a href="{% url 'takenoko:signup' %}">＋新規登録はこちら</a>
-        </div>
-      </form>
+          <div class="form-block register-link">
+            <a href="{% url 'takenoko:signup' %}">＋新規登録はこちら</a>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
-</body>
+  </body>
 </html>

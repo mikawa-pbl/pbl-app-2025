@@ -250,13 +250,13 @@
     <div class="item-grid-wrapper">
       <div class="item-grid">
         {% for item in items %}
-        <a href="{% url 'takenoko:product_details' %}?id={{ item.item_id }}">
-          {% include "teams/takenoko/Components/item_card.html" %}
-        </a>
+          <a href="{% url 'takenoko:product_details' %}?id={{ item.pk }}">
+            {% include "teams/takenoko/Components/item_card.html" %}
+          </a>
         {% empty %}
-        <p style="grid-column: 1 / -1; text-align: center; padding: 32px">
-          商品はまだ登録されていません
-        </p>
+          <p style="grid-column: 1 / -1; text-align: center; padding: 32px;">
+            商品はまだ登録されていません
+          </p>
         {% endfor %}
       </div>
     </div>

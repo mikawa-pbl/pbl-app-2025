@@ -174,61 +174,66 @@
             row-gap: 20px;
           "
         >
-          <!-- 画像URLはここを差し替えるだけ -->
+          {% if item.images.all %} {% for img in item.images.all %}
           <img
-            src="{% static 'images/sample.jpg' %}"
-            alt="サムネ1"
-            class="thumb"
+            src="{{ img.image.url }}"
+            alt="サムネ{{ forloop.counter }}"
+            class="thumb{% if forloop.first %} is-active{% endif %}"
             onclick="changeImage(this.src, this)"
           />
-          <img
-            src="{% static 'images/sample2.jpg' %}"
-            alt="サムネ2"
-            class="thumb"
-            onclick="changeImage(this.src, this)"
-          />
+          {% endfor %} {% else %}
           <img
             src="{% static 'images/noimage.png' %}"
-            alt="サムネ3"
-            class="thumb"
+            alt="画像なし"
+            class="thumb is-active"
             onclick="changeImage(this.src, this)"
           />
-          <img
-            src="{% static 'images/noimage.png' %}"
-            alt="サムネ4"
-            class="thumb"
-            onclick="changeImage(this.src, this)"
-          />
-          <img
-            src="{% static 'images/noimage.png' %}"
-            alt="サムネ5"
-            class="thumb"
-            onclick="changeImage(this.src, this)"
-          />
+          {% endif %}
         </div>
 
-        <!-- メイン画像：srcは空（JSで一番上のサムネを入れる） -->
+        <!-- メイン画像 -->
         <div style="position: absolute; margin-left: 80px">
-          <img id="mainImage" class="main-img" src="" alt="メイン画像" />
+          <img
+            id="mainImage"
+            class="main-img"
+            src="{% if item.get_main_image %}{{ item.get_main_image.image.url }}{% else %}{% static 'images/noimage.png' %}{% endif %}"
+            alt="メイン画像"
+          />
         </div>
       </div>
 
-      <!-- 右側：見た目だけの固定情報 -->
+      <!-- 右側：商品情報 -->
       <div style="position: relative; left: 544px; width: 640px">
-        <p class="info-title">バイク</p>
-        <p class="info-price">¥50,000</p>
-        <p class="info-text">
-          ほぼ未使用です。保管していただけで走行していません。受け渡しは学内希望。
-        </p>
-        <div style="margin-top: 18px">
-          <span class="badge">未使用に近い</span>
-        </div>
+        <p class="info-title">{{ item.name }}</p>
+        <p class="info-price">¥{{ item.price|floatformat:0 }}</p>
+
+        <p class="info-label">状態</p>
+        <span class="badge">{{ item.get_condition_display }}</span>
+
+        <p class="info-label">説明</p>
+        <p class="info-text">{{ item.description }}</p>
+
+        <p class="info-label">対象学年</p>
         <div style="margin-top: 8px">
-          <span class="tag">学部1年</span>
+          {% for g in item.target_grades.all %}
+          <span class="tag">{{ g.display_name }}</span>
+          {% empty %}
+          <span class="tag">指定なし</span>
+          {% endfor %}
         </div>
-        <a href="{% url 'takenoko:start_trading' %}"
-          ><button type="button" class="primary-btn">取引開始</button></a
-        >
+
+        <p class="info-label">タグ</p>
+        <div style="margin-top: 8px">
+          {% for t in item.tags.all %}
+          <span class="tag">{{ t.display_name }}</span>
+          {% empty %}
+          <span class="tag">タグなし</span>
+          {% endfor %}
+        </div>
+
+        <a href="{% url 'takenoko:start_trading' %}">
+          <button type="button" class="primary-btn">取引開始</button>
+        </a>
       </div>
     </div>
   </body>

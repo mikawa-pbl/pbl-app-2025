@@ -48,7 +48,7 @@
     alt="{{ item.name }}"
   />
   {% else %}
-  <img src="{% static 'images/sample.jpg' %}" class="item-img" alt="画像なし" />
+  <img src="{% static 'images/noimage.png' %}" class="item-img" alt="画像なし" />
   {% endif %}
   <div class="item-price"><p>￥{{ item.price|floatformat:0 }}</p></div>
 </div>

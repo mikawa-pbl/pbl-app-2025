@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .forms import TakenokoSignupForm, ItemCreateForm
 from .models import TakenokoUser, Item, ItemImage, TargetGrade, Tag
@@ -54,7 +54,12 @@ def listing_items(request):
     return render(request, 'teams/takenoko/listing_items.html')
 
 def product_details(request):
-    return render(request, 'teams/takenoko/product_details.html')
+    item_id = request.GET.get('id')
+    if not item_id:
+        messages.error(request, "商品が見つかりません。")
+        return redirect("takenoko:main")
+    item = get_object_or_404(Item, pk=item_id)
+    return render(request, 'teams/takenoko/product_details.html', {"item": item})
 
 def login(request):
     # すでにログイン済みならメインページへリダイレクト

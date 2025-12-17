@@ -89,3 +89,9 @@ def item_edit(request):
 
 def edit_complete(request):
     return render(request, 'teams/takenoko/edit_complete.html')
+
+def logout(request):
+    if SESSION_KEY in request.session:
+        request.session.pop(SESSION_KEY, None)
+    messages.success(request, "ログアウトしました。")
+    return redirect("takenoko:main")

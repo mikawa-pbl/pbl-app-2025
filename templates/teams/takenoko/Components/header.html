@@ -169,10 +169,26 @@
 
 <!-- ユーザーメニュー -->
 <div class="user-menu" id="user-menu">
-  <a href="{% url 'takenoko:listing_items' %}">出品した商品</a>
-  <a href="{% url 'takenoko:purchased_items' %}">購入した商品</a>
-  <a href="{% url 'takenoko:login' %}">ログイン</a>
+  {% if request.session.takenoko_user_id %}
+    <a href="{% url 'takenoko:listing_items' %}">出品した商品</a>
+    <a href="{% url 'takenoko:purchased_items' %}">購入した商品</a>
+    <form action="{% url 'takenoko:logout' %}" method="post" style="margin:0;padding:0;">
+      {% csrf_token %}
+      <button type="submit" style="display:flex;align-items:center;justify-content:center;width:256px;height:64px;border:none;border-bottom:1px solid #8C8EFC;background:none;font-size:18px;color:#333;cursor:pointer;">
+        ログアウト
+      </button>
+    </form>
+  {% else %}
+    <a href="{% url 'takenoko:login' %}">ログイン</a>
+    <a href="{% url 'takenoko:signup' %}">新規登録</a>
+  {% endif %}
 </div>
+
+<style>
+  .user-menu {
+    height: auto !important;
+  }
+</style>
 
 <!-- 通知パネル -->
 <div class="notification-box" id="notification-box">

@@ -1,3 +1,45 @@
+.displaynone{
+  display: none;  
+}
+
+
+
+/* 詳細ダイアログのプロフィール行（学年・名前） */
+.dialog-profile-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    margin-bottom: 10px;
+}
+.profile-grade {
+    font-weight: bold;
+    font-size: 15px;
+    padding: 4px;
+}
+.profile-name {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+.profile-place {
+    text-align: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.profile-comment {
+    text-align: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.profile-inlab {
+    text-align: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
 body {
     font-family: sans-serif;
     display: flex;
@@ -13,7 +55,8 @@ body {
     background: #e3e3e3;
     padding: 12px;
     display: flex;
-    align-items: center;
+    align-items:center;
+    justify-content: space-between;
     font-size: 18px;
     border: 1px solid #aaa;
     border-radius: 4px;

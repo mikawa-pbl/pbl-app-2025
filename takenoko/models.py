@@ -19,12 +19,11 @@ def avatar_upload_path(instance, filename):
 def item_image_upload_path(instance, filename):
     """
     商品画像の保存パスとファイル名を生成
-    形式: takenoko/items/{item_id}_{timestamp}_{order}.{拡張子}
-    例: takenoko/items/abc123_20231217_143052_1.jpg
+    形式: takenoko/items/{item_pk}_{timestamp}_{order}.{拡張子}
     """
     ext = os.path.splitext(filename)[1].lower()
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    new_filename = f"{instance.item_id}_{timestamp}_{instance.order}{ext}"
+    new_filename = f"{instance.item.id}_{timestamp}_{instance.order}{ext}"
     return os.path.join('takenoko', 'items', new_filename)
 
 # --- ユーザー情報 ---

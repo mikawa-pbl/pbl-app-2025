@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import TakenokoSignupForm
-from .models import TakenokoUser
+from .forms import TakenokoSignupForm, ItemCreateForm
+from .models import TakenokoUser, Item, ItemImage, TargetGrade, Tag
 
 SESSION_KEY = "takenoko_user_id"
 
@@ -73,8 +73,65 @@ def signup(request):
 
 @takenoko_login_required
 def item_create(request):
-    return render(request, 'teams/takenoko/item_create.html')
+    user = get_current_user(request)
+    
+    if request.method == "POST":
+        form = ItemCreateForm(request.POST)
+        images = request.FILES.getlist('images')
+        image_errors = form.validate_images(images) if images else []
+        
+        if form.is_valid() and not image_errors:
+            item = form.save(commit=False)
+            item.seller = user
+            item.status = 'active'
+            item.save()
 
+            # 対象学年
+            grades = request.POST.getlist('grades')
+            for grade_code in grades:
+                try:
+                    grade = TargetGrade.objects.get(code=grade_code)
+                    item.target_grades.add(grade)
+                except TargetGrade.DoesNotExist:
+                    pass
+
+            # タグ
+            tags = request.POST.getlist('tags')
+            for tag_name in tags:
+                try:
+                    tag = Tag.objects.get(name=tag_name)
+                    item.tags.add(tag)
+                except Tag.DoesNotExist:
+                    pass
+
+            # 画像
+            for order, image in enumerate(images, start=1):
+                ItemImage.objects.create(item=item, image=image, order=order)
+
+            messages.success(request, "商品を出品しました。")
+            return redirect("takenoko:create_complete")
+        else:
+            if image_errors:
+                for error in image_errors:
+                    messages.error(request, error)
+            if form.errors:
+                messages.error(request, "入力内容を確認してください。")
+            # ここで再選択値を渡す
+            return render(request, 'teams/takenoko/item_create.html', {
+                "form": form,
+                "selected_grades": request.POST.getlist('grades'),
+                "selected_tags": request.POST.getlist('tags'),
+            })
+    else:
+        form = ItemCreateForm()
+    
+    return render(request, 'teams/takenoko/item_create.html', {
+        "form": form,
+        "selected_grades": [],
+        "selected_tags": [],
+    })
+
+@takenoko_login_required
 def create_complete(request):
     return render(request, 'teams/takenoko/create_complete.html')
 

@@ -41,6 +41,14 @@
 </style>
 
 <div class="item-card">
-  <img src="{% static 'images/sample.jpg' %}" class="item-img" />
-  <div class="item-price"><p>￥5,000</p></div>
+  {% if item.get_main_image %}
+  <img
+    src="{{ item.get_main_image.image.url }}"
+    class="item-img"
+    alt="{{ item.name }}"
+  />
+  {% else %}
+  <img src="{% static 'images/sample.jpg' %}" class="item-img" alt="画像なし" />
+  {% endif %}
+  <div class="item-price"><p>￥{{ item.price|floatformat:0 }}</p></div>
 </div>

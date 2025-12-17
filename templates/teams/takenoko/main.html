@@ -228,38 +228,20 @@
     <!-- カテゴリ -->
     <div class="feature-area">
       <div class="feature-box-container">
-        <button class="feature-box">
-          <i class="fas fa-book"></i>
-          <p>書籍</p>
-        </button>
-        <button class="feature-box">
-          <i class="fas fa-paint-roller"></i>
-          <p>日用品</p>
-        </button>
-        <button class="feature-box">
-          <i class="fas fa-desktop"></i>
-          <p>家電</p>
-        </button>
-        <button class="feature-box">
-          <i class="fas fa-bed"></i>
-          <p>家具</p>
-        </button>
-        <button class="feature-box">
-          <i class="fas fa-tshirt"></i>
-          <p>服飾</p>
-        </button>
-        <button class="feature-box">
-          <i class="fas fa-box-open"></i>
-          <p>雑貨</p>
-        </button>
-        <button class="feature-box">
-          <i class="fas fa-motorcycle"></i>
-          <p>乗り物</p>
-        </button>
-        <button class="feature-box">
-          <i class="fas fa-file-alt"></i>
-          <p>過去問</p>
-        </button>
+        {% for tag in tags %}
+          {% if tag.name == selected_tag %}
+            <a href="{% url 'takenoko:main' %}" style="text-decoration: none;">
+          {% else %}
+            <a href="{% url 'takenoko:main' %}?tag={{ tag.name }}" style="text-decoration: none;">
+          {% endif %}
+              <div class="feature-box" style="{% if tag.name == selected_tag %}background-color: #B8E6D5; border: 2px solid #649CE4;{% endif %}">
+                <p>{{ tag.display_name }}</p>
+                <div class="feature-circle"></div>
+              </div>
+            </a>
+        {% empty %}
+          <p style="padding: 16px; color: #999;">タグが登録されていません</p>
+        {% endfor %}
       </div>
       <button class="feature-circle">¥0</button>
     </div>
@@ -267,18 +249,15 @@
     <!-- 商品一覧 -->
     <div class="item-grid-wrapper">
       <div class="item-grid">
-        <a href="{% url 'takenoko:product_details' %}"
-          >{% include "teams/takenoko/Components/item_card.html" %}</a
-        >
-        <a href="{% url 'takenoko:product_details' %}"
-          >{% include "teams/takenoko/Components/item_card.html" %}</a
-        >
-        <a href="{% url 'takenoko:product_details' %}"
-          >{% include "teams/takenoko/Components/item_card.html" %}</a
-        >
-        <a href="{% url 'takenoko:product_details' %}"
-          >{% include "teams/takenoko/Components/item_card.html" %}</a
-        >
+        {% for item in items %}
+        <a href="{% url 'takenoko:product_details' %}?id={{ item.item_id }}">
+          {% include "teams/takenoko/Components/item_card.html" %}
+        </a>
+        {% empty %}
+        <p style="grid-column: 1 / -1; text-align: center; padding: 32px">
+          商品はまだ登録されていません
+        </p>
+        {% endfor %}
       </div>
     </div>
 

@@ -26,7 +26,26 @@ def takenoko_login_required(view_func):
 
 
 def main(request):
-    return render(request, 'teams/takenoko/main.html')
+    # GETパラメータからタグを取得
+    selected_tag = request.GET.get('tag')
+    
+    # アクティブな商品を取得（新着順）
+    items = Item.objects.filter(status='active').order_by('-created_at')
+    
+    # タグでフィルタリング
+    if selected_tag:
+        items = items.filter(tags__name=selected_tag).distinct()
+    
+    items = items[:12]
+    
+    # 登録されているすべてのタグを取得
+    tags = Tag.objects.all()
+    
+    return render(request, 'teams/takenoko/main.html', {
+        "items": items,
+        "tags": tags,
+        "selected_tag": selected_tag
+    })
 
 def purchased_items(request):
     return render(request, 'teams/takenoko/purchased_items.html')

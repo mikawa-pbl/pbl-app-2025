@@ -175,26 +175,25 @@
 
       <!-- 商品一覧 -->
       <div class="items-grid">
-        <!-- ✅ item_card を a で囲って href を指定 -->
-        <a class="card-link" href="{% url 'takenoko:item_delete' %}">
+        {% for item in items %}
+        <a
+          class="card-link"
+          href="{% url 'takenoko:product_details' %}?id={{ item.pk }}"
+        >
           {% include "teams/takenoko/Components/item_card.html" %}
         </a>
-
-        <a class="card-link" href="{% url 'takenoko:item_delete' %}">
-          {% include "teams/takenoko/Components/item_card.html" %}
-        </a>
-
-        <a class="card-link" href="{% url 'takenoko:item_delete' %}">
-          {% include "teams/takenoko/Components/item_card.html" %}
-        </a>
-
-        <a class="card-link" href="{% url 'takenoko:item_delete' %}">
-          {% include "teams/takenoko/Components/item_card.html" %}
-        </a>
-
-        <a class="card-link" href="{% url 'takenoko:item_delete' %}">
-          {% include "teams/takenoko/Components/item_card.html" %}
-        </a>
+        {% empty %}
+        <p
+          style="
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 32px;
+            color: #999;
+          "
+        >
+          まだ商品を出品していません
+        </p>
+        {% endfor %}
       </div>
     </main>
 

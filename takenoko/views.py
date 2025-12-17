@@ -50,8 +50,12 @@ def main(request):
 def purchased_items(request):
     return render(request, 'teams/takenoko/purchased_items.html')
 
+@takenoko_login_required
 def listing_items(request):
-    return render(request, 'teams/takenoko/listing_items.html')
+    user = get_current_user(request)
+    # ログインユーザーが出品した商品を取得（新着順）
+    items = Item.objects.filter(seller=user).order_by('-created_at')
+    return render(request, 'teams/takenoko/listing_items.html', {"items": items})
 
 def product_details(request):
     item_id = request.GET.get('id')
@@ -159,18 +163,23 @@ def item_create(request):
 def create_complete(request):
     return render(request, 'teams/takenoko/create_complete.html')
 
+@takenoko_login_required
 def start_trading(request):
     return render(request, 'teams/takenoko/start_trading.html')
 
+@takenoko_login_required
 def item_delete(request):
     return render(request, 'teams/takenoko/item_delete.html')
 
+@takenoko_login_required
 def item_edit(request):
     return render(request, 'teams/takenoko/item_edit.html')
 
+@takenoko_login_required
 def edit_complete(request):
     return render(request, 'teams/takenoko/edit_complete.html')
 
+@takenoko_login_required
 def logout(request):
     if SESSION_KEY in request.session:
         request.session.pop(SESSION_KEY, None)

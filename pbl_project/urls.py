@@ -48,8 +48,8 @@ urlpatterns = [
     path('takenoko/', include('takenoko.urls')), 
     path('teachers/', include('teachers.urls')),
     path("", lambda request: redirect("team_giryulink:index")),
-    # path("admin/", admin.site.urls),
-    # path("team_giryulink/", include("team_giryulink.urls")),
+    path("admin/", admin.site.urls),
+    path("team_giryulink/", include("team_giryulink.urls")),
 ]
 
 # Serve media files in development

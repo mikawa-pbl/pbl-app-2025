@@ -66,6 +66,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "h34vvy_u53rzz.middleware.H34vvySessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -207,8 +208,9 @@ DATABASES = {
 DATABASE_ROUTERS = ["routers.TeamPerAppRouter"]
 
 AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
-    "h34vvy_u53rzz.backends.H34vvyBackend",
+    "h34vvy_u53rzz.backends.H34vvyUserBackend",
+    # グローバルの認証バックエンド
+    # "django.contrib.auth.backends.ModelBackend",
 ]
 
 # Password validation

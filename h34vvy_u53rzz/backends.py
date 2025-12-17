@@ -1,48 +1,57 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
-from django.db import connections
-from django.db.utils import DatabaseError
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.sessions.backends.db import SessionStore
 
-from .models import AppAccount
+from .models import H34vvyUser
 
 
-class H34vvyBackend(BaseBackend):
+class H34vvySessionStore(SessionStore):
     """
-    アプリ固有のローカルユーザー名を auth_user（default DB）にひも付けるバックエンド。
+    チーム独自のセッションストレージ
     """
 
-    app_code = "h34vvy"
+    @classmethod
+    def get_model_class(cls):
+        # Avoids a circular import and allows importing SessionStore when
+        # django.contrib.sessions is not in INSTALLED_APPS.
+        from .models import H34vvySession
 
-    def authenticate(self, request, username=None, password=None, app_code=None, **kwargs):
-        # username: ローカルユーザー名
+        return H34vvySession
+
+
+def is_h34vvy_u53rzz_request(request) -> bool:
+    if request is None:
+        return False
+    return request.path.startswith("/h34vvy_u53rzz/")
+
+
+class H34vvyUserBackend(BaseBackend):
+    """
+    チーム独自の認証ユーザバックエンド
+    """
+
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        # 対象外のアプリなら None を返して次の認証バックエンドに素通りさせる
+        if not is_h34vvy_u53rzz_request(request):
+            return None
+        # 以降、認証できなかったら AnonymousUser() を返して認証プロセスを終了する
+
         if username is None or password is None:
-            return None
-        target_app = app_code or self.app_code
+            return AnonymousUser()
         try:
-            account = AppAccount.objects.using("h34vvy_u53rzz").get(
-                app_code=target_app, local_username=username
-            )
-        except AppAccount.DoesNotExist:
-            return None
-
-        UserModel = get_user_model()
-        try:
-            user = UserModel.objects.using("default").get(pk=account.user_id)
-        except UserModel.DoesNotExist:
-            return None
-        except DatabaseError:
-            # default DB に接続できないなどの場合は認証不可
-            return None
+            user = H34vvyUser.objects.get(username=username)
+        except H34vvyUser.DoesNotExist:
+            return AnonymousUser()
 
         if not user.is_active:
-            return None
+            return AnonymousUser()
         if user.check_password(password):
             return user
-        return None
+        return AnonymousUser()
 
     def get_user(self, user_id):
-        UserModel = get_user_model()
         try:
-            return UserModel.objects.using("default").get(pk=user_id)
-        except UserModel.DoesNotExist:
-            return None
+            return H34vvyUser.objects.get(pk=user_id)
+        except H34vvyUser.DoesNotExist:
+            pass
+        return None

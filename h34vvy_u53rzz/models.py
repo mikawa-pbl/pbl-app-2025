@@ -1,3 +1,6 @@
+from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.sessions.base_session import AbstractBaseSession
+from django.contrib.sessions.models import SessionManager
 from django.db import models
 
 from .doors import DOORS
@@ -6,26 +9,50 @@ from .doors import DOORS
 DOOR_LABEL_MAP = {door.id: door.label for door in DOORS}
 
 
-class AppAccount(models.Model):
+class H34vvySession(AbstractBaseSession):
     """
-    default DB の auth_user（共有）と、アプリ内のローカルユーザー名を紐づける。
-    FKを張るとDBが跨ってしまうため、user_idは整数で保持する。
+    チーム独自のセッションDB
     """
 
-    app_code = models.CharField(max_length=64, default="h34vvy", db_index=True)
-    local_username = models.CharField(max_length=150)
-    user_id = models.PositiveIntegerField(help_text="auth_user.id")
+    objects = SessionManager()
+
+    @classmethod
+    def get_session_store_class(cls):
+        from .backends import SessionStore
+
+        return SessionStore
+
+
+class H34vvyGroup(Group):
+    pass
+
+
+class H34vvyPermission(Permission):
+    pass
+
+
+class H34vvyUser(AbstractUser):
+    """
+    チーム独自の認証・認可用ユーザアカウント
+    """
+
     points = models.PositiveIntegerField(default=0, help_text="アプリ内ポイント")
     created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        unique_together = ("app_code", "local_username")
-        indexes = [
-            models.Index(fields=["app_code", "local_username"]),
-        ]
-
-    def __str__(self):
-        return f"{self.app_code}:{self.local_username} -> {self.user_id}"
+    # auth.models.PermissionsMixin で定義されている外部キーが
+    # 共有テーブルではなくチーム固有のテーブルを参照するように変更する
+    groups = models.ManyToManyField(
+        H34vvyGroup,
+        blank=True,
+        related_name="h34vvy_user_set",
+        related_query_name="h34vvy_user",
+    )
+    user_permissions = models.ManyToManyField(
+        H34vvyPermission,
+        blank=True,
+        related_name="h34vvy_user_set",
+        related_query_name="h34vvy_user",
+    )
 
 
 # 後でなくす

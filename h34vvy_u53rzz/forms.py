@@ -1,11 +1,12 @@
 from django import forms
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import AnonymousUser
 
 from .models import Entry
 
 
 class SignupForm(forms.Form):
-    local_username = forms.CharField(
+    username = forms.CharField(
         label="ユーザー名",
         max_length=150,
         widget=forms.TextInput(
@@ -47,7 +48,7 @@ class SignupForm(forms.Form):
 
 
 class NamespacedLoginForm(forms.Form):
-    local_username = forms.CharField(
+    username = forms.CharField(
         label="ユーザー名",
         max_length=150,
         widget=forms.TextInput(
@@ -80,17 +81,11 @@ class NamespacedLoginForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        username = cleaned_data.get("local_username")
+        username = cleaned_data.get("username")
         password = cleaned_data.get("password")
         if username and password:
-            user = authenticate(
-                self.request,
-                backend="h34vvy_u53rzz.backends.H34vvyBackend",
-                username=username,
-                password=password,
-                app_code="h34vvy",
-            )
-            if user is None:
+            user = authenticate(self.request, username=username, password=password)
+            if not user.is_authenticated:
                 raise forms.ValidationError(
                     self.error_messages["invalid_login"],
                     code="invalid_login",

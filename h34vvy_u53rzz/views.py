@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from django.http import JsonResponse
@@ -9,7 +9,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from .doors import DOORS
 from .forms import EntryForm, NamespacedLoginForm, SignupForm
-from .models import AppAccount, Entry
+from .models import H34vvyUser, Entry
 
 
 LOGIN_REDIRECT_FALLBACK = reverse_lazy("h34vvy_u53rzz:index")
@@ -28,7 +28,9 @@ def index(request):
 
 def _get_safe_redirect(request):
     target = request.POST.get("next") or request.GET.get("next")
-    if target and url_has_allowed_host_and_scheme(target, allowed_hosts={request.get_host()}):
+    if target and url_has_allowed_host_and_scheme(
+        target, allowed_hosts={request.get_host()}
+    ):
         return target
     return str(LOGIN_REDIRECT_FALLBACK)
 
@@ -38,7 +40,7 @@ def _style_auth_form(form):
     base_attrs = {
         "class": "w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40",
     }
-    form.fields["local_username"].widget.attrs.update(
+    form.fields["username"].widget.attrs.update(
         {
             **base_attrs,
             "placeholder": "ユーザー名",
@@ -88,7 +90,7 @@ def signup_view(request):
         base_attrs = {
             "class": "w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40",
         }
-        form.fields["local_username"].widget.attrs.update(
+        form.fields["username"].widget.attrs.update(
             {**base_attrs, "placeholder": "アプリ内で使うユーザー名"}
         )
         form.fields["password1"].widget.attrs.update(
@@ -102,48 +104,37 @@ def signup_view(request):
     if request.method == "POST":
         form = style_signup(SignupForm(request.POST))
         if form.is_valid():
-            local_username = form.cleaned_data["local_username"]
+            username = form.cleaned_data["username"]
             password = form.cleaned_data["password1"]
             # auth_user側のユーザー名は衝突を避けるために接頭辞を付与
-            auth_username = f"h34vvy_{local_username}"
-            if len(auth_username) > 150:
+            if len(username) > 150:
                 form.add_error(
-                    "local_username",
+                    "username",
                     "ユーザー名が長すぎます（プレフィックス込み150文字以内）。",
                 )
             else:
-                UserModel = get_user_model()
-                # 共有ユーザー表側の重複チェック
-                if UserModel.objects.using("default").filter(username=auth_username).exists():
+                if H34vvyUser.objects.filter(username=username).exists():
                     form.add_error(
-                        "local_username",
-                        "このユーザー名は既に使用されています。別の名前を入力してください。",
-                    )
-                # アプリ内ローカル名の重複チェック
-                elif AppAccount.objects.using("h34vvy_u53rzz").filter(
-                    app_code="h34vvy", local_username=local_username
-                ).exists():
-                    form.add_error(
-                        "local_username",
+                        "username",
                         "このユーザー名は既に登録されています。別の名前を入力してください。",
                     )
                 else:
-                    user = UserModel._default_manager.db_manager("default").create_user(
-                        username=auth_username,
-                        password=password,
-                    )
                     try:
-                        AppAccount.objects.using("h34vvy_u53rzz").create(
-                            app_code="h34vvy",
-                            local_username=local_username,
-                            user_id=user.id,
-                        )
+                        user = H34vvyUser.objects.db_manager(
+                            "h34vvy_u53rzz"
+                        ).create_user(username=username, password=password)
                     except Exception:
-                        # AppAccount作成に失敗したらユーザーを削除しておく
-                        user.delete(using="default")
-                        form.add_error(None, "登録に失敗しました。時間をおいて再度お試しください。")
+                        # H34vvyUser作成に失敗したらユーザーを削除しておく
+                        user.delete()
+                        form.add_error(
+                            None, "登録に失敗しました。時間をおいて再度お試しください。"
+                        )
                     else:
-                        login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+                        login(
+                            request,
+                            user,
+                            backend="h34vvy_u53rzz.backends.H34vvyUserBackend",
+                        )
                         return redirect(redirect_to)
     else:
         form = style_signup(SignupForm())
@@ -166,11 +157,7 @@ def logout_view(request):
 
 @login_required(login_url=LOGIN_URL)
 def ranking_view(request):
-    accounts = list(
-        AppAccount.objects.using("h34vvy_u53rzz")
-        .order_by("-points", "local_username")
-        .all()
-    )
+    accounts = list(H34vvyUser.objects.order_by("-points", "username").all())
     rankings = []
     last_points = None
     last_rank = 0
@@ -262,9 +249,9 @@ def timeline_view(request):
                 entry.helper_confirmed_at = timezone.now()
                 entry.save(update_fields=["helper_confirmed_at"])
                 # 助けたユーザーにポイントを付与
-                AppAccount.objects.using("h34vvy_u53rzz").filter(
-                    app_code="h34vvy", user_id=request.user.id
-                ).update(points=F("points") + 1)
+                H34vvyUser.objects.filter(id=request.user.id).update(
+                    points=F("points") + 1
+                )
         return redirect("h34vvy_u53rzz:timeline")
     entries = Entry.objects.all()  # Meta.ordering で新しい順
     return render(

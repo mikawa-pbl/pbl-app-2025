@@ -1,7 +1,6 @@
 from django import template
-from django.contrib.auth import get_user_model
 
-from ..models import AppAccount
+from ..models import H34vvyUser
 
 register = template.Library()
 
@@ -13,9 +12,5 @@ def user_points(user):
     """
     if not user or not user.is_authenticated:
         return None
-    account = (
-        AppAccount.objects.using("h34vvy_u53rzz")
-        .filter(app_code="h34vvy", user_id=user.id)
-        .first()
-    )
+    account = H34vvyUser.objects.filter(id=user.id).first()
     return account.points if account else None

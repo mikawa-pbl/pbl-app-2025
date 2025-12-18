@@ -1,0 +1,18 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{% static 'agileca/css/gikamap.css' %}" />
+    <link rel="stylesheet" href="{% static 'agileca/css/split.css' %}" />
+    <title>{% block title %}Split Layout{% endblock %}</title>
+  </head>
+  <body>
+    <div class="split-layout">
+      <aside class="left">{% block left %}{% endblock %}</aside>
+
+      <main class="right">{% block right %}{% endblock %}</main>
+    </div>
+  </body>
+</html>

@@ -3,57 +3,486 @@
 <head>
     <meta charset="UTF-8">
     <title>Team Giryulink - Shopping</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; margin: 0; background: #f6f7fb; color: #222; }
-        .site { max-width: 960px; margin: 0 auto; padding: 24px; }
-        header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-        h1 { margin: 0; font-size: 1.6rem; }
-        /* Controls (Add product form) */
-        .controls { margin: 18px 0; display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
-        .add-btn { background: #1e88e5; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
-        .add-form { display: none; gap: 8px; align-items: center; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-        .add-form input { padding: 6px 8px; border-radius: 6px; border: 1px solid #ddd; }
-        .add-form .submit { background: #2e7d32; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
-        .add-form .cancel { background: #fff; border: 1px solid #ddd; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
-        .products { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px; justify-content: center; }
-        /* card layout: allow delete button to overlap and be clickable */
-        .card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: visible; width: 300px; text-align: left; position: relative; }
-        .delete-btn { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; z-index: 20; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-        /* ensure link doesn't cover the delete button (keeps button clickable) */
-        .card-link { position: relative; z-index: 1; display: block; }
-        .card img { width: 100%; height: 200px; object-fit: cover; display: block; }
-        .card .info { padding: 12px 14px; }
-        .card h2 { margin: 0 0 8px 0; font-size: 1rem; }
-        .price { font-size: 1.2rem; color: #e53935; font-weight: 700; }
-        footer { margin-top: 36px; padding: 14px 0; text-align: center; background: #222; color: #fff; border-radius: 6px; }
-        footer a { color: #ffd; text-decoration: none; }
-        .card img { width: 100%; height: 200px; object-fit: contain; object-position: center; background: #f3f4f6; display: block; }
-        .card-link img { transition: transform 0.18s ease; will-change: transform; object-fit: contain; object-position: center; background: #f3f4f6; }
-        .card-link { text-decoration: none; color: inherit; display: block; }
-        .card-link img { transition: transform 0.18s ease; will-change: transform; }
-        .card-link .info h2 { color: #222; transition: transform 0.12s ease, color 0.12s ease; transform-origin: left center; }
-        .card-link:hover img { transform: scale(1.03); }
-        .card-link:hover .info h2 { transform: translateY(-3px) scale(1.02); color: #1e88e5; }
-        @media (max-width: 640px) { .card { width: 100%; } .card img { height: 180px; } }
+        /* Reset & Base */
+        * { box-sizing: border-box; }
+        body { 
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; 
+            margin: 0; 
+            background: #f6f7fb; 
+            color: #222; 
+            padding-bottom: 70px; /* 为底部导航留出空间 */
+        }
+        
+        /* Header - 手机优化 */
+        .site { max-width: 960px; margin: 0 auto; padding: 12px; }
+        header { 
+            display: flex; 
+            flex-direction: column;
+            gap: 12px;
+            padding: 12px 8px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            margin: -12px -12px 16px -12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        h1 { margin: 0; font-size: 1.3rem; }
+        
+        /* Search Bar */
+        .search-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .search-input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: #f9fafb;
+            transition: all 0.2s ease;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #1e88e5;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(30,136,229,0.1);
+        }
+        .search-btn, .clear-search-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .search-btn {
+            background: #1e88e5;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(30,136,229,0.3);
+        }
+        .search-btn:hover {
+            background: #1565c0;
+        }
+        .clear-search-btn {
+            background: #f5f5f5;
+            color: #666;
+            display: none;
+        }
+        .clear-search-btn.active {
+            display: block;
+        }
+        .clear-search-btn:hover {
+            background: #e0e0e0;
+        }
+        .search-results-info {
+            font-size: 0.9rem;
+            color: #666;
+            padding: 0 4px;
+        }
+        
+        /* Controls - 手机优化表单 */
+        .controls { 
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+            background: #fff;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .controls.show {
+            transform: translateY(0);
+        }
+        .add-btn { 
+            background: #1e88e5; 
+            color: #fff; 
+            border: none; 
+            padding: 10px 16px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 0.95rem;
+            width: 100%;
+            max-width: 200px;
+            box-shadow: 0 2px 4px rgba(30,136,229,0.3);
+        }
+        .add-form { 
+            display: flex; 
+            flex-direction: column;
+            gap: 10px; 
+            background: #fff; 
+            padding: 16px; 
+            border-radius: 12px 12px 0 0;
+            width: 100%;
+        }
+        .add-form input, .add-form textarea { 
+            padding: 10px 12px; 
+            border-radius: 8px; 
+            border: 1px solid #ddd; 
+            font-size: 1rem;
+            width: 100%;
+        }
+        .add-form textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .add-form .submit { 
+            background: #2e7d32; 
+            color: #fff; 
+            border: none; 
+            padding: 12px 16px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .add-form .cancel { 
+            background: #fff; 
+            border: 1px solid #ddd; 
+            padding: 12px 16px; 
+            border-radius: 8px; 
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        /* Products Grid - 手机端2列显示 */
+        .products { 
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px; 
+            margin-top: 16px; 
+        }
+        
+        /* Card - 手机优化 2列布局 */
+        .card { 
+            background: #fff; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08); 
+            overflow: hidden; 
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:active {
+            transform: scale(0.98);
+        }
+        .delete-btn { 
+            position: absolute; 
+            top: 6px; 
+            right: 6px; 
+            background: rgba(229,57,53,0.9); 
+            color: #fff; 
+            border: none; 
+            padding: 6px 8px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 0.75rem; 
+            z-index: 20; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-weight: 600;
+        }
+        .card-link { 
+            position: relative; 
+            z-index: 1; 
+            display: block;
+            text-decoration: none; 
+            color: inherit;
+        }
+        .card img { 
+            width: 100%; 
+            height: 140px; 
+            object-fit: contain; 
+            object-position: center; 
+            background: #f9fafb; 
+            display: block;
+        }
+        .card .info { padding: 10px; }
+        .card h2 { 
+            margin: 0 0 6px 0; 
+            font-size: 0.9rem; 
+            color: #222;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .price { 
+            font-size: 1.1rem; 
+            color: #e53935; 
+            font-weight: 700; 
+        }
+        
+        /* Footer - 固定底部导航 */
+        footer { 
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            text-align: center; 
+            background: #fff; 
+            color: #222;
+            border-top: 1px solid #e0e0e0;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+            z-index: 90;
+        }
+        footer a { 
+            color: #1e88e5; 
+            text-decoration: none; 
+            font-weight: 600;
+            padding: 8px 16px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        
+        /* 加载指示器 */
+        .loading-indicator {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            margin: 20px 0;
+        }
+        .loading-indicator.active {
+            display: flex;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1e88e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .no-more-products {
+            text-align: center;
+            padding: 24px;
+            color: #999;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .no-more-products.active {
+            display: block;
+        }
+        
+        /* 平板和桌面优化 */
+        @media (min-width: 640px) {
+            .site { padding: 24px; }
+            h1 { font-size: 1.6rem; }
+            header {
+                flex-direction: row;
+                align-items: center;
+            }
+            .header-top {
+                width: auto;
+            }
+            .search-form {
+                max-width: 400px;
+            }
+            .products { 
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+            }
+            .card img { height: 200px; }
+            .card h2 { font-size: 1rem; }
+            .card .info { padding: 14px; }
+            .delete-btn { 
+                padding: 7px 10px; 
+                font-size: 0.85rem;
+                top: 10px;
+                right: 10px;
+            }
+            .add-form {
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: flex-start;
+            }
+            .add-form input[name="title"] { flex: 1; min-width: 200px; }
+            .add-form input[name="price"] { width: 120px; }
+            .add-form input[name="image"] { flex: 1; min-width: 200px; }
+            .add-form textarea { width: 100%; }
+            footer {
+                position: static;
+                margin-top: 36px;
+                border-radius: 6px;
+            }
+            body { padding-bottom: 0; }
+        }
+        
+        @media (min-width: 960px) {
+            .products { 
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        /* 图片上传样式 */
+        .image-upload-container {
+            position: relative;
+        }
+        
+        .image-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border: 2px dashed #1e88e5;
+            border-radius: 8px;
+            background: #f0f8ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .image-upload-label:hover {
+            background: #e3f2fd;
+            border-color: #1565c0;
+        }
+        
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        .upload-text {
+            font-size: 0.9rem;
+            color: #1e88e5;
+            font-weight: 600;
+        }
+        
+        .image-preview {
+            position: relative;
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            background: #f9fafb;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(229, 57, 53, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        /* 移动端特定样式 */
+        @media (max-width: 639px) {
+            .upload-icon {
+                font-size: 2.5rem;
+            }
+            .upload-text::after {
+                content: ' (タップして撮影/選択)';
+                font-size: 0.75rem;
+                display: block;
+                margin-top: 4px;
+                color: #666;
+            }
+        }
+        
+        /* 桌面端样式 */
+        @media (min-width: 640px) {
+            .image-upload-label {
+                padding: 24px;
+            }
+            .upload-text::after {
+                content: ' (クリックして選択)';
+                font-size: 0.8rem;
+                display: block;
+                margin-top: 4px;
+                color: #666;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="site">
     <header>
-        <h1>Furu-Trade</h1>
+        <div class="header-top">
+            <h1>Furu-Trade</h1>
+        </div>
+        <!-- Search Bar -->
+        <form class="search-form" method="get" action="{% url 'team_giryulink:index' %}">
+            <input 
+                type="text" 
+                name="search" 
+                class="search-input" 
+                placeholder="商品を検索..." 
+                value="{{ search_query }}" 
+                id="searchInput"
+                aria-label="商品を検索">
+            <button type="submit" class="search-btn">🔍 検索</button>
+            <button type="button" class="clear-search-btn{% if search_query %} active{% endif %}" id="clearSearch">✕</button>
+        </form>
+        {% if search_query %}
+        <div class="search-results-info">
+            「{{ search_query }}」の検索結果: {{ products|length }}件
+        </div>
+        {% endif %}
     </header>
 
-    <!-- Controls: Add product button + form (positioned above product list) -->
-    <div class="controls" aria-hidden="false">
-        <button class="add-btn" id="toggleAdd">＋ 新しい商品を追加</button>
-
+    <!-- Add product form (hidden by default, shown when footer button clicked) -->
+    <div class="controls" id="addProductSection">
         <!-- server-backed form: POSTs to add product view -->
-        <form class="add-form" id="addForm" method="post" action="{% url 'team_giryulink:add_product' %}" aria-label="Add product form" style="display:none;">
+        <form class="add-form" id="addForm" method="post" action="{% url 'team_giryulink:add_product' %}" aria-label="Add product form" enctype="multipart/form-data">
             {% csrf_token %}
             <input id="pTitle" name="title" type="text" placeholder="商品名" required aria-label="商品名">
             <input id="pPrice" name="price" type="number" placeholder="価格 (¥)" min="0" required aria-label="価格">
-            <input id="pImage" name="image" type="url" placeholder="画像URL" aria-label="画像URL">
-            <textarea id="pDescription" name="description" placeholder="商品説明" aria-label="商品説明" style="display:block; width:260px; height:72px; padding:6px; border-radius:6px; border:1px solid #ddd;"></textarea>
+            
+            <!-- 图片上传区域 -->
+            <div class="image-upload-container" style="width: 100%;">
+                <label for="pImage" class="image-upload-label">
+                    <span class="upload-icon">📷</span>
+                    <span class="upload-text">写真を選択/撮影</span>
+                </label>
+                <input id="pImage" name="image" type="file" accept="image/*" capture="environment" aria-label="商品画像" style="display: none;">
+                <div id="imagePreview" class="image-preview" style="display: none;">
+                    <img id="previewImg" src="" alt="プレビュー">
+                    <button type="button" class="remove-image" id="removeImage">✕</button>
+                </div>
+            </div>
+            
+            <textarea id="pDescription" name="description" placeholder="商品説明" aria-label="商品説明"></textarea>
             <button class="submit" id="addSubmit" type="submit">追加</button>
             <button type="button" class="cancel" id="addCancel">キャンセル</button>
         </form>
@@ -64,36 +493,98 @@
         <section class="products" aria-label="Products">
             {% for p in products %}
             <article class="card">
-                <form method="post" action="{% url 'team_giryulink:delete_product' p.id %}" style="position:absolute; top:8px; right:8px; margin:0;">
+                <form method="post" action="{% url 'team_giryulink:delete_product' p.id %}" style="position:absolute; top:6px; right:6px; margin:0;">
                     {% csrf_token %}
                     <button class="delete-btn" type="submit" aria-label="削除 {{ p.title }}">削除</button>
                 </form>
                 <a class="card-link" href="{% url 'team_giryulink:product_detail' p.id %}" aria-label="{{ p.title }}">
-                    <img src="{{ p.image|default:'https://via.placeholder.com/600x400?text=No+Image' }}" alt="{{ p.title }}">
+                    {% if p.image %}
+                    <img src="{{ p.image.url }}" alt="{{ p.title }}">
+                    {% else %}
+                    <img src="https://via.placeholder.com/600x400?text=No+Image" alt="{{ p.title }}">
+                    {% endif %}
                     <div class="info">
                         <h2>{{ p.title }}</h2>
                         <div class="price">{{ p.formatted_price }}</div>
                     </div>
                 </a>
             </article>
+            {% empty %}
+            <p style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #999;">商品がまだありません</p>
             {% endfor %}
         </section>
 
-        <script>
-            // small behaviour: toggle form and cancel (keeps client UX)
-            const toggleAdd = document.getElementById('toggleAdd');
-            const addForm = document.getElementById('addForm');
-            const addCancel = document.getElementById('addCancel');
-            const pTitle = document.getElementById('pTitle');
+        <!-- Loading Indicator -->
+        <div class="loading-indicator" id="loadingIndicator">
+            <div class="spinner"></div>
+        </div>
+        <div class="no-more-products" id="noMoreProducts">
+            すべての商品を表示しました
+        </div>
 
-            toggleAdd.addEventListener('click', () => {
-                const visible = addForm.style.display === 'flex' || addForm.style.display === 'block';
-                addForm.style.display = visible ? 'none' : 'flex';
-                if (!visible) { addForm.style.display = 'flex'; pTitle.focus(); }
+        <script>
+            // Image upload preview
+            const imageInput = document.getElementById('pImage');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            const removeImageBtn = document.getElementById('removeImage');
+            const addCancel = document.getElementById('addCancel');
+            const addProductSection = document.getElementById('addProductSection');
+            const addForm = document.getElementById('addForm');
+
+            // Cancel button functionality
+            if (addCancel) {
+                addCancel.addEventListener('click', (e) => {
+                    e.preventDefault(); // 防止页面跳转
+                    addProductSection.classList.remove('show');
+                    // 延迟重置表单，等待动画完成
+                    setTimeout(() => {
+                        addForm.reset();
+                        imagePreview.style.display = 'none';
+                        previewImg.src = '';
+                    }, 300);
+                });
+            }
+
+            // Search functionality
+            const clearSearchBtn = document.getElementById('clearSearch');
+            const searchInput = document.getElementById('searchInput');
+
+            if (clearSearchBtn) {
+                clearSearchBtn.addEventListener('click', function() {
+                    searchInput.value = '';
+                    // Redirect to index without search parameter
+                    window.location.href = '{% url "team_giryulink:index" %}';
+                });
+            }
+
+            // Show/hide clear button based on input
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    if (this.value.trim()) {
+                        clearSearchBtn.classList.add('active');
+                    } else {
+                        clearSearchBtn.classList.remove('active');
+                    }
+                });
+            }
+
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        previewImg.src = event.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
-            addCancel.addEventListener('click', () => {
-                addForm.style.display = 'none';
-                addForm.reset();
+
+            removeImageBtn.addEventListener('click', function() {
+                imageInput.value = '';
+                imagePreview.style.display = 'none';
+                previewImg.src = '';
             });
 
             // Confirm before submitting any delete form whose action includes "/delete/"
@@ -107,12 +598,95 @@
                     }
                 }
             });
+
+            // Infinite Scroll Implementation
+            let currentPage = 1;
+            let isLoading = false;
+            let hasMoreProducts = {% if page_obj.has_next %}true{% else %}false{% endif %};
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const noMoreProducts = document.getElementById('noMoreProducts');
+            const productsContainer = document.querySelector('.products');
+
+            function loadMoreProducts() {
+                if (isLoading || !hasMoreProducts) return;
+                
+                isLoading = true;
+                loadingIndicator.classList.add('active');
+                currentPage++;
+
+                fetch(`?page=${currentPage}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // 插入新商品HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = data.html;
+                    while (tempDiv.firstChild) {
+                        productsContainer.appendChild(tempDiv.firstChild);
+                    }
+                    
+                    hasMoreProducts = data.has_next;
+                    isLoading = false;
+                    loadingIndicator.classList.remove('active');
+                    
+                    if (!hasMoreProducts) {
+                        noMoreProducts.classList.add('active');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading products:', error);
+                    isLoading = false;
+                    loadingIndicator.classList.remove('active');
+                });
+            }
+
+            // 监听滚动事件
+            window.addEventListener('scroll', () => {
+                if (isLoading || !hasMoreProducts) return;
+                
+                const scrollPosition = window.innerHeight + window.scrollY;
+                const pageHeight = document.documentElement.scrollHeight;
+                
+                // 当滚动到距离底部200px时开始加载
+                if (scrollPosition >= pageHeight - 200) {
+                    loadMoreProducts();
+                }
+            });
+
+            // 如果初始内容不够填满屏幕，自动加载更多
+            window.addEventListener('load', () => {
+                if (hasMoreProducts && document.documentElement.scrollHeight <= window.innerHeight) {
+                    loadMoreProducts();
+                }
+            });
         </script>
     </main>
 
     <footer>
-        <p><a href="/team_giryulink/members/">メンバー一覧</a></p>
+        <button class="add-btn" id="footerAddBtn" style="width: 100%; max-width: 100%; margin: 0;">＋ 新しい商品を追加</button>
     </footer>
 </div>
+
+<script>
+    // Initialize footer button after DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        const footerAddBtn = document.getElementById('footerAddBtn');
+        const addProductSection = document.getElementById('addProductSection');
+        
+        if (footerAddBtn && addProductSection) {
+            footerAddBtn.addEventListener('click', (e) => {
+                e.preventDefault(); // 防止页面跳转
+                addProductSection.classList.add('show');
+                // 延迟聚焦，等待动画完成
+                setTimeout(() => {
+                    document.getElementById('pTitle').focus();
+                }, 300);
+            });
+        }
+    });
+</script>
 </body>
 </html>

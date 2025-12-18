@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン - 施設予約システム</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+        }
+        .login-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 300px;
+        }
+        h2 { margin-bottom: 20px; color: #333; }
+        p { margin-bottom: 30px; color: #666; }
+
+        form { display: flex; flex-direction: column; gap: 15px; }
+
+        button {
+            padding: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+
+        .btn-applicant { background-color: #3498db; } /* 青 */
+        .btn-signer { background-color: #f39c12; }    /* オレンジ */
+        .btn-approver { background-color: #e74c3c; }   /* 赤 */
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>施設予約システム</h2>
+        <p>ログインする役職を選択してください</p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <button type="submit" name="role" value="applicant" class="btn-applicant">
+                申請者としてログイン
+            </button>
+
+            <button type="submit" name="role" value="signer" class="btn-signer">
+                署名者としてログイン
+            </button>
+
+            <button type="submit" name="role" value="approver" class="btn-approver">
+                承認者としてログイン
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>

@@ -2,18 +2,134 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ product.title }} — Team Giryulink</title>
   <style>
-    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#f6f7fb;margin:0;padding:24px;color:#222}
-    .wrap{max-width:920px;margin:24px auto}
-    .card{background:#fff;padding:18px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-    .media{display:flex;gap:20px;flex-wrap:wrap}
-    .media img{width:100%;max-width:420px;height:auto;object-fit:contain;background:#f3f4f6;border-radius:6px}
-    .meta{flex:1;min-width:220px}
-    h1{margin:0 0 8px 0;font-size:1.4rem}
-    .price{color:#e53935;font-weight:700;font-size:1.3rem;margin:8px 0}
-    .section{margin-top:14px}
-    a.back{color:#1e88e5;text-decoration:none;display:inline-block;margin-bottom:12px}
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+      background: #f6f7fb;
+      margin: 0;
+      padding: 12px;
+      color: #222;
+    }
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    a.back {
+      color: #1e88e5;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      background: #fff;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      transition: background 0.2s ease;
+    }
+    a.back:active {
+      background: #e3f2fd;
+    }
+    .card {
+      background: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .media {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .media img {
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      object-fit: contain;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+    .meta {
+      flex: 1;
+    }
+    h1 {
+      margin: 0 0 12px 0;
+      font-size: 1.3rem;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+    .price {
+      color: #e53935;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin: 12px 0;
+      padding: 12px;
+      background: #ffebee;
+      border-radius: 8px;
+      display: inline-block;
+    }
+    .section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .section strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 1rem;
+      color: #444;
+    }
+    .section p {
+      margin: 0;
+      line-height: 1.6;
+      color: #555;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    /* 平板及以上设备 */
+    @media (min-width: 640px) {
+      body {
+        padding: 24px;
+      }
+      .wrap {
+        margin: 24px auto;
+      }
+      .card {
+        padding: 24px;
+      }
+      .media {
+        flex-direction: row;
+        gap: 24px;
+      }
+      .media img {
+        max-width: 420px;
+        flex-shrink: 0;
+      }
+      h1 {
+        font-size: 1.6rem;
+      }
+      .price {
+        font-size: 1.6rem;
+      }
+      a.back {
+        font-size: 1rem;
+      }
+    }
+    
+    /* 桌面设备 */
+    @media (min-width: 960px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+      .media img {
+        max-width: 480px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -21,18 +137,18 @@
     <a class="back" href="{% url 'team_giryulink:index' %}">← 商品一覧へ戻る</a>
     <div class="card">
       <div class="media">
-        <img src="{{ product.image }}" alt="{{ product.title }}">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.title }}">
+        {% else %}
+        <img src="https://via.placeholder.com/600x400?text=No+Image" alt="{{ product.title }}">
+        {% endif %}
         <div class="meta">
-          {% if product %}
-            <h1>{{ product.name }}</h1>
-            <div class="price">¥{{ product.price|floatformat:0 }}</div>
-            <div class="section">
-              <strong>商品説明</strong>
-              <p>{{ product.description|default:"説明はありません。" }}</p>
-            </div>
-          {% else %}
-            <p>Product not found.</p>
-          {% endif %}
+          <h1>{{ product.title }}</h1>
+          <div class="price">¥{{ product.price|floatformat:0 }}</div>
+          <div class="section">
+            <strong>商品説明</strong>
+            <p>{{ product.description|default:"説明はありません。" }}</p>
+          </div>
         </div>
       </div>
     </div>

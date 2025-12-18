@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Agileca Members</title>
+</head>
+
+<body>
+  <h1>Agileca Classrooms</h1>
+  <ul>
+    {% for classroom in classrooms %}
+    <li>{{ classroom.building }} {{ classroom.room_name }}</li>
+    {% empty %}
+    <li>データがありません</li>
+    {% endfor %}
+  </ul>
+  <p><a href="/agileca/">Agileca トップへ</a></p>
+</body>
+
+</html>

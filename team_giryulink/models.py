@@ -10,8 +10,8 @@ class Member(models.Model):
 
 class Product(models.Model):
     title = models.CharField(max_length=200)
-    price = models.PositiveIntegerField(default=0)
-    image = models.URLField(blank=True)
+    price = models.IntegerField(default=0)
+    image = models.ImageField(upload_to="team_giryulink/products/", blank=True, null=True)
     description = models.TextField(blank=True)
 
     def __str__(self):

@@ -377,6 +377,12 @@ function updateQuantity(index, newQuantity) {
     const item = cart[index];
     const qty = parseInt(newQuantity);
 
+    // 数字以外または無効な値の場合は元に戻す
+    if (isNaN(qty) || newQuantity === '' || newQuantity === null) {
+        document.getElementById(`qty-${index}`).value = item.quantity;
+        return;
+    }
+
     if (qty <= 0) {
         removeFromCart(index);
         return;
@@ -390,6 +396,21 @@ function updateQuantity(index, newQuantity) {
 
     item.quantity = qty;
     updateCart();
+}
+
+// 数量入力欄でキー入力を制限（数字のみ許可）
+function validateNumberInput(event) {
+    // 許可するキー: 数字、バックスペース、Delete、矢印キー、Tab
+    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+    if (allowedKeys.includes(event.key)) {
+        return true;
+    }
+    // 数字以外は入力させない
+    if (!/^\d$/.test(event.key)) {
+        event.preventDefault();
+        return false;
+    }
+    return true;
 }
 
 function clearCart() {
@@ -432,7 +453,7 @@ function updateCart() {
                     <div class="quantity-control">
                         <button type="button" class="qty-btn" onclick="updateQuantity(${index}, ${item.quantity - 1})">-</button>
                         <input type="number" class="qty-input" id="qty-${index}" value="${item.quantity}"
-                               min="1" max="${item.stock}" onchange="updateQuantity(${index}, this.value)">
+                               min="1" max="${item.stock}" onkeydown="validateNumberInput(event)" onchange="updateQuantity(${index}, this.value)" onpaste="return false">
                         <button type="button" class="qty-btn" onclick="updateQuantity(${index}, ${item.quantity + 1})">+</button>
                     </div>
                     <div class="cart-item-subtotal">¥${subtotal.toLocaleString()}</div>

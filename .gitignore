@@ -211,3 +211,7 @@ __marimo__/
 
 # work
 work/
+
+# 画像アップロード用のフォルダー。中身がGitにPushされないようにIgnore
+#By Team Giryulink
+media/

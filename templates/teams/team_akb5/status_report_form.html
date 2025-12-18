@@ -1,27 +1,86 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>ネットワーク状況の投稿</title>
-    <style>
-        body { font-family: sans-serif; margin: 2em; }
-        form p { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; }
-        input[type="text"], select, textarea { width: 300px; padding: 5px; }
-        button { padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <h1>ネットワーク状況の投稿</h1>
-    <p>ネットワークの「遅い」「つながらない」などの状況を報告してください。</p>
+{% extends "teams/team_akb5/base.html" %}
 
-    <form method="post">
-        {% csrf_token %} {{ form.as_p }}
-        
-        <button type="submit">投稿する</button>
-    </form>
-    
-    <hr>
-<a href="{% url 'team_akb5:status_list' %}">一覧に戻る</a>
-</body>
-</html>
+{% block title %}ネットワーク状況の投稿{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+    #map {
+        height: 400px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>ネットワーク状況の投稿</h1>
+<p>ネットワークの「遅い」「つながらない」などの状況を報告してください。</p>
+<p>地図をクリックして、位置情報を選択してください。</p>
+<div id="map"></div>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">投稿する</button>
+</form>
+
+<hr>
+<a href="{% url 'team_akb5:admin' %}">一覧に戻る</a>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const latitudeInput = document.getElementById('id_latitude');
+        const longitudeInput = document.getElementById('id_longitude');
+
+        // Map coordinates
+        const lat1 = 34.70315;
+        const lon1 = 137.40365;
+        const lat2 = 34.70047;
+        const lon2 = 137.41189;
+
+        // Initialize map and set bounds
+        const map = L.map('map').fitBounds([
+            [lat1, lon1],
+            [lat2, lon2]
+        ]);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        let marker;
+        let isDragged = false;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const lat = urlParams.get('lat');
+        const lng = urlParams.get('lng');
+
+        if (lat && lng) {
+            const initialLatLng = L.latLng(lat, lng);
+            latitudeInput.value = lat;
+            longitudeInput.value = lng;
+            marker = L.marker(initialLatLng).addTo(map);
+            map.setView(initialLatLng, 15);
+        }
+
+        map.on('mousedown', function (e) {
+            isDragged = false;
+        });
+
+        map.on('mousemove', function (e) {
+            isDragged = true;
+        });
+
+        map.on('click', function (e) {
+            if (!isDragged) {
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+                marker = L.marker(e.latlng).addTo(map);
+                latitudeInput.value = e.latlng.lat;
+                longitudeInput.value = e.latlng.lng;
+            }
+        });
+    });
+</script>
+{% endblock %}

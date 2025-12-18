@@ -1,53 +1,82 @@
 # Create your views here.
+import os
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from .models import Member
 from .models import Product
+import django.db.models as models
 
 def index(request):
-    products = Product.objects.order_by('-id')  # newest first
+    # Get search query from GET parameters
+    search_query = request.GET.get('search', '').strip()
+    
+    # Filter products by search query if provided
+    if search_query:
+        products = Product.objects.filter(
+            models.Q(title__icontains=search_query) | 
+            models.Q(description__icontains=search_query)
+        ).order_by("-id")
+    else:
+        products = Product.objects.order_by("-id")  # newest first
+    
     # add formatted_price for template (e.g. "¥1,234")
     for p in products:
         try:
             p.formatted_price = f"¥{int(p.price):,}"
         except Exception:
             p.formatted_price = f"¥{p.price}"
-    return render(request, 'teams/team_giryulink/index.html', {'products': products})
+    
+    return render(request, "teams/team_giryulink/index.html", {
+        "products": products,
+        "search_query": search_query,
+    })
+
 
 def members(request):
-    qs = Member.objects.using('team_giryulink').all()  # ← Chỉ định rõ DB team_giryulink
-    return render(request, 'teams/team_giryulink/members.html', {'members': qs})
+    qs = Member.objects.all()
+    return render(request, "teams/team_giryulink/members.html", {"members": qs})
+
 
 def product_detail(request, pk):
     """Show product detail page."""
-    product = get_object_or_404(Product.objects.using("team_giryulink"), pk=pk)
-    return render(request, 'teams/team_giryulink/product_detail.html', {'product': product})
+    product = get_object_or_404(Product, pk=pk)
+    return render(
+        request, "teams/team_giryulink/product_detail.html", {"product": product}
+    )
+
 
 def add_product(request):
-    """Handle POST from index form and create Product, then redirect to index or detail."""
-    if request.method != 'POST':
-        return redirect('team_giryulink:index')
-    title = request.POST.get('title', '').strip()
-    price = request.POST.get('price', '').strip()
-    image = request.POST.get('image', '').strip() or 'https://via.placeholder.com/600x400?text=No+Image'
-    description = request.POST.get('description', '').strip()
+    if request.method == "POST":
+        title = request.POST.get("title", "").strip()
+        price_str = request.POST.get("price", "0")
+        description = request.POST.get("description", "").strip()
+        image_file = request.FILES.get("image")  # 获取上传的文件
 
-    if not title:
-        # minimal validation: redirect back (you can add messages)
-        return redirect('team_giryulink:index')
+        try:
+            price = int(price_str)
+        except ValueError:
+            price = 0
 
-    try:
-        price_val = int(price) if price else 0
-    except ValueError:
-        price_val = 0
+        product = Product(title=title, price=price, description=description)
 
-    prod = Product.objects.create(title=title, price=price_val, image=image, description=description)
-    # redirect to product detail after creation
-    return redirect('team_giryulink:product_detail', pk=prod.pk)
+        # 处理上传的图片文件
+        if image_file:
+            product.image = image_file
+
+        product.save()
+
+    return redirect("team_giryulink:index")
+
 
 @require_POST
 def delete_product(request, pk):
-    """Delete product and redirect back to index."""
+    """Delete product and its associated image file, then redirect back to index."""
     product = get_object_or_404(Product, pk=pk)
+    
+    # Delete the image file from the file system if it exists
+    if product.image:
+        if os.path.isfile(product.image.path):
+            os.remove(product.image.path)
+    
     product.delete()
-    return redirect('team_giryulink:index')
+    return redirect("team_giryulink:index")

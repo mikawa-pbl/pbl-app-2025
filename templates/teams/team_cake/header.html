@@ -4,20 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Team Cake - 商品登録</title>
-    <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body>
-    <nav>
-        <div class="nav-wrapper teal">
-            <div class="container">
-                <a href="/team_cake/" class="brand-logo">Team Cake</a>
-                <ul id="nav-mobile" class="right hide-on-med-and-down">
-                    <li><a href="/team_cake/" class="btn waves-effect waves-light teal lighten-2">トップ</a></li>
-                    <li><a href="/team_cake/registration_goods/"
-                            class="btn waves-effect waves-light teal lighten-2">新規追加</a></li>
-                </ul>
-            </div>
+    <nav class="bg-[#D71718]">
+        <div class="container mx-auto px-4 flex items-center justify-between h-16">
+            <a href="/team_cake/" class="text-white text-4xl font-bold">Team Cake</a>
+            <ul class="flex space-x-4">
+                <li><a href="/team_cake/"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#F5E829] text-base font-medium text-black hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#F5E829] sm:ml-3 sm:w-auto sm:text-sm rounded transition">トップ</a>
+                </li>
+                <li><a href="/team_cake/registration_goods/"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#F5E829] text-base font-medium text-black hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#F5E829] sm:ml-3 sm:w-auto sm:text-sm rounded transition">新規追加</a>
+                </li>
+            </ul>
         </div>
     </nav>

@@ -8,13 +8,13 @@ def create_initial_data(apps, schema_editor):
     
     # タグを登録
     tags_data = [
-        {'name': 'textbook', 'display_name': '教科書'},
-        {'name': 'reference', 'display_name': '参考書'},
-        {'name': 'notes', 'display_name': 'ノート'},
-        {'name': 'stationery', 'display_name': '文房具'},
-        {'name': 'electronics', 'display_name': '電子機器'},
-        {'name': 'furniture', 'display_name': '家具'},
-        {'name': 'clothing', 'display_name': 'オタ服'},
+        {'name': 'textbook', 'display_name': '書籍'},
+        {'name': 'reference', 'display_name': '日用品'},
+        {'name': 'notes', 'display_name': '家具'},
+        {'name': 'stationery', 'display_name': '電子機器'},
+        {'name': 'electronics', 'display_name': '服飾品'},
+        {'name': 'furniture', 'display_name': '乗り物'},
+        {'name': 'clothing', 'display_name': '過去問'},
         {'name': 'other', 'display_name': 'その他'},
     ]
     

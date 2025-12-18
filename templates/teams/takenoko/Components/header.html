@@ -1,5 +1,8 @@
 {% load static %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+/>
 
 <style>
   /* ヘッダー全体 */
@@ -8,7 +11,7 @@
   }
 
   .header-bar {
-    background-color: #649CE4;
+    background-color: #649ce4;
     width: 100%;
     height: 96px;
     position: relative;
@@ -44,7 +47,7 @@
     border-radius: 8px;
     display: none;
     z-index: 1000;
-    border: 2px solid #8C8EFC;
+    border: 2px solid #8c8efc;
   }
 
   /* 各ボタン (64×256 ボックス) */
@@ -57,7 +60,7 @@
     text-decoration: none;
     color: #333;
     font-size: 18px;
-    border-bottom: 1px solid #8C8EFC;
+    border-bottom: 1px solid #8c8efc;
   }
 
   .user-menu a:last-child {
@@ -92,7 +95,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   }
 
   .info-modal img {
@@ -106,7 +109,7 @@
     padding: 8px 24px;
     border-radius: 999px;
     border: none;
-    background: #F96796;
+    background: #f96796;
     color: #fff;
     font-size: 16px;
     cursor: pointer;
@@ -125,7 +128,7 @@
     height: 320px;
     background: white;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     display: none;
     z-index: 1000;
     padding: 12px;
@@ -142,12 +145,11 @@
   }
 </style>
 
-
 <header>
   <div class="header-bar">
     <div class="header-logo">
       <a href="{% url 'takenoko:main' %}">
-        <img src="{% static 'images/hubhub.PNG' %}" alt="logo" width="96px">
+        <img src="{% static 'images/hubhub.PNG' %}" alt="logo" width="96px" />
       </a>
     </div>
 
@@ -162,22 +164,59 @@
 <!-- インフォメーション -->
 <div class="info-overlay" id="info-overlay">
   <div class="info-modal">
-    <img src="{% static 'images/info.jpg' %}" alt="使い方">
+    <img src="{% static 'images/info.jpg' %}" alt="使い方" />
     <button class="info-close-btn" id="info-close">閉じる</button>
   </div>
 </div>
 
 <!-- ユーザーメニュー -->
 <div class="user-menu" id="user-menu">
+  {% if request.session.takenoko_user_id %}
   <a href="{% url 'takenoko:listing_items' %}">出品した商品</a>
   <a href="{% url 'takenoko:purchased_items' %}">購入した商品</a>
+  <form
+    action="{% url 'takenoko:logout' %}"
+    method="post"
+    style="margin: 0; padding: 0"
+  >
+    {% csrf_token %}
+    <button
+      type="submit"
+      style="
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 256px;
+        height: 64px;
+        border: none;
+        border-bottom: 1px solid #8c8efc;
+        background: none;
+        font-size: 18px;
+        color: #333;
+        cursor: pointer;
+      "
+    >
+      ログアウト
+    </button>
+  </form>
+  {% else %}
   <a href="{% url 'takenoko:login' %}">ログイン</a>
+  <a href="{% url 'takenoko:signup' %}">新規登録</a>
+  {% endif %}
 </div>
+
+<style>
+  .user-menu {
+    height: auto !important;
+  }
+</style>
 
 <!-- 通知パネル -->
 <div class="notification-box" id="notification-box">
   <p>通知1：テスト通知</p>
-  <p>通知2：長い文を入れてみるとどうなるかを確認する通知テキストです。折り返されます。</p>
+  <p>
+    通知2：長い文を入れてみるとどうなるかを確認する通知テキストです。折り返されます。
+  </p>
   <p>通知3：テスト</p>
   <p>通知4：テスト</p>
   <p>通知5：テスト</p>
@@ -187,19 +226,19 @@
 </div>
 
 <script>
-  const menuToggle        = document.getElementById("menu-toggle");
-  const userMenu          = document.getElementById("user-menu");
-  const bellToggle        = document.getElementById("bell-toggle");
-  const notificationBox   = document.getElementById("notification-box");
-  const infoToggle        = document.getElementById("info-toggle");
-  const infoOverlay       = document.getElementById("info-overlay");
-  const infoClose         = document.getElementById("info-close");
+  const menuToggle = document.getElementById("menu-toggle");
+  const userMenu = document.getElementById("user-menu");
+  const bellToggle = document.getElementById("bell-toggle");
+  const notificationBox = document.getElementById("notification-box");
+  const infoToggle = document.getElementById("info-toggle");
+  const infoOverlay = document.getElementById("info-overlay");
+  const infoClose = document.getElementById("info-close");
 
   // ==== ユーザーメニュー ====
-  menuToggle.addEventListener("click", function(event) {
+  menuToggle.addEventListener("click", function (event) {
     event.stopPropagation();
     // メニューをトグル
-    const willShow = (userMenu.style.display !== "block");
+    const willShow = userMenu.style.display !== "block";
     userMenu.style.display = willShow ? "block" : "none";
     // 片方だけ開くように通知は閉じる
     if (willShow) {
@@ -208,9 +247,9 @@
   });
 
   // ==== 通知パネル ====
-  bellToggle.addEventListener("click", function(event) {
+  bellToggle.addEventListener("click", function (event) {
     event.stopPropagation();
-    const willShow = (notificationBox.style.display !== "block");
+    const willShow = notificationBox.style.display !== "block";
     notificationBox.style.display = willShow ? "block" : "none";
     // 片方だけ開くようにメニューは閉じる
     if (willShow) {
@@ -219,7 +258,7 @@
   });
 
   // ==== info ポップアップ ====
-  infoToggle.addEventListener("click", function(event) {
+  infoToggle.addEventListener("click", function (event) {
     event.stopPropagation();
     infoOverlay.style.display = "flex";
     // 他のパネルはついでに閉じておく
@@ -227,11 +266,11 @@
     notificationBox.style.display = "none";
   });
 
-  infoClose.addEventListener("click", function() {
+  infoClose.addEventListener("click", function () {
     infoOverlay.style.display = "none";
   });
 
-  infoOverlay.addEventListener("click", function(event) {
+  infoOverlay.addEventListener("click", function (event) {
     // 白い箱以外(灰色の部分)をクリックしたら閉じる
     if (event.target === infoOverlay) {
       infoOverlay.style.display = "none";
@@ -239,12 +278,15 @@
   });
 
   // ==== 画面の適当な場所をクリックしたらメニュー & 通知を閉じる ====
-  document.addEventListener("click", function(event) {
+  document.addEventListener("click", function (event) {
     const target = event.target;
 
-    const clickInMenu   = userMenu.contains(target) || menuToggle.contains(target);
-    const clickInNotif  = notificationBox.contains(target) || bellToggle.contains(target);
-    const clickInInfo   = infoOverlay.contains(target) || infoToggle.contains(target);
+    const clickInMenu =
+      userMenu.contains(target) || menuToggle.contains(target);
+    const clickInNotif =
+      notificationBox.contains(target) || bellToggle.contains(target);
+    const clickInInfo =
+      infoOverlay.contains(target) || infoToggle.contains(target);
 
     // info オーバーレイ上のクリックは infoOverlay 側の処理に任せる
     if (!clickInMenu) {

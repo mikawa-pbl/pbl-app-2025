@@ -1,46 +1,54 @@
 {% load static %}
 <style>
-    .item-card {
-        position: relative;
-        width: 256px;
-        height: 256px;
-        border-radius: 32px;
-        background-color: aquamarine;
-        overflow: hidden;
-    }
+  .item-card {
+    position: relative;
+    width: 256px;
+    height: 256px;
+    border-radius: 32px;
+    background-color: aquamarine;
+    overflow: hidden;
+  }
 
-    /* 価格ラベル */
-    .item-price {
-        position: absolute;
-        left: 12px;
-        top: calc(256px - 44px); /* 下から余白を確保して配置 */
-        width: 96px;
-        height: 32px;
-        border-radius: 100px;
-        background-color: #649CE4;
+  /* 価格ラベル */
+  .item-price {
+    position: absolute;
+    left: 12px;
+    top: calc(256px - 44px); /* 下から余白を確保して配置 */
+    width: 96px;
+    height: 32px;
+    border-radius: 100px;
+    background-color: #649ce4;
 
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-        padding: 5px 10px;
-    }
+    padding: 5px 10px;
+  }
 
-    .item-price p {
-        color: white;
-        font-size: 14px;
-        margin: 0;
-        font-weight: 600;
-    }
+  .item-price p {
+    color: white;
+    font-size: 14px;
+    margin: 0;
+    font-weight: 600;
+  }
 
-    .item-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+  .item-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 </style>
 
 <div class="item-card">
-  <img src="{% static 'images/sample.jpg' %}" class="item-img">
-  <div class="item-price"><p>￥5,000</p></div>
+  {% if item.get_main_image %}
+  <img
+    src="{{ item.get_main_image.image.url }}"
+    class="item-img"
+    alt="{{ item.name }}"
+  />
+  {% else %}
+  <img src="{% static 'images/noimage.png' %}" class="item-img" alt="画像なし" />
+  {% endif %}
+  <div class="item-price"><p>￥{{ item.price|floatformat:0 }}</p></div>
 </div>

@@ -19,7 +19,7 @@ WHERE (first_name='Taro' AND last_name='Yamada')
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('team_terrace', '0001_initial'),
+        ("team_terrace", "0001_initial"),
     ]
     operations = [
         migrations.RunSQL(

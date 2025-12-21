@@ -1,4 +1,7 @@
+{% extends 'teams/h34vvy_u53rzz/base.html' %}
 {% load h34vvy_tags %}
+
+{% block content %}
 <nav class="mb-4 flex items-center justify-between rounded-md bg-slate-900 px-4 py-2 text-white">
   <div class="text-sm font-semibold">ドア開けてや</div>
   <div class="flex items-center gap-2 text-sm text-slate-100">
@@ -20,19 +23,47 @@
     {% endif %}
   </div>
 </nav>
-<!-- 
-<nav
-  class="sticky z-30 w-full border-t border-slate-800 bg-slate-900/95 text-white backdrop-blur supports-[backdrop-filter]:bg-slate-900/80 top-[calc(100vh-4rem)]">
-  <div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-    <div class="flex flex-1 flex-wrap items-center gap-2 text-xs md:text-sm">
-      <a href="{% url 'h34vvy_u53rzz:index' %}"
-        class="rounded px-3 py-2 transition hover:bg-white/10 {% if nav_active == 'index' %}bg-blue-600 text-white{% else %}text-slate-200{% endif %}">ホーム</a>
-      <a href="{% url 'h34vvy_u53rzz:help' %}"
-        class="rounded px-3 py-2 transition hover:bg-white/10 {% if nav_active == 'help' %}bg-blue-600 text-white{% else %}text-slate-200{% endif %}">助けを求める</a>
-      <a href="{% url 'h34vvy_u53rzz:timeline' %}"
-        class="rounded px-3 py-2 transition hover:bg-white/10 {% if nav_active == 'timeline' %}bg-blue-600 text-white{% else %}text-slate-200{% endif %}">タイムライン</a>
-      <a href="{% url 'h34vvy_u53rzz:ranking' %}"
-        class="rounded px-3 py-2 transition hover:bg-white/10 {% if nav_active == 'ranking' %}bg-blue-600 text-white{% else %}text-slate-200{% endif %}">ランキング</a>
-    </div>
-  </div>
-</nav> -->
+
+<header class="space-y-2">
+  <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">
+    ポイント
+  </p>
+  <h1 class="text-3xl font-bold text-slate-900">ランキング</h1>
+  <p class="text-sm text-slate-600">
+    助けに行った回数に応じたポイントの順位です。
+  </p>
+</header>
+
+<div class="overflow-hidden rounded-xl bg-white shadow">
+  <table class="min-w-full divide-y divide-slate-200 text-sm">
+    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+      <tr>
+        <th class="px-4 py-3">順位</th>
+        <th class="px-4 py-3">ユーザー</th>
+        <th class="px-4 py-3 text-right">ポイント</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for item in rankings %}
+      {% with account=item.account rank=item.rank %}
+      {% if account.user_id == current_user_id %}
+      <tr class="bg-blue-50/70 font-semibold text-blue-900">
+        {% else %}
+      <tr>
+        {% endif %}
+        <td class="px-4 py-3">{{ rank }}</td>
+        <td class="px-4 py-3">{{ account.username }}</td>
+        <td class="px-4 py-3 text-right font-semibold">{{ account.points }} pt</td>
+      </tr>
+      {% endwith %}
+      {% empty %}
+      <tr>
+        <td colspan="3" class="px-4 py-6 text-center text-slate-500">
+          まだランキング対象のユーザーがいません。
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

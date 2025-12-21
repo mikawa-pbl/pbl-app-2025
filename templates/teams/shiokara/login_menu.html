@@ -1,0 +1,105 @@
+{% extends "teams/shiokara/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .tut-logo-box {
+        flex: 0 0 auto;
+        order: 2;
+        margin-left: auto;
+    }
+
+    .tut-page-title {
+        order: 1;
+    }
+
+    .tut-logo-img {
+        max-height: 56px;
+        width: auto;
+        display: block;
+    }
+
+    .tut-page-title h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #42413F;
+    }
+
+    .tut-page-lead {
+        margin: 4px 0 0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 640px) {
+        .tut-page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .tut-logo-img {
+            max-height: 44px;
+        }
+        .tut-page-title h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" with active_page='login' %}
+
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
+        <header class="tut-page-header page-header">
+            <div class="tut-logo-box">
+                <img src="{% static 'image/mark_gikanavi.png' %}"
+                     alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
+            </div>
+            <div class="tut-page-title">
+                <h1>ログイン / 学生情報登録</h1>
+                <p class="tut-page-lead page-lead">
+                    ログイン方法を選択してください。
+                </p>
+            </div>
+        </header>
+
+        <section style="max-width: 600px; margin: 60px auto; padding: 0 20px;">
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <a href="{% url 'shiokara:login_form' %}" style="text-decoration: none;">
+                    <button type="button" style="
+                        padding: 16px 40px;
+                        font-size: 1.1rem;
+                        background: #cc0000;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        transition: background 0.2s;
+                        min-width: 200px;
+                    " onmouseover="this.style.background='#aa0000'" onmouseout="this.style.background='#cc0000'">
+                        ログイン
+                    </button>
+                </a>
+
+                <a href="{% url 'shiokara:register' %}" style="text-decoration: none;">
+                    <button type="button" style="
+                        padding: 16px 40px;
+                        font-size: 1.1rem;
+                        background: #0066cc;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        transition: background 0.2s;
+                        min-width: 200px;
+                    " onmouseover="this.style.background='#0055aa'" onmouseout="this.style.background='#0066cc'">
+                        新規登録
+                    </button>
+                </a>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

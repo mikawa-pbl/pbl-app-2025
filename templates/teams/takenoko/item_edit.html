@@ -362,7 +362,7 @@
         );
         el.value = el.value.replace(/[^0-9]/g, "");
         const n = Number(el.value || 0);
-        if (n > 99999) el.value = "99999";
+        if (n > 999999) el.value = "999999";
       }
 
       window.addEventListener("DOMContentLoaded", () => {

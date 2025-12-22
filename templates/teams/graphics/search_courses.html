@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>授業評価を検索 - Graphics</title>
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --border-color: #e2e8f0;
+            --light-bg: #f8fafc;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,19 +22,123 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: #f5f5f5;
+            padding: 0;
+        }
+
+        /* ヘッダー */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+        }
+
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* ハンバーガーメニュー */
+        .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            z-index: 1000;
+        }
+
+        .hamburger span {
+            width: 30px;
+            height: 3px;
+            background-color: white;
+            transition: all 0.3s;
+        }
+
+        /* メニュー */
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: white;
+            transition: right 0.3s ease;
+            z-index: 999;
+            padding-top: 60px;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+        }
+
+        .nav-menu.active {
+            right: 0;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-menu a {
+            display: block;
+            padding: 18px 30px;
+            color: #1e293b;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-menu a:hover {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+            padding-left: 35px;
+        }
+
+        /* オーバーレイ */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* メインコンテンツエリア */
+        .main-content {
             padding: 20px;
+            padding-top: 90px;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            position: relative;
         }
 
         .container.has-results {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 20px;
+            padding-left: 460px;
         }
 
         .container.no-results {
@@ -46,9 +157,19 @@
         }
 
         .container.has-results .search-panel {
-            position: sticky;
-            top: 20px;
+            position: fixed;
+            top: 90px;
+            left: calc(50% - 700px + 20px);
+            width: 420px;
             padding: 20px;
+            max-height: calc(100vh - 110px);
+            overflow-y: auto;
+        }
+
+        @media (max-width: 1440px) {
+            .container.has-results .search-panel {
+                left: 20px;
+            }
         }
 
         .container.no-results .search-panel {
@@ -80,17 +201,24 @@
             font-weight: 600;
             margin-bottom: 10px;
             font-size: 14px;
+            text-align: center;
         }
 
         .container.has-results .filter-group label {
             font-size: 12px;
             margin-bottom: 6px;
+            text-align: left;
         }
 
         .button-group {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
+            justify-content: center;
+        }
+
+        .container.has-results .button-group {
+            justify-content: flex-start;
         }
 
         .filter-button {
@@ -163,8 +291,13 @@
         .checkbox-group {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             margin-top: 15px;
+        }
+
+        .container.has-results .checkbox-group {
+            justify-content: flex-start;
         }
 
         .results-panel {
@@ -178,6 +311,7 @@
 
         .container.has-results .results-panel {
             display: block;
+            margin-left: 0;
         }
 
         .results-header {
@@ -341,17 +475,44 @@
 
         @media (max-width: 1024px) {
             .container.has-results {
-                grid-template-columns: 1fr;
+                padding-left: 0;
             }
 
             .container.has-results .search-panel {
                 position: static;
+                width: 100%;
+                max-height: none;
+                left: auto;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container {% if is_search %}has-results{% else %}no-results{% endif %}">
+    <!-- ヘッダー -->
+    <header>
+        <h1>TUT 参考書レビューシステム</h1>
+        <button class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <!-- ナビゲーションメニュー -->
+    <nav class="nav-menu" id="navMenu">
+        <ul>
+            <li><a href="{% url 'graphics:index' %}" onclick="toggleMenu()">ホーム</a></li>
+            <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
+            <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
+        </ul>
+    </nav>
+
+    <!-- オーバーレイ -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+        <div class="container {% if is_search %}has-results{% else %}no-results{% endif %}">
         <!-- 検索パネル -->
         <div class="search-panel">
             <h1>授業評価を検索</h1>
@@ -481,8 +642,17 @@
                 {% endif %}
             {% endif %}
         </div>
+        </div>
     </div>
 
+    <script>
+        function toggleMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const overlay = document.getElementById('overlay');
+            navMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+    </script>
     <script>
         function setFilter(name, value) {
             // 対応するhidden inputの値を更新

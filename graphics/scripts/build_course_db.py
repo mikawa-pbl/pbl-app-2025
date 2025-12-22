@@ -216,6 +216,86 @@ def process_csv_file(csv_path, year):
                     print(f"  [新規] {subject_name} ({year}年度, {semester}, {grade})")
 
 
+def consolidate_grades():
+    """
+    同じ科目・年度・学期・担当教員・選択必須・開講学科で学年だけが異なる開講情報を統合する
+    例: 同じ条件でB3とB4 → B3, B4
+    """
+    print("\n" + "=" * 80)
+    print("学年統合処理開始")
+    print("=" * 80)
+
+    # 全ての開講情報を取得
+    all_offerings = CourseOffering.objects.using('graphics').all()
+
+    # subject, year, semester, is_required でグループ化
+    from collections import defaultdict
+    grouped = defaultdict(list)
+
+    for offering in all_offerings:
+        key = (offering.subject.id, offering.year, offering.semester, offering.is_required)
+        grouped[key].append(offering)
+
+    consolidated_count = 0
+
+    for key, offerings in grouped.items():
+        if len(offerings) <= 1:
+            # 1件しかない場合はスキップ
+            continue
+
+        # 教員と学科が完全に一致するグループを探す
+        processed = set()
+
+        for i, first in enumerate(offerings):
+            if i in processed:
+                continue
+
+            first_teachers = set(first.teachers.all())
+            first_departments = set(first.departments.all())
+
+            # 統合可能なグループを探す
+            to_merge = [first]
+            to_merge_indices = [i]
+
+            for j, other in enumerate(offerings):
+                if j <= i or j in processed:
+                    continue
+
+                other_teachers = set(other.teachers.all())
+                other_departments = set(other.departments.all())
+
+                # 教員と学科が完全に一致するか確認
+                if (first_teachers == other_teachers and
+                    first_departments == other_departments):
+                    to_merge.append(other)
+                    to_merge_indices.append(j)
+
+            if len(to_merge) <= 1:
+                continue
+
+            # 学年を統合
+            grades = [offering.grade for offering in to_merge]
+            merged_grade = ', '.join(sorted(set(grades)))
+
+            # 最初のレコードに統合
+            first.grade = merged_grade
+            first.save()
+
+            # 他のレコードを削除
+            for other in to_merge[1:]:
+                other.delete()
+
+            # 処理済みとしてマーク
+            for idx in to_merge_indices:
+                processed.add(idx)
+
+            consolidated_count += len(to_merge) - 1
+            print(f"  [統合] {first.subject.name} ({first.year}年度, {first.semester}): {merged_grade}")
+
+    print(f"\n統合完了: {consolidated_count}件の開講情報を統合")
+    print("=" * 80)
+
+
 def main():
     if len(sys.argv) < 2:
         print("使用方法: python build_course_db.py <csv_directory_path>")
@@ -252,6 +332,9 @@ def main():
         process_csv_file(csv_file, year)
 
     print("\n処理完了")
+
+    # 学年統合処理を実行
+    consolidate_grades()
 
     # 統計情報を表示
     print("\n=== データベース統計 ===")

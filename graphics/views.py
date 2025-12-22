@@ -119,6 +119,10 @@ def search_courses(request):
         # 重複を除去
         courses = courses.distinct()
 
+        # 各コースに学科数を追加
+        for course in courses:
+            course.dept_count = course.departments.count()
+
         total_count = courses.count()
 
     context = {

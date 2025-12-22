@@ -627,9 +627,13 @@
                                 <div class="course-title">{{ course.subject.name }}</div>
                                 <div class="course-rating">☆☆☆☆☆ 0.0(0)</div>
                                 <div class="course-tags">
-                                    {% for dept in course.departments.all %}
-                                        <span class="course-tag tag-{{ dept.name|slice:':1' }}">{{ dept.name }}</span>
-                                    {% endfor %}
+                                    {% if course.dept_count == 5 %}
+                                        <span class="course-tag tag-common">共通科目</span>
+                                    {% else %}
+                                        {% for dept in course.departments.all %}
+                                            <span class="course-tag tag-{{ dept.name|slice:':1' }}">{{ dept.name }}</span>
+                                        {% endfor %}
+                                    {% endif %}
                                 </div>
                             </div>
                         {% endfor %}

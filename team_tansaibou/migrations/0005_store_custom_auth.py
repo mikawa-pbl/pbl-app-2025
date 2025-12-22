@@ -1,77 +1,74 @@
 # Generated manually - Store model with custom authentication
 # No dependency on Django auth - fully self-contained in team_tansaibou DB
 # Handles both fresh installs and migrations from old schema
+# Database-agnostic: works with SQLite, PostgreSQL, MySQL
 
-from django.db import migrations, models
+from django.db import migrations, models, connection
 import django.db.models.deletion
+
+
+def get_table_columns(cursor, table_name):
+    """DB非依存でテーブルのカラム名一覧を取得"""
+    columns = {col.name for col in connection.introspection.get_table_description(cursor, table_name)}
+    return columns
+
+
+def table_exists(cursor, table_name):
+    """DB非依存でテーブルの存在確認"""
+    return table_name in connection.introspection.table_names(cursor)
 
 
 def create_or_update_store_table(apps, schema_editor):
     """Storeテーブルを作成、または既存テーブルに新カラムを追加"""
-    # テーブルが存在するか確認
     with schema_editor.connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT name FROM sqlite_master
-            WHERE type='table' AND name='team_tansaibou_store'
-        """)
-        table_exists = cursor.fetchone() is not None
-
-    if not table_exists:
-        # テーブルが存在しない場合は作成
-        with schema_editor.connection.cursor() as cursor:
+        if not table_exists(cursor, 'team_tansaibou_store'):
+            # テーブルが存在しない場合は作成
             cursor.execute("""
-                CREATE TABLE "team_tansaibou_store" (
-                    "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    "username" varchar(50) NOT NULL UNIQUE,
-                    "password" varchar(128) NOT NULL,
-                    "name" varchar(100) NOT NULL,
-                    "slug" varchar(50) NOT NULL UNIQUE,
-                    "description" text NOT NULL,
-                    "is_active" bool NOT NULL DEFAULT 1,
-                    "created_at" datetime NOT NULL,
-                    "updated_at" datetime NOT NULL
+                CREATE TABLE team_tansaibou_store (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username VARCHAR(50) NOT NULL DEFAULT '',
+                    password VARCHAR(128) NOT NULL DEFAULT '',
+                    name VARCHAR(100) NOT NULL,
+                    slug VARCHAR(50) NOT NULL UNIQUE,
+                    description TEXT NOT NULL DEFAULT '',
+                    is_active BOOLEAN NOT NULL DEFAULT 1,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
             """)
-        return
+            return
 
-    # 既存テーブルのカラムを確認
-    with schema_editor.connection.cursor() as cursor:
-        cursor.execute("PRAGMA table_info(team_tansaibou_store)")
-        columns = {row[1] for row in cursor.fetchall()}
+        # 既存テーブルのカラムを確認
+        columns = get_table_columns(cursor, 'team_tansaibou_store')
 
-    # usernameカラムがなければ追加
-    if 'username' not in columns:
-        with schema_editor.connection.cursor() as cursor:
+        # usernameカラムがなければ追加
+        if 'username' not in columns:
             cursor.execute("""
                 ALTER TABLE team_tansaibou_store
                 ADD COLUMN username VARCHAR(50) DEFAULT ''
             """)
 
-    # passwordカラムがなければ追加
-    if 'password' not in columns:
-        with schema_editor.connection.cursor() as cursor:
+        # passwordカラムがなければ追加
+        if 'password' not in columns:
             cursor.execute("""
                 ALTER TABLE team_tansaibou_store
                 ADD COLUMN password VARCHAR(128) DEFAULT ''
             """)
 
-    # is_activeカラムがなければ追加
-    if 'is_active' not in columns:
-        with schema_editor.connection.cursor() as cursor:
+        # is_activeカラムがなければ追加
+        if 'is_active' not in columns:
             cursor.execute("""
                 ALTER TABLE team_tansaibou_store
-                ADD COLUMN is_active BOOLEAN DEFAULT 1
+                ADD COLUMN is_active BOOLEAN DEFAULT TRUE
             """)
 
 
 def add_store_field_to_table(apps, schema_editor, table_name):
     """既存テーブルにstore_idカラムを追加（存在しない場合のみ）"""
     with schema_editor.connection.cursor() as cursor:
-        cursor.execute(f"PRAGMA table_info({table_name})")
-        columns = {row[1] for row in cursor.fetchall()}
+        columns = get_table_columns(cursor, table_name)
 
-    if 'store_id' not in columns:
-        with schema_editor.connection.cursor() as cursor:
+        if 'store_id' not in columns:
             cursor.execute(f"""
                 ALTER TABLE {table_name}
                 ADD COLUMN store_id bigint NULL REFERENCES team_tansaibou_store(id)

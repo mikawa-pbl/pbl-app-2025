@@ -79,13 +79,47 @@ def get_or_create_teacher(teacher_name):
     return teacher
 
 
+def map_department_to_system(department_name):
+    """
+    学科名を系に変換する
+
+    機械 → 1系
+    電気 → 2系
+    情報 → 3系
+    化学・環境 → 4系
+    建築 → 5系
+    その他 → None（登録しない）
+    """
+    # 系へのマッピング
+    if '機械' in department_name:
+        return '1系'
+    elif '電気' in department_name or '電子' in department_name:
+        return '2系'
+    elif '情報' in department_name or '知能' in department_name:
+        return '3系'
+    elif '化学' in department_name or '生命' in department_name or '環境' in department_name:
+        return '4系'
+    elif '建築' in department_name or '都市' in department_name:
+        return '5系'
+    else:
+        # その他の学科は登録しない
+        return None
+
+
 def get_or_create_department(department_name):
-    """学科マスタの取得または作成"""
+    """学科マスタの取得または作成（系にマッピング）"""
+    # 学科名を系に変換
+    system_name = map_department_to_system(department_name)
+
+    if system_name is None:
+        # 5つの系に該当しない場合はNoneを返す
+        return None
+
     department, created = Department.objects.using('graphics').get_or_create(
-        name=department_name
+        name=system_name
     )
     if created:
-        print(f"  [新規学科] {department_name}")
+        print(f"  [新規学科] {system_name}")
     return department
 
 
@@ -143,7 +177,7 @@ def process_csv_file(csv_path, year):
                 # 学科を追加
                 for dept_name in departments:
                     department = get_or_create_department(dept_name)
-                    if department not in existing.departments.all():
+                    if department is not None and department not in existing.departments.all():
                         existing.departments.add(department)
 
                 print(f"  [更新] {subject_name} ({year}年度, {semester}, {grade})")
@@ -167,11 +201,19 @@ def process_csv_file(csv_path, year):
 
                 # 学科を追加
                 departments = parse_departments(department_str)
+                has_valid_department = False
                 for dept_name in departments:
                     department = get_or_create_department(dept_name)
-                    course_offering.departments.add(department)
+                    if department is not None:
+                        course_offering.departments.add(department)
+                        has_valid_department = True
 
-                print(f"  [新規] {subject_name} ({year}年度, {semester}, {grade})")
+                # 5つの系のいずれにも該当しない場合は削除
+                if not has_valid_department:
+                    course_offering.delete()
+                    print(f"  [スキップ] {subject_name} ({year}年度, {semester}, {grade}) - 5つの系に該当しない")
+                else:
+                    print(f"  [新規] {subject_name} ({year}年度, {semester}, {grade})")
 
 
 def main():

@@ -153,7 +153,7 @@ def index(request):
 def member_list(request):
     """担当者一覧"""
     store = request.current_store
-    members = Member.objects.using(DB).filter(store=store).order_by('member_id', 'name')
+    members = Member.objects.using(DB).filter(store=store).order_by('student_id', 'name')
     context = {
         'store': store,
         'members': members,

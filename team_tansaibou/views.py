@@ -153,7 +153,7 @@ def index(request):
 def member_list(request):
     """担当者一覧"""
     store = request.current_store
-    members = Member.objects.using(DB).filter(store=store).order_by('last_name', 'first_name')
+    members = Member.objects.using(DB).filter(store=store).order_by('member_id', 'name')
     context = {
         'store': store,
         'members': members,
@@ -167,18 +167,20 @@ def member_add(request):
     store = request.current_store
     if request.method == 'POST':
         try:
-            last_name = request.POST.get('last_name', '').strip()
-            first_name = request.POST.get('first_name', '').strip()
+            name = request.POST.get('name', '').strip()
+            student_id = request.POST.get('student_id', '').strip()
+            email = request.POST.get('email', '').strip()
 
-            if not last_name or not first_name:
-                messages.error(request, '姓と名を入力してください')
+            if not name:
+                messages.error(request, '名前を入力してください')
             else:
                 Member.objects.using(DB).create(
                     store=store,
-                    last_name=last_name,
-                    first_name=first_name
+                    name=name,
+                    student_id=student_id,
+                    email=email
                 )
-                messages.success(request, f'担当者「{last_name} {first_name}」を登録しました')
+                messages.success(request, f'担当者「{name}」を登録しました')
                 return redirect('team_tansaibou:member_list')
 
         except Exception as e:
@@ -188,27 +190,29 @@ def member_add(request):
 
 
 @tansaibou_login_required
-def member_edit(request, member_id):
+def member_edit(request, pk):
     """担当者編集"""
     store = request.current_store
     try:
-        member = Member.objects.using(DB).get(id=member_id, store=store)
+        member = Member.objects.using(DB).get(id=pk, store=store)
     except Member.DoesNotExist:
         messages.error(request, '担当者が見つかりません')
         return redirect('team_tansaibou:member_list')
 
     if request.method == 'POST':
         try:
-            last_name = request.POST.get('last_name', '').strip()
-            first_name = request.POST.get('first_name', '').strip()
+            name = request.POST.get('name', '').strip()
+            student_id = request.POST.get('student_id', '').strip()
+            email = request.POST.get('email', '').strip()
 
-            if not last_name or not first_name:
-                messages.error(request, '姓と名を入力してください')
+            if not name:
+                messages.error(request, '名前を入力してください')
             else:
-                member.last_name = last_name
-                member.first_name = first_name
+                member.name = name
+                member.student_id = student_id
+                member.email = email
                 member.save(using=DB)
-                messages.success(request, f'担当者「{last_name} {first_name}」を更新しました')
+                messages.success(request, f'担当者「{name}」を更新しました')
                 return redirect('team_tansaibou:member_list')
 
         except Exception as e:
@@ -222,18 +226,18 @@ def member_edit(request, member_id):
 
 
 @tansaibou_login_required
-def member_delete(request, member_id):
+def member_delete(request, pk):
     """担当者削除"""
     store = request.current_store
     try:
-        member = Member.objects.using(DB).get(id=member_id, store=store)
+        member = Member.objects.using(DB).get(id=pk, store=store)
     except Member.DoesNotExist:
         messages.error(request, '担当者が見つかりません')
         return redirect('team_tansaibou:member_list')
 
     if request.method == 'POST':
         try:
-            name = f'{member.last_name} {member.first_name}'
+            name = member.name
             member.delete(using=DB)
             messages.success(request, f'担当者「{name}」を削除しました')
         except Exception as e:
@@ -303,7 +307,7 @@ def register_sale(request):
                         )
 
                 messages.success(request, f'販売を登録しました（合計: ¥{total_amount:,}、商品数: {len(cart_data)}）')
-                return redirect('team_tansaibou:sale_list')
+                return redirect('team_tansaibou:register_sale')
 
         except json.JSONDecodeError:
             messages.error(request, 'カートデータの形式が不正です')
@@ -340,6 +344,54 @@ def sale_list(request):
         'transactions': transactions,
     }
     return render(request, 'teams/team_tansaibou/sale_list.html', context)
+
+
+@tansaibou_login_required
+def sale_edit(request, pk):
+    """販売履歴編集"""
+    store = request.current_store
+    try:
+        transaction = Transaction.objects.using(DB).select_related('recorded_by').get(id=pk, store=store)
+    except Transaction.DoesNotExist:
+        messages.error(request, '販売履歴が見つかりません')
+        return redirect('team_tansaibou:sale_list')
+
+    if request.method == 'POST':
+        try:
+            transaction_date = request.POST.get('transaction_date')
+            payment_method = request.POST.get('payment_method')
+            recorded_by_id = request.POST.get('recorded_by')
+            notes = request.POST.get('notes', '')
+
+            if not all([transaction_date, payment_method, recorded_by_id]):
+                messages.error(request, '必須項目を全て入力してください')
+            else:
+                # 編集ログを備考に追記
+                now = timezone.localtime(timezone.now())
+                editor = Member.objects.using(DB).get(id=recorded_by_id)
+                edit_log = f"\n[{now.strftime('%m/%d %H:%M')} {editor.name}により編集]"
+
+                transaction.transaction_date = transaction_date
+                transaction.payment_method = payment_method
+                transaction.recorded_by_id = recorded_by_id
+                transaction.notes = notes + edit_log
+                transaction.save(using=DB)
+
+                messages.success(request, '販売履歴を更新しました')
+                return redirect('team_tansaibou:sale_list')
+
+        except Member.DoesNotExist:
+            messages.error(request, '担当者が見つかりません')
+        except Exception as e:
+            messages.error(request, f'エラーが発生しました: {str(e)}')
+
+    context = {
+        'store': store,
+        'transaction': transaction,
+        'members': Member.objects.using(DB).filter(store=store),
+        'payment_methods': Transaction.PAYMENT_METHOD_CHOICES,
+    }
+    return render(request, 'teams/team_tansaibou/sale_edit.html', context)
 
 
 # ===== 商品管理 =====

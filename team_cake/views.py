@@ -48,7 +48,7 @@ def registration_goods(request):
             # handle uploaded file (if any) and save it under this app's templates images dir
             uploaded = request.FILES.get('image')
             if uploaded:
-                base_dir = Path(__file__).resolve().parent
+                base_dir = Path(__file__).resolve().parent.parent
                 images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                 images_dir.mkdir(parents=True, exist_ok=True)
 
@@ -91,7 +91,7 @@ def edit_good(request, pk):
 
             uploaded = request.FILES.get('image')
             if uploaded:
-                base_dir = Path(__file__).resolve().parent
+                base_dir = Path(__file__).resolve().parent.parent
                 images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                 images_dir.mkdir(parents=True, exist_ok=True)
 
@@ -133,7 +133,7 @@ def delete_good(request, pk):
             good.delete()
 
             if image_filename:
-                base_dir = Path(__file__).resolve().parent
+                base_dir = Path(__file__).resolve().parent.parent
                 images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                 image_path = images_dir / image_filename
                 if image_path.exists():
@@ -149,7 +149,7 @@ def delete_good(request, pk):
                     cur.execute('DELETE FROM team_cake_good WHERE id = %s', [pk])
 
                     if image_filename:
-                        base_dir = Path(__file__).resolve().parent
+                        base_dir = Path(__file__).resolve().parent.parent
                         images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                         image_path = images_dir / image_filename
                         if image_path.exists():
@@ -165,10 +165,7 @@ def serve_template_image(request, filename: str):
     /team_cake/images/<filename> similar to `team_USL.serve_template_image`.
     """
     base_dir = Path(__file__).resolve().parent.parent
-    images_dir = base_dir / 'team_cake' / 'templates' / 'teams' / 'team_cake' / 'images'
-    # If code runs with different cwd layout, also try app dir variant
-    if not images_dir.exists():
-        images_dir = Path(__file__).resolve().parent / 'templates' / 'teams' / 'team_cake' / 'images'
+    images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
 
     file_path = (images_dir / filename).resolve()
 

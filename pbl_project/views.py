@@ -21,7 +21,7 @@ def index(request):
         {"name": "mori_doragon_yuhi_machi", "url": "/mori_doragon_yuhi_machi/"},  # ← 新チームを追加
         {"name": "Team Giryulink", "url": "/team_giryulink/"},
         {"name": "takenoko", "url": "/takenoko/"},
-        {"name": "Team UDuv run python manage.py makemigrations", "url": "/team_UD/"},
+        {"name": "Team UD", "url": "/team_UD/"},
         {"name": "Team TeXTeX", "url": "/team_TeXTeX/"},
         {"name": "Team Cake", "url": "/team_cake/"},
         {"name": "Team Shouronpou", "url": "/team_shouronpou/"},

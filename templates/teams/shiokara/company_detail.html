@@ -1,0 +1,406 @@
+{# templates/teams/shiokara/company_detail.html #}
+{% extends "teams/shiokara/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" %}
+
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
+<h1>{{ company.name }}</h1>
+
+<form method="post" action="{% url 'shiokara:company_favorite' company.pk %}" class="fav-form" style="margin-top:8px; margin-bottom:12px; display:inline-block;">
+  {% csrf_token %}
+  <button type="submit" class="fav-btn" aria-pressed="{% if is_favorite %}true{% else %}false{% endif %}">
+    {% if is_favorite %}★ お気に入り解除{% else %}☆ お気に入りに追加{% endif %}
+  </button>
+</form>
+
+<p>ここは {{ company.name }} の体験談・インターン情報などを載せる予定のページです。</p>
+
+<ul>
+    {% if company.url %}
+    <li>
+        公式サイト：
+        <a href="{{ company.url }}" target="_blank" rel="noopener">
+            {{ company.url }}
+        </a>
+    </li>
+    {% endif %}
+
+    {% if company.description %}
+    <li>
+        紹介文：<br>
+        <small>{{ company.description|linebreaksbr }}</small>
+    </li>
+    {% endif %}
+</ul>
+
+<hr>
+
+<h2>口コミ</h2>
+
+{% if avg_rating %}
+  <p>平均評価：★{{ avg_rating|floatformat:1 }} / 5</p>
+{% endif %}
+
+{# ★ 並び替えフォーム #}
+<form method="get" style="margin-bottom: 8px;">
+  <label>
+    並び替え:
+    <select name="sort" onchange="this.form.submit()">
+      <option value="new" {% if sort == "new" %}selected{% endif %}>新着順</option>
+      <option value="rating" {% if sort == "rating" %}selected{% endif %}>評価が高い順</option>
+    </select>
+  </label>
+</form>
+
+{% if avg_rating %}
+  <p>平均評価：★{{ avg_rating|floatformat:1 }} / 5</p>
+{% endif %}
+
+{% if reviews %}
+  <ul>
+    {% for review in reviews %}
+      <li style="margin-bottom:1.2em;">
+        <strong>★{{ review.rating }}</strong><br>
+        <small>
+          {{ review.grade }} /
+          {{ review.department_name }} /
+          {{ review.lab_field }}<br>
+          性別: 
+          {% if review.gender == "male" %}男性{% elif review.gender == "female" %}女性
+          {% elif review.gender == "other" %}その他{% else %}回答しない{% endif %}
+          {% if review.high_school %}
+            / 高校: {{ review.high_school }}
+          {% endif %}
+          / {{ review.created_at|date:"Y-m-d" }}
+        </small><br>
+        {{ review.comment|linebreaksbr }}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>まだ口コミは投稿されていません。</p>
+{% endif %}
+
+<p>
+  <a href="{% url 'shiokara:company_experience_post' company.pk %}">
+    この企業の口コミを投稿する
+  </a>
+</p>
+
+<p>
+    <a href="{% url 'shiokara:company_search' %}">← 企業検索に戻る</a>
+</p>
+
+{% if points_awarded %}
+  <div id="points-popup-wrapper" aria-live="polite" role="status">
+    <div id="points-popup" class="points-popup" role="alert">
+      <div class="points-popup-title">ポイント獲得！</div>
+      <div class="points-popup-body">{{ points_awarded }}pt を獲得しました。</div>
+      <button id="points-popup-close" class="points-popup-close" aria-label="ポップアップを閉じる">✕</button>
+    </div>
+  </div>
+
+  <style>
+    /* ポップアップ: 上中央からひょっこりポップイン */
+    #points-popup-wrapper {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 12000;
+      pointer-events: none; /* wrapper はクリック透過、内部でボタンは有効 */
+    }
+
+    .points-popup {
+      pointer-events: auto;
+      min-width: 260px;
+      max-width: 90vw;
+      background: linear-gradient(180deg,#f0fff4,#ffffff);
+      color: #155724;
+      padding: 12px 16px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+      border: 1px solid rgba(34,139,34,0.12);
+      text-align: left;
+      transform-origin: 50% 0%;
+      transform: translateY(-22px) scale(0.92);
+      opacity: 0;
+      transition: transform 420ms cubic-bezier(.2,.9,.3,1), opacity 300ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 表示時クラス */
+    .points-popup.show {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .points-popup-title{ font-weight:700; margin-bottom:6px; }
+    .points-popup-body{ font-size:0.98rem; }
+
+    .points-popup-close{
+      position:absolute; top:6px; right:8px; border:0; background:transparent; font-size:14px; cursor:pointer; color:#2f6f34;
+      padding:4px 6px; line-height:1; border-radius:6px;
+    }
+    .points-popup-close:focus{ outline:2px solid rgba(34,139,34,0.15); }
+  </style>
+
+  <script>
+    (function(){
+      var wrapper = document.getElementById('points-popup-wrapper');
+      if(!wrapper) return;
+      var popup = document.getElementById('points-popup');
+      var btn = document.getElementById('points-popup-close');
+      // 小さな遅延でアニメーションを発火させる（ブラウザの描画タイミングを待つ）
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          popup.classList.add('show');
+        });
+      });
+
+      // 自動で数秒後にフェードアウトして DOM から削除
+      var hideDelay = 3500;
+      var hideTimer = setTimeout(function(){
+        popup.classList.remove('show');
+        setTimeout(function(){ if(wrapper) wrapper.remove(); }, 420);
+      }, hideDelay);
+
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        clearTimeout(hideTimer);
+        popup.classList.remove('show');
+        setTimeout(function(){ if(wrapper) wrapper.remove(); }, 220);
+      });
+    })();
+  </script>
+{% endif %}
+
+<!-- ======================== -->
+<!-- ポイント機能チュートリアル -->
+<!-- ======================== -->
+<style>
+    /* ポイントチュートリアル用スタイル */
+    #points-tut-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        z-index: 9998;
+        display: none;
+    }
+
+    .points-tut-highlight {
+        position: relative;
+        z-index: 9999 !important;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 6px rgba(255,255,255,0.05) inset;
+        transform: translateZ(0) scale(1.02);
+        transition: box-shadow 180ms ease, transform 180ms ease;
+        outline: 3px solid rgba(203,0,0,0.95);
+        border-radius: 8px;
+    }
+
+    #points-tut-tooltip {
+        position: fixed;
+        z-index: 10000;
+        max-width: 320px;
+        background: #fff;
+        color: #222;
+        border-radius: 8px;
+        box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+        padding: 12px;
+        display: none;
+        font-size: 0.95rem;
+    }
+
+    #points-tut-tooltip #points-tut-controls {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 8px;
+    }
+
+    #points-tut-tooltip button {
+        background: #f3f3f3;
+        border: 1px solid #ddd;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    #points-tut-start-btn {
+        position: fixed;
+        left: 18px;
+        bottom: 18px;
+        z-index: 10001;
+        background: linear-gradient(180deg, #4CAF50, #45a049);
+        color: #fff;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width:640px) {
+        #points-tut-tooltip { max-width: 260px; font-size: 0.9rem; }
+        #points-tut-start-btn { left: 12px; bottom: 12px; font-size: 0.85rem; }
+    }
+</style>
+
+<div id="points-tut-overlay" aria-hidden="true"></div>
+<div id="points-tut-tooltip" aria-hidden="true" role="dialog" aria-label="ポイント機能説明">
+    <div id="points-tut-content"></div>
+    <div id="points-tut-controls">
+        <button id="points-tut-prev" type="button">戻る</button>
+        <button id="points-tut-next" type="button">次へ</button>
+        <button id="points-tut-close" type="button">閉じる</button>
+    </div>
+</div>
+
+<button id="points-tut-start-btn" aria-label="ポイント機能のチュートリアルを開始">💚 ポイント機能</button>
+
+<script>
+    (function(){
+        const steps = [
+            {
+                sel: 'header',
+                title: 'ポイント表示',
+                body: 'ヘッダーの右上に現在のポイント数が表示されます。このサイトではポイントで企業情報を閲覧できます。'
+            },
+            {
+                sel: 'h1',
+                title: '企業詳細ページ',
+                body: 'このページを見るのに1ポイント消費しました。同じ企業をもう一度訪れる場合、ポイントは消費されません。'
+            },
+            {
+                sel: 'a[href*="company_experience_post"]',
+                title: '口コミ投稿で獲得',
+                body: 'このボタンから口コミを投稿すると、5ポイント獲得できます。ポイントを増やして、もっと多くの企業情報を見ましょう！'
+            },
+            {
+                sel: 'h2',
+                title: '口コミ一覧',
+                body: '他の学生の口コミが表示されます。企業選びの参考にしてください。'
+            }
+        ];
+
+        let idx = 0;
+        const overlay = document.getElementById('points-tut-overlay');
+        const tooltip = document.getElementById('points-tut-tooltip');
+        const content = document.getElementById('points-tut-content');
+        const btnPrev = document.getElementById('points-tut-prev');
+        const btnNext = document.getElementById('points-tut-next');
+        const btnClose = document.getElementById('points-tut-close');
+        const startBtn = document.getElementById('points-tut-start-btn');
+
+        function showStep(i){
+            document.querySelectorAll('.points-tut-highlight').forEach(el=>el.classList.remove('points-tut-highlight'));
+            tooltip.style.display = 'none';
+            overlay.style.display = 'block';
+
+            const step = steps[i];
+            if(!step) { endTutorial(); return; }
+            const target = document.querySelector(step.sel);
+            content.innerHTML = '<strong>'+step.title+'</strong><div style="margin-top:6px;">'+step.body+'</div>';
+
+            if(target){
+                target.classList.add('points-tut-highlight');
+                const r = target.getBoundingClientRect();
+                const tt = tooltip;
+                const margin = 100;
+                let top = window.scrollY + r.bottom + margin;
+                let left = window.scrollX + r.left;
+                left = Math.min(Math.max(left, 8 + window.scrollX), window.scrollX + document.documentElement.clientWidth - tt.offsetWidth - 8);
+                tt.style.top = top + 'px';
+                tt.style.left = left + 'px';
+                tt.style.display = 'block';
+                btnNext.focus();
+            } else {
+                const tt = tooltip;
+                tt.style.top = (window.scrollY + window.innerHeight/2 - 80) + 'px';
+                tt.style.left = (window.scrollX + (window.innerWidth - tt.offsetWidth)/2) + 'px';
+                tt.style.display = 'block';
+            }
+
+            btnPrev.disabled = (i===0);
+            btnNext.textContent = (i === steps.length -1) ? '完了' : '次へ';
+            idx = i;
+        }
+
+        function nextStep(){
+            if(idx < steps.length -1) showStep(idx+1);
+            else endTutorial();
+        }
+        function prevStep(){ if(idx>0) showStep(idx-1); }
+
+        function startTutorial(){
+            showStep(0);
+            overlay.style.display = 'block';
+            document.body.classList.add('points-tut-in-progress');
+        }
+
+        function endTutorial(){
+            overlay.style.display = 'none';
+            tooltip.style.display = 'none';
+            document.querySelectorAll('.points-tut-highlight').forEach(el=>el.classList.remove('points-tut-highlight'));
+            document.body.classList.remove('points-tut-in-progress');
+        }
+
+        btnNext.addEventListener('click', nextStep);
+        btnPrev.addEventListener('click', prevStep);
+        btnClose.addEventListener('click', endTutorial);
+        overlay.addEventListener('click', endTutorial);
+        startBtn.addEventListener('click', startTutorial);
+
+        document.addEventListener('keydown', (ev)=>{
+            if(!document.body.classList.contains('points-tut-in-progress')) return;
+            if(ev.key === 'Escape') endTutorial();
+            if(ev.key === 'ArrowRight' || ev.key === 'Enter') nextStep();
+            if(ev.key === 'ArrowLeft') prevStep();
+        });
+
+        // 初回ポイント消費時は自動起動
+        const FIRST_POINT_USAGE = {{ first_point_usage|yesno:"true,false" }};
+        const SEEN_POINTS_TUTORIAL = {{ seen_points_tutorial|yesno:"true,false" }};
+        console.log('🔍 FIRST_POINT_USAGE:', FIRST_POINT_USAGE, 'SEEN_POINTS_TUTORIAL:', SEEN_POINTS_TUTORIAL);
+        if(FIRST_POINT_USAGE && !SEEN_POINTS_TUTORIAL){
+            console.log('🚀 Points Tutorial will auto-start...');
+            setTimeout(()=>{ startTutorial(); }, 300);
+        } else {
+            console.log('✅ Points Tutorial auto-start is disabled');
+        }
+
+        window.__points_tut_start = startTutorial;
+    })();
+</script>
+        {% comment %} Favorite toggle AJAX handler for company detail {% endcomment %}
+        <script>
+        document.addEventListener('DOMContentLoaded', function(){
+          var form = document.querySelector('.fav-form');
+          if(!form) return;
+          form.addEventListener('submit', function(ev){
+            ev.preventDefault();
+            var btn = form.querySelector('.fav-btn');
+            var csrftoken = form.querySelector('input[name=csrfmiddlewaretoken]')?.value;
+            fetch(form.action, { method: 'POST', headers: { 'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': csrftoken } })
+              .then(r=>r.json()).then(function(data){
+                if(data && data.ok){
+                  if(data.added){ btn.textContent = '★ お気に入り解除'; btn.setAttribute('aria-pressed','true'); }
+                  else { btn.textContent = '☆ お気に入りに追加'; btn.setAttribute('aria-pressed','false'); }
+                }
+              }).catch(function(){ form.submit(); });
+          });
+        });
+        </script>
+    </div>
+</div>
+
+        {% endblock %}

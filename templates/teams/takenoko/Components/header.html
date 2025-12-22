@@ -1,16 +1,300 @@
 {% load static %}
-<!-- templates/components/header.html -->
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+/>
+
+<style>
+  /* ヘッダー全体 */
+  header {
+    width: 100%;
+  }
+
+  .header-bar {
+    background-color: #649ce4;
+    width: 100%;
+    height: 96px;
+    position: relative;
+  }
+
+  .header-logo {
+    position: absolute;
+    left: 32px;
+    top: 0;
+    height: 96px;
+    display: flex;
+    align-items: center;
+  }
+
+  .header-nav {
+    position: absolute;
+    top: 10px;
+    right: 32px;
+    color: white;
+    font-size: 48px;
+    display: flex;
+    gap: 24px;
+  }
+
+  /* メニューボックス */
+  .user-menu {
+    position: absolute;
+    top: 96px;
+    right: 0;
+    width: 256px;
+    height: 194px;
+    background: white;
+    border-radius: 8px;
+    display: none;
+    z-index: 1000;
+    border: 2px solid #8c8efc;
+  }
+
+  /* 各ボタン (64×256 ボックス) */
+  .user-menu a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 256px;
+    height: 64px;
+    text-decoration: none;
+    color: #333;
+    font-size: 18px;
+    border-bottom: 1px solid #8c8efc;
+  }
+
+  .user-menu a:last-child {
+    border-bottom: none;
+  }
+
+  .user-menu a:hover {
+    background-color: #f2f2f2;
+  }
+
+  /* 画面全体を覆う薄暗い背景 */
+  .info-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+  }
+
+  /* 中央のポップアップ */
+  .info-modal {
+    background: #fff;
+    width: 800px;
+    max-width: 90vw;
+    height: 640px;
+    max-height: 90vh;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .info-modal img {
+    max-width: 100%;
+    max-height: calc(100% - 48px);
+    object-fit: contain;
+    margin-bottom: 16px;
+  }
+
+  .info-close-btn {
+    padding: 8px 24px;
+    border-radius: 999px;
+    border: none;
+    background: #f96796;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .info-close-btn:hover {
+    opacity: 0.9;
+  }
+
+  /* 通知パネル（320×320の箱） */
+  .notification-box {
+    position: absolute;
+    top: 96px;
+    right: 0;
+    width: 320px;
+    height: 320px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: none;
+    z-index: 1000;
+    padding: 12px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .notification-box p {
+    margin: 0 0 8px 0;
+    padding: 8px;
+    background: white;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+</style>
 
 <header>
-  <div style="background-color: #649CE4; width: 100%; height: 96px; position: relative;">
-    <div style="left: 32px;">
-      <img src="{% static 'images/hubhub.PNG' %}" alt="logo" width="96px">
+  <div class="header-bar">
+    <div class="header-logo">
+      <a href="{% url 'takenoko:main' %}">
+        <img src="{% static 'images/hubhub.PNG' %}" alt="logo" width="96px" />
+      </a>
     </div>
-    <nav style="position: absolute; top: 10px; right: 32px; color:white; font-size: 48px; display: flex; gap: 24px;">
-      <button><i class="fas fa-info-circle"></i></button>
-      <button><i class="fas fa-bell"></i></button>
-      <button><i class="fas fa-user-circle"></i></button>
+
+    <nav class="header-nav">
+      <button id="info-toggle"><i class="fas fa-info-circle"></i></button>
+      <button id="bell-toggle"><i class="fas fa-bell"></i></button>
+      <button id="menu-toggle"><i class="fas fa-user-circle"></i></button>
     </nav>
   </div>
 </header>
+
+<!-- インフォメーション -->
+<div class="info-overlay" id="info-overlay">
+  <div class="info-modal">
+    <img src="{% static 'images/info.jpg' %}" alt="使い方" />
+    <button class="info-close-btn" id="info-close">閉じる</button>
+  </div>
+</div>
+
+<!-- ユーザーメニュー -->
+<div class="user-menu" id="user-menu">
+  {% if request.session.takenoko_user_id %}
+  <a href="{% url 'takenoko:listing_items' %}">出品した商品</a>
+  <a href="{% url 'takenoko:purchased_items' %}">購入した商品</a>
+  <form
+    action="{% url 'takenoko:logout' %}"
+    method="post"
+    style="margin: 0; padding: 0"
+  >
+    {% csrf_token %}
+    <button
+      type="submit"
+      style="
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 256px;
+        height: 64px;
+        border: none;
+        border-bottom: 1px solid #8c8efc;
+        background: none;
+        font-size: 18px;
+        color: #333;
+        cursor: pointer;
+      "
+    >
+      ログアウト
+    </button>
+  </form>
+  {% else %}
+  <a href="{% url 'takenoko:login' %}">ログイン</a>
+  <a href="{% url 'takenoko:signup' %}">新規登録</a>
+  {% endif %}
+</div>
+
+<style>
+  .user-menu {
+    height: auto !important;
+  }
+</style>
+
+<!-- 通知パネル -->
+<div class="notification-box" id="notification-box">
+  <p>通知1：テスト通知</p>
+  <p>
+    通知2：長い文を入れてみるとどうなるかを確認する通知テキストです。折り返されます。
+  </p>
+  <p>通知3：テスト</p>
+  <p>通知4：テスト</p>
+  <p>通知5：テスト</p>
+  <p>通知6：テスト</p>
+  <p>通知7：テスト</p>
+  <p>通知8：テスト（これでスクロールが必ず発生）</p>
+</div>
+
+<script>
+  const menuToggle = document.getElementById("menu-toggle");
+  const userMenu = document.getElementById("user-menu");
+  const bellToggle = document.getElementById("bell-toggle");
+  const notificationBox = document.getElementById("notification-box");
+  const infoToggle = document.getElementById("info-toggle");
+  const infoOverlay = document.getElementById("info-overlay");
+  const infoClose = document.getElementById("info-close");
+
+  // ==== ユーザーメニュー ====
+  menuToggle.addEventListener("click", function (event) {
+    event.stopPropagation();
+    // メニューをトグル
+    const willShow = userMenu.style.display !== "block";
+    userMenu.style.display = willShow ? "block" : "none";
+    // 片方だけ開くように通知は閉じる
+    if (willShow) {
+      notificationBox.style.display = "none";
+    }
+  });
+
+  // ==== 通知パネル ====
+  bellToggle.addEventListener("click", function (event) {
+    event.stopPropagation();
+    const willShow = notificationBox.style.display !== "block";
+    notificationBox.style.display = willShow ? "block" : "none";
+    // 片方だけ開くようにメニューは閉じる
+    if (willShow) {
+      userMenu.style.display = "none";
+    }
+  });
+
+  // ==== info ポップアップ ====
+  infoToggle.addEventListener("click", function (event) {
+    event.stopPropagation();
+    infoOverlay.style.display = "flex";
+    // 他のパネルはついでに閉じておく
+    userMenu.style.display = "none";
+    notificationBox.style.display = "none";
+  });
+
+  infoClose.addEventListener("click", function () {
+    infoOverlay.style.display = "none";
+  });
+
+  infoOverlay.addEventListener("click", function (event) {
+    // 白い箱以外(灰色の部分)をクリックしたら閉じる
+    if (event.target === infoOverlay) {
+      infoOverlay.style.display = "none";
+    }
+  });
+
+  // ==== 画面の適当な場所をクリックしたらメニュー & 通知を閉じる ====
+  document.addEventListener("click", function (event) {
+    const target = event.target;
+
+    const clickInMenu =
+      userMenu.contains(target) || menuToggle.contains(target);
+    const clickInNotif =
+      notificationBox.contains(target) || bellToggle.contains(target);
+    const clickInInfo =
+      infoOverlay.contains(target) || infoToggle.contains(target);
+
+    // info オーバーレイ上のクリックは infoOverlay 側の処理に任せる
+    if (!clickInMenu) {
+      userMenu.style.display = "none";
+    }
+    if (!clickInNotif) {
+      notificationBox.style.display = "none";
+    }
+    // infoOverlay はここでは閉じない（専用の処理で制御）
+  });
+</script>

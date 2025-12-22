@@ -1,0 +1,14 @@
+INSERT INTO team_akb5_member (first_name, last_name) VALUES ('央樹', '堀');
+INSERT INTO team_akb5_member (first_name, last_name) VALUES ('春樹', '泉谷');
+INSERT INTO team_akb5_member (first_name, last_name) VALUES ('一平', '多賀');
+INSERT INTO team_akb5_member (first_name, last_name) VALUES ('快多', '湯原');
+INSERT INTO team_akb5_member (first_name, last_name) VALUES ('理希', '岩田');
+SELECT * FROM team_akb5_member;
+
+
+please make map by leaflet.js
+this map show the trouble occuring spot.
+this map is implemented in UserView.
+map*s latitude and longtitude is between 34.70315, 137.40365 34.70047, 137.41189.
+please add db query to store users geometory position.
+this app must get users position permission from browser.

@@ -92,15 +92,30 @@
     {% endif %}
 
     {% if menu_lines %}
-      <div class="today-menu-card">
-        <div class="today-label">本日のメニュー</div>
-        <div class="today-menu-text">
-          {% for line in menu_lines %}
-            {{ line }}{% if not forloop.last %}<br>{% endif %}
-          {% endfor %}
+      <a href="{% url 'team_kitajaki:rate_menu' %}" style="text-decoration: none; color: inherit;">
+        <div class="today-menu-card">
+          <div class="today-label">本日のメニュー</div>
+          <div class="today-menu-text">
+            {% for line in menu_lines %}
+              {{ line }}{% if not forloop.last %}<br>{% endif %}
+            {% endfor %}
+          </div>
         </div>
-      </div>
-    {% else %}
+      </a>
+      
+      {% if average_scores %}
+        <div class="score-block" style="margin-top: -30px; margin-bottom: 50px;">
+          <h2 style="font-size: 1.1rem; color: #444;">みんなの評価（{{ average_scores.count }}件）上をクリックで評価</h2>
+          <p style="font-size: 1.2rem; font-weight: bold; color: #333;">
+            味: <span style="color: #d9534f;">{{ average_scores.avg_taste }}</span>/5点
+            |
+            量: <span style="color: #5cb85c;">{{ average_scores.avg_volume }}</span>/5点
+          </p>
+        </div>
+      {% else %}
+        <p style="margin-top: -30px; margin-bottom: 50px; color: #888;">このメニューの評価はまだありません。クリックして最初の評価をしてみましょう！</p>
+      {% endif %}
+      {% else %}
       <p>本日のメニューはPDFから取得できませんでした。</p>
     {% endif %}
 
@@ -137,6 +152,11 @@
 
     <p class="back-link">
       <a href="{% url 'team_kitajaki:index' %}">トップに戻る</a>
+    </p>
+    <p style="text-align: center; margin: 20px 0;">
+      <a href="{% url 'team_kitajaki:menu_ranking' %}" style="display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">
+          🏆 人気メニューランキングを見る
+      </a>
     </p>
   </div>
 </body>

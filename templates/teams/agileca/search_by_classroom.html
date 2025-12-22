@@ -1,0 +1,81 @@
+{% extends "teams/agileca/layout/split_base.html" %}
+{% load static %}
+
+{% block title %}Example{% endblock %}
+
+{% block left %}
+  {% include "teams/agileca/partials/sidebar.html" %}
+{% endblock %}
+
+{% block right %}
+    
+    <h2>🚪 部屋名で教室を検索</h2>
+    
+    <form action="{% url 'agileca:search_roomname' %}" method="GET" class="search-form" style="border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: #f9f9f9;">
+        
+        <input 
+            type="text" 
+            name="q" 
+            placeholder="部屋名を入力" 
+            value="{{ query|default_if_none:'' }}"
+            style="padding: 8px; width: 300px; border: 1px solid #ddd; border-radius: 4px;"
+        >
+        
+        <button type="submit" style="padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            検索
+        </button>
+        
+        {% if query %}
+            <a href="{% url 'agileca:search_roomname' %}" style="margin-left: 10px; color: #6c757d; text-decoration: none;">
+                リセット
+            </a>
+        {% endif %}
+    </form>
+
+    <hr style="margin-top: 30px; margin-bottom: 20px;">
+
+    {% if rooms %}
+        <h3>検索結果 ({{ rooms.count }} 件)</h3>
+        <ul style="list-style: none; padding: 0;">
+            {% for room in rooms %}
+                <li style="border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-left: 5px solid #007bff; border-radius: 5px;">
+                    
+                    <h4>{{ room.room_name }} ({{ room.floor }}階)</h4>
+                    
+                    <p><strong>建物:</strong> 
+                        <span style="display: inline-block; background-color: #e0f7ff; color: #007bff; padding: 3px 8px; margin-right: 10px; border-radius: 12px; font-size: 0.9em;">
+                            {{ room.building.name }}
+                        </span>
+                    </p>
+                    
+                    <p><strong>担当教授:</strong> 
+                        {% if room.professor %}
+                            <span style="display: inline-block; background-color: #ffe6e6; color: #ff4d4d; padding: 3px 8px; margin-right: 10px; border-radius: 12px; font-size: 0.9em;">
+                                {{ room.professor.name }}
+                            </span>
+                        {% else %}
+                            <span style="color: #6c757d;">未定</span>
+                        {% endif %}
+                    </p>
+                    
+                    <p><strong>用途:</strong> 
+                        {% for attr in room.attributes.all %}
+                            <span style="display: inline-block; background-color: #e6ffed; color: #28a745; padding: 3px 8px; margin-right: 5px; border-radius: 12px; font-size: 0.9em;">
+                                {{ attr.name }}
+                            </span>
+                        {% empty %}
+                            <span style="color: #6c757d;">属性なし</span>
+                        {% endfor %}
+                    </p>
+                </li>
+            {% endfor %}
+        </ul>
+    
+    {% elif query %}
+        <p>「<strong>{{ query }}</strong>」に一致する教室は見つかりませんでした。</p>
+        
+    {% else %}
+        <p>部屋名を入力して、教室を検索してください。</p>
+        
+    {% endif %}
+{% endblock %}

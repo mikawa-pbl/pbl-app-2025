@@ -1,0 +1,92 @@
+{% extends "teams/shiokara/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" with active_page='sitemap' %}
+
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
+<div style="max-width:800px; margin:40px auto; padding:20px;">
+  <h1 style="text-align:center; margin-bottom:30px;">サイトマップ</h1>
+  
+  <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin-bottom:20px;">
+    <h2 style="color:#333; border-bottom:2px solid #007bff; padding-bottom:8px; margin-bottom:16px;">ログイン・アカウント</h2>
+    <ul style="list-style:none; padding:0;">
+      <li style="margin:8px 0;">
+        <a href="{% url 'shiokara:login' %}" style="color:#007bff; text-decoration:none;">🔐 ログインメニュー</a>
+        <span style="color:#666; font-size:0.9rem;"> - ログインまたは新規登録を選択</span>
+      </li>
+      <li style="margin:8px 0;">
+        <a href="{% url 'shiokara:login_form' %}" style="color:#007bff; text-decoration:none;">📝 ログインフォーム</a>
+        <span style="color:#666; font-size:0.9rem;"> - 学籍番号とパスワードでログイン</span>
+      </li>
+      <li style="margin:8px 0;">
+        <a href="{% url 'shiokara:register' %}" style="color:#007bff; text-decoration:none;">✨ 新規登録</a>
+        <span style="color:#666; font-size:0.9rem;"> - 新規アカウント作成</span>
+      </li>
+      <li style="margin:8px 0;">
+        <a href="{% url 'shiokara:my_page' %}" style="color:#007bff; text-decoration:none;">👤 マイページ</a>
+        <span style="color:#666; font-size:0.9rem;"> - お気に入り企業や体験談の管理</span>
+      </li>
+      <li style="margin:8px 0;">
+        <a href="{% url 'shiokara:logout' %}" style="color:#007bff; text-decoration:none;">🚪 ログアウト</a>
+      </li>
+    </ul>
+  </div>
+
+  <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin-bottom:20px;">
+    <h2 style="color:#333; border-bottom:2px solid #28a745; padding-bottom:8px; margin-bottom:16px;">企業検索</h2>
+    <ul style="list-style:none; padding:0;">
+      <li style="margin:8px 0;">
+        <a href="{% url 'shiokara:department_list' %}" style="color:#28a745; text-decoration:none;">🏢 学科別企業一覧</a>
+        <span style="color:#666; font-size:0.9rem;"> - ホーム画面・学科から企業を探す</span>
+      </li>
+      <li style="margin:8px 0;">
+        <a href="{% url 'shiokara:company_search' %}" style="color:#28a745; text-decoration:none;">🔍 企業検索</a>
+        <span style="color:#666; font-size:0.9rem;"> - キーワードや条件で企業を検索</span>
+      </li>
+    </ul>
+  </div>
+
+  <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin-bottom:20px;">
+    <h2 style="color:#333; border-bottom:2px solid #ffc107; padding-bottom:8px; margin-bottom:16px;">企業情報</h2>
+    <ul style="list-style:none; padding:0;">
+      <li style="margin:8px 0;">
+        <span style="color:#ffc107;">📋 企業詳細ページ</span>
+        <span style="color:#666; font-size:0.9rem;"> - 各企業の詳細情報、評価、体験談を表示</span>
+      </li>
+      <li style="margin:8px 0; margin-left:20px;">
+        <span style="color:#666;">⭐ お気に入り登録・解除</span>
+      </li>
+      <li style="margin:8px 0; margin-left:20px;">
+        <span style="color:#666;">💬 体験談投稿</span>
+      </li>
+    </ul>
+  </div>
+
+  <div style="background:#f8f9fa; padding:20px; border-radius:8px;">
+    <h2 style="color:#333; border-bottom:2px solid #6c757d; padding-bottom:8px; margin-bottom:16px;">その他</h2>
+    <ul style="list-style:none; padding:0;">
+      <li style="margin:8px 0;">
+        <span style="color:#6c757d;">🎯 チュートリアル</span>
+        <span style="color:#666; font-size:0.9rem;"> - 初回利用時のガイド表示</span>
+      </li>
+      <li style="margin:8px 0;">
+        <span style="color:#6c757d;">🎮 テトリスゲーム</span>
+        <span style="color:#666; font-size:0.9rem;"> - ミニゲーム機能</span>
+      </li>
+    </ul>
+  </div>
+
+  <div style="text-align:center; margin-top:30px;">
+    <a href="{% url 'shiokara:department_list' %}" 
+       style="display:inline-block; padding:12px 24px; background:#007bff; color:white; text-decoration:none; border-radius:6px; font-weight:bold;">
+      ホームに戻る
+    </a>
+  </div>
+</div>
+    </div>
+</div>
+{% endblock %}

@@ -77,7 +77,6 @@ class CourseOffering(models.Model):
     class Meta:
         verbose_name = "開講情報"
         verbose_name_plural = "開講情報"
-        unique_together = [['subject', 'year', 'semester', 'grade']]
 
 
 class SubjectReview(models.Model):

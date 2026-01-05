@@ -631,10 +631,10 @@
                     </div>
                 </div>
                 
-                <!-- 面接時の追加入力欄（初期は非表示） -->
-                <div id="interviewFields" style="display: none;">
+                <!-- 面接時の追加入力欄 -->
+                <div id="interviewFields">
                     <div class="form-group">
-                        <label>どんなことを聞かれたか？ <span class="required-mark">*</span><span class="data-collection-mark">†</span></label>
+                        <label>どんなことを聞かれたか？ <span class="data-collection-mark">†</span></label>
                         <div id="questionsContainer">
                             <div class="question-item" style="display: flex; gap: 8px; margin-bottom: 8px;">
                                 <input type="text" class="question-input" placeholder="質問内容を入力..." style="flex: 1;">
@@ -664,46 +664,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // 会社名検索機能の初期化
             initCompanySearch();
-            
-            // イベント・工程の選択変更時に追加フィールドを表示/非表示
-            initInterviewFieldsToggle();
         });
-        
-        function initInterviewFieldsToggle() {
-            const stageSelect = document.getElementById('modalInterviewStage');
-            const statusSelect = document.getElementById('modalStatus');
-            const interviewFields = document.getElementById('interviewFields');
-            
-            // 面接系のイベント一覧
-            const interviewStages = [
-                '一次面接',
-                '二次面接',
-                '三次面接',
-                '最終面接',
-                'グループディスカッション'
-            ];
-            
-            function updateInterviewFieldsVisibility() {
-                const selectedStage = stageSelect.value;
-                const selectedStatus = statusSelect.value;
-                
-                // 聞かれたことフィールドを非表示にする選考状況
-                const hiddenStatuses = ['興味あり', 'エントリー予定', '予定あり', '選考辞退'];
-                
-                // 面接系イベントかつ特定の状況以外の場合に表示
-                if (interviewStages.includes(selectedStage) && !hiddenStatuses.includes(selectedStatus)) {
-                    interviewFields.style.display = 'block';
-                } else {
-                    interviewFields.style.display = 'none';
-                    // 面接以外の場合はクリア
-                    clearInterviewQuestions();
-                }
-            }
-            
-            stageSelect.addEventListener('change', updateInterviewFieldsVisibility);
-            statusSelect.addEventListener('change', updateInterviewFieldsVisibility);
-        }
-        
         function addQuestion() {
             const container = document.getElementById('questionsContainer');
             const newItem = document.createElement('div');
@@ -917,7 +878,6 @@
             document.getElementById('modalStatus').value = '';
             document.getElementById('modalMemoInput').value = '';
             clearInterviewQuestions();
-            document.getElementById('interviewFields').style.display = 'none';
             document.getElementById('companyDropdown').classList.remove('active');
         }
 
@@ -1025,14 +985,6 @@
                 alert('会社リストから会社を選択してください');
                 return;
             }
-            
-            // 面接系イベントかつ特定の状況以外の場合は「聞かれたこと」も必須
-            const interviewStages = ['一次面接', '二次面接', '三次面接', '最終面接', 'グループディスカッション'];
-            const hiddenStatuses = ['興味あり', 'エントリー予定', '予定あり', '選考辞退'];
-            if (interviewStages.includes(interviewStage) && !hiddenStatuses.includes(status) && !interviewQuestions) {
-                alert('面接の場合、「どんなことを聞かれたか？」は必須です（最低1つ入力してください）');
-                return;
-            }
 
             // 面接日が選択されている場合は、その日付を使用。なければモーダルの日付を使用
             let dateStr;
@@ -1095,14 +1047,7 @@
             document.getElementById('modalStatus').value = memo.status;
             document.getElementById('modalMemoInput').value = memo.content;
             setInterviewQuestions(memo.interview_questions || '');
-            
-            // 面接系イベントかつ特定の状況以外の場合は追加フィールドを表示
-            const interviewStages = ['一次面接', '二次面接', '三次面接', '最終面接', 'グループディスカッション'];
-            const hiddenStatuses = ['興味あり', 'エントリー予定', '予定あり', '選考辞退'];
-            if (interviewStages.includes(memo.interview_stage) && !hiddenStatuses.includes(memo.status)) {
-                document.getElementById('interviewFields').style.display = 'block';
-            }
-            
+
             // フォームを表示
             showMemoForm();
 

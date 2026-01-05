@@ -295,3 +295,9 @@ td {
     color: #666;
     margin-bottom: 6px;
 }
+
+/* lab options background in status dialog */
+#locationSelect option[key^="lab"],
+#locationSelect option.lab-option {
+    background-color: #e3f2fd;
+}

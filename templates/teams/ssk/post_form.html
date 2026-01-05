@@ -91,9 +91,12 @@
           タグを1つ以上入力してください（例: #授業 #休講）
         </div>
 
-        {# Tag suggestion dropdown (initially hidden). JS below will populate/filter it. #}
+        {# Tag suggestion area: prefix-search with checkbox candidates (max 5) #}
         <div id="tag-suggest-wrap" style="position:relative;">
-          <div id="tag-suggest" style="position:absolute;left:0;right:0;z-index:50;display:none;margin-top:6px;background:#fff;border:1px solid #eee;border-radius:8px;box-shadow:0 6px 18px rgba(15,23,42,0.06);max-height:220px;overflow:auto;"></div>
+          <div id="tag-suggest" style="position:absolute;left:0;right:0;z-index:50;display:none;margin-top:6px;background:#fff;border:1px solid #eee;border-radius:8px;box-shadow:0 6px 18px rgba(15,23,42,0.06);max-height:220px;overflow:auto;padding:8px;">
+            <div style="font-size:0.9rem;color:#6b7280;padding:6px 4px;">候補から選択（最大5件）</div>
+            <div id="tag-suggest-list" style="display:flex;flex-direction:column;gap:6px;padding-top:6px;"></div>
+          </div>
         </div>
 
         <div style="display:flex;gap:8px;align-items:center;">
@@ -147,98 +150,108 @@
     // find the tags_text input (could be <input> or <textarea> rendered by form)
     const tagInput = document.querySelector('[name="tags_text"]');
     const suggestBox = document.getElementById('tag-suggest');
+    const suggestList = document.getElementById('tag-suggest-list');
     const wrap = document.getElementById('tag-suggest-wrap');
-    if(!tagInput || !suggestBox) return;
+    if(!tagInput || !suggestBox || !suggestList) return;
 
     function tokenize(value){
       // split by whitespace, ignore empty
-      return value.split(/\s+/).filter(Boolean);
+      return value.split(/\s+/).filter(Boolean).map(t => t.replace(/^#+/, ''));
     }
 
     function normalize(s){ return (s||"").toLowerCase(); }
 
-    function getCurrentToken(value, cursorPos){
-      // Approximation: take text before cursor, split by whitespace and return last token
-      const before = value.slice(0, cursorPos == null ? value.length : cursorPos);
-      const tokens = before.split(/\s+/).filter(Boolean);
-      return tokens.length ? tokens[tokens.length-1] : "";
-    }
+    function renderCheckboxes(matches, existing){
+      suggestList.innerHTML = '';
+      if(!matches.length){ suggestBox.style.display = 'none'; return; }
+      // show up to 5
+      matches.slice(0,5).forEach(name => {
+        const lc = normalize(name);
+        const isChecked = existing.indexOf(lc) !== -1;
+        const row = document.createElement('label');
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.gap = '8px';
+        row.style.padding = '6px 8px';
+        row.style.borderRadius = '6px';
+        row.style.cursor = 'pointer';
 
-    function renderSuggestions(matches){
-      if(!matches.length){
-        suggestBox.style.display = 'none';
-        suggestBox.innerHTML = '';
-        return;
-      }
-      suggestBox.style.display = '';
-      suggestBox.innerHTML = matches.map(name =>
-        `<div class="ts-item" style="padding:8px 10px;border-bottom:1px solid #f5f6f8;cursor:pointer;">${name}</div>`
-      ).join('');
-      // attach click handlers
-      Array.from(suggestBox.querySelectorAll('.ts-item')).forEach((el, idx)=>{
-        el.addEventListener('click', function(){
-          applySuggestion(matches[idx]);
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = name;
+        cb.checked = isChecked;
+        cb.style.marginRight = '6px';
+
+        const txt = document.createElement('span');
+        txt.textContent = '#' + name;
+        txt.style.color = '#0f172a';
+
+        cb.addEventListener('change', function(){
+          const val = tagInput.value || '';
+          const cursor = tagInput.selectionStart || val.length;
+          const before = val.slice(0, cursor);
+          const after = val.slice(cursor);
+
+          // tokens before and after cursor
+          let tokensBefore = before.split(/\s+/).filter(Boolean);
+          let tokensAfter = after.split(/\s+/).filter(Boolean);
+
+          if(cb.checked){
+            // Replace the token currently being edited (last token before cursor) with the selected tag.
+            if(tokensBefore.length){
+              tokensBefore[tokensBefore.length-1] = '#' + name;
+            } else {
+              tokensBefore.push('#' + name);
+            }
+          } else {
+            // Remove the tag (normalized) from both before/after tokens
+            tokensBefore = tokensBefore.filter(t => normalize(t.replace(/^#+/, '')) !== lc);
+            tokensAfter = tokensAfter.filter(t => normalize(t.replace(/^#+/, '')) !== lc);
+          }
+
+          const newTokens = tokensBefore.concat(tokensAfter);
+          tagInput.value = newTokens.map(t => (t.startsWith('#') ? t : ('#' + t.replace(/^#+/, '')))).join(' ') + (newTokens.length ? ' ' : '');
+          tagInput.focus();
+          // trigger input handlers to update suggestion box and warnings
+          tagInput.dispatchEvent(new Event('input'));
         });
+
+        row.appendChild(cb);
+        row.appendChild(txt);
+        suggestList.appendChild(row);
       });
+      suggestBox.style.display = '';
     }
 
-    function applySuggestion(tagName){
-      const val = tagInput.value;
+    function updatePrefixSuggestions(){
+      const val = tagInput.value || '';
       const cursor = tagInput.selectionStart || val.length;
-      const tokensBefore = val.slice(0, cursor).split(/\s+/).filter(Boolean);
-      const tokensAfter = val.slice(cursor).split(/\s+/).filter(Boolean);
-      // replace last token before cursor with the suggestion
-      if(tokensBefore.length){
-        tokensBefore[tokensBefore.length-1] = '#' + tagName;
-      } else {
-        tokensBefore.push('#' + tagName);
-      }
-      const newTokens = tokensBefore.concat(tokensAfter);
-      tagInput.value = newTokens.join(' ') + (newTokens.length ? ' ' : '');
-      tagInput.focus();
-      // hide suggestions
-      suggestBox.style.display = 'none';
-    }
-
-    function update(){
-      const val = tagInput.value;
-      const cursor = tagInput.selectionStart || val.length;
-      const current = getCurrentToken(val, cursor).replace(/^#+/, '');
-      const existing = tokenize(val).map(t => t.replace(/^#+/, '').toLowerCase());
+      const before = val.slice(0, cursor);
+      const tokens = before.split(/\s+/).filter(Boolean);
+      const current = tokens.length ? tokens[tokens.length-1].replace(/^#+/, '') : '';
+      const existing = tokenize(val).map(t => normalize(t));
       if(!current){
-        // nothing typed -> hide suggestions
+        // hide when nothing typed, but still show top-5 maybe; here we hide
         suggestBox.style.display = 'none';
-        suggestBox.innerHTML = '';
         return;
       }
       const q = normalize(current);
-      // filter tags containing q and not already present
-      const matches = allTags.filter(t => normalize(t).indexOf(q) !== -1 && existing.indexOf(normalize(t)) === -1);
-      renderSuggestions(matches.slice(0,12));
+      // prefix match
+      const matches = allTags.filter(t => normalize(t).indexOf(q) === 0 && existing.indexOf(normalize(t)) === -1);
+      // if none found from prefix, fallback to contains (but continue to exclude existing)
+      const matchesFallback = allTags.filter(t => normalize(t).indexOf(q) !== -1 && existing.indexOf(normalize(t)) === -1);
+      renderCheckboxes(matches.length ? matches : matchesFallback, existing);
     }
 
-    // show suggestions on input and keyup
-    tagInput.addEventListener('input', update);
-    tagInput.addEventListener('keyup', update);
+    // update on input/keyup
+    tagInput.addEventListener('input', updatePrefixSuggestions);
+    tagInput.addEventListener('keyup', updatePrefixSuggestions);
 
-    // hide on outside click
-    document.addEventListener('click', function(e){
-      if(!wrap.contains(e.target)){
-        suggestBox.style.display = 'none';
-      }
-    });
+    // when clicking outside, hide suggestions
+    document.addEventListener('click', function(e){ if(!wrap.contains(e.target)) suggestBox.style.display = 'none'; });
 
-    // keyboard navigation (optional basic)
-    tagInput.addEventListener('keydown', function(e){
-      if(suggestBox.style.display === '' ){
-        const items = Array.from(suggestBox.querySelectorAll('.ts-item'));
-        const active = suggestBox.querySelector('.ts-item.--active');
-        let idx = items.indexOf(active);
-        if(e.key === 'ArrowDown'){ e.preventDefault(); idx = Math.min(items.length-1, idx+1); if(active) active.classList.remove('--active'); if(items[idx]) items[idx].classList.add('--active'); }
-        else if(e.key === 'ArrowUp'){ e.preventDefault(); idx = Math.max(0, idx-1); if(active) active.classList.remove('--active'); if(items[idx]) items[idx].classList.add('--active'); }
-        else if(e.key === 'Enter'){ if(active){ e.preventDefault(); const txt = active.textContent.trim(); applySuggestion(txt); } }
-      }
-    });
+    // ensure initial suggestion state (reflect existing tags checked)
+    tagInput.dispatchEvent(new Event('input'));
 
     // date validation
     const dateWarning = document.getElementById('date-warning');

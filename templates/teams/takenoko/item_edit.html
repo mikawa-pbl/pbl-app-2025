@@ -171,6 +171,23 @@
         object-fit: cover;
         display: block;
       }
+      .thumb.marked {
+        opacity: 0.5;
+        filter: grayscale(80%);
+      }
+      .remove-btn {
+        position: absolute;
+        right: 6px;
+        top: 6px;
+        border: none;
+        background: rgba(255,255,255,0.9);
+        color: #333;
+        border-radius: 999px;
+        padding: 4px 8px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .remove-btn:focus { outline: none; }
       .thumb .empty {
         color: rgba(100, 156, 228, 0.9);
         font-size: 28px;
@@ -282,7 +299,7 @@
           const url = URL.createObjectURL(file);
           const box = document.createElement("div");
           box.className = "thumb";
-          box.innerHTML = `<img src="${url}" alt="画像${idx + 1}">`;
+          box.innerHTML = `<img src="${url}" alt="画像${idx + 1}"><button type="button" class="remove-btn" aria-label="画像を取り消す" onclick="removeImage(${idx})">×</button>`;
           thumbs.appendChild(box);
         });
 
@@ -293,14 +310,18 @@
           thumbs.appendChild(box);
         }
 
-        $("pickBtn").disabled = selectedFiles.length >= MAX_IMAGES;
+        updatePickBtnState();
       }
 
       function addImages(fileList) {
         const files = Array.from(fileList || []);
         if (files.length === 0) return;
 
-        const canAdd = Math.max(0, MAX_IMAGES - selectedFiles.length);
+        const existing = document.querySelectorAll("#existingThumbs .thumb").length;
+        const toBeDeleted = document.querySelectorAll("#existingThumbs input[type='hidden']:not([disabled])").length;
+        const existingRemaining = Math.max(0, existing - toBeDeleted);
+
+        const canAdd = Math.max(0, MAX_IMAGES - existingRemaining - selectedFiles.length);
         selectedFiles = selectedFiles.concat(files.slice(0, canAdd));
 
         const dt = new DataTransfer();
@@ -308,6 +329,38 @@
         $("images").files = dt.files;
 
         renderThumbs();
+      }
+
+      function removeImage(index) {
+        selectedFiles.splice(index, 1);
+        const dt = new DataTransfer();
+        selectedFiles.forEach((f) => dt.items.add(f));
+        $("images").files = dt.files;
+        renderThumbs();
+      }
+
+      function toggleExistingImageDelete(imgId) {
+        const el = $("existing_img_" + imgId);
+        const hidden = $("delete_img_" + imgId);
+        if (!el || !hidden) return;
+        const marked = el.classList.toggle("marked");
+        const btn = el.querySelector(".remove-btn");
+        if (marked) {
+          if (btn) btn.textContent = "取り消す";
+          hidden.disabled = false;
+        } else {
+          if (btn) btn.textContent = "削除";
+          hidden.disabled = true;
+        }
+        updatePickBtnState();
+      }
+
+      function updatePickBtnState() {
+        const existing = document.querySelectorAll("#existingThumbs .thumb").length;
+        const toBeDeleted = document.querySelectorAll("#existingThumbs input[type='hidden']:not([disabled])").length;
+        const existingRemaining = Math.max(0, existing - toBeDeleted);
+        const total = existingRemaining + selectedFiles.length;
+        $("pickBtn").disabled = total >= MAX_IMAGES || selectedFiles.length >= MAX_IMAGES;
       }
 
       // ===== 対象学年タグ select の色（required無しでも薄色placeholder化） =====
@@ -375,6 +428,9 @@
         // 対象学年タグは任意：送信ブロックなし
         updateGradeSelectColor();
         $("gradeSelect").addEventListener("change", updateGradeSelectColor);
+
+        // 初期のピックボタン状態を計算
+        updatePickBtnState();
       });
     </script>
   </head>
@@ -392,6 +448,42 @@
 
         <form action="" id="sellForm" method="post" enctype="multipart/form-data">
           {% csrf_token %}
+
+          <!-- 既存画像（クリックで削除/取り消し） -->
+          <div class="field">
+            <label class="label">登録済み画像（クリックで削除を切替）</label>
+            <div style="display:flex; gap:12px; flex-wrap:wrap;" id="existingThumbs">
+              {% for img in item.images.all %}
+                <div class="thumb{% if delete_images and img.id|stringformat:"s" in delete_images %} marked{% endif %}" id="existing_img_{{ img.id }}" data-img-id="{{ img.id }}" style="width:120px; height:120px;">
+                  <img src="{{ img.image.url }}" alt="img{{ forloop.counter }}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
+                  {% if delete_images and img.id|stringformat:"s" in delete_images %}
+                    <button type="button" class="remove-btn" aria-label="既存画像を削除" onclick="toggleExistingImageDelete({{ img.id }})">取り消す</button>
+                    <input type="hidden" name="delete_images" value="{{ img.id }}" id="delete_img_{{ img.id }}">
+                  {% else %}
+                    <button type="button" class="remove-btn" aria-label="既存画像を削除" onclick="toggleExistingImageDelete({{ img.id }})">削除</button>
+                    <input type="hidden" name="delete_images" value="{{ img.id }}" id="delete_img_{{ img.id }}" disabled>
+                  {% endif %}
+                </div>
+              {% empty %}
+                <p style="color:#888;">登録済み画像はありません。</p>
+              {% endfor %}
+            </div>
+            <p class="text-sm text-gray-500 mt-2">※ 最大5枚。削除後＋追加分が5枚以内になるようにしてください。</p>
+          </div>
+
+          <!-- 新規画像追加 -->
+          <div class="field">
+            <label class="label" for="images">画像を追加（複数可・5MB以下）</label>
+
+            <div class="uploader">
+              <div class="thumbs" id="thumbs"></div>
+
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <label class="upload-btn" id="pickBtn" for="images"><i class="fas fa-plus"></i> 画像を追加</label>
+                <input id="images" name="images" class="file-input" type="file" accept="image/*" multiple />
+              </div>
+            </div>
+          </div>
 
           <!-- 商品名 -->
           <div class="field">
@@ -509,27 +601,7 @@
             </div>
           </div>
 
-          <!-- 既存画像（削除チェック） -->
-          <div class="field">
-            <label class="label">登録済み画像（削除するものにチェック）</label>
-            <div style="display:flex; gap:12px; flex-wrap:wrap;">
-              {% for img in item.images.all %}
-                <label style="display:flex; flex-direction:column; align-items:center; gap:6px;">
-                  <img src="{{ img.image.url }}" alt="img{{ forloop.counter }}" style="width:120px; height:120px; object-fit:cover; border-radius:12px; border:1px solid #ddd;">
-                  <input type="checkbox" name="delete_images" value="{{ img.id }}"> 削除
-                </label>
-              {% empty %}
-                <p style="color:#888;">登録済み画像はありません。</p>
-              {% endfor %}
-            </div>
-            <p class="text-sm text-gray-500 mt-2">※ 最大5枚。削除後＋追加分が5枚以内になるようにしてください。</p>
-          </div>
 
-          <!-- 新規画像追加 -->
-          <div class="field">
-            <label class="label" for="images">画像を追加（複数可・5MB以下）</label>
-            <input id="images" name="images" type="file" multiple accept="image/*" class="input" />
-          </div>
 
           <!-- 送信 -->
           <div class="actions">

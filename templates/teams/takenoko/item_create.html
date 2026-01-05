@@ -165,29 +165,25 @@
       color: rgba(100,156,228,0.9);
       font-size: 28px;
     }
-
-    .upload-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: none;
-      background: #649CE4;
-      color: white;
-      font-size: 14px;
-      font-weight: 700;
-      border-radius: 999px;
-      padding: 10px 14px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .upload-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .file-input {
-      display: none;
-    }
-
+      .thumb .remove-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 26px;
+        height: 26px;
+        border-radius: 999px;
+        border: none;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
+      }
+      .thumb .remove-btn:focus { outline: 2px solid rgba(100,156,228,0.6); }
     /* ===== 学年タグ（複数） ===== */
     .chips {
       display: flex;
@@ -266,7 +262,7 @@
         const url = URL.createObjectURL(file);
         const box = document.createElement("div");
         box.className = "thumb";
-        box.innerHTML = `<img src="${url}" alt="画像${idx+1}">`;
+        box.innerHTML = `<img src="${url}" alt="画像${idx+1}"><button type="button" class="remove-btn" aria-label="画像を削除" onclick="removeImage(${idx})">×</button>`;
         thumbs.appendChild(box);
       });
 
@@ -278,6 +274,18 @@
       }
 
       $("pickBtn").disabled = (selectedFiles.length >= MAX_IMAGES);
+    }
+
+    function removeImage(index) {
+      if (index < 0 || index >= selectedFiles.length) return;
+      selectedFiles.splice(index, 1);
+      const dt = new DataTransfer();
+      selectedFiles.forEach(f => dt.items.add(f));
+      if (selectedFiles.length === 0) {
+        $("images").value = "";
+      }
+      $("images").files = dt.files;
+      renderThumbs();
     }
 
     function addImages(fileList) {

@@ -290,13 +290,13 @@
 <body>
     <header>
         <div class="logo">Furu-Trade</div>
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="商品を検索...">
-            <button class="search-btn">
+        <form method="get" action="{% url 'team_giryulink:index' %}" class="search-container">
+            <input type="text" name="search" class="search-input" placeholder="商品を検索..." value="{{ search_query }}">
+            <button type="submit" class="search-btn">
                 <span>🔍</span>
                 <span>検索</span>
             </button>
-        </div>
+        </form>
     </header>
     
     <main>

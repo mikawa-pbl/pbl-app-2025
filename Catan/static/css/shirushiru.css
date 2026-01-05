@@ -141,6 +141,41 @@ table {
     font-size: 12px;
 }
 
+/* 固定レイアウトにして列幅を明示的に固定する */
+table {
+    table-layout: fixed;
+}
+
+/* 列幅の割り当て（学年ごとのテーブルすべてに適用） */
+table th:nth-child(1),
+table td:nth-child(1) {
+    width: 15%; /* 名前 */
+}
+table th:nth-child(2),
+table td:nth-child(2) {
+    width: 33%; /* 場所 */
+}
+table th:nth-child(3),
+table td:nth-child(3) {
+    width: 40%; /* コメント */
+}
+table th:nth-child(4),
+table td:nth-child(4) {
+    width: 12%; /* 詳細ボタン等 */
+}
+/* 5列目は非表示列用（存在するテーブルのみ） */
+table th:nth-child(5),
+table td:nth-child(5) {
+    width: 0;
+}
+
+/* 長いテキストは省略表示 */
+table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 table,
 th,
 td {

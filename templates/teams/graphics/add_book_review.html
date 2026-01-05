@@ -33,6 +33,11 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
         }
         header h1 {
             font-size: 24px;
@@ -66,7 +71,7 @@
             height: 100vh;
             background-color: white;
             transition: right 0.3s ease;
-            z-index: 999;
+            z-index: 1002;
             padding-top: 60px;
             box-shadow: -2px 0 8px rgba(0,0,0,0.1);
         }
@@ -112,6 +117,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 40px 20px;
+            padding-top: 100px;
         }
         h2 {
             color: #0f172a;
@@ -208,7 +214,7 @@
     <nav class="nav-menu" id="navMenu">
         <ul>
             <li><a href="{% url 'graphics:index' %}" onclick="toggleMenu()">ホーム</a></li>
-            <li><a href="{% url 'graphics:book_reviews' %}" onclick="toggleMenu()">レビュー一覧</a></li>
+            <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
             <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
         </ul>
     </nav>

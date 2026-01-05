@@ -34,9 +34,18 @@
     <!-- (A) ヘッダー -->
     <header class="sticky top-0 z-10 flex items-center justify-between w-full px-4 py-3 bg-white shadow-sm">
         <h1 class="text-lg font-bold text-gray-800">技科大 混雑マップ</h1>
-        <div class="flex items-center space-x-3">
-            <span id="points-display" class="text-base font-bold text-blue-600">保有: 読み込み中...</span>
-            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div class="relative">
+            <div id="user-menu-btn" class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition">
+                <span id="points-display" class="text-base font-bold text-blue-600">保有: ...</span>
+                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <!-- ドロップダウンメニュー -->
+            <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden z-50 ring-1 ring-black ring-opacity-5">
+                <div class="px-4 py-2 text-xs text-gray-500 border-b">ユーザー切り替え</div>
+                <div id="user-list-container" class="max-h-60 overflow-y-auto">
+                    <!-- JSで追加 -->
+                </div>
+            </div>
         </div>
     </header>
 
@@ -70,9 +79,12 @@
     <!-- (D) 情報投稿モーダル -->
     <div id="post-modal" class="fixed inset-0 z-50 items-center justify-center hidden p-4 bg-black bg-opacity-50 modal-overlay">
         <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-xl modal-content">
-            <h3 id="post-modal-title" class="text-lg font-bold text-gray-900">混雑状況を投稿</h3>
+            <div class="flex justify-between items-start">
+                <h3 id="post-modal-title" class="text-lg font-bold text-gray-900">混雑状況を投稿</h3>
+                <span id="post-modal-distance" class="text-sm font-semibold">--</span>
+            </div>
             <div class="mt-4 space-y-4">
-                <div id="post-facility-container">
+                <div id="post-facility-container" style="display: none;">
                     <select id="post-facility" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                         <option value="" disabled selected>施設を選択</option>
                     </select>
@@ -85,6 +97,7 @@
                 </select>
                 <textarea id="post-comment" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="コメント (任意)"></textarea>
             </div>
+            <p id="post-distance-error" class="text-sm font-bold text-center text-red-600 mt-4 hidden"></p>
             <div class="flex justify-end mt-6 space-x-3">
                 <button id="cancel-post-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
                     キャンセル
@@ -112,6 +125,8 @@
             targetFacilityId: null,
             userFacilityAccess: new Set(),
             postLockedFacilityId: null, // ロックされた投稿先
+            userLocation: null,         // ユーザーの位置情報
+            isLocationAcquired: false,  // 位置情報取得済みフラグ
         };
 
         // --- DOM要素 ---
@@ -128,10 +143,32 @@
         const postModalTitle = document.getElementById('post-modal-title');
         const postStatusSelect = document.getElementById('post-status');
         const postCommentInput = document.getElementById('post-comment');
+        const postModalDistance = document.getElementById('post-modal-distance');
+        const postDistanceError = document.getElementById('post-distance-error');
 
         // --- ユーティリティ: CSRF トークン取得 ---
         function getCsrfToken() {
             return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+        
+        // --- ユーティリティ: 距離計算 ---
+        function haversine(lat1, lon1, lat2, lon2) {
+            if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return null;
+            const R = 6371000; // 地球の半径 (メートル)
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // 距離 (メートル)
+        }
+        
+        function getDistanceColor(distance) {
+            if (distance == null) return 'text-gray-500';
+            if (distance < 50) return 'text-green-600';
+            if (distance <= 100) return 'text-orange-500';
+            return 'text-red-600';
         }
 
         // --- ユーティリティ: API呼び出し ---
@@ -147,7 +184,6 @@
                 options.body = JSON.stringify(data);
             }
             const response = await fetch(url, options);
-            // try parse JSON body regardless of status
             let json = null;
             try {
                 json = await response.json();
@@ -161,27 +197,81 @@
             return json;
         }
 
+        // --- 位置情報許可のハンドリング ---
+        function handleLocationPermission() {
+            if (state.isLocationAcquired) return true;
+            // 起動時に位置情報を要求する通知（DBの位置情報を使用することを示す）
+            const confirmed = confirm("投稿や距離の表示には、位置情報が必要です。\n（登録された位置情報を使用します）\n\n許可しますか？");
+            if (confirmed) {
+                state.isLocationAcquired = true;
+                updateAllDistancesUI();
+                return true;
+            }
+            alert("位置情報を許可しないと、この機能は利用できません。");
+            return false;
+        }
+
+        // --- ユーザー切り替え機能 ---
+        async function setupUserSwitcher() {
+            const btn = document.getElementById('user-menu-btn');
+            const menu = document.getElementById('user-dropdown');
+            const listContainer = document.getElementById('user-list-container');
+            
+            // トグル
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('hidden');
+            };
+
+            // 外部クリックで閉じる
+            document.addEventListener('click', (e) => {
+                if (!btn.contains(e.target) && !menu.contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            });
+
+            // ユーザー一覧取得
+            try {
+                const data = await apiCall('/team_northcliff/api/users/');
+                if (data.users) {
+                    listContainer.innerHTML = '';
+                    data.users.forEach(u => {
+                        const div = document.createElement('div');
+                        div.className = 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer';
+                        div.textContent = u.name;
+                        if (u.name === username) {
+                             div.classList.add('bg-blue-50', 'font-bold');
+                        }
+                        div.onclick = () => {
+                            window.location.href = `/team_northcliff/ui/${encodeURIComponent(u.name)}/`;
+                        };
+                        listContainer.appendChild(div);
+                    });
+                }
+            } catch (e) {
+                console.error('ユーザー一覧取得失敗', e);
+            }
+        }
+
         // --- 初期データ読み込み ---
         async function initializeApp() {
             try {
-                // ユーザー情報とポイント取得
+                // ユーザー情報（ポイントと位置情報）取得
                 const userData = await apiCall(`/team_northcliff/api/${username}/user-data/`);
                 state.userId = userData.user_id;
                 state.points = userData.points;
+                state.userLocation = { latitude: userData.latitude, longitude: userData.longitude };
                 pointsDisplay.textContent = `保有: ${state.points}P`;
+
+                // 起動時に位置情報を要求
+                handleLocationPermission();
+                
+                // ユーザー切り替えセットアップ
+                setupUserSwitcher();
 
                 // 施設一覧を取得
                 const facilitiesData = await apiCall('/team_northcliff/api/facilities/');
                 state.facilities = facilitiesData.facilities;
-
-                // 投稿フォームの施設選択肢を設定
-                postFacilitySelect.innerHTML = '<option value="" disabled selected>施設を選択</option>';
-                state.facilities.forEach(facility => {
-                    const option = document.createElement('option');
-                    option.value = facility.id;
-                    option.textContent = facility.name;
-                    postFacilitySelect.appendChild(option);
-                });
 
                 render();
             } catch (error) {
@@ -189,7 +279,7 @@
                 facilityList.innerHTML = '<p class="text-red-500">データ読み込みエラー</p>';
             }
         }
-
+        
         // --- UI再描画 ---
         function render() {
             facilityList.innerHTML = '';
@@ -197,9 +287,16 @@
             state.facilities.forEach(facility => {
                 const facilityCard = document.createElement('div');
                 facilityCard.className = 'p-4 bg-white rounded-lg shadow-md border border-gray-200';
+                
+                const distance = state.isLocationAcquired ? haversine(state.userLocation.latitude, state.userLocation.longitude, facility.latitude, facility.longitude) : null;
+                const distanceText = distance != null ? `距離: ${Math.round(distance)}m` : '距離: --';
+                const distanceColor = getDistanceColor(distance);
 
                 let cardContent = `
-                    <h3 class="text-lg font-bold text-gray-800">${facility.name}</h3>
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg font-bold text-gray-800">${facility.name}</h3>
+                        <span class="facility-distance text-sm font-semibold ${distanceColor}">${distanceText}</span>
+                    </div>
                     <p class="text-xs text-gray-500 mt-1">最終投稿： ${facility.last_post_time}</p>
                     <div class="border-t my-3"></div>
                 `;
@@ -207,35 +304,10 @@
                 const isUnlocked = state.userFacilityAccess.has(facility.id);
 
                 if (isUnlocked) {
-                    // 閲覧後の状態（コメントは後から安全に追加）
                     const statusDisplay = statusMap[facility.latest_status] || '情報なし';
-                    cardContent += `
-                        <div>
-                            <span class="text-sm font-medium text-gray-700">現在の状況：</span>
-                            <span class="text-base font-bold">${statusDisplay}</span>
-                        </div>
-                    `;
-                } else {
-                    // ポイント消費ボタン と 投稿ボタン を横並びで表示
-                    cardContent += `
-                        <div class="flex space-x-2">
-                            <button 
-                                class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition duration-300"
-                                data-action="unlock"
-                                data-id="${facility.id}"
-                            >
-                                最新情報を取得 (1P消費)
-                            </button>
-                            <button 
-                                class="flex-none px-3 py-2 font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition duration-300"
-                                data-action="post"
-                                data-facility-id="${facility.id}"
-                            >
-                                投稿する
-                            </button>
-                        </div>
-                    `;
-                }
+                    cardContent += `<div><span class="text-sm font-medium text-gray-700">現在の状況：</span><span class="text-base font-bold">${statusDisplay}</span></div>`;
+                } 
+                // else: ロック中のメッセージなどは特にないので何もしない（ボタンは下に追加）
 
                 facilityCard.innerHTML = cardContent;
                 facilityList.appendChild(facilityCard);
@@ -244,26 +316,43 @@
                 if (isUnlocked && Array.isArray(facility.recent_comments) && facility.recent_comments.length > 0) {
                     const commentsContainer = document.createElement('div');
                     commentsContainer.className = 'mt-3 space-y-3';
-
                     facility.recent_comments.forEach(c => {
                         const cWrap = document.createElement('div');
                         cWrap.className = 'p-3 bg-gray-50 rounded-md';
-
                         const cText = document.createElement('p');
                         cText.className = 'text-sm text-gray-700';
                         cText.textContent = c.comment || '';
-
                         const cTime = document.createElement('p');
                         cTime.className = 'text-xs text-gray-500 mt-1';
                         cTime.textContent = c.time_ago || '';
-
                         cWrap.appendChild(cText);
                         cWrap.appendChild(cTime);
                         commentsContainer.appendChild(cWrap);
                     });
-
                     facilityCard.appendChild(commentsContainer);
                 }
+
+                // --- ボタンは常に表示（最後に追記） ---
+                const btnContainer = document.createElement('div');
+                btnContainer.className = 'flex space-x-2 mt-4';
+                btnContainer.innerHTML = `
+                    <button class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" data-action="unlock" data-id="${facility.id}">最新情報を取得 (1P消費)</button>
+                    <button class="flex-none px-3 py-2 font-medium text-white bg-green-600 rounded-md hover:bg-green-700" data-action="post" data-facility-id="${facility.id}">投稿する</button>
+                `;
+                facilityCard.appendChild(btnContainer);
+            });
+
+        }
+        
+        // --- 距離表示だけを更新 ---
+        function updateAllDistancesUI() {
+            if (!state.isLocationAcquired) return;
+            document.querySelectorAll('.facility-distance').forEach((el, index) => {
+                const facility = state.facilities[index];
+                if (!facility) return;
+                const distance = haversine(state.userLocation.latitude, state.userLocation.longitude, facility.latitude, facility.longitude);
+                el.textContent = distance != null ? `距離: ${Math.round(distance)}m` : '距離: --';
+                el.className = `facility-distance text-sm font-semibold ${getDistanceColor(distance)}`;
             });
         }
 
@@ -283,36 +372,52 @@
         }
 
         // --- イベントリスナー ---
-
         facilityList.addEventListener('click', async (event) => {
             const btn = event.target.closest('button');
             if (!btn) return;
 
             const action = btn.dataset.action;
             if (action === 'unlock') {
-                const facilityId = parseInt(btn.dataset.id);
-                if (state.points <= 0) {
-                    alert('ポイントが足りません');
-                    return;
-                }
-                state.targetFacilityId = facilityId;
+                if (state.points <= 0) { alert('ポイントが足りません'); return; }
+                state.targetFacilityId = parseInt(btn.dataset.id);
                 openModal(confirmModal);
                 return;
             }
 
             if (action === 'post') {
+                if (!handleLocationPermission()) return;
+                
                 const facilityId = parseInt(btn.dataset.facilityId);
-                // 該当施設のみ投稿できるようにロックしてモーダルを開く
+                const facility = state.facilities.find(f => f.id === facilityId);
+                if (!facility) return;
+
+                // 該当施設のみ投稿できるようにロックしてモーダルを開く準備
                 state.postLockedFacilityId = facilityId;
-                postFacilitySelect.value = String(facilityId);
-                postFacilitySelect.disabled = true; // 選択不可にする
-                // 選択要素を非表示にして、代わりにタイトルに施設名を表示
-                if (postFacilityContainer) postFacilityContainer.style.display = 'none';
-                const facilityObj = state.facilities.find(f => f.id === facilityId);
-                const facilityName = facilityObj ? facilityObj.name : '施設';
-                if (postModalTitle) postModalTitle.textContent = `${facilityName}の混雑状況を投稿`;
+                
+                const distance = haversine(state.userLocation.latitude, state.userLocation.longitude, facility.latitude, facility.longitude);
+                const distanceText = distance != null ? `距離: ${Math.round(distance)}m` : '距離: --';
+                const distanceColor = getDistanceColor(distance);
+                
+                postModalTitle.textContent = `${facility.name}の混雑状況を投稿`;
+                postModalDistance.textContent = distanceText;
+                postModalDistance.className = `text-sm font-semibold ${distanceColor}`;
+                
+                // フォームの初期化
                 postStatusSelect.value = '';
                 postCommentInput.value = '';
+                
+                // 距離に応じて投稿フォームを制御
+                if (distance != null && distance > 100) {
+                    postDistanceError.textContent = '距離が遠すぎるため、投稿できません。';
+                    postDistanceError.classList.remove('hidden');
+                    confirmPostBtn.disabled = true;
+                    confirmPostBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                } else {
+                    postDistanceError.classList.add('hidden');
+                    confirmPostBtn.disabled = false;
+                    confirmPostBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                }
+                
                 openModal(postModal);
                 return;
             }
@@ -325,12 +430,7 @@
 
         confirmUnlockBtn.addEventListener('click', async () => {
             try {
-                // API呼び出し: ポイント消費して施設情報にアクセス
-                await apiCall(`/team_northcliff/api/${username}/access-facility/`, 'POST', {
-                    facility_id: state.targetFacilityId,
-                });
-
-                // 状態更新
+                await apiCall(`/team_northcliff/api/${username}/access-facility/`, 'POST', { facility_id: state.targetFacilityId });
                 state.points -= 1;
                 state.userFacilityAccess.add(state.targetFacilityId);
                 pointsDisplay.textContent = `保有: ${state.points}P`;
@@ -345,19 +445,12 @@
 
         cancelPostBtn.addEventListener('click', () => {
             // キャンセル時はロック解除してモーダルを閉じる
-            if (state.postLockedFacilityId !== null) {
-                postFacilitySelect.disabled = false;
-                state.postLockedFacilityId = null;
-                postFacilitySelect.value = '';
-                if (postFacilityContainer) postFacilityContainer.style.display = ''; // 表示に戻す
-                if (postModalTitle) postModalTitle.textContent = '混雑状況を投稿';
-            }
+            state.postLockedFacilityId = null;
             closeModal(postModal);
         });
 
         confirmPostBtn.addEventListener('click', async () => {
-            // 投稿先はロックがあればそれを使い、なければ選択値を使う
-            const facilityId = state.postLockedFacilityId !== null ? state.postLockedFacilityId : parseInt(postFacilitySelect.value);
+            const facilityId = state.postLockedFacilityId;
             const status = postStatusSelect.value;
             const comment = postCommentInput.value.trim();
 
@@ -370,39 +463,36 @@
                 // API呼び出し: 投稿をデータベースに保存
                 await apiCall(`/team_northcliff/api/${username}/create-post/`, 'POST', {
                     facility_id: facilityId,
-                    status,
+                    status: status,
                     comment: comment || null,
                 });
 
-                // ポイント獲得と投稿者は自動的に施設にアクセス可能
+                // 状態更新
                 state.points += 1;
                 state.userFacilityAccess.add(facilityId);
                 pointsDisplay.textContent = `保有: ${state.points}P`;
 
-                // 施設の最新情報を再取得
+                // 最新の施設情報を再取得
                 const facilitiesData = await apiCall('/team_northcliff/api/facilities/');
                 state.facilities = facilitiesData.facilities;
-
-                // 成功時はロック解除してモーダルを閉じる
-                if (state.postLockedFacilityId !== null) {
-                    postFacilitySelect.disabled = false;
-                    state.postLockedFacilityId = null;
-                    postFacilitySelect.value = '';
-                    if (postFacilityContainer) postFacilityContainer.style.display = ''; // 表示に戻す
-                    if (postModalTitle) postModalTitle.textContent = '混雑状況を投稿';
-                }
-
+                
+                // UIを再描画してモーダルを閉じる
                 render();
+                state.postLockedFacilityId = null;
                 closeModal(postModal);
+
             } catch (error) {
-                // クールタイムのサーバーメッセージを優先して表示
-                if (error && error.message && error.message.includes('１０分以内に同一の施設情報を投稿することはできません')) {
-                    alert('１０分以内に同一の施設情報を投稿することはできません');
+                // 既存のクールタイムエラー処理を維持
+                if (error && error.message && error.message.includes('１０分以内')) {
+                    alert(error.message);
+                } else if (error && error.message && error.message.includes('位置情報が利用できない')) {
+                    alert(error.message);
+                } else if (error && error.message && error.message.includes('施設から100m以上離れている')) {
+                    alert(error.message);
                 } else {
                     console.error('投稿エラー:', error);
                     alert('投稿に失敗しました');
                 }
-                // 失敗時はモーダルはそのまま（ロックは維持）
             }
         });
 

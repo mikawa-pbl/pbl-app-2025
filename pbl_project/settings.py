@@ -67,6 +67,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "h34vvy_u53rzz.middleware.H34vvySessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -210,6 +211,13 @@ DATABASES = {
 
 # app_labelごとにDBを振り分けるルーター
 DATABASE_ROUTERS = ["routers.TeamPerAppRouter"]
+
+# "django.contrib.auth.backends.ModelBackend" はチームgiryulinkのユーザー認証のものです。
+# グローバルの認証バックエンド
+AUTHENTICATION_BACKENDS = [
+    "h34vvy_u53rzz.backends.H34vvyUserBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

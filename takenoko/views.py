@@ -186,11 +186,121 @@ def start_trading(request):
 
 @takenoko_login_required
 def item_delete(request):
-    return render(request, 'teams/takenoko/item_delete.html')
+    item_id = request.GET.get("id")
+    if not item_id:
+        messages.error(request, "商品が見つかりません。")
+        return redirect("takenoko:listing_items")
+
+    user = get_current_user(request)
+    item = Item.objects.filter(pk=item_id, seller=user).first()
+    if not item:
+        messages.error(request, "この商品が見つからないか、操作権限がありません。")
+        return redirect("takenoko:listing_items")
+
+    if request.method == "POST":
+        item.delete()
+        messages.success(request, "商品を削除しました。")
+        return redirect("takenoko:listing_items")
+
+    return render(request, "teams/takenoko/item_delete.html", {"item": item})
 
 @takenoko_login_required
 def item_edit(request):
-    return render(request, 'teams/takenoko/item_edit.html')
+    item_id = request.GET.get("id")
+    if not item_id:
+        messages.error(request, "商品が見つかりません。")
+        return redirect("takenoko:listing_items")
+
+    user = get_current_user(request)
+    item = Item.objects.filter(pk=item_id, seller=user).first()
+    if not item:
+        messages.error(request, "この商品が見つからないか、操作権限がありません。")
+        return redirect("takenoko:listing_items")
+
+    if request.method == "POST":
+        form = ItemCreateForm(request.POST, instance=item)
+        new_images = request.FILES.getlist('images')
+        delete_ids = request.POST.getlist('delete_images')
+
+        # 画像枚数チェック（削除後の残数 + 追加 <= 5）
+        remaining = item.images.exclude(id__in=delete_ids).count()
+        if remaining + len(new_images) > 5:
+            messages.error(request, "画像は最大5枚までです。")
+            return render(request, "teams/takenoko/item_edit.html", {
+                "form": form,
+                "item": item,
+                "selected_grades": request.POST.getlist('grades'),
+                "selected_tags": request.POST.getlist('tags'),
+            })
+
+        # バリデーション（任意）
+        image_errors = []
+        for img in new_images:
+            if img.size > 5 * 1024 * 1024:
+                image_errors.append(f"{img.name}: 5MB以下にしてください。")
+            if not getattr(img, "content_type", "").startswith("image/"):
+                image_errors.append(f"{img.name}: 画像ファイルのみアップロード可能です。")
+        if image_errors:
+            for e in image_errors:
+                messages.error(request, e)
+            return render(request, "teams/takenoko/item_edit.html", {
+                "form": form,
+                "item": item,
+                "selected_grades": request.POST.getlist('grades'),
+                "selected_tags": request.POST.getlist('tags'),
+            })
+
+        if form.is_valid():
+            item = form.save(commit=False)
+            item.seller = user
+            item.save()
+
+            # 学年
+            item.target_grades.clear()
+            for code in request.POST.getlist('grades'):
+                grade = TargetGrade.objects.filter(code=code).first()
+                if grade:
+                    item.target_grades.add(grade)
+
+            # タグ
+            item.tags.clear()
+            for name in request.POST.getlist('tags'):
+                tag = Tag.objects.filter(name=name).first()
+                if tag:
+                    item.tags.add(tag)
+
+            # 画像削除
+            if delete_ids:
+                item.images.filter(id__in=delete_ids).delete()
+
+            # 画像追加（連番付け直し）
+            current = list(item.images.order_by('order'))
+            order_start = 1
+            for existing in current:
+                existing.order = order_start
+                existing.save(update_fields=['order'])
+                order_start += 1
+            for img in new_images:
+                ItemImage.objects.create(item=item, image=img, order=order_start)
+                order_start += 1
+
+            messages.success(request, "商品を更新しました。")
+            return redirect(f"/takenoko/item_delete/?id={item.pk}")
+        else:
+            messages.error(request, "入力内容を確認してください。")
+    else:
+        initial = {
+            "grades": list(item.target_grades.values_list("code", flat=True)),
+            "tags": list(item.tags.values_list("name", flat=True)),
+        }
+        form = ItemCreateForm(instance=item, initial=initial)
+
+    return render(request, "teams/takenoko/item_edit.html", {
+        "form": form,
+        "item": item,
+        "selected_grades": request.POST.getlist('grades') if request.method == "POST" else list(item.target_grades.values_list("code", flat=True)),
+        "selected_tags": request.POST.getlist('tags') if request.method == "POST" else list(item.tags.values_list("name", flat=True)),
+    })
 
 @takenoko_login_required
 def edit_complete(request):

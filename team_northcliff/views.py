@@ -11,3 +11,7 @@ def members(request):
 
 def ui(request, username):
     return render(request, 'teams/team_northcliff/ui.html', {'username': username})
+
+# 追加: map_ui ページを username コンテキストで表示
+def map_ui(request, username):
+    return render(request, 'teams/team_northcliff/map_ui.html', {'username': username})

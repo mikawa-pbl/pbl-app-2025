@@ -1,0 +1,54 @@
+{% extends 'teams/team_TMR/base.html' %}
+
+{% block title %}新規登録{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-6 text-gray-800">新規登録</h2>
+
+<form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- 招待コードフォーム -->
+    <fieldset class="border rounded-md p-4">
+        <legend class="text-lg font-medium text-gray-900 px-2">招待コード</legend>
+        {% if invitation_form.invitation_code.errors %}
+            <div class="text-red-500 text-sm mb-2">
+                {{ invitation_form.invitation_code.errors.0 }}
+            </div>
+        {% endif %}
+        <label for="{{ invitation_form.invitation_code.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ invitation_form.invitation_code.label }}:</label>
+        <input type="text" name="{{ invitation_form.invitation_code.name }}" id="{{ invitation_form.invitation_code.id_for_label }}"
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               required>
+    </fieldset>
+    
+    <!-- ユーザー登録フォーム -->
+    <fieldset class="border rounded-md p-4">
+        <legend class="text-lg font-medium text-gray-900 px-2">アカウント情報</legend>
+        
+        <!-- Django標準のUserCreationFormのエラーとフィールドを表示 -->
+        {% for field in user_form %}
+            <div class="mb-4">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}:</label>
+                <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="{{ field.id_for_label }}"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                       required>
+                {% if field.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ field.errors.0 }}</p>
+                {% endif %}
+                {% if field.help_text %}
+                    <p class="text-gray-500 text-sm mt-1">{{ field.help_text|safe }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </fieldset>
+    
+
+    <div>
+        <button type="submit"
+                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            登録する
+        </button>
+    </div>
+</form>
+{% endblock %}

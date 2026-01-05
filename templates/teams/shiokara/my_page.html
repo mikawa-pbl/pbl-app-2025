@@ -1,0 +1,437 @@
+{% extends "teams/shiokara/base.html" %}
+{% load static %}
+
+{% block title %}マイページ - 就活支援サービス{% endblock %}
+
+{% block content %}
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" with active_page='my_page' %}
+
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
+  <h1>マイページ</h1>
+
+  {% if person %}
+    <section style="background: white; padding: 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 24px;">
+      <h2 style="margin-top: 0;">プロフィール設定</h2>
+      
+      <form method="post" enctype="multipart/form-data" style="max-width: 600px;">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px; text-align: center;">
+          {% if person.icon_picture %}
+            <img src="{% static person.icon_picture %}" alt="アイコン" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 3px solid #cc0000;">
+          {% else %}
+            <img src="{% static 'image/person.png' %}" alt="デフォルトアイコン" style="width: 80px; height: 80px; object-fit: cover;">
+          {% endif %}
+          <div style="margin-top: 12px;">
+            <label for="id_icon" style="cursor: pointer; background: #0066cc; color: white; padding: 8px 16px; border-radius: 6px; display: inline-block;">
+              アイコンを選択
+            </label>
+            <input type="file" name="icon" id="id_icon" accept="image/*" style="display: none;" onchange="previewIcon(this)">
+          </div>
+          <small style="display: block; margin-top: 8px; color: #666;">※ 画像ファイル (jpg, png, gif) をアップロード</small>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label for="id_nickname" style="display: block; margin-bottom: 6px; font-weight: 600;">ニックネーム:</label>
+          <input type="text" name="nickname" id="id_nickname" value="{{ person.nickname }}" maxlength="50" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; box-sizing: border-box;">
+          <small style="display: block; margin-top: 4px; color: #666;">※ 未設定の場合は学籍番号が表示されます</small>
+        </div>
+
+        <button type="submit" style="padding: 12px 24px; background: #cc0000; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">
+          保存
+        </button>
+      </form>
+
+      <script>
+        function previewIcon(input) {
+          if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const img = input.closest('form').querySelector('img');
+              img.src = e.target.result;
+              img.style.width = '100px';
+              img.style.height = '100px';
+              img.style.borderRadius = '50%';
+              img.style.border = '3px solid #cc0000';
+            };
+            reader.readAsDataURL(input.files[0]);
+          }
+        }
+      </script>
+    </section>
+
+    <section style="background: white; padding: 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 24px;">
+      <h2 style="margin-top: 0;">登録情報</h2>
+      <ul style="list-style: none; padding: 0;">
+        <li style="margin-bottom: 12px;"><strong>学籍番号:</strong> {{ person.student_id }}</li>
+        <li style="margin-bottom: 12px;"><strong>課程:</strong> {{ person.get_course_display }}</li>
+        <li style="margin-bottom: 12px;"><strong>学年:</strong> {{ person.grade }} 年</li>
+        <li style="margin-bottom: 12px;"><strong>学科・専攻:</strong> {{ person.department_name }}</li>
+        <li style="margin-bottom: 12px;"><strong>研究分野:</strong> {{ person.lab_field }}</li>
+        <li style="margin-bottom: 12px;"><strong>ポイント:</strong> <strong style="font-size: 1.2rem; color: #cc0000;">{{ person.points }}</strong> pt</li>
+        <li style="margin-bottom: 12px;"><strong>登録日時:</strong> {{ person.created_at|date:"Y/m/d H:i" }}</li>
+      </ul>
+      
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+        <a href="{% url 'shiokara:site_feedback' %}" style="
+          display: inline-block;
+          padding: 10px 20px;
+          background: #0066cc;
+          color: white;
+          text-decoration: none;
+          border-radius: 6px;
+          transition: background 0.2s;
+        " onmouseover="this.style.background='#0055aa'" onmouseout="this.style.background='#0066cc'">
+          💬 サイト要望を送信してポイント獲得
+        </a>
+      </div>
+    </section>
+  {% else %}
+    <p>ログイン情報が見つかりませんでした。</p>
+  {% endif %}
+
+    <section style="background: white; padding: 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 24px;">
+      <h2 style="margin-top: 0;">📅 就活カレンダー</h2>
+      <p style="color: #666; font-size: 0.9rem; margin-bottom: 16px;">お気に入り企業のインターン・選考日程を確認できます</p>
+      
+      <div id="calendar-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <button id="prev-month" style="padding: 8px 16px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">◀ 前月</button>
+          <h3 id="current-month" style="margin: 0; font-size: 1.2rem;"></h3>
+          <button id="next-month" style="padding: 8px 16px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; cursor: pointer;">次月 ▶</button>
+        </div>
+        
+        <div id="calendar" style="border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;"></div>
+        
+        <div style="margin-top: 16px; display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.85rem;">
+          <div><span style="display: inline-block; width: 12px; height: 12px; background: #4caf50; border-radius: 2px; margin-right: 4px;"></span>インターン開始</div>
+          <div><span style="display: inline-block; width: 12px; height: 12px; background: #ff9800; border-radius: 2px; margin-right: 4px;"></span>インターン締切</div>
+          <div><span style="display: inline-block; width: 12px; height: 12px; background: #2196f3; border-radius: 2px; margin-right: 4px;"></span>前年度選考開始</div>
+        </div>
+      </div>
+      
+      <script>
+        // お気に入り企業のイベントデータ
+        const events = [
+          {% for company in favorites %}
+            {% if company.internship_start_date %}
+              { date: '{{ company.internship_start_date|date:"Y-m-d" }}', type: 'start', company: '{{ company.name|escapejs }}' },
+            {% endif %}
+            {% if company.internship_deadline %}
+              { date: '{{ company.internship_deadline|date:"Y-m-d" }}', type: 'deadline', company: '{{ company.name|escapejs }}' },
+            {% endif %}
+            {% if company.last_year_selection_start_date %}
+              { date: '{{ company.last_year_selection_start_date|date:"Y-m-d" }}', type: 'selection', company: '{{ company.name|escapejs }}' },
+            {% endif %}
+          {% endfor %}
+        ];
+
+        let currentDate = new Date();
+
+        function renderCalendar() {
+          const year = currentDate.getFullYear();
+          const month = currentDate.getMonth();
+          
+          // 月の表示
+          const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+          document.getElementById('current-month').textContent = year + '年 ' + monthNames[month];
+          
+          // カレンダーグリッド作成
+          const firstDay = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+          
+          let calendarHTML = '<table style="width: 100%; border-collapse: collapse;">';
+          calendarHTML += '<thead><tr>';
+          ['日', '月', '火', '水', '木', '金', '土'].forEach((day, i) => {
+            const color = i === 0 ? '#e74c3c' : i === 6 ? '#3498db' : '#333';
+            calendarHTML += `<th style="padding: 8px; background: #f5f5f5; border: 1px solid #e0e0e0; color: ${color};">${day}</th>`;
+          });
+          calendarHTML += '</tr></thead><tbody><tr>';
+          
+          // 空白セル
+          for (let i = 0; i < firstDay; i++) {
+            calendarHTML += '<td style="padding: 8px; border: 1px solid #e0e0e0;"></td>';
+          }
+          
+          // 日付セル
+          for (let day = 1; day <= daysInMonth; day++) {
+            if ((firstDay + day - 1) % 7 === 0 && day !== 1) {
+              calendarHTML += '</tr><tr>';
+            }
+            
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dayEvents = events.filter(e => e.date === dateStr);
+            
+            let cellStyle = 'padding: 8px; border: 1px solid #e0e0e0; vertical-align: top; height: 60px;';
+            let cellContent = `<div style="font-weight: 600; margin-bottom: 4px;">${day}</div>`;
+            
+            dayEvents.forEach(event => {
+              const colors = { start: '#4caf50', deadline: '#ff9800', selection: '#2196f3' };
+              const labels = { start: '開始', deadline: '締切', selection: '選考' };
+              cellContent += `<div style="font-size: 0.7rem; background: ${colors[event.type]}; color: white; padding: 2px 4px; border-radius: 3px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${event.company}">${labels[event.type]}</div>`;
+            });
+            
+            calendarHTML += `<td style="${cellStyle}">${cellContent}</td>`;
+          }
+          
+          // 残りの空白セル
+          const remainingCells = (7 - (firstDay + daysInMonth) % 7) % 7;
+          for (let i = 0; i < remainingCells; i++) {
+            calendarHTML += '<td style="padding: 8px; border: 1px solid #e0e0e0;"></td>';
+          }
+          
+          calendarHTML += '</tr></tbody></table>';
+          document.getElementById('calendar').innerHTML = calendarHTML;
+        }
+        
+        document.getElementById('prev-month').addEventListener('click', () => {
+          currentDate.setMonth(currentDate.getMonth() - 1);
+          renderCalendar();
+        });
+        
+        document.getElementById('next-month').addEventListener('click', () => {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          renderCalendar();
+        });
+        
+        // 初回描画
+        renderCalendar();
+      </script>
+    </section>
+
+    <h2>お気に入り企業</h2>
+        {% if favorites %}
+        <ul id="favorites-list">
+            {% for c in favorites %}
+                <li data-company-id="{{ c.pk }}">
+                    <a href="{% url 'shiokara:company_detail' c.pk %}">{{ c.name }}</a>
+                    <form method="post" action="{% url 'shiokara:company_favorite' c.pk %}" class="fav-form-inline" style="display:inline-block; margin-left:8px;">
+                        {% csrf_token %}
+                        <button type="submit" class="fav-remove-btn">★ お気に入り解除</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>お気に入りはまだ登録されていません。</p>
+    {% endif %}
+
+    <p>※ 上で表示されるのはログイン中に登録したお気に入り企業です。</p>
+
+<!-- ======================== -->
+<!-- ポイント機能チュートリアル -->
+<!-- ======================== -->
+<style>
+    #mypage-tut-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        z-index: 9998;
+        display: none;
+    }
+
+    .mypage-tut-highlight {
+        position: relative;
+        z-index: 9999 !important;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 6px rgba(255,255,255,0.05) inset;
+        transform: translateZ(0) scale(1.02);
+        transition: box-shadow 180ms ease, transform 180ms ease;
+        outline: 3px solid rgba(76,175,80,0.95);
+        border-radius: 8px;
+    }
+
+    #mypage-tut-tooltip {
+        position: fixed;
+        z-index: 10000;
+        max-width: 320px;
+        background: #fff;
+        color: #222;
+        border-radius: 8px;
+        box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+        padding: 12px;
+        display: none;
+        font-size: 0.95rem;
+    }
+
+    #mypage-tut-tooltip #mypage-tut-controls {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 8px;
+    }
+
+    #mypage-tut-tooltip button {
+        background: #f3f3f3;
+        border: 1px solid #ddd;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    #mypage-tut-start-btn {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 10001;
+        background: linear-gradient(180deg, #4CAF50, #45a049);
+        color: #fff;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width:640px) {
+        #mypage-tut-tooltip { max-width: 260px; font-size: 0.9rem; }
+        #mypage-tut-start-btn { right: 12px; bottom: 12px; font-size: 0.85rem; }
+    }
+</style>
+
+<div id="mypage-tut-overlay" aria-hidden="true"></div>
+<div id="mypage-tut-tooltip" aria-hidden="true" role="dialog" aria-label="ポイント機能説明">
+    <div id="mypage-tut-content"></div>
+    <div id="mypage-tut-controls">
+        <button id="mypage-tut-prev" type="button">戻る</button>
+        <button id="mypage-tut-next" type="button">次へ</button>
+        <button id="mypage-tut-close" type="button">閉じる</button>
+    </div>
+</div>
+
+<button id="mypage-tut-start-btn" aria-label="ポイント機能のチュートリアルを開始">💡 ポイント情報</button>
+
+<script>
+    (function(){
+        const steps = [
+            {
+                sel: 'h1',
+                title: 'マイページへようこそ',
+                body: 'ここはあなたのプロフィールと、最も重要な「ポイント」が表示されるページです。'
+            },
+            {
+                sel: 'li:has(> strong)',
+                title: 'ポイント表示',
+                body: 'このサイトではポイント制度を採用しています。現在のポイント数がここに表示されます。'
+            },
+            {
+                sel: 'ul',
+                title: 'ポイントの使い方',
+                body: '企業詳細ページを見るたびに1ポイント消費されます。同じ企業は2回目以降、ポイント不要です。'
+            },
+            {
+                sel: 'p',
+                title: 'ポイントを獲得しよう',
+                body: '口コミを投稿すると5ポイント獲得できます。積極的に投稿して、ポイントを増やしましょう！'
+            },
+            {
+                sel: 'h1',
+                title: 'ポイント機能のまとめ',
+                body: '初期値：10pt | 消費：企業詳細-1pt | 獲得：口コミ投稿+5pt'
+            }
+        ];
+
+        let idx = 0;
+        const overlay = document.getElementById('mypage-tut-overlay');
+        const tooltip = document.getElementById('mypage-tut-tooltip');
+        const content = document.getElementById('mypage-tut-content');
+        const btnPrev = document.getElementById('mypage-tut-prev');
+        const btnNext = document.getElementById('mypage-tut-next');
+        const btnClose = document.getElementById('mypage-tut-close');
+        const startBtn = document.getElementById('mypage-tut-start-btn');
+
+        function showStep(i){
+            document.querySelectorAll('.mypage-tut-highlight').forEach(el=>el.classList.remove('mypage-tut-highlight'));
+            tooltip.style.display = 'none';
+            overlay.style.display = 'block';
+
+            const step = steps[i];
+            if(!step) { endTutorial(); return; }
+            const target = document.querySelector(step.sel);
+            content.innerHTML = '<strong>'+step.title+'</strong><div style="margin-top:6px;">'+step.body+'</div>';
+
+            if(target){
+                target.classList.add('mypage-tut-highlight');
+                const r = target.getBoundingClientRect();
+                const tt = tooltip;
+                const margin = 100;
+                let top = window.scrollY + r.bottom + margin;
+                let left = window.scrollX + r.left;
+                left = Math.min(Math.max(left, 8 + window.scrollX), window.scrollX + document.documentElement.clientWidth - tt.offsetWidth - 8);
+                tt.style.top = top + 'px';
+                tt.style.left = left + 'px';
+                tt.style.display = 'block';
+                btnNext.focus();
+            } else {
+                const tt = tooltip;
+                tt.style.top = (window.scrollY + window.innerHeight/2 - 80) + 'px';
+                tt.style.left = (window.scrollX + (window.innerWidth - tt.offsetWidth)/2) + 'px';
+                tt.style.display = 'block';
+            }
+
+            btnPrev.disabled = (i===0);
+            btnNext.textContent = (i === steps.length -1) ? '完了' : '次へ';
+            idx = i;
+        }
+
+        function nextStep(){
+            if(idx < steps.length -1) showStep(idx+1);
+            else endTutorial();
+        }
+        function prevStep(){ if(idx>0) showStep(idx-1); }
+
+        function startTutorial(){
+            showStep(0);
+            overlay.style.display = 'block';
+            document.body.classList.add('mypage-tut-in-progress');
+        }
+
+        function endTutorial(){
+            overlay.style.display = 'none';
+            tooltip.style.display = 'none';
+            document.querySelectorAll('.mypage-tut-highlight').forEach(el=>el.classList.remove('mypage-tut-highlight'));
+            document.body.classList.remove('mypage-tut-in-progress');
+        }
+
+        btnNext.addEventListener('click', nextStep);
+        btnPrev.addEventListener('click', prevStep);
+        btnClose.addEventListener('click', endTutorial);
+        overlay.addEventListener('click', endTutorial);
+        startBtn.addEventListener('click', startTutorial);
+
+        document.addEventListener('keydown', (ev)=>{
+            if(!document.body.classList.contains('mypage-tut-in-progress')) return;
+            if(ev.key === 'Escape') endTutorial();
+            if(ev.key === 'ArrowRight' || ev.key === 'Enter') nextStep();
+            if(ev.key === 'ArrowLeft') prevStep();
+        });
+
+        window.__mypage_tut_start = startTutorial;
+    })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.fav-form-inline').forEach(function(form){
+        form.addEventListener('submit', function(ev){
+            ev.preventDefault();
+            var li = form.closest('li');
+            var csrftoken = form.querySelector('input[name=csrfmiddlewaretoken]')?.value;
+            fetch(form.action, { method: 'POST', headers: { 'X-Requested-With':'XMLHttpRequest', 'X-CSRFToken': csrftoken } })
+                .then(r=>r.json()).then(function(data){
+                    if(data && data.ok){
+                        // お気に入り解除ならリストから削除
+                        if(!data.added && li){ li.remove(); }
+                    }
+                }).catch(function(){ form.submit(); });
+        });
+    });
+});
+</script>
+    </div>
+</div>
+{% endblock %}

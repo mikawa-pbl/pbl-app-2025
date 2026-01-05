@@ -1,0 +1,493 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>豊橋技術科学大学 キャンパスマップ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { height: 100vh; width: 100%; z-index: 0; }
+
+        /* ポイント表示 */
+        #points-overlay {
+            position: absolute; top: 10px; right: 10px; z-index: 1000;
+            background: white; padding: 8px 12px; border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            font-weight: bold; color: #2563eb;
+        }
+
+        /* ポップアップ内スタイル */
+        .popup-content { min-width: 220px; font-size: 14px; }
+        .popup-btn {
+            display: block; width: 100%; margin-top: 8px; padding: 8px 0;
+            text-align: center; color: white; border-radius: 4px;
+            font-weight: bold; border: none; cursor: pointer;
+        }
+        .btn-unlock { background-color: #2563eb; } 
+        .btn-post { background-color: #16a34a; }
+        
+        .dist-badge {
+            display: inline-block; background: #eee; color: #333;
+            padding: 2px 6px; border-radius: 4px; font-size: 12px;
+            margin-bottom: 5px; border: 1px solid #ccc;
+        }
+
+        /* 常に表示されるラベル（ツールチップ）のスタイル */
+        .leaflet-tooltip.facility-label {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #333;
+            color: #333;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 2px 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .modal-overlay { z-index: 2000; }
+        .leaflet-control-gps {
+            background-color: white; width: 34px; height: 34px;
+            border-bottom: 1px solid #ccc; border-radius: 4px;
+            cursor: pointer; text-align: center; line-height: 34px; font-size: 20px;
+        }
+        .comment-wrap { padding:6px 8px; background:#f8f8f8; border-radius:6px; margin-top:6px; }
+        .comment-time { font-size:12px; color:#666; margin-top:4px; }
+    </style>
+</head>
+<body>
+    {% csrf_token %}
+
+    <div class="fixed top-2 right-2 z-[1000]">
+        <div id="user-menu-btn" class="flex items-center space-x-3 bg-white p-2 rounded-lg shadow-md cursor-pointer hover:bg-gray-50 transition">
+            <span id="points-display" class="text-base font-bold text-blue-600">保有: ...</span>
+            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <!-- ドロップダウンメニュー -->
+        <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden ring-1 ring-black ring-opacity-5">
+            <div class="px-4 py-2 text-xs text-gray-500 border-b">ユーザー切り替え</div>
+            <div id="user-list-container" class="max-h-60 overflow-y-auto">
+                <!-- JSで追加 -->
+            </div>
+        </div>
+    </div>
+    <div id="map"></div>
+
+    <div id="confirm-modal" class="fixed inset-0 items-center justify-center hidden p-4 bg-black bg-opacity-50 modal-overlay">
+        <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-xl">
+            <h3 class="text-lg font-bold text-gray-900">情報を取得します</h3>
+            <p class="mt-2 text-sm text-gray-600">最新情報を取得するために 1P 消費します。よろしいですか？</p>
+            <div class="flex justify-end mt-6 space-x-3">
+                <button id="cancel-unlock-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">キャンセル</button>
+                <button id="confirm-unlock-btn" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">OK (1P消費)</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="post-modal" class="fixed inset-0 items-center justify-center hidden p-4 bg-black bg-opacity-50 modal-overlay">
+        <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-xl">
+            <h3 id="post-modal-title" class="text-lg font-bold text-gray-900">混雑状況を投稿</h3>
+            <div class="mt-4 space-y-4">
+                <select id="post-status" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    <option value="" disabled selected>混雑状況を選択</option>
+                    <option value="empty">🟢 空いている</option>
+                    <option value="moderate">🟡 やや混雑</option>
+                    <option value="crowded">🔴 混雑</option>
+                </select>
+                <textarea id="post-comment" class="w-full px-3 py-2 border border-gray-300 rounded-md" rows="3" placeholder="コメント (任意)"></textarea>
+            </div>
+            <div class="flex justify-end mt-6 space-x-3">
+                <button id="cancel-post-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">キャンセル</button>
+                <button id="confirm-post-btn" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700">投稿 (1P獲得)</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        const username = '{{ username|escapejs }}';
+        
+        // 状態管理
+        const state = {
+            points: 0,
+            userId: null,
+            userFacilityAccess: new Set(),
+            targetFacilityId: null,
+            facilities: [],
+            userLocation: null,         // ユーザーの位置情報
+            isLocationAcquired: false   // 位置情報取得済みフラグ
+        };
+
+        // マーカーと座標を管理する辞書 (ID -> Marker/LatLng)
+        const markersMap = {};
+        const facilityCoords = {};
+
+        const statusMap = { 'empty': '🟢 空いている', 'moderate': '🟡 やや混雑', 'crowded': '🔴 混雑' };
+        
+        // API Helper
+        function getCsrfToken() { return document.querySelector('[name=csrfmiddlewaretoken]').value; }
+        async function apiCall(url, method='GET', data=null) {
+            const opts = { method, headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() } };
+            if (data) opts.body = JSON.stringify(data);
+            const res = await fetch(url, opts);
+            const json = await res.json().catch(()=>({}));
+            if (!res.ok) throw new Error(json.error || `API Error: ${res.status}`);
+            return json;
+        }
+
+        // --- マップ設定 ---
+        var map = L.map('map').setView([34.701663, 137.408313], 17); // デフォルト
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+        
+        var userMarker = null;
+
+        // --- 初期化 ---
+        async function initializeApp() {
+            try {
+                // ユーザー情報
+                const userData = await apiCall(`/team_northcliff/api/${username}/user-data/`);
+                state.userId = userData.user_id;
+                state.points = userData.points;
+                state.userLocation = { latitude: userData.latitude, longitude: userData.longitude };
+                updatePoints();
+
+                // 起動時に位置情報を要求
+                handleLocationPermission();
+
+                // ユーザー切り替えセットアップ
+                setupUserSwitcher();
+
+                // 施設情報取得
+                await loadFacilities();
+                
+            } catch (e) {
+                console.error(e);
+                document.getElementById('points-display').textContent = "エラー";
+            }
+        }
+        function updatePoints() { document.getElementById('points-display').textContent = `保有: ${state.points}P`; }
+
+        async function loadFacilities() {
+            try {
+                const data = await apiCall('/team_northcliff/api/facilities/');
+                state.facilities = data.facilities;
+                addMarkers(); // データ取得後にマーカー設置
+            } catch(e) { console.error(e); }
+        }
+
+        // --- 位置情報許可のハンドリング ---
+        function handleLocationPermission() {
+            if (state.isLocationAcquired) return true;
+            // 起動時に位置情報を要求する通知（DBの位置情報を使用することを示す）
+            const confirmed = confirm("投稿や距離の表示には、位置情報が必要です。\n（登録された位置情報を使用します）\n\n許可しますか？");
+            if (confirmed) {
+                state.isLocationAcquired = true;
+                setUserLocationMarker();
+                return true;
+            }
+            alert("位置情報を許可しないと、この機能は利用できません。");
+            return false;
+        }
+
+        // --- ユーザー切り替え機能 ---
+        async function setupUserSwitcher() {
+            const btn = document.getElementById('user-menu-btn');
+            const menu = document.getElementById('user-dropdown');
+            const listContainer = document.getElementById('user-list-container');
+            
+            // トグル
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('hidden');
+            };
+
+            // 外部クリックで閉じる
+            document.addEventListener('click', (e) => {
+                if (!btn.contains(e.target) && !menu.contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            });
+
+            // ユーザー一覧取得
+            try {
+                const data = await apiCall('/team_northcliff/api/users/');
+                if (data.users) {
+                    listContainer.innerHTML = '';
+                    data.users.forEach(u => {
+                        const div = document.createElement('div');
+                        div.className = 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer';
+                        div.textContent = u.name;
+                        if (u.name === username) {
+                             div.classList.add('bg-blue-50', 'font-bold');
+                        }
+                        div.onclick = () => {
+                            window.location.href = `/team_northcliff/map_ui/${encodeURIComponent(u.name)}/`;
+                        };
+                        listContainer.appendChild(div);
+                    });
+                }
+            } catch (e) {
+                console.error('ユーザー一覧取得失敗', e);
+            }
+        }
+
+        // --- ユーザー位置情報の表示 ---
+        function setUserLocationMarker() {
+             if (!state.userLocation || !state.userLocation.latitude || !state.userLocation.longitude) return;
+             
+             const latlng = [state.userLocation.latitude, state.userLocation.longitude];
+             
+             // マップ中心をユーザー位置へ
+             map.setView(latlng, 17);
+
+             // 既存マーカー削除
+             if (userMarker) map.removeLayer(userMarker);
+
+             // 青いドットマーカー
+             userMarker = L.circleMarker(latlng, {
+                color: '#fff', weight: 2, fillColor: '#007bff', fillOpacity: 1, radius: 8
+             });
+             userMarker.addTo(map).bindPopup("現在地");
+
+             // 範囲円
+             L.circle(latlng, { radius: 20, color: '#007bff', weight: 1, opacity: 0.2 }).addTo(map);
+        }
+
+        // --- ポップアップ生成 ---
+        function generatePopupContent(facility) {
+            const div = document.createElement('div');
+            div.className = 'popup-content';
+
+            // タイトル
+            const title = document.createElement('b');
+            title.textContent = facility.name;
+            div.appendChild(title);
+
+            // ロック判定
+            const isUnlocked = state.userFacilityAccess.has(facility.id);
+
+            if (isUnlocked) {
+                // === 1. アンロック済み (最新情報のみ表示) ===
+                
+                const lastPost = document.createElement('div');
+                lastPost.style.marginTop = '6px';
+                lastPost.textContent = `最終投稿： ${facility.last_post_time || '情報なし'}`;
+                div.appendChild(lastPost);
+
+                const statusDiv = document.createElement('div');
+                statusDiv.innerHTML = `<b>現在の状況：</b> ${statusMap[facility.latest_status] || '情報なし'}`;
+                div.appendChild(statusDiv);
+
+                // コメント
+                if (facility.recent_comments && facility.recent_comments.length > 0) {
+                    facility.recent_comments.forEach(c => {
+                        const cDiv = document.createElement('div');
+                        cDiv.className = 'comment-wrap';
+                        const cText = document.createElement('div');
+                        cText.textContent = c.comment || ''; // XSS対策
+                        cDiv.appendChild(cText);
+                        const cTime = document.createElement('div');
+                        cTime.className = 'comment-time';
+                        cTime.textContent = c.time_ago || '';
+                        cDiv.appendChild(cTime);
+                        div.appendChild(cDiv);
+                    });
+                }
+
+            } else {
+                // === ロック中 (メッセージ) ===
+                const note = document.createElement('p');
+                note.textContent = '詳細を見るにはポイントが必要です。';
+                note.style.color = '#666'; note.style.marginTop = '8px';
+                div.appendChild(note);
+            }
+
+            // === ボタンは常に表示 ===
+            
+            // 解除ボタン
+            const unlockBtn = document.createElement('button');
+            unlockBtn.className = 'popup-btn btn-unlock';
+            unlockBtn.textContent = '最新情報を取得 (1P消費)';
+            unlockBtn.onclick = () => openUnlockModal(facility.id);
+            div.appendChild(unlockBtn);
+
+            // 投稿ボタン
+            const postBtn = document.createElement('button');
+            postBtn.className = 'popup-btn btn-post';
+            postBtn.style.marginTop = '5px';
+            postBtn.textContent = '投稿する';
+            postBtn.onclick = () => openPostModal(facility.id);
+            div.appendChild(postBtn);
+
+            return div;
+        }
+
+        // --- マーカー設置 (データ基盤) ---
+        function addMarkers() {
+            // 既存マーカークリア（必要なら実装するが、今回は追加のみでOK）
+
+            state.facilities.forEach(facility => {
+                if (!facility.latitude || !facility.longitude) return;
+
+                const latlng = L.latLng(facility.latitude, facility.longitude);
+                const marker = L.marker(latlng);
+                
+                // ツールチップで名前を常に表示
+                marker.bindTooltip(facility.name, {
+                    permanent: true, 
+                    direction: 'top', 
+                    offset: [-10, -35],
+                    className: 'facility-label'
+                });
+
+                marker.addTo(map);
+
+                // 管理用保存
+                markersMap[facility.id] = marker;
+                facilityCoords[facility.id] = latlng;
+
+                marker.bindPopup(() => {
+                    // 最新の状態を参照
+                    const currentF = state.facilities.find(f => f.id === facility.id);
+                    
+                    let distHtml = '';
+                    if (state.userLocation && state.userLocation.latitude && state.userLocation.longitude) {
+                        const userLatLng = L.latLng(state.userLocation.latitude, state.userLocation.longitude);
+                        const d = map.distance(userLatLng, latlng);
+                        const txt = d >= 1000 ? (d/1000).toFixed(2)+'km' : Math.round(d)+'m';
+                        distHtml = `<span class="dist-badge">🚶 現在地から ${txt}</span><br>`;
+                    }
+
+                    const content = generatePopupContent(currentF);
+                    
+                    if(distHtml) {
+                        const dSpan = document.createElement('div');
+                        dSpan.innerHTML = distHtml;
+                        content.insertBefore(dSpan, content.firstChild);
+                    }
+                    return content;
+                });
+            });
+        }
+
+        // --- モーダル制御 ---
+        const confirmModal = document.getElementById('confirm-modal');
+        const postModal = document.getElementById('post-modal');
+
+        function openUnlockModal(fid) {
+            if(state.points < 1) { alert("ポイントが足りません"); return; }
+            state.targetFacilityId = fid;
+            confirmModal.classList.remove('hidden'); confirmModal.classList.add('flex');
+        }
+
+        function openPostModal(fid) {
+            // === 3. 距離制限 (100m) ===
+            // DB上の位置情報で計算
+            if (state.userLocation && state.userLocation.latitude && state.userLocation.longitude && facilityCoords[fid]) {
+                const userLatLng = L.latLng(state.userLocation.latitude, state.userLocation.longitude);
+                const dist = map.distance(userLatLng, facilityCoords[fid]);
+                if (dist > 100) {
+                    alert(`現在地から離れすぎています (約${Math.round(dist)}m)。\n投稿は100m圏内でのみ可能です。`);
+                    return; // モーダルを開かない
+                }
+            } else {
+                 alert("位置情報を取得できていないため投稿できません。");
+                 return;
+            }
+
+            state.targetFacilityId = fid;
+            
+            // 施設名をタイトルに反映
+            const target = state.facilities.find(f => f.id === fid);
+            const titleEl = document.getElementById('post-modal-title');
+            if (target && titleEl) {
+                titleEl.textContent = `${target.name}の混雑状況を投稿`;
+            }
+
+            document.getElementById('post-status').value = "";
+            document.getElementById('post-comment').value = "";
+            postModal.classList.remove('hidden'); postModal.classList.add('flex');
+        }
+
+        function closeModal(m) {
+            m.classList.add('hidden'); m.classList.remove('flex');
+            // targetFacilityId はクリアしない
+        }
+
+        document.getElementById('cancel-unlock-btn').onclick = () => {
+            closeModal(confirmModal);
+            state.targetFacilityId = null;
+        };
+        document.getElementById('cancel-post-btn').onclick = () => {
+            closeModal(postModal);
+            state.targetFacilityId = null;
+        };
+
+        // アンロック実行
+        document.getElementById('confirm-unlock-btn').onclick = async () => {
+            const fid = state.targetFacilityId;
+            try {
+                await apiCall(`/team_northcliff/api/${username}/access-facility/`, 'POST', { facility_id: fid });
+                state.points -= 1;
+                state.userFacilityAccess.add(fid);
+                updatePoints();
+                closeModal(confirmModal);
+                
+                // ポップアップを維持して内容を更新
+                const marker = markersMap[fid];
+                if (marker) {
+                    const f = state.facilities.find(item => item.id === fid);
+                    // ポップアップが開いていれば中身を書き換え
+                    if (map.hasLayer(marker.getPopup())) {
+                        marker.setPopupContent(generatePopupContent(f));
+                    } else {
+                        marker.openPopup();
+                    }
+                }
+            } catch(e) { alert(e.message); state.targetFacilityId = null; }
+        };
+
+        // 投稿実行
+        document.getElementById('confirm-post-btn').onclick = async () => {
+            const status = document.getElementById('post-status').value;
+            const comment = document.getElementById('post-comment').value;
+            if(!status) return alert("状況を選択してください");
+            
+            try {
+                await apiCall(`/team_northcliff/api/${username}/create-post/`, 'POST', {
+                    facility_id: state.targetFacilityId, status, comment
+                });
+                state.points += 1;
+                state.userFacilityAccess.add(state.targetFacilityId);
+                updatePoints();
+                await loadFacilities(); // データ再取得
+                closeModal(postModal);
+                
+                // ポップアップ更新
+                const fid = state.targetFacilityId;
+                const marker = markersMap[fid];
+                if (marker) {
+                    const f = state.facilities.find(item => item.id === fid);
+                    // アンロック済みの表示（投稿ボタンなし）に切り替わる
+                    marker.setPopupContent(generatePopupContent(f));
+                    marker.openPopup();
+                }
+                state.targetFacilityId = null;
+
+            } catch(error) { 
+                if (error && error.message && error.message.includes('１０分以内に')) {
+                    alert('１０分以内に同一の施設情報を投稿することはできません');
+                } else {
+                    alert(error.message || '投稿に失敗しました');
+                }
+            }
+        };
+
+        initializeApp();
+
+    </script>
+</body>
+</html>

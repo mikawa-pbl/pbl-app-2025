@@ -12,7 +12,7 @@ from django.conf import settings
 # def index(request):
 #     return render(request, 'teams/team_cake/index.html')
 
-def index(request):
+def _get_index_context():
     try:
         # 通常はORMで取得（UUIDField の変換が走る）
         qs = Good.objects.using('team_cake').all()
@@ -22,7 +22,7 @@ def index(request):
         slider_goods = all_goods[-3:] if len(all_goods) >= 3 else all_goods
         slider_goods = list(reversed(slider_goods))
         
-        return render(request, 'teams/team_cake/index.html', {'goods': qs, 'slider_goods': slider_goods})
+        return {'goods': qs, 'slider_goods': slider_goods}
     except ValueError:
         # DB に古い整数 ID 等、UUID として変換できない値が入っている場合のフォールバック。
         # テンプレートは objects の `.name` / `.price` を参照する想定のため SimpleNamespace を作る。
@@ -36,7 +36,17 @@ def index(request):
         slider_goods = goods[-3:] if len(goods) >= 3 else goods
         slider_goods = list(reversed(slider_goods))
         
-        return render(request, 'teams/team_cake/index.html', {'goods': goods, 'slider_goods': slider_goods})
+        return {'goods': goods, 'slider_goods': slider_goods}
+
+def index(request):
+    context = _get_index_context()
+    context['is_staff'] = False
+    return render(request, 'teams/team_cake/index.html', context)
+
+def admin_index(request):
+    context = _get_index_context()
+    context['is_staff'] = True
+    return render(request, 'teams/team_cake/index.html', context)
 
 def registration_goods(request):
     if request.method == 'POST':
@@ -48,7 +58,7 @@ def registration_goods(request):
             # handle uploaded file (if any) and save it under this app's templates images dir
             uploaded = request.FILES.get('image')
             if uploaded:
-                base_dir = Path(__file__).resolve().parent
+                base_dir = Path(__file__).resolve().parent.parent
                 images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                 images_dir.mkdir(parents=True, exist_ok=True)
 
@@ -91,7 +101,7 @@ def edit_good(request, pk):
 
             uploaded = request.FILES.get('image')
             if uploaded:
-                base_dir = Path(__file__).resolve().parent
+                base_dir = Path(__file__).resolve().parent.parent
                 images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                 images_dir.mkdir(parents=True, exist_ok=True)
 
@@ -133,7 +143,7 @@ def delete_good(request, pk):
             good.delete()
 
             if image_filename:
-                base_dir = Path(__file__).resolve().parent
+                base_dir = Path(__file__).resolve().parent.parent
                 images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                 image_path = images_dir / image_filename
                 if image_path.exists():
@@ -149,7 +159,7 @@ def delete_good(request, pk):
                     cur.execute('DELETE FROM team_cake_good WHERE id = %s', [pk])
 
                     if image_filename:
-                        base_dir = Path(__file__).resolve().parent
+                        base_dir = Path(__file__).resolve().parent.parent
                         images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                         image_path = images_dir / image_filename
                         if image_path.exists():
@@ -165,10 +175,7 @@ def serve_template_image(request, filename: str):
     /team_cake/images/<filename> similar to `team_USL.serve_template_image`.
     """
     base_dir = Path(__file__).resolve().parent.parent
-    images_dir = base_dir / 'team_cake' / 'templates' / 'teams' / 'team_cake' / 'images'
-    # If code runs with different cwd layout, also try app dir variant
-    if not images_dir.exists():
-        images_dir = Path(__file__).resolve().parent / 'templates' / 'teams' / 'team_cake' / 'images'
+    images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
 
     file_path = (images_dir / filename).resolve()
 

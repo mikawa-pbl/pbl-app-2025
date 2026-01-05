@@ -1,0 +1,234 @@
+{# teams/ssk/post_form.html #}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>{% if post %}編集{% else %}新規投稿{% endif %}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial;background:#f6f8fa;margin:24px;}
+    .container{max-width:720px;margin:0 auto;}
+    .form-card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,0.06);}
+    label{display:block;margin-bottom:6px;font-weight:600;}
+    input[type="text"], textarea, select {width:100%;padding:10px;border:1px solid #e6e9ee;border-radius:8px;font-size:1rem}
+    .row{display:flex;gap:12px;align-items:center}
+    .muted{color:#6b7280;font-size:0.9rem}
+    .btn{background:#2563eb;color:#fff;padding:10px 14px;border-radius:10px;border:none;cursor:pointer}
+    .secondary{background:#fff;border:1px solid #e6e9ee;color:#374151;padding:9px 12px;border-radius:10px}
+    .small{font-size:0.9rem;color:#6b7280}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-card">
+      <h1 style="margin-top:0;">{% if post %}投稿を編集{% else %}新規投稿{% endif %}</h1>
+
+      <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+          <div style="color:#b91c1c;margin-bottom:12px;">
+            {% for field in form %}
+              {% for error in field.errors %}
+                <div>{{ field.label }}: {{ error }}</div>
+              {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+              <div>{{ error }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <p>
+          {{ form.title.label_tag }}<br>
+          {{ form.title }}
+        </p>
+
+        <p>
+          {{ form.date.label_tag }}<br>
+          {{ form.date }} <span class="small">（任意）</span>
+        </p>
+
+        <p>
+          {{ form.end_date.label_tag }}<br>
+          {{ form.end_date }} <span class="small">（任意：区間の終了日を指定する場合）</span>
+        </p>
+
+        {% if not post %}
+        <p>
+          {{ form.password.label_tag }}<br>
+          {{ form.password }}
+          <span class="small">（任意：作成時のみ設定）</span>
+        </p>
+        {% endif %}
+
+        {# 時刻入力は廃止（必要なら再追加を検討） #}
+
+        <p>
+          {{ form.body.label_tag }}<br>
+          {{ form.body }}
+        </p>
+
+        <p>
+          {{ form.tags_text.label_tag }}<br>
+          {{ form.tags_text }}
+          <small>（スペース区切りで複数指定。例: #授業 #休講）</small>
+        </p>
+
+        <!-- client-side warning (hidden by default) -->
+        <div id="tags-warning" style="color:#b91c1c; display:none; margin-top:6px;">
+          タグを1つ以上入力してください（例: #授業 #休講）
+        </div>
+
+        {# Tag suggestion dropdown (initially hidden). JS below will populate/filter it. #}
+        <div id="tag-suggest-wrap" style="position:relative;">
+          <div id="tag-suggest" style="position:absolute;left:0;right:0;z-index:50;display:none;margin-top:6px;background:#fff;border:1px solid #eee;border-radius:8px;box-shadow:0 6px 18px rgba(15,23,42,0.06);max-height:220px;overflow:auto;"></div>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn" type="submit">{% if post %}更新{% else %}投稿{% endif %}</button>
+          <button type="button" class="secondary" onclick="location.href='{% url 'ssk:post_list' %}'">一覧へ戻る</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {# Insert JS at end of template (uses all_tag_names provided by view) #}
+  <script>
+  (function(){
+    // client-side required-tag check
+    const formEl = document.querySelector('form');
+    const tagInput = document.querySelector('[name="tags_text"]');
+    const tagsWarning = document.getElementById('tags-warning');
+    if(formEl && tagInput && tagsWarning){
+      formEl.addEventListener('submit', function(e){
+        // normalize and split
+        const v = (tagInput.value || "").replace(/\u3000/g,' ').trim();
+        const tokens = v.split(/\s+/).filter(Boolean).map(t => t.replace(/^#+/, ''));
+        if(tokens.length === 0){
+          e.preventDefault();
+          tagsWarning.style.display = 'block';
+          tagInput.focus();
+          return false;
+        } else {
+          tagsWarning.style.display = 'none';
+        }
+      });
+      // hide warning when user types
+      tagInput.addEventListener('input', function(){
+        const v = (tagInput.value || "").replace(/\u3000/g,' ').trim();
+        const tokens = v.split(/\s+/).filter(Boolean).map(t => t.replace(/^#+/, ''));
+        if(tokens.length) tagsWarning.style.display = 'none';
+      });
+    }
+
+    // Build array of tag names from server-provided context
+    const allTags = [
+      {% if all_tag_names %}
+        {% for t in all_tag_names %}
+          "{{ t|escapejs }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      {% else %}
+        // no tags
+      {% endif %}
+    ];
+
+    // find the tags_text input (could be <input> or <textarea> rendered by form)
+    const tagInput = document.querySelector('[name="tags_text"]');
+    const suggestBox = document.getElementById('tag-suggest');
+    const wrap = document.getElementById('tag-suggest-wrap');
+    if(!tagInput || !suggestBox) return;
+
+    function tokenize(value){
+      // split by whitespace, ignore empty
+      return value.split(/\s+/).filter(Boolean);
+    }
+
+    function normalize(s){ return (s||"").toLowerCase(); }
+
+    function getCurrentToken(value, cursorPos){
+      // Approximation: take text before cursor, split by whitespace and return last token
+      const before = value.slice(0, cursorPos == null ? value.length : cursorPos);
+      const tokens = before.split(/\s+/).filter(Boolean);
+      return tokens.length ? tokens[tokens.length-1] : "";
+    }
+
+    function renderSuggestions(matches){
+      if(!matches.length){
+        suggestBox.style.display = 'none';
+        suggestBox.innerHTML = '';
+        return;
+      }
+      suggestBox.style.display = '';
+      suggestBox.innerHTML = matches.map(name =>
+        `<div class="ts-item" style="padding:8px 10px;border-bottom:1px solid #f5f6f8;cursor:pointer;">${name}</div>`
+      ).join('');
+      // attach click handlers
+      Array.from(suggestBox.querySelectorAll('.ts-item')).forEach((el, idx)=>{
+        el.addEventListener('click', function(){
+          applySuggestion(matches[idx]);
+        });
+      });
+    }
+
+    function applySuggestion(tagName){
+      const val = tagInput.value;
+      const cursor = tagInput.selectionStart || val.length;
+      const tokensBefore = val.slice(0, cursor).split(/\s+/).filter(Boolean);
+      const tokensAfter = val.slice(cursor).split(/\s+/).filter(Boolean);
+      // replace last token before cursor with the suggestion
+      if(tokensBefore.length){
+        tokensBefore[tokensBefore.length-1] = '#' + tagName;
+      } else {
+        tokensBefore.push('#' + tagName);
+      }
+      const newTokens = tokensBefore.concat(tokensAfter);
+      tagInput.value = newTokens.join(' ') + (newTokens.length ? ' ' : '');
+      tagInput.focus();
+      // hide suggestions
+      suggestBox.style.display = 'none';
+    }
+
+    function update(){
+      const val = tagInput.value;
+      const cursor = tagInput.selectionStart || val.length;
+      const current = getCurrentToken(val, cursor).replace(/^#+/, '');
+      const existing = tokenize(val).map(t => t.replace(/^#+/, '').toLowerCase());
+      if(!current){
+        // nothing typed -> hide suggestions
+        suggestBox.style.display = 'none';
+        suggestBox.innerHTML = '';
+        return;
+      }
+      const q = normalize(current);
+      // filter tags containing q and not already present
+      const matches = allTags.filter(t => normalize(t).indexOf(q) !== -1 && existing.indexOf(normalize(t)) === -1);
+      renderSuggestions(matches.slice(0,12));
+    }
+
+    // show suggestions on input and keyup
+    tagInput.addEventListener('input', update);
+    tagInput.addEventListener('keyup', update);
+
+    // hide on outside click
+    document.addEventListener('click', function(e){
+      if(!wrap.contains(e.target)){
+        suggestBox.style.display = 'none';
+      }
+    });
+
+    // keyboard navigation (optional basic)
+    tagInput.addEventListener('keydown', function(e){
+      if(suggestBox.style.display === '' ){
+        const items = Array.from(suggestBox.querySelectorAll('.ts-item'));
+        const active = suggestBox.querySelector('.ts-item.--active');
+        let idx = items.indexOf(active);
+        if(e.key === 'ArrowDown'){ e.preventDefault(); idx = Math.min(items.length-1, idx+1); if(active) active.classList.remove('--active'); if(items[idx]) items[idx].classList.add('--active'); }
+        else if(e.key === 'ArrowUp'){ e.preventDefault(); idx = Math.max(0, idx-1); if(active) active.classList.remove('--active'); if(items[idx]) items[idx].classList.add('--active'); }
+        else if(e.key === 'Enter'){ if(active){ e.preventDefault(); const txt = active.textContent.trim(); applySuggestion(txt); } }
+      }
+    });
+
+  })();
+  </script>
+</body>
+</html>

@@ -164,51 +164,25 @@
       color: rgba(100,156,228,0.9);
       font-size: 28px;
     }
-
-    /* ★ 追加：サムネの削除ボタン（×） */
-    .thumb .remove-btn {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(0,0,0,0.6);
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .thumb .remove-btn:active {
-      transform: scale(0.96);
-    }
-
-    .upload-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: none;
-      background: #649CE4;
-      color: white;
-      font-size: 14px;
-      font-weight: 700;
-      border-radius: 999px;
-      padding: 10px 14px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .upload-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .file-input {
-      display: none;
-    }
-
+      .thumb .remove-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 26px;
+        height: 26px;
+        border-radius: 999px;
+        border: none;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
+      }
+      .thumb .remove-btn:focus { outline: 2px solid rgba(100,156,228,0.6); }
     /* ===== 学年タグ（複数） ===== */
     .chips {
       display: flex;
@@ -302,10 +276,7 @@
         const url = URL.createObjectURL(file);
         const box = document.createElement("div");
         box.className = "thumb";
-        box.innerHTML = `
-          <img src="${url}" alt="画像${idx+1}">
-          <button type="button" class="remove-btn" aria-label="画像を削除" onclick="removeImage(${idx})">×</button>
-        `;
+        box.innerHTML = `<img src="${url}" alt="画像${idx+1}"><button type="button" class="remove-btn" aria-label="画像を削除" onclick="removeImage(${idx})">×</button>`;
         thumbs.appendChild(box);
       });
 
@@ -317,6 +288,18 @@
       }
 
       $("pickBtn").disabled = (selectedFiles.length >= MAX_IMAGES);
+    }
+
+    function removeImage(index) {
+      if (index < 0 || index >= selectedFiles.length) return;
+      selectedFiles.splice(index, 1);
+      const dt = new DataTransfer();
+      selectedFiles.forEach(f => dt.items.add(f));
+      if (selectedFiles.length === 0) {
+        $("images").value = "";
+      }
+      $("images").files = dt.files;
+      renderThumbs();
     }
 
     function addImages(fileList) {
@@ -416,45 +399,6 @@
       el.value = el.value.replace(/[^0-9]/g, "");
       const n = Number(el.value || 0);
       if (n > 999999) el.value = "999999";
-    }
-
-    // =====（元コードの「未定義で落ちる」対策：空配列とヘルパー）=====
-    // Django側で使うなら、ここを context から埋める
-    const PRESELECTED_GRADES = window.PRESELECTED_GRADES || [];
-    const PRESELECTED_TAGS = window.PRESELECTED_TAGS || [];
-
-    function getOptionText(selectId, value) {
-      const sel = $(selectId);
-      if (!sel) return "";
-      const opt = Array.from(sel.options).find(o => o.value === value);
-      return opt ? opt.text : "";
-    }
-
-    function addHiddenAndChip(name, val, text, chipsId, dataPrefix) {
-      if (!val) return;
-
-      const exists = document.querySelector(`input[name="${name}"][value="${val}"]`);
-      if (exists) return;
-
-      const hidden = document.createElement("input");
-      hidden.type = "hidden";
-      hidden.name = name;
-      hidden.value = val;
-
-      if (name === "grades") $("gradeHidden").appendChild(hidden);
-      if (name === "tags") $("tagHidden").appendChild(hidden);
-
-      const chip = document.createElement("span");
-      chip.className = "chip";
-      chip.setAttribute(`data-${dataPrefix}`, val);
-
-      if (name === "grades") {
-        chip.innerHTML = `${text}<button type="button" aria-label="削除" onclick="removeGradeTag('${val}')">×</button>`;
-      } else {
-        chip.innerHTML = `${text}<button type="button" aria-label="削除" onclick="removeCategoryTag('${val}')">×</button>`;
-      }
-
-      $(chipsId).appendChild(chip);
     }
 
     window.addEventListener("DOMContentLoaded", () => {

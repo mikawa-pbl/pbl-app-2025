@@ -132,7 +132,9 @@ class Item(models.Model):
     # 状態の選択肢
     CONDITION_CHOICES = [
         ('new', '新品・未使用'),
+        ('like_new', '未使用に近い'),
         ('good', '目立った傷なし'),
+        ('fair', 'やや傷や汚れあり'),
         ('bad', '傷や汚れあり'),
     ]
 

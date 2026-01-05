@@ -316,10 +316,10 @@ def login_view(request):
     elif request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
-        
+
         if not username or not password:
             return render(request, "teams/team_UD/login.html", {"error": "ユーザー名とパスワードを入力してください"})
-        
+
         try:
             account = Account.objects.using("team_UD").get(username=username, password=password)
             # セッションにユーザー情報を保存
@@ -327,7 +327,10 @@ def login_view(request):
             request.session["username"] = account.username
             return redirect("team_UD:calendar")
         except Account.DoesNotExist:
-            return render(request, "teams/team_UD/login.html", {"error": "ユーザー名またはパスワードが間違っています"})
+            return render(request, "teams/team_UD/login.html", {"error": "ユーザー名かパスワードのどちらかが間違っています"})
+        except Exception as e:
+            # 予期しないエラーの場合も、セキュリティのため詳細を隠す
+            return render(request, "teams/team_UD/login.html", {"error": "ユーザー名かパスワードのどちらかが間違っています"})
 
 
 def logout_view(request):

@@ -89,6 +89,7 @@ class TakenokoUser(models.Model):
 class Tag(models.Model):
     name = models.CharField("タグ名", max_length=50, unique=True, primary_key=True)
     display_name = models.CharField("表示名", max_length=100)
+    icon = models.CharField("アイコン", max_length=50, default='tag')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

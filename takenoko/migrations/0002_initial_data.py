@@ -8,19 +8,19 @@ def create_initial_data(apps, schema_editor):
     
     # タグを登録
     tags_data = [
-        {'name': 'textbook', 'display_name': '教科書'},
-        {'name': 'reference', 'display_name': '参考書'},
-        {'name': 'notes', 'display_name': 'ノート'},
-        {'name': 'stationery', 'display_name': '文房具'},
-        {'name': 'electronics', 'display_name': '電子機器'},
-        {'name': 'furniture', 'display_name': '家具'},
-        {'name': 'clothing', 'display_name': 'オタ服'},
-        {'name': 'other', 'display_name': 'その他'},
+        {'name': 'book', 'display_name': '書籍', 'icon': 'book'},
+        {'name': 'daily_necessities', 'display_name': '日用品', 'icon': 'paint-roller'},
+        {'name': 'furniture', 'display_name': '家具', 'icon': 'bed'},
+        {'name': 'electronic_devices', 'display_name': '電子機器', 'icon': 'desktop'},
+        {'name': 'clothing', 'display_name': '服飾', 'icon': 'tshirt'},
+        {'name': 'vehicles', 'display_name': '乗り物', 'icon': 'motorcycle'},
+        {'name': 'past_questions', 'display_name': '過去問', 'icon': 'file-alt'},
+        {'name': 'other', 'display_name': 'その他', 'icon': 'box-open'},
     ]
-    
-    for tag_data in tags_data:
+
+    for tag_data in tags_data:  
         Tag.objects.get_or_create(**tag_data)
-    
+
     # 対象学年を登録
     grades_data = [
         {'code': 'b1', 'display_name': '学部1年向け'},
@@ -45,7 +45,7 @@ def reverse_initial_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('takenoko', '0001_initial'),
+        ("takenoko", "0001_initial"),
     ]
 
     operations = [

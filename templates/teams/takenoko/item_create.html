@@ -3,11 +3,10 @@
 <html lang="ja">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     html, body {
@@ -166,6 +165,28 @@
       font-size: 28px;
     }
 
+    /* ★ 追加：サムネの削除ボタン（×） */
+    .thumb .remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .thumb .remove-btn:active {
+      transform: scale(0.96);
+    }
+
     .upload-btn {
       display: inline-flex;
       align-items: center;
@@ -258,6 +279,21 @@
 
     function $(id){ return document.getElementById(id); }
 
+    function syncInputFiles() {
+      const dt = new DataTransfer();
+      selectedFiles.forEach(f => dt.items.add(f));
+      $("images").files = dt.files;
+    }
+
+    // ★ 追加：画像を取り消す（削除）
+    function removeImage(index) {
+      if (index < 0 || index >= selectedFiles.length) return;
+
+      selectedFiles.splice(index, 1);
+      syncInputFiles();
+      renderThumbs();
+    }
+
     function renderThumbs() {
       const thumbs = $("thumbs");
       thumbs.innerHTML = "";
@@ -266,7 +302,10 @@
         const url = URL.createObjectURL(file);
         const box = document.createElement("div");
         box.className = "thumb";
-        box.innerHTML = `<img src="${url}" alt="画像${idx+1}">`;
+        box.innerHTML = `
+          <img src="${url}" alt="画像${idx+1}">
+          <button type="button" class="remove-btn" aria-label="画像を削除" onclick="removeImage(${idx})">×</button>
+        `;
         thumbs.appendChild(box);
       });
 
@@ -287,10 +326,7 @@
       const canAdd = Math.max(0, MAX_IMAGES - selectedFiles.length);
       selectedFiles = selectedFiles.concat(files.slice(0, canAdd));
 
-      const dt = new DataTransfer();
-      selectedFiles.forEach(f => dt.items.add(f));
-      $("images").files = dt.files;
-
+      syncInputFiles();
       renderThumbs();
     }
 
@@ -373,36 +409,72 @@
       if (hidden) hidden.remove();
     }
 
-    // ===== 価格入力（最大99999 / 数字のみ） =====
+    // ===== 価格入力（最大999999 / 数字のみ） =====
     function normalizePrice() {
       const el = $("price");
       el.value = el.value.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
       el.value = el.value.replace(/[^0-9]/g, "");
       const n = Number(el.value || 0);
-      if (n > 99999) el.value = "99999";
+      if (n > 999999) el.value = "999999";
+    }
+
+    // =====（元コードの「未定義で落ちる」対策：空配列とヘルパー）=====
+    // Django側で使うなら、ここを context から埋める
+    const PRESELECTED_GRADES = window.PRESELECTED_GRADES || [];
+    const PRESELECTED_TAGS = window.PRESELECTED_TAGS || [];
+
+    function getOptionText(selectId, value) {
+      const sel = $(selectId);
+      if (!sel) return "";
+      const opt = Array.from(sel.options).find(o => o.value === value);
+      return opt ? opt.text : "";
+    }
+
+    function addHiddenAndChip(name, val, text, chipsId, dataPrefix) {
+      if (!val) return;
+
+      const exists = document.querySelector(`input[name="${name}"][value="${val}"]`);
+      if (exists) return;
+
+      const hidden = document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = name;
+      hidden.value = val;
+
+      if (name === "grades") $("gradeHidden").appendChild(hidden);
+      if (name === "tags") $("tagHidden").appendChild(hidden);
+
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.setAttribute(`data-${dataPrefix}`, val);
+
+      if (name === "grades") {
+        chip.innerHTML = `${text}<button type="button" aria-label="削除" onclick="removeGradeTag('${val}')">×</button>`;
+      } else {
+        chip.innerHTML = `${text}<button type="button" aria-label="削除" onclick="removeCategoryTag('${val}')">×</button>`;
+      }
+
+      $(chipsId).appendChild(chip);
     }
 
     window.addEventListener("DOMContentLoaded", () => {
       renderThumbs();
+
       $("images").addEventListener("change", (e) => addImages(e.target.files));
       $("price").addEventListener("input", normalizePrice);
 
       updateGradeSelectColor();
       $("gradeSelect").addEventListener("change", updateGradeSelectColor);
-      
+
       updateTagSelectColor();
       $("tagSelect").addEventListener("change", updateTagSelectColor);
 
-      // エラー再表示時、選択を復元
+      // エラー再表示時、選択を復元（必要なときだけ配列に値が入る）
       PRESELECTED_GRADES.forEach(val => {
-        if (!document.querySelector(`input[name="grades"][value="${val}"]`)) {
-          addHiddenAndChip("grades", val, getOptionText("gradeSelect", val), "gradeChips", "grade");
-        }
+        addHiddenAndChip("grades", val, getOptionText("gradeSelect", val), "gradeChips", "grade");
       });
       PRESELECTED_TAGS.forEach(val => {
-        if (!document.querySelector(`input[name="tags"][value="${val}"]`)) {
-          addHiddenAndChip("tags", val, getOptionText("tagSelect", val), "tagChips", "tag");
-        }
+        addHiddenAndChip("tags", val, getOptionText("tagSelect", val), "tagChips", "tag");
       });
     });
   </script>
@@ -507,7 +579,6 @@
 
           <div style="display:flex; gap:10px;">
             <div class="select-wrap" style="flex:1;">
-              <!-- ★requiredなし：空でも送信できる -->
               <select id="gradeSelect" class="select">
                 <option value="" selected disabled>追加する学年を選択</option>
                 {% for value, label in form.fields.grades.choices %}
@@ -521,10 +592,7 @@
             </button>
           </div>
 
-          <!-- hidden inputs（選んだ分だけ送る。0個なら送られない＝任意） -->
           <div id="gradeHidden"></div>
-
-          <!-- 表示チップ -->
           <div class="chips" id="gradeChips"></div>
         </div>
 

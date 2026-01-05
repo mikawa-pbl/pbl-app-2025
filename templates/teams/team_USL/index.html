@@ -1,10 +1,11 @@
-<!-- templates/team_a/members.html -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>部屋検索</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
 
     <style>
         body {
@@ -57,7 +58,7 @@
         }
 
         .search-building {
-            flex: 0 0 62px; /* 棟の小さめボックス */
+            flex: 0 0 62px;
         }
 
         .search-button {
@@ -102,24 +103,31 @@
             margin: 0 0 6px;
         }
 
+        /* ズーム機能を有効にするための外枠の設定 */
         .map-wrapper {
             position: relative;
             width: 100%;
+            height: 350px; /* スマホで操作しやすい高さを確保 */
             background-color: #fafafa;
             border: 1px solid #ddd;
             border-radius: 4px;
-            overflow: hidden;
+            overflow: hidden; /* 枠外にはみ出した画像を表示しない */
+            touch-action: none; /* ブラウザ標準のスクロールを無効化（ズーム操作を優先） */
         }
 
+        /* 実際に動く中身のコンテナ */
         .map-wrapper-inner {
             position: relative;
             width: 100%;
+            height: 100%;
+            cursor: move;
         }
 
         .map-wrapper-inner img {
             display: block;
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: contain; /* 画像の全体が見えるように収める */
         }
 
         .cursor-dot {
@@ -131,20 +139,9 @@
             transform: translate(-50%, -50%);
             pointer-events: none;
             box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+            z-index: 10;
         }
 
-        .hint-text {
-            margin-top: 6px;
-            font-size: 13px;
-            color: #777;
-        }
-
-        .result-info {
-            font-size: 13px;
-            margin-top: 6px;
-        }
-
-        /* 画面が広いときは少し余白を増やす */
         @media (min-width: 768px) {
             .search-header {
                 padding: 16px 24px 10px;
@@ -160,16 +157,12 @@
 <body>
 <div class="page">
 
-    <!-- 上部：検索バー -->
     <header class="search-header">
         <h1 class="search-title">部屋検索</h1>
-        <!-- 棟のプルダウンバージョン -->
         <form method="get" class="search-form">
             <div class="search-field search-building">
                 <div class="search-label">棟</div>
-                <select id="building_id"
-                        name="building_id"
-                        class="search-input">
+                <select id="building_id" name="building_id" class="search-input">
                     <option value="">選択</option>
                     <option value="A" {% if building_id == "A" %}selected{% endif %}>A</option>
                     <option value="A1" {% if building_id == "A1" %}selected{% endif %}>A1</option>
@@ -185,11 +178,7 @@
 
             <div class="search-field">
                 <div class="search-label">部屋番号</div>
-                <input type="text"
-                    id="room_number"
-                    name="room_number"
-                    class="search-input"
-                    value="{{ room_number }}">
+                <input type="text" id="room_number" name="room_number" class="search-input" value="{{ room_number }}">
             </div>
 
             <div class="search-button">
@@ -197,53 +186,65 @@
             </div>
         </form>
 
-
         {% if error_message %}
             <div class="error">{{ error_message }}</div>
         {% endif %}
     </header>
 
-    <!-- 下部：全体マップ & 詳細マップ -->
     <main class="content">
 
-        <!-- 全体マップ -->
         <section class="map-card">
             <h2 class="map-title">全体マップ</h2>
             <div class="map-wrapper">
-                <div class="map-wrapper-inner">
-                    <!-- とりあえず適当な全体図の画像パス -->
+                <div id="zoom-all" class="map-wrapper-inner">
                     <img src="images/campus_all.png" alt="全体マップ">
                 </div>
             </div>
         </section>
 
-        <!-- 詳細マップ（フロアマップ） -->
-        <!-- 詳細マップ（フロアマップ） -->
-        <!-- 詳細マップ（フロアマップ） -->
         <section class="map-card">
-        <h2 class="map-title">詳細マップ（フロアマップ）</h2>
-        <div class="map-wrapper">
-            <div class="map-wrapper-inner">
-
-            {% if floor_image_url %}
-                <img src="{{ floor_image_url }}" alt="フロア画像">
-
-                {# x,y が取れたときだけ赤点を出す（不要ならこのifごと削除OK） #}
-                {% if x is not None and y is not None %}
-                <div class="cursor-dot" style="left: {{ x }}%; top: {{ y }}%;"></div>
-                {% endif %}
-
-            {% else %}
-                {# 初期表示 or DBで見つからなかった場合のデフォルト #}
-                <img src="images/A-3.png" alt="フロア画像">
-            {% endif %}
-
+            <h2 class="map-title">詳細マップ（フロアマップ）</h2>
+            <div class="map-wrapper">
+                <div id="zoom-floor" class="map-wrapper-inner">
+                    {% if floor_image_url %}
+                        <img src="{{ floor_image_url }}" alt="フロア画像">
+                        {% if x is not None and y is not None %}
+                        <div class="cursor-dot" style="left: {{ x }}%; top: {{ y }}%;"></div>
+                        {% endif %}
+                    {% else %}
+                        <img src="images/A-3.png" alt="フロア画像">
+                    {% endif %}
+                </div>
             </div>
-        </div>
         </section>
-
 
     </main>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- 全体マップの設定 ---
+        const elemAll = document.getElementById('zoom-all');
+        const panzoomAll = Panzoom(elemAll, {
+            maxScale: 5,        // 最大5倍
+            minScale: 1,        // 最小1倍
+            contain: 'outside', // 拡大時に画像の端で止まるようにする
+            step: 0.2           // ズームの滑らかさ
+        });
+
+        // 親要素でホイールによるズームも有効にする（PC用）
+        elemAll.parentElement.addEventListener('wheel', panzoomAll.zoomWithWheel);
+
+        // --- 詳細マップの設定 ---
+        const elemFloor = document.getElementById('zoom-floor');
+        const panzoomFloor = Panzoom(elemFloor, {
+            maxScale: 8,        // 詳細なので少し高めに設定
+            minScale: 1,
+            contain: 'outside'
+        });
+
+        elemFloor.parentElement.addEventListener('wheel', panzoomFloor.zoomWithWheel);
+    });
+</script>
 </body>
 </html>

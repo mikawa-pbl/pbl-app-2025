@@ -231,6 +231,7 @@ def item_edit(request):
                 "item": item,
                 "selected_grades": request.POST.getlist('grades'),
                 "selected_tags": request.POST.getlist('tags'),
+                "delete_images": request.POST.getlist('delete_images'),
             })
 
         # バリデーション（任意）
@@ -248,6 +249,7 @@ def item_edit(request):
                 "item": item,
                 "selected_grades": request.POST.getlist('grades'),
                 "selected_tags": request.POST.getlist('tags'),
+                "delete_images": request.POST.getlist('delete_images'),
             })
 
         if form.is_valid():
@@ -300,6 +302,7 @@ def item_edit(request):
         "item": item,
         "selected_grades": request.POST.getlist('grades') if request.method == "POST" else list(item.target_grades.values_list("code", flat=True)),
         "selected_tags": request.POST.getlist('tags') if request.method == "POST" else list(item.tags.values_list("name", flat=True)),
+        "delete_images": request.POST.getlist('delete_images') if request.method == "POST" else [],
     })
 
 @takenoko_login_required

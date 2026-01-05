@@ -128,3 +128,55 @@ def search_by_room_name(request):
     }
     
     return render(request, 'teams/agileca/search_by_classroom.html', context)
+
+# 複合検索 (詳細検索)
+def search_complex(request):
+    # フォームから各検索条件を取得
+    building_query = request.GET.get('building_name', '')
+    room_query = request.GET.get('room_name', '')
+    professor_query = request.GET.get('professor_name', '')
+    selected_ids = request.GET.getlist('attribute_ids')
+
+    # 初期クエリセット (全件)
+    # allで引っ張っている点に不安あり
+    rooms = Classroom.objects.all()
+
+    # フィルタリングの適用 (条件が指定されている場合のみ適用)
+    # ここでフィルターを分けていると計算量的によくないかも、現時点のサイズではおそらく問題にはならない
+    
+    # 1. 建物名
+    if building_query:
+        rooms = rooms.filter(building__name__contains=building_query)
+    
+    # 2. 部屋名
+    if room_query:
+        rooms = rooms.filter(room_name__icontains=room_query)
+        
+    # 3. 担当教授名
+    if professor_query:
+        rooms = rooms.filter(professor__name__icontains=professor_query)
+        
+    # 4. 属性 (タグ) - AND検索
+    if selected_ids:
+        try:
+            selected_ids_int = [int(id) for id in selected_ids]
+        except ValueError:
+            selected_ids_int = []
+            
+        for attr_id in selected_ids_int:
+            rooms = rooms.filter(attributes__id=attr_id)
+    
+    # コンテキストの作成 (テンプレートへのデータの受け渡し)
+    all_attributes = Attribute.objects.all()
+    
+    context = {
+        'rooms': rooms,
+        'all_attributes': all_attributes,
+        # フォームの状態を維持するために、入力された値を返す
+        'building_name': building_query,
+        'room_name': room_query,
+        'professor_name': professor_query,
+        'selected_ids': selected_ids, # テンプレート側で stringformat:"s" と比較するため、文字列リストのままでOK
+    }
+    
+    return render(request, 'teams/agileca/search_complex.html', context)

@@ -1,0 +1,104 @@
+{% extends "teams/agileca/layout/split_base.html" %}
+{% load static %}
+
+{% block title %}詳細検索{% endblock %}
+
+{% block left %}
+  {% include "teams/agileca/partials/sidebar.html" %}
+{% endblock %}
+
+{% block right %}
+    <h2>🔍 詳細検索</h2>
+    <p>複数の条件を組み合わせて教室を検索できます。</p>
+    
+    <form action="{% url 'agileca:search_complex' %}" method="GET" class="search-form" style="border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: #f9f9f9;">
+        
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">建物名</label>
+            <input type="text" name="building_name" value="{{ building_name|default_if_none:'' }}" placeholder="例: A" style="padding: 8px; width: 100%; max-width: 400px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">部屋名</label>
+            <input type="text" name="room_name" value="{{ room_name|default_if_none:'' }}" placeholder="例: 101" style="padding: 8px; width: 100%; max-width: 400px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">担当教授</label>
+            <input type="text" name="professor_name" value="{{ professor_name|default_if_none:'' }}" placeholder="例: 鈴木" style="padding: 8px; width: 100%; max-width: 400px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">特徴・属性 (AND検索)</label>
+            <div class="tag-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                {% for attr in all_attributes %}
+                    <label style="background-color: #fff; padding: 5px 10px; border: 1px solid #ddd; border-radius: 3px; cursor: pointer;">
+                        <input 
+                            type="checkbox" 
+                            name="attribute_ids" 
+                            value="{{ attr.id }}" 
+                            {% if attr.id|stringformat:"s" in selected_ids %}checked{% endif %}
+                        >
+                        {{ attr.name }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                検索する
+            </button>
+            
+            {% if request.GET %}
+                <a href="{% url 'agileca:search_complex' %}" style="color: #6c757d; text-decoration: none;">
+                    条件をクリア
+                </a>
+            {% endif %}
+        </div>
+    </form>
+
+    <hr style="margin-top: 30px; margin-bottom: 20px;">
+
+    {% if rooms %}
+        <h3>検索結果 ({{ rooms.count }} 件)</h3>
+        <ul style="list-style: none; padding: 0;">
+            {% for room in rooms %}
+                <li style="border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-left: 5px solid #007bff; border-radius: 5px;">
+                    
+                    <h4>{{ room.room_name }} ({{ room.floor }}階)</h4>
+                    
+                    <p><strong>建物:</strong> 
+                        <span style="display: inline-block; background-color: #e0f7ff; color: #007bff; padding: 3px 8px; margin-right: 10px; border-radius: 12px; font-size: 0.9em;">
+                            {{ room.building.name }}
+                        </span>
+                    </p>
+                    
+                    <p><strong>担当教授:</strong> 
+                        {% if room.professor %}
+                            <span style="display: inline-block; background-color: #ffe6e6; color: #ff4d4d; padding: 3px 8px; margin-right: 10px; border-radius: 12px; font-size: 0.9em;">
+                                {{ room.professor.name }}
+                            </span>
+                        {% else %}
+                            <span style="color: #6c757d;">未定</span>
+                        {% endif %}
+                    </p>
+                    
+                    <p><strong>用途:</strong> 
+                        {% for attr in room.attributes.all %}
+                            <span style="display: inline-block; background-color: #e6ffed; color: #28a745; padding: 3px 8px; margin-right: 5px; border-radius: 12px; font-size: 0.9em;">
+                                {{ attr.name }}
+                            </span>
+                        {% empty %}
+                            <span style="color: #6c757d;">属性なし</span>
+                        {% endfor %}
+                    </p>
+                </li>
+            {% endfor %}
+        </ul>
+    
+    {% elif request.GET %}
+        <p>条件に一致する教室は見つかりませんでした。</p>
+    {% endif %}
+
+{% endblock %}

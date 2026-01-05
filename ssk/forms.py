@@ -1,6 +1,6 @@
 # ssk/forms.py
 from django import forms
-from django.forms.widgets import SelectDateWidget
+from django.forms.widgets import DateInput
 from django.forms.widgets import PasswordInput
 from django.core.exceptions import ValidationError
 from .models import Post
@@ -10,22 +10,14 @@ class PostForm(forms.ModelForm):
     date = forms.DateField(
         label="開始日",
         required=False,
-        widget=SelectDateWidget(
-            years=range(2024, 2031),
-            empty_label=("年", "月", "日"),
-        )
+        widget=DateInput(attrs={"type": "date"})
     )
 
     end_date = forms.DateField(
         label="終了日（任意）",
         required=False,
-        widget=SelectDateWidget(
-            years=range(2024, 2031),
-            empty_label=("年", "月", "日"),
-        )
+        widget=DateInput(attrs={"type": "date"})
     )
-
-    # ※ 時刻フィールドは廃止（日付区間のみ）
 
     # 投稿に対して任意で設定する編集用パスワード（新規作成時のみ使用）
     password = forms.CharField(

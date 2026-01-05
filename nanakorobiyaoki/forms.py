@@ -21,7 +21,6 @@ class MyPageEditForm(forms.ModelForm):
             'icon', 
             'grade',
             'department', 
-            'age', 
             'gender', 
             'club', 
             'one_word', 

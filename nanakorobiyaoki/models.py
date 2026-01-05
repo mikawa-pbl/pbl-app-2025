@@ -64,7 +64,6 @@ class MyPage(models.Model):
         null=True,
     )
 
-    age = models.IntegerField(verbose_name="年齢",null=True)
     gender = models.CharField(
         max_length=50, 
         choices=GENDER_CHOICES, # プルダウンにする
@@ -76,7 +75,7 @@ class MyPage(models.Model):
     github_account = models.CharField(max_length=100, blank=True, null=True, verbose_name="githubアカウント")
     hobby = models.CharField(max_length=200, blank=True, null=True, verbose_name="趣味")
     birthplace = models.CharField(max_length=100, blank=True, null=True, verbose_name="出身")
-    birth_date = models.DateField(verbose_name="誕生日", null=True)
+    birth_date = models.DateField(verbose_name="誕生日", null=True, blank=True)
     relationship_status = models.CharField(
         max_length=50, 
         choices=RELATIONSHIP_CHOICES, # プルダウンにする

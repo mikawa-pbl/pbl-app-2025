@@ -390,36 +390,8 @@
       <section class="card">
         <h1 class="title">商品を編集</h1>
 
-        <form
-          action="{% url 'takenoko:edit_complete' %}"
-          id="sellForm"
-          method="post"
-          enctype="multipart/form-data"
-        >
+        <form action="" id="sellForm" method="post" enctype="multipart/form-data">
           {% csrf_token %}
-
-          <!-- 画像（最大5枚） -->
-          <div class="field">
-            <label class="label">画像（最大5枚）</label>
-
-            <div class="uploader">
-              <div class="thumbs" id="thumbs"></div>
-
-              <div style="display: flex; flex-direction: column; gap: 8px">
-                <label class="upload-btn" id="pickBtn" for="images">
-                  <i class="fas fa-plus"></i> 画像を追加
-                </label>
-                <input
-                  id="images"
-                  name="images"
-                  class="file-input"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                />
-              </div>
-            </div>
-          </div>
 
           <!-- 商品名 -->
           <div class="field">
@@ -430,7 +402,7 @@
               class="input"
               type="text"
               required
-              placeholder="例：計算機科学の教科書"
+              value="{{ form.name.value|default_if_none:'' }}"
             />
           </div>
 
@@ -446,72 +418,120 @@
               pattern="[0-9]*"
               maxlength="6"
               required
-              placeholder="例：5000（¥99,999まで）"
+              value="{{ form.price.value|default_if_none:'' }}"
             />
           </div>
 
           <!-- 商品詳細 -->
           <div class="field">
-            <label class="label" for="detail">商品詳細</label>
+            <label class="label" for="description">商品詳細</label>
             <textarea
-              id="detail"
-              name="detail"
+              id="description"
+              name="description"
               class="textarea"
               maxlength="300"
               required
-              placeholder="状態、受け渡し場所、注意点など（300文字まで）"
-            ></textarea>
+            >{{ form.description.value|default_if_none:'' }}</textarea>
           </div>
 
-          <!-- 商品状態 -->
+          <!-- 商品状態（choicesをフォームから動的表示） -->
           <div class="field">
             <label class="label" for="condition">商品状態</label>
             <div class="select-wrap">
               <select id="condition" name="condition" class="select" required>
-                <option value="" selected disabled>選択してください</option>
-                <option value="new">新品・未使用</option>
-                <option value="like_new">未使用に近い</option>
-                <option value="good">目立った傷や汚れなし</option>
-                <option value="fair">やや傷や汚れあり</option>
-                <option value="poor">傷や汚れあり</option>
+                <option value="" disabled {% if not form.condition.value %}selected{% endif %}>選択してください</option>
+                {% for val, label in form.fields.condition.choices %}
+                  <option value="{{ val }}" {% if form.condition.value == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
               </select>
             </div>
           </div>
 
-          <!-- 対象学年タグ（複数可） ※任意 -->
+          <!-- 対象学年（DBのTargetGrade） -->
           <div class="field">
-            <label class="label" for="gradeSelect"
-              >対象学年タグ（複数可）</label
-            >
-
-            <div style="display: flex; gap: 10px">
-              <div class="select-wrap" style="flex: 1">
-                <!-- ★requiredなし：空でも送信できる -->
+            <label class="label" for="gradeSelect">対象学年タグ（複数可）</label>
+            <div style="display:flex; gap:10px;">
+              <div class="select-wrap" style="flex:1;">
                 <select id="gradeSelect" class="select">
                   <option value="" selected disabled>追加する学年を選択</option>
-                  <option value="b1">学部1年</option>
-                  <option value="b2">学部2年</option>
-                  <option value="b3">学部3年</option>
-                  <option value="b4">学部4年</option>
-                  <option value="m1">修士1年</option>
-                  <option value="m2">修士2年</option>
-                  <option value="d">博士</option>
+                  {% for val, label in form.fields.grades.choices %}
+                    <option value="{{ val }}">{{ label }}</option>
+                  {% endfor %}
                 </select>
               </div>
-
-              <button type="button" class="upload-btn" onclick="addGradeTag()">
-                <i class="fas fa-tag"></i> 追加
-              </button>
+              <button type="button" class="upload-btn" onclick="addGradeTag()"><i class="fas fa-tag"></i> 追加</button>
             </div>
-
-            <!-- hidden inputs（選んだ分だけ送る。0個なら送られない＝任意） -->
-            <div id="gradeHidden"></div>
-
-            <!-- 表示チップ -->
-            <div class="chips" id="gradeChips"></div>
+            <div id="gradeHidden">
+              {% for g in selected_grades %}
+                <input type="hidden" name="grades" value="{{ g }}">
+              {% endfor %}
+            </div>
+            <div class="chips" id="gradeChips">
+              {% for g in selected_grades %}
+                <span class="chip" data-grade="{{ g }}">
+                  {% for val, label in form.fields.grades.choices %}
+                    {% if val == g %}{{ label }}{% endif %}
+                  {% endfor %}
+                  <button type="button" aria-label="削除" onclick="removeGradeTag('{{ g }}')">×</button>
+                </span>
+              {% endfor %}
+            </div>
           </div>
 
-          <!-- 出品ボタン -->
+          <!-- タグ（Tagモデル） -->
+          <div class="field">
+            <label class="label" for="tagSelect">カテゴリタグ（複数可）</label>
+            <div style="display:flex; gap:10px;">
+              <div class="select-wrap" style="flex:1;">
+                <select id="tagSelect" class="select">
+                  <option value="" selected disabled>追加するタグを選択</option>
+                  {% for val, label in form.fields.tags.choices %}
+                    <option value="{{ val }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <button type="button" class="upload-btn" onclick="addCategoryTag()"><i class="fas fa-tag"></i> 追加</button>
+            </div>
+            <div id="tagHidden">
+              {% for t in selected_tags %}
+                <input type="hidden" name="tags" value="{{ t }}">
+              {% endfor %}
+            </div>
+            <div class="chips" id="tagChips">
+              {% for t in selected_tags %}
+                <span class="chip" data-tag="{{ t }}">
+                  {% for val, label in form.fields.tags.choices %}
+                    {% if val == t %}{{ label }}{% endif %}
+                  {% endfor %}
+                  <button type="button" aria-label="削除" onclick="removeCategoryTag('{{ t }}')">×</button>
+                </span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- 既存画像（削除チェック） -->
+          <div class="field">
+            <label class="label">登録済み画像（削除するものにチェック）</label>
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+              {% for img in item.images.all %}
+                <label style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                  <img src="{{ img.image.url }}" alt="img{{ forloop.counter }}" style="width:120px; height:120px; object-fit:cover; border-radius:12px; border:1px solid #ddd;">
+                  <input type="checkbox" name="delete_images" value="{{ img.id }}"> 削除
+                </label>
+              {% empty %}
+                <p style="color:#888;">登録済み画像はありません。</p>
+              {% endfor %}
+            </div>
+            <p class="text-sm text-gray-500 mt-2">※ 最大5枚。削除後＋追加分が5枚以内になるようにしてください。</p>
+          </div>
+
+          <!-- 新規画像追加 -->
+          <div class="field">
+            <label class="label" for="images">画像を追加（複数可・5MB以下）</label>
+            <input id="images" name="images" type="file" multiple accept="image/*" class="input" />
+          </div>
+
+          <!-- 送信 -->
           <div class="actions">
             <button type="submit" class="submit-btn">編集する</button>
           </div>

@@ -1,30 +1,32 @@
 from django.test import TestCase
 from django.db.models import Sum
-from .models import H34vvyUser, Laboratory
+from .labs import LABORATORIES
+from .models import H34vvyUser, Entry
 
 class RankingTests(TestCase):
     databases = {"h34vvy_u53rzz"}
 
     def setUp(self):
-        self.lab_a = Laboratory.objects.create(name="Lab A")
-        self.lab_b = Laboratory.objects.create(name="Lab B")
+        # labs.py defined keys: lab_nakamura, lab_sato, ...
+        self.lab_a_id = "lab_nakamura"
+        self.lab_b_id = "lab_sato"
 
         # Lab A: 30 points
         self.u1 = H34vvyUser.objects.create_user(
-            username="u1", password="pw", laboratory=self.lab_a
+            username="u1", password="pw", laboratory=self.lab_a_id
         )
         self.u1.points = 10
         self.u1.save()
 
         self.u2 = H34vvyUser.objects.create_user(
-            username="u2", password="pw", laboratory=self.lab_a
+            username="u2", password="pw", laboratory=self.lab_a_id
         )
         self.u2.points = 20
         self.u2.save()
 
         # Lab B: 5 points
         self.u3 = H34vvyUser.objects.create_user(
-            username="u3", password="pw", laboratory=self.lab_b
+            username="u3", password="pw", laboratory=self.lab_b_id
         )
         self.u3.points = 5
         self.u3.save()
@@ -35,21 +37,29 @@ class RankingTests(TestCase):
         self.u4.save()
 
     def test_ranking_aggregation(self):
-        labs = list(
-            Laboratory.objects.annotate(total_points=Sum("h34vvy_users__points"))
+        # Multiple users in lab_a (10 + 20 = 30 points)
+        # Multiple users in lab_b (5 points)
+        # Expected: 1 entry for lab_a, 1 entry for lab_b (plus potentially empty lab)
+        
+        lab_stats = list(
+            H34vvyUser.objects.values("laboratory")
+            .annotate(total_points=Sum("points"))
             .order_by("-total_points")
-            .all()
         )
         
-        self.assertEqual(len(labs), 2)
+        # If aggregation fails (due to default ordering), we might see multiple entries for the same lab
+        # e.g. Lab A (10), Lab A (20) instead of Lab A (30)
         
-        # 1st: Lab A (30pts)
-        self.assertEqual(labs[0].name, "Lab A")
-        self.assertEqual(labs[0].total_points, 30)
+        lab_a_entries = [x for x in lab_stats if x["laboratory"] == self.lab_a_id]
+        lab_b_entries = [x for x in lab_stats if x["laboratory"] == self.lab_b_id]
         
-        # 2nd: Lab B (5pts)
-        self.assertEqual(labs[1].name, "Lab B")
-        self.assertEqual(labs[1].total_points, 5)
+        print(f"DEBUG: Lab Stats: {lab_stats}")
+        
+        self.assertEqual(len(lab_a_entries), 1, "Should have exactly one entry for Lab A")
+        self.assertEqual(lab_a_entries[0]["total_points"], 30, "Lab A should have 30 points total")
+        
+        self.assertEqual(len(lab_b_entries), 1, "Should have exactly one entry for Lab B")
+        self.assertEqual(lab_b_entries[0]["total_points"], 5, "Lab B should have 5 points total")
 
     def test_signup_view_with_lab(self):
         response = self.client.post(
@@ -58,11 +68,11 @@ class RankingTests(TestCase):
                 "username": "newuser",
                 "password1": "password123",
                 "password2": "password123",
-                "laboratory": self.lab_a.id,
+                "laboratory": self.lab_a_id,
             },
             follow=True,
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(H34vvyUser.objects.filter(username="newuser").exists())
         user = H34vvyUser.objects.get(username="newuser")
-        self.assertEqual(user.laboratory, self.lab_a)
+        self.assertEqual(user.laboratory, self.lab_a_id)

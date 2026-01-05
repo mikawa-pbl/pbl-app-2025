@@ -9,7 +9,8 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from .doors import DOORS
 from .forms import EntryForm, NamespacedLoginForm, SignupForm
-from .models import H34vvyUser, Entry, Laboratory
+from .labs import LABORATORIES
+from .models import H34vvyUser, Entry
 
 
 LOGIN_REDIRECT_FALLBACK = reverse_lazy("h34vvy_u53rzz:index")
@@ -176,24 +177,40 @@ def ranking_view(request):
     # Laboratory Ranking
     from django.db.models import Sum
 
-    labs = list(
-        Laboratory.objects.annotate(total_points=Sum("h34vvy_users__points"))
+    # 集計: { "laboratory": "lab_id", "total_points": 123 }
+    lab_stats = (
+        H34vvyUser.objects.order_by().values("laboratory")
+        .annotate(total_points=Sum("points"))
         .order_by("-total_points")
-        .all()
     )
+    
+    # ID -> Name マッピング用辞書
+    lab_map = {lab.id: lab.name for lab in LABORATORIES}
+
     lab_rankings = []
     last_points = None
     last_rank = 0
-    for idx, lab in enumerate(labs, start=1):
-        # total_points might be None if no users or no points, treat as 0
-        points = lab.total_points or 0
+    rank_counter = 1
+
+    for stat in lab_stats:
+        lab_id = stat["laboratory"]
+        # laboratoryが空文字（未所属）の場合はランキング対象外にするならここでスキップ
+        if not lab_id:
+            continue
+            
+        points = stat["total_points"] or 0
+        lab_name = lab_map.get(lab_id, lab_id)
+
         if points == last_points:
             rank = last_rank
         else:
-            rank = idx
-        lab_rankings.append({"lab": lab, "rank": rank, "points": points})
+            rank = rank_counter
+        
+        lab_rankings.append({"lab": {"name": lab_name}, "rank": rank, "points": points})
+        
         last_points = points
         last_rank = rank
+        rank_counter += 1
 
     return render(
         request,

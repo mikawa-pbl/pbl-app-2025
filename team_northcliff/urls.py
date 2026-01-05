@@ -6,6 +6,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("members/", views.members, name="members"),
     path("ui/<str:username>/", views.ui, name="ui"),
+    path("map_ui/<str:username>/", views.map_ui, name="map_ui"),  # 追加: マップUI（ユーザー名付き）
     # API endpoints
     path("api/<str:username>/user-data/", api.user_data_view, name="api_user_data"),
     path("api/facilities/", api.facilities_view, name="api_facilities"),

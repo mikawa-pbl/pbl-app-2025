@@ -73,7 +73,7 @@
             <td class="px-4 py-3">
               {{ account.username }}
               {% if account.laboratory %}
-              <span class="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">{{ account.laboratory.name }}</span>
+              <span class="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">{{ account.lab_label }}</span>
               {% endif %}
             </td>
             <td class="px-4 py-3 text-right font-semibold">{{ account.points }} pt</td>

@@ -587,6 +587,53 @@ def company_detail(request, pk):
     # ポイント付与ポップアップ用フラグ（POST→redirect 後に表示するため session から取得）
     points_awarded = request.session.pop('points_awarded', None)
 
+    # oncampus_briefingの数字をコース名に変換
+    FIELD_OPTIONS = {
+        '1系': [
+            '機械・システムデザインコース',
+            '材料・生産加工コース',
+            'システム制御・ロボットコース',
+            '環境・エネルギーコース',
+        ],
+        '2系': [
+            '材料エレクトロニクスコース',
+            '機能電気システムコース',
+            '集積電子システムコース',
+            '情報通信システムコース',
+        ],
+        '3系': [
+            '計算機数理科学分野',
+            'データ情報学分野',
+            'ヒューマン・ブレイン情報学分野',
+            'メディア・ロボット情報学分野',
+        ],
+        '4系': [
+            '分子制御化学分野',
+            '分子生物化学分野',
+            '分子機能化学分野',
+        ],
+        '5系': [
+            '建築・都市デザイン学分野',
+            '都市・地域マネジメント学分野',
+        ],
+    }
+    
+    oncampus_briefing_names = []
+    if company.oncampus_briefing:
+        # "1.2,4.2,5.1" のような形式をパース
+        codes = [code.strip() for code in company.oncampus_briefing.split(',')]
+        for code in codes:
+            try:
+                if '.' in code:
+                    dept, idx = code.split('.')
+                    dept_key = f"{dept}系"
+                    idx_num = int(idx) - 1  # 1-indexedから0-indexedへ
+                    if dept_key in FIELD_OPTIONS and 0 <= idx_num < len(FIELD_OPTIONS[dept_key]):
+                        oncampus_briefing_names.append(FIELD_OPTIONS[dept_key][idx_num])
+            except (ValueError, IndexError):
+                # パースエラーは無視
+                pass
+
     if person.points < 1:
         # ポイント不足: 専用のロック画面を表示
         return render_with_person(request, "teams/shiokara/company_detail_locked.html", {"company": company})
@@ -636,6 +683,7 @@ def company_detail(request, pk):
         "seen_points_tutorial": getattr(person, "seen_points_tutorial", False) if person else False,
         # このユーザーがこの企業をお気に入り登録しているか
         "is_favorite": bool(person and Person.objects.using(DB_ALIAS).filter(pk=person.pk, favorites__pk=company.pk).exists()),
+        "oncampus_briefing_names": oncampus_briefing_names,
     }
     return render_with_person(request, "teams/shiokara/company_detail.html", context)
 

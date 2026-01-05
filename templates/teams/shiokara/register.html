@@ -168,17 +168,17 @@
             {% csrf_token %}
 
             <div class="form-field">
-                <label for="id_student_id">学籍番号:</label>
-                <input type="text" name="student_id" id="id_student_id" value="{{ student_id }}" required>
-            </div>
-
-            <div class="form-field">
                 <label>課程:</label>
                 <div class="radio-group">
                     <label><input type="radio" name="course" value="B" id="id_course_b" {% if course == "B" %}checked{% endif %}> 学部(B)</label>
                     <label><input type="radio" name="course" value="M" id="id_course_m" {% if course == "M" %}checked{% endif %}> 修士(M)</label>
                     <label><input type="radio" name="course" value="D" id="id_course_d" {% if course == "D" %}checked{% endif %}> 博士(D)</label>
                 </div>
+            </div>
+
+            <div class="form-field">
+                <label for="id_student_id">学籍番号:</label>
+                <input type="text" name="student_id" id="id_student_id" value="{{ student_id }}" placeholder="半角数字で入力してください" required>
             </div>
 
             <div class="form-field">

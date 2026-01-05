@@ -12,7 +12,7 @@ from django.conf import settings
 # def index(request):
 #     return render(request, 'teams/team_cake/index.html')
 
-def index(request):
+def _get_index_context():
     try:
         # 通常はORMで取得（UUIDField の変換が走る）
         qs = Good.objects.using('team_cake').all()
@@ -22,7 +22,7 @@ def index(request):
         slider_goods = all_goods[-3:] if len(all_goods) >= 3 else all_goods
         slider_goods = list(reversed(slider_goods))
         
-        return render(request, 'teams/team_cake/index.html', {'goods': qs, 'slider_goods': slider_goods})
+        return {'goods': qs, 'slider_goods': slider_goods}
     except ValueError:
         # DB に古い整数 ID 等、UUID として変換できない値が入っている場合のフォールバック。
         # テンプレートは objects の `.name` / `.price` を参照する想定のため SimpleNamespace を作る。
@@ -36,7 +36,17 @@ def index(request):
         slider_goods = goods[-3:] if len(goods) >= 3 else goods
         slider_goods = list(reversed(slider_goods))
         
-        return render(request, 'teams/team_cake/index.html', {'goods': goods, 'slider_goods': slider_goods})
+        return {'goods': goods, 'slider_goods': slider_goods}
+
+def index(request):
+    context = _get_index_context()
+    context['is_staff'] = False
+    return render(request, 'teams/team_cake/index.html', context)
+
+def admin_index(request):
+    context = _get_index_context()
+    context['is_staff'] = True
+    return render(request, 'teams/team_cake/index.html', context)
 
 def registration_goods(request):
     if request.method == 'POST':

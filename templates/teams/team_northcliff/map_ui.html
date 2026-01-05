@@ -104,7 +104,9 @@
             userId: null,
             userFacilityAccess: new Set(),
             targetFacilityId: null,
-            facilities: []
+            facilities: [],
+            userLocation: null,         // ユーザーの位置情報
+            isLocationAcquired: false   // 位置情報取得済みフラグ
         };
 
         // マーカーと座標を管理する辞書 (ID -> Marker/LatLng)
@@ -124,6 +126,12 @@
             return json;
         }
 
+        // --- マップ設定 ---
+        var map = L.map('map').setView([34.701663, 137.408313], 17); // デフォルト
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+        
+        var userMarker = null;
+
         // --- 初期化 ---
         async function initializeApp() {
             try {
@@ -131,14 +139,15 @@
                 const userData = await apiCall(`/team_northcliff/api/${username}/user-data/`);
                 state.userId = userData.user_id;
                 state.points = userData.points;
+                state.userLocation = { latitude: userData.latitude, longitude: userData.longitude };
                 updatePoints();
+
+                // 起動時に位置情報を要求
+                handleLocationPermission();
 
                 // 施設情報取得
                 await loadFacilities();
                 
-                // マーカー設置（JS定義の座標を使用）
-                addMarkers();
-
             } catch (e) {
                 console.error(e);
                 document.getElementById('points-overlay').textContent = "エラー";
@@ -150,38 +159,61 @@
             try {
                 const data = await apiCall('/team_northcliff/api/facilities/');
                 state.facilities = data.facilities;
+                addMarkers(); // データ取得後にマーカー設置
             } catch(e) { console.error(e); }
         }
 
-        // --- マップ設定 ---
-        var map = L.map('map').setView([34.701663, 137.408313], 17);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+        // --- 位置情報許可のハンドリング ---
+        function handleLocationPermission() {
+            if (state.isLocationAcquired) return true;
+            // 起動時に位置情報を要求する通知（DBの位置情報を使用することを示す）
+            const confirmed = confirm("投稿や距離の表示には、位置情報が必要です。\n（登録された位置情報を使用します）\n\n許可しますか？");
+            if (confirmed) {
+                state.isLocationAcquired = true;
+                setUserLocationMarker();
+                return true;
+            }
+            alert("位置情報を許可しないと、この機能は利用できません。");
+            return false;
+        }
 
-        var currentLatLng = null;
+        // --- ユーザー位置情報の表示 ---
+        function setUserLocationMarker() {
+             if (!state.userLocation || !state.userLocation.latitude || !state.userLocation.longitude) return;
+             
+             const latlng = [state.userLocation.latitude, state.userLocation.longitude];
+             
+             // マップ中心をユーザー位置へ
+             map.setView(latlng, 17);
+
+             // 既存マーカー削除
+             if (userMarker) map.removeLayer(userMarker);
+
+             // 青いドットマーカー
+             userMarker = L.circleMarker(latlng, {
+                color: '#fff', weight: 2, fillColor: '#007bff', fillOpacity: 1, radius: 8
+             });
+             userMarker.addTo(map).bindPopup("現在地");
+
+             // 範囲円
+             L.circle(latlng, { radius: 20, color: '#007bff', weight: 1, opacity: 0.2 }).addTo(map);
+        }
 
         // --- ポップアップ生成 ---
-        function generatePopupContent(facility, fallbackName) {
+        function generatePopupContent(facility) {
             const div = document.createElement('div');
             div.className = 'popup-content';
 
             // タイトル
             const title = document.createElement('b');
-            title.textContent = facility ? facility.name : fallbackName;
+            title.textContent = facility.name;
             div.appendChild(title);
-
-            // 施設データが見つからない場合
-            if (!facility) {
-                div.appendChild(document.createElement('br'));
-                div.appendChild(document.createTextNode("データなし"));
-                return div;
-            }
 
             // ロック判定
             const isUnlocked = state.userFacilityAccess.has(facility.id);
 
             if (isUnlocked) {
                 // === 1. アンロック済み (最新情報のみ表示) ===
-                // 要望通り投稿ボタンは非表示にする
                 
                 const lastPost = document.createElement('div');
                 lastPost.style.marginTop = '6px';
@@ -207,7 +239,6 @@
                         div.appendChild(cDiv);
                     });
                 }
-                // ※ ここに投稿ボタンは作成しない
 
             } else {
                 // === ロック中 (解除ボタン or 投稿ボタン) ===
@@ -234,27 +265,18 @@
             return div;
         }
 
-        // --- マーカー設置 (4. 常にラベル表示) ---
+        // --- マーカー設置 (データ基盤) ---
         function addMarkers() {
-            const locations = [
-                { searchKey: '図書館', label: '附属図書館', lat: 34.700842, lng: 137.410081 },
-                { searchKey: '駐車場', label: '北駐車場', lat: 34.703080, lng: 137.407548, icon: true },
-                { searchKey: '食', label: '食堂', lat: 34.700797, lng: 137.409067 },
-                { searchKey: 'カフェ', label: 'カフェ', lat: 34.700950, lng: 137.409500 },
-                { searchKey: 'バス', label: 'バス停', lat: 34.700883, lng: 137.412751 }
-            ];
+            // 既存マーカークリア（必要なら実装するが、今回は追加のみでOK）
 
-            locations.forEach(loc => {
-                const latlng = L.latLng(loc.lat, loc.lng);
-                let marker;
-                if (loc.icon) {
-                    marker = L.marker(latlng, { icon: L.icon({ iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png', iconSize:[25,41], iconAnchor:[12,41]}) });
-                } else {
-                    marker = L.marker(latlng);
-                }
+            state.facilities.forEach(facility => {
+                if (!facility.latitude || !facility.longitude) return;
+
+                const latlng = L.latLng(facility.latitude, facility.longitude);
+                const marker = L.marker(latlng);
                 
-                // ★ 4. ツールチップで名前を常に表示
-                marker.bindTooltip(loc.label, {
+                // ツールチップで名前を常に表示
+                marker.bindTooltip(facility.name, {
                     permanent: true, 
                     direction: 'top', 
                     offset: [-10, -35],
@@ -263,26 +285,23 @@
 
                 marker.addTo(map);
 
-                // 施設データ紐付け
-                let f = state.facilities.find(item => item.name.includes(loc.searchKey));
-                if (f) {
-                    // IDでマーカーと座標を逆引きできるように保存
-                    markersMap[f.id] = marker;
-                    facilityCoords[f.id] = latlng;
-                }
+                // 管理用保存
+                markersMap[facility.id] = marker;
+                facilityCoords[facility.id] = latlng;
 
                 marker.bindPopup(() => {
-                    // 最新の検索結果を使用 (再ロード対応)
-                    let currentF = state.facilities.find(item => item.name.includes(loc.searchKey));
+                    // 最新の状態を参照
+                    const currentF = state.facilities.find(f => f.id === facility.id);
                     
                     let distHtml = '';
-                    if (currentLatLng) {
-                        const d = map.distance(currentLatLng, latlng);
+                    if (state.userLocation && state.userLocation.latitude && state.userLocation.longitude) {
+                        const userLatLng = L.latLng(state.userLocation.latitude, state.userLocation.longitude);
+                        const d = map.distance(userLatLng, latlng);
                         const txt = d >= 1000 ? (d/1000).toFixed(2)+'km' : Math.round(d)+'m';
                         distHtml = `<span class="dist-badge">🚶 現在地から ${txt}</span><br>`;
                     }
 
-                    const content = generatePopupContent(currentF, loc.label);
+                    const content = generatePopupContent(currentF);
                     
                     if(distHtml) {
                         const dSpan = document.createElement('div');
@@ -293,42 +312,6 @@
                 });
             });
         }
-
-        // --- Mock GPS ---
-        function setMockLocation() {
-            const mockLat = 34.701317;
-            const mockLng = 137.410044;
-            currentLatLng = L.latLng(mockLat, mockLng);
-            
-            map.eachLayer(layer => { if(layer._mockLocation) map.removeLayer(layer); });
-
-            const blueDot = L.circleMarker(currentLatLng, {
-                color: '#fff', weight: 2, fillColor: '#007bff', fillOpacity: 1, radius: 8
-            });
-            blueDot._mockLocation = true;
-            blueDot.addTo(map).bindPopup("現在地 (テスト用)");
-
-            const circle = L.circle(currentLatLng, { radius: 20, color: '#007bff', weight: 1, opacity: 0.2 });
-            circle._mockLocation = true;
-            circle.addTo(map);
-        }
-
-        map.on('locationfound', (e) => { setMockLocation(); });
-        map.on('locationerror', (e) => { console.warn("GPS失敗"); setMockLocation(); });
-
-        var GpsControl = L.Control.extend({
-            options: { position: 'topleft' },
-            onAdd: function(map) {
-                var btn = L.DomUtil.create('div', 'leaflet-control-gps leaflet-bar');
-                btn.innerHTML = '📍';
-                btn.onclick = (e) => {
-                    L.DomEvent.stopPropagation(e);
-                    map.locate({setView: true, maxZoom: 17}); 
-                };
-                return btn;
-            }
-        });
-        map.addControl(new GpsControl());
 
         // --- モーダル制御 ---
         const confirmModal = document.getElementById('confirm-modal');
@@ -342,12 +325,17 @@
 
         function openPostModal(fid) {
             // === 3. 距離制限 (100m) ===
-            if (currentLatLng && facilityCoords[fid]) {
-                const dist = map.distance(currentLatLng, facilityCoords[fid]);
+            // DB上の位置情報で計算
+            if (state.userLocation && state.userLocation.latitude && state.userLocation.longitude && facilityCoords[fid]) {
+                const userLatLng = L.latLng(state.userLocation.latitude, state.userLocation.longitude);
+                const dist = map.distance(userLatLng, facilityCoords[fid]);
                 if (dist > 100) {
                     alert(`現在地から離れすぎています (約${Math.round(dist)}m)。\n投稿は100m圏内でのみ可能です。`);
                     return; // モーダルを開かない
                 }
+            } else {
+                 alert("位置情報を取得できていないため投稿できません。");
+                 return;
             }
 
             state.targetFacilityId = fid;
@@ -366,7 +354,7 @@
 
         function closeModal(m) {
             m.classList.add('hidden'); m.classList.remove('flex');
-            // targetFacilityId はクリアしない（ポップアップ更新で使うため）
+            // targetFacilityId はクリアしない
         }
 
         document.getElementById('cancel-unlock-btn').onclick = () => {
@@ -388,15 +376,14 @@
                 updatePoints();
                 closeModal(confirmModal);
                 
-                // === 2. ポップアップを維持して内容を更新 ===
+                // ポップアップを維持して内容を更新
                 const marker = markersMap[fid];
                 if (marker) {
                     const f = state.facilities.find(item => item.id === fid);
                     // ポップアップが開いていれば中身を書き換え
                     if (map.hasLayer(marker.getPopup())) {
-                        marker.setPopupContent(generatePopupContent(f, f.name));
+                        marker.setPopupContent(generatePopupContent(f));
                     } else {
-                        // 念のため閉じていたら開く
                         marker.openPopup();
                     }
                 }
@@ -425,7 +412,7 @@
                 if (marker) {
                     const f = state.facilities.find(item => item.id === fid);
                     // アンロック済みの表示（投稿ボタンなし）に切り替わる
-                    marker.setPopupContent(generatePopupContent(f, f.name));
+                    marker.setPopupContent(generatePopupContent(f));
                     marker.openPopup();
                 }
                 state.targetFacilityId = null;
@@ -440,7 +427,6 @@
         };
 
         initializeApp();
-        setMockLocation();
 
     </script>
 </body>

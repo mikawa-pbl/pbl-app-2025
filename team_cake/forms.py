@@ -8,4 +8,4 @@ class GoodsForm(forms.ModelForm):
 
     class Meta:
         model = Good
-        fields = ['name', 'description', 'price']
+        fields = ['name', 'description', 'price', 'original_price']

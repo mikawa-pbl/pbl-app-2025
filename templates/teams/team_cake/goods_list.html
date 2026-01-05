@@ -10,7 +10,7 @@
                 <!-- <a href="/team_cake/goods/{{ good.id }}/" class="card-link"> -->
                 <!-- <a href="#" class="card-link"> -->
                 <a href="#" class="block"
-                    onclick="openModal('{{ good.id }}', '{{ good.name }}', '{{ good.price }}', '{{ good.description }}')">
+                    onclick="openModal('{{ good.id }}', '{{ good.name|escapejs }}', '{{ good.price }}', '{{ good.description|escapejs }}', '{% if good.original_price is not None %}{{ good.original_price }}{% endif %}')">
                     <div
                         class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                         <div class="relative pb-[75%]">
@@ -27,6 +27,9 @@
                             <p class="text-gray-500">{{ good.description|default:"説明なし" }}</p>
                         </div>
                         <div class="px-4 pb-4">
+                            {% if good.original_price %}
+                            <span class="text-gray-500 line-through text-sm mr-2">¥{{ good.original_price }}</span>
+                            {% endif %}
                             <span class="text-[#D71718] font-bold">¥{{ good.price }}</span>
                             <!-- <a href="/team_cake/goods/{{ good.id }}/" class="right">詳細</a> -->
                             <!-- <a href="#" class="right">詳細</a> -->

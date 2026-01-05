@@ -24,14 +24,86 @@
       color: #444;
       margin-bottom: 24px;
     }
+
+        /* ===== コメント表示 ===== */
+    .comment-section {
+      max-width: 860px;
+      margin: 0 auto 28px;
+      text-align: left;
+    }
+
+    .comment-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin: 0 0 10px;
+      color: #333;
+      text-align: center;
+    }
+
+    .comment-box-wrap {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 14px 16px;
+    }
+
+    .comment-list {
+      max-height: 220px;         /* ★多いときスクロール */
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .comment-item {
+      padding: 12px 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .comment-item:last-child { border-bottom: none; }
+
+    .comment-meta {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+      color: #666;
+      font-size: 0.92rem;
+    }
+
+    .comment-score {
+      font-weight: 700;
+      color: #444;
+    }
+
+    .comment-text {
+      color: #222;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .comment-empty {
+      color: #888;
+      padding: 10px;
+    }
+
+
+    /* ===== 今日カード ===== */
     .today-menu-card {
       display: inline-block;
-      padding: 24px 40px;
+      position: relative;
+      padding: 42px 80px 24px;   /* ★ 上だけ増やしてバッジ分のスペース確保 */
       border-radius: 16px;
       background: #ffffff;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       margin-bottom: 48px;
+      min-width: 280px;
     }
+
+    /* 入賞時ハイライト */
+    .today-menu-card.ranked {
+      outline: 3px solid rgba(255, 193, 7, 0.70);
+      box-shadow: 0 10px 26px rgba(255, 193, 7, 0.22);
+    }
+
     .today-label {
       font-size: 0.9rem;
       letter-spacing: 0.15em;
@@ -40,10 +112,48 @@
       margin-bottom: 8px;
     }
     .today-menu-text {
-      font-size: 2rem;   /* ← 大きく */
+      font-size: 2rem;
       font-weight: bold;
     }
 
+    /* ===== バッジ（共通）===== */
+    .rank-badges {
+      position: absolute;
+      top: 10px;
+      left: 50%;                 /* ★ 右上固定をやめて中央寄せ */
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: calc(100% - 24px);
+      pointer-events: none;      /* クリック判定を邪魔しない */
+    }
+
+    .rank-badge {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255, 193, 7, 0.18);
+      border: 1px solid rgba(255, 193, 7, 0.55);
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+    /* 部門ごとに少し色分け（任意） */
+    .rank-badge.badge-overall {
+      background: rgba(255, 193, 7, 0.20);
+      border-color: rgba(255, 193, 7, 0.55);
+    }
+    .rank-badge.badge-taste {
+      background: rgba(217, 83, 79, 0.12);
+      border-color: rgba(217, 83, 79, 0.35);
+    }
+    .rank-badge.badge-volume {
+      background: rgba(92, 184, 92, 0.12);
+      border-color: rgba(92, 184, 92, 0.35);
+    }
+
+    /* ===== 今週表 ===== */
     .week-block {
       margin-top: 40px;
     }
@@ -71,6 +181,21 @@
     .week-table tr:last-child td {
       border-bottom: none;
     }
+
+    /* 行ハイライト（入賞時） */
+    .week-table tr.ranked-row td {
+      background: rgba(255, 193, 7, 0.08);
+    }
+
+    /* 表の中でバッジを横並び表示 */
+    .inline-badges {
+      margin-left: 10px;
+      display: inline-flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      vertical-align: middle;
+    }
+
     .back-link {
       margin-top: 32px;
     }
@@ -93,7 +218,19 @@
 
     {% if menu_lines %}
       <a href="{% url 'team_kitajaki:rate_menu' %}" style="text-decoration: none; color: inherit;">
-        <div class="today-menu-card">
+        <div class="today-menu-card {% if today_rank_badges %}ranked{% endif %}">
+          
+          <!-- ★ 右上：ランキングバッジ（複数入賞なら連結表示） -->
+          {% if today_rank_badges %}
+            <div class="rank-badges">
+              {% for b in today_rank_badges %}
+                <span class="rank-badge badge-{{ b.key }}">
+                  {{ b.icon }} {{ b.label }}{{ b.rank }}
+                </span>
+              {% endfor %}
+            </div>
+          {% endif %}
+
           <div class="today-label">本日のメニュー</div>
           <div class="today-menu-text">
             {% for line in menu_lines %}
@@ -102,7 +239,7 @@
           </div>
         </div>
       </a>
-      
+
       {% if average_scores %}
         <div class="score-block" style="margin-top: -30px; margin-bottom: 50px;">
           <h2 style="font-size: 1.1rem; color: #444;">みんなの評価（{{ average_scores.count }}件）上をクリックで評価</h2>
@@ -115,9 +252,33 @@
       {% else %}
         <p style="margin-top: -30px; margin-bottom: 50px; color: #888;">このメニューの評価はまだありません。クリックして最初の評価をしてみましょう！</p>
       {% endif %}
-      {% else %}
+    {% else %}
       <p>本日のメニューはPDFから取得できませんでした。</p>
     {% endif %}
+
+        <!-- ★ みんなのコメント -->
+    <div class="comment-section">
+      <div class="comment-title">みんなのコメント</div>
+
+      <div class="comment-box-wrap">
+        {% if comments %}
+          <div class="comment-list">
+            {% for c in comments %}
+              <div class="comment-item">
+                <div class="comment-meta">
+                  <span class="comment-score">味 {{ c.taste_score }}/5 ・ 量 {{ c.volume_score }}/5</span>
+                  <span>投稿: {{ c.created_at|date:"n月j日 H:i" }}</span>
+                </div>
+                <div class="comment-text">{{ c.comment }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="comment-empty">まだコメントがありません。最初のコメントを書いてみましょう。</div>
+        {% endif %}
+      </div>
+    </div>
+
 
     <div class="week-block">
       <h2 class="week-title">今週のメニュー</h2>
@@ -132,11 +293,23 @@
           </thead>
           <tbody>
             {% for item in week_menus %}
-              <tr>
+              <tr class="{% if item.is_ranked %}ranked-row{% endif %}">
                 <td>{{ item.date|date:"n月j日" }}（{{ item.weekday_char }}）</td>
                 <td>
                   {% if item.menu %}
                     {{ item.menu }}
+
+                    <!-- ★ 表の中にもバッジ（複数入賞なら連結表示） -->
+                    {% if item.rank_badges %}
+                      <span class="inline-badges">
+                        {% for b in item.rank_badges %}
+                          <span class="rank-badge badge-{{ b.key }}">
+                            {{ b.icon }} {{ b.label }}{{ b.rank }}
+                          </span>
+                        {% endfor %}
+                      </span>
+                    {% endif %}
+
                   {% else %}
                     メニューなし / 未掲載
                   {% endif %}

@@ -64,3 +64,12 @@ class PostForm(forms.ModelForm):
         if not names:
             raise ValidationError("タグを1つ以上入力してください。例: #授業 #休講")
         return tags_text
+
+    def clean(self):
+        """Form-level validation: ensure end_date is not before start date."""
+        cleaned = super().clean()
+        start = cleaned.get("date")
+        end = cleaned.get("end_date")
+        if start and end and end < start:
+            self.add_error("end_date", ValidationError("終了日は開始日より前にできません。開始日より後の日付を指定してください。"))
+        return cleaned

@@ -53,6 +53,10 @@
           {{ form.end_date }} <span class="small">（任意：区間の終了日を指定する場合）</span>
         </p>
 
+        <div id="date-warning" style="color:#b91c1c; display:none; margin-top:6px;">
+          終了日は開始日より後の日付を指定してください。
+        </div>
+
         {% if not post %}
         <p>
           {{ form.password.label_tag }}<br>
@@ -227,6 +231,39 @@
         else if(e.key === 'Enter'){ if(active){ e.preventDefault(); const txt = active.textContent.trim(); applySuggestion(txt); } }
       }
     });
+
+    // date validation
+    const dateWarning = document.getElementById('date-warning');
+    const dateInput = document.querySelector('[name="date"]');
+    const endDateInput = document.querySelector('[name="end_date"]');
+    if(dateInput && endDateInput && dateWarning){
+      formEl.addEventListener('submit', function(e){
+        const dateValue = dateInput.value;
+        const endDateValue = endDateInput.value;
+        if(dateValue && endDateValue){
+          const date = new Date(dateValue);
+          const endDate = new Date(endDateValue);
+          if(endDate < date){
+            e.preventDefault();
+            dateWarning.style.display = 'block';
+            endDateInput.focus();
+            return false;
+          } else {
+            dateWarning.style.display = 'none';
+          }
+        }
+      });
+      // hide warning when user types
+      endDateInput.addEventListener('input', function(){
+        const dateValue = dateInput.value;
+        const endDateValue = endDateInput.value;
+        if(dateValue && endDateValue){
+          const date = new Date(dateValue);
+          const endDate = new Date(endDateValue);
+          if(endDate >= date) dateWarning.style.display = 'none';
+        }
+      });
+    }
 
   })();
   </script>

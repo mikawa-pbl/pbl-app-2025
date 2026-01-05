@@ -212,10 +212,10 @@ DATABASES = {
 # app_labelごとにDBを振り分けるルーター
 DATABASE_ROUTERS = ["routers.TeamPerAppRouter"]
 
+# "django.contrib.auth.backends.ModelBackend" はチームgiryulinkのユーザー認証のものです。
 AUTHENTICATION_BACKENDS = [
     "h34vvy_u53rzz.backends.H34vvyUserBackend",
-    # グローバルの認証バックエンド
-    # "django.contrib.auth.backends.ModelBackend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 # Password validation

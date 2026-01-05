@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>新規登録 - Furu-Trade</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding-bottom: 80px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .register-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: #222;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #fafafa;
+        }
+        
+        input::placeholder {
+            color: #aaa;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #2196f3;
+            background: #fff;
+        }
+        
+        .register-btn {
+            width: 100%;
+            background: #2196f3;
+            color: #fff;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 24px 0;
+            color: #999;
+            font-size: 0.85rem;
+        }
+        
+        .login-link {
+            text-align: center;
+        }
+        
+        .login-btn {
+            width: 100%;
+            background: #fff;
+            color: #2196f3;
+            border: 2px solid #2196f3;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        
+        .messages {
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+        
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 12px;
+            z-index: 200;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: #666;
+            font-size: 0.7rem;
+            flex: 1;
+            padding: 4px;
+        }
+        
+        .nav-item.active {
+            color: #2196f3;
+        }
+        
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+        
+        @media (min-width: 1024px) {
+            body {
+                padding-bottom: 0;
+            }
+            .bottom-nav {
+                max-width: 1200px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-radius: 12px 12px 0 0;
+            }
+        }
+        
+        .info-text {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="register-box">
+            <h1>新規登録</h1>
+            
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_name">名前（任意）</label>
+                    <input type="text" name="name" id="id_name" placeholder="田中太郎">
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_email">メールアドレス (@tut.jp)</label>
+                    <input type="email" name="email" id="id_email" placeholder="h123456@tut.jp" required>
+                    <div class="info-text">@tut.jpドメインのメールアドレスのみ登録できます</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password1">パスワード</label>
+                    <input type="password" name="password1" id="id_password1" placeholder="パスワードを入力" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password2">パスワード（確認）</label>
+                    <input type="password" name="password2" id="id_password2" placeholder="もう一度入力" required>
+                </div>
+                
+                <button type="submit" class="register-btn">登録</button>
+            </form>
+            
+            <div class="divider">すでにアカウントをお持ちの方</div>
+            
+            <div class="login-link">
+                <a href="{% url 'team_giryulink:login' %}" class="login-btn">ログイン</a>
+            </div>
+        </div>
+    </main>
+    
+    <nav class="bottom-nav">
+        <a href="{% url 'team_giryulink:index' %}" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>ホーム</span>
+        </a>
+        <a href="{% url 'team_giryulink:history' %}" class="nav-item">
+            <span class="nav-icon">🕐</span>
+            <span>履歴</span>
+        </a>
+        <a href="{% url 'team_giryulink:add_product' %}" class="nav-item">
+            <span class="nav-icon">➕</span>
+            <span>出品</span>
+        </a>
+        <a href="{% url 'team_giryulink:chat_list' %}" class="nav-item">
+            <span class="nav-icon">💬</span>
+            <span>チャット</span>
+        </a>
+        <a href="{% url 'team_giryulink:my_page' %}" class="nav-item active">
+            <span class="nav-icon">👤</span>
+            <span>マイページ</span>
+        </a>
+    </nav>
+</body>
+</html>

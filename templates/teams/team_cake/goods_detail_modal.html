@@ -18,7 +18,12 @@
                         <h3 class="text-lg leading-6 font-medium text-gray-900" id="modalTitle"></h3>
                         <div class="mt-2">
                             <p class="text-sm text-gray-500" id="modalDescription"></p>
-                            <p class="mt-2 text-lg font-bold text-[#D71718]">¥<span id="modalPrice"></span></p>
+                            <div class="mt-2">
+                                <span id="modalOriginalPriceWrapper"
+                                    class="hidden text-gray-500 line-through text-sm mr-2">¥<span
+                                        id="modalOriginalPrice"></span></span>
+                                <span class="text-lg font-bold text-[#D71718]">¥<span id="modalPrice"></span></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -42,11 +47,21 @@
 </div>
 
 <script>
-    function openModal(id, title, price, description) {
+    function openModal(id, title, price, description, originalPrice) {
         if (event) event.preventDefault();
         document.getElementById('modalTitle').innerText = title;
         document.getElementById('modalDescription').innerText = description;
         document.getElementById('modalPrice').innerText = price;
+
+        const originalPriceWrapper = document.getElementById('modalOriginalPriceWrapper');
+        const originalPriceSpan = document.getElementById('modalOriginalPrice');
+
+        if (originalPrice) {
+            originalPriceSpan.innerText = originalPrice;
+            originalPriceWrapper.classList.remove('hidden');
+        } else {
+            originalPriceWrapper.classList.add('hidden');
+        }
 
         const deleteForm = document.getElementById('deleteForm');
         if (deleteForm) {

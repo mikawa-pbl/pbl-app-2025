@@ -3,17 +3,31 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team Cake - 商品登録</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body>
-    <nav class="bg-[#D71718]">
-        <div class="container mx-auto px-4 flex items-center justify-between h-16">
-            <a href="/team_cake/" class="text-white text-4xl font-bold">Daily Pocket</a>
-            <ul class="flex space-x-4">
-                <li><a href="{% if is_staff %}/team_cake/admin/{% else %}/team_cake/{% endif %}"
+    <!-- Overlay -->
+    <div id="mobile-menu-overlay"
+        class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden transition-opacity duration-300 opacity-0"></div>
+
+    <nav class="bg-[#D71718] relative z-50">
+        <div class="container mx-auto px-4 flex flex-wrap items-center justify-between md:h-16 py-2 md:py-0">
+            <div class="flex items-center justify-between w-full md:w-auto">
+                <a href="/team_cake/" class="text-white text-3xl md:text-4xl font-bold">Daily Pocket</a>
+                <button id="mobile-menu-btn" class="md:hidden text-white p-2 focus:outline-none">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+            <ul id="nav-menu"
+                class="absolute md:static left-0 top-full w-full bg-[#D71718] md:bg-transparent z-50 md:flex md:w-auto flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 overflow-hidden md:overflow-visible transition-all duration-300 ease-in-out max-h-0 opacity-0 md:max-h-full md:opacity-100 shadow-lg md:shadow-none px-4 md:px-0 pb-4 md:pb-0">
+                <li class="pt-4 md:pt-0"><a href="{% if is_staff %}/team_cake/admin/{% else %}/team_cake/{% endif %}"
                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-[#F5E829] text-base font-medium text-black hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#F5E829] sm:ml-3 sm:w-auto sm:text-sm rounded transition">トップ</a>
                 </li>
                 {% if is_staff %}
@@ -31,3 +45,39 @@
             </ul>
         </div>
     </nav>
+
+    <script>
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const navMenu = document.getElementById('nav-menu');
+        const overlay = document.getElementById('mobile-menu-overlay');
+
+        function toggleMenu() {
+            const isClosed = navMenu.classList.contains('max-h-0');
+
+            if (isClosed) {
+                // Open menu
+                navMenu.classList.remove('max-h-0', 'opacity-0');
+                navMenu.classList.add('max-h-96', 'opacity-100');
+
+                // Show overlay
+                overlay.classList.remove('hidden');
+                // Small delay to allow display:block to apply before opacity transition
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                }, 10);
+            } else {
+                // Close menu
+                navMenu.classList.remove('max-h-96', 'opacity-100');
+                navMenu.classList.add('max-h-0', 'opacity-0');
+
+                // Hide overlay
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300); // Wait for transition to finish
+            }
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+    </script>

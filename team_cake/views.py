@@ -28,10 +28,10 @@ def _get_index_context():
         # テンプレートは objects の `.name` / `.price` を参照する想定のため SimpleNamespace を作る。
         conn = connections['team_cake']
         with conn.cursor() as cur:
-            cur.execute('SELECT id, name, price, description, image_filename FROM team_cake_good')
+            cur.execute('SELECT id, name, price, description, image_filename, original_price FROM team_cake_good')
             rows = cur.fetchall()
 
-        goods = [SimpleNamespace(id=row[0], name=row[1], price=row[2], description=row[3], image_filename=row[4]) for row in rows]
+        goods = [SimpleNamespace(id=row[0], name=row[1], price=row[2], description=row[3], image_filename=row[4], original_price=row[5]) for row in rows]
         
         slider_goods = goods[-3:] if len(goods) >= 3 else goods
         slider_goods = list(reversed(slider_goods))

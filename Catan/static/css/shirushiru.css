@@ -49,7 +49,9 @@ body {
 .container {
     width: 360px;
     background: #fff;
+    padding-bottom: 160px; 
 }
+   
 
 .header {
     background: #e3e3e3;

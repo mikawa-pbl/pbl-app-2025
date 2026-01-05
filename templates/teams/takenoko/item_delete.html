@@ -256,7 +256,7 @@
         // 今は「削除した体で一覧へ」かつ「戻るで削除画面に戻らない」を最優先で実装する
 
         const listUrl = "{% url 'takenoko:listing_items' %}";
-        window.location.replace(listUrl); // ★履歴を置き換えるので戻るで戻れない
+        window.location.replace(listUrl); // ★履歴を置き換えるので戻れない
       }
     </script>
   </head>
@@ -279,57 +279,49 @@
             row-gap: 20px;
           "
         >
+          {% if item.images.all %} {% for img in item.images.all %}
           <img
-            src="{% static 'images/sample.jpg' %}"
-            alt="サムネ1"
-            class="thumb"
+            src="{{ img.image.url }}"
+            alt="サムネ{{ forloop.counter }}"
+            class="thumb{% if forloop.first %} is-active{% endif %}"
             onclick="changeImage(this.src, this)"
           />
-          <img
-            src="{% static 'images/sample2.jpg' %}"
-            alt="サムネ2"
-            class="thumb"
-            onclick="changeImage(this.src, this)"
-          />
+          {% endfor %} {% else %}
           <img
             src="{% static 'images/noimage.png' %}"
-            alt="サムネ3"
-            class="thumb"
+            alt="画像なし"
+            class="thumb is-active"
             onclick="changeImage(this.src, this)"
           />
-          <img
-            src="{% static 'images/noimage.png' %}"
-            alt="サムネ4"
-            class="thumb"
-            onclick="changeImage(this.src, this)"
-          />
-          <img
-            src="{% static 'images/noimage.png' %}"
-            alt="サムネ5"
-            class="thumb"
-            onclick="changeImage(this.src, this)"
-          />
+          {% endif %}
         </div>
 
-        <!-- メイン画像：srcは空（JSで一番上のサムネを入れる） -->
+        <!-- メイン画像 -->
         <div style="position: absolute; margin-left: 80px">
-          <img id="mainImage" class="main-img" src="" alt="メイン画像" />
+          <img
+            id="mainImage"
+            class="main-img"
+            src="{% if item.get_main_image %}{{ item.get_main_image.image.url }}{% else %}{% static 'images/noimage.png' %}{% endif %}"
+            alt="メイン画像"
+          />
         </div>
       </div>
 
-      <!-- 右側：見た目だけの固定情報 -->
+      <!-- 右側：商品情報 -->
       <div style="position: relative; left: 544px; width: 640px">
-        <p class="info-title">バイク</p>
-        <p class="info-price">¥50,000</p>
-        <p class="info-text">
-          ほぼ未使用です。保管していただけで走行していません。受け渡しは学内希望。
-        </p>
+        <p class="info-title">{{ item.name }}</p>
+        <p class="info-price">¥{{ item.price|floatformat:0 }}</p>
+        <p class="info-text">{{ item.description }}</p>
 
         <div style="margin-top: 18px">
-          <span class="badge">未使用に近い</span>
+          <span class="badge">{{ item.get_condition_display }}</span>
         </div>
         <div style="margin-top: 8px">
-          <span class="tag">学部1年</span>
+          {% for g in item.target_grades.all %}
+          <span class="tag">{{ g.display_name }}</span>
+          {% empty %}
+          <span class="tag">指定なし</span>
+          {% endfor %}
         </div>
 
         <!-- 編集・削除（同幅） -->
@@ -337,28 +329,33 @@
           <button type="button" class="delete-btn" onclick="openDeleteModal()">
             削除
           </button>
-          <a href="{% url 'takenoko:item_edit' %}">
+          <a href="{% url 'takenoko:item_edit' %}?id={{ item.pk }}">
             <button type="button" class="edit-btn">編集</button>
           </a>
         </div>
       </div>
     </div>
 
-    <!-- 削除確認（同幅） -->
+    <!-- 削除確認モーダル -->
     <div id="deleteModal" class="modal-bg">
       <div class="modal-box">
         <p class="modal-title">本当に削除しますか？</p>
         <p class="modal-text">この操作は取り消せません。</p>
 
         <div class="modal-actions">
-          <button
-            type="button"
-            class="danger-btn"
-            style="width: 100%; flex: 1"
-            onclick="confirmDelete()"
+          <form
+            method="post"
+            action="{% url 'takenoko:item_delete' %}?id={{ item.pk }}"
           >
-            削除する
-          </button>
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="danger-btn"
+              style="width: 100%; flex: 1"
+            >
+              削除する
+            </button>
+          </form>
           <button type="button" class="cancel-btn" onclick="closeDeleteModal()">
             キャンセル
           </button>

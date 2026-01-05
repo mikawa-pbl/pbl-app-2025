@@ -186,7 +186,23 @@ def start_trading(request):
 
 @takenoko_login_required
 def item_delete(request):
-    return render(request, 'teams/takenoko/item_delete.html')
+    item_id = request.GET.get("id")
+    if not item_id:
+        messages.error(request, "商品が見つかりません。")
+        return redirect("takenoko:listing_items")
+
+    user = get_current_user(request)
+    item = Item.objects.filter(pk=item_id, seller=user).first()
+    if not item:
+        messages.error(request, "この商品が見つからないか、操作権限がありません。")
+        return redirect("takenoko:listing_items")
+
+    if request.method == "POST":
+        item.delete()
+        messages.success(request, "商品を削除しました。")
+        return redirect("takenoko:listing_items")
+
+    return render(request, "teams/takenoko/item_delete.html", {"item": item})
 
 @takenoko_login_required
 def item_edit(request):

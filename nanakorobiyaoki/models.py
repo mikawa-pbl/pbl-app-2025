@@ -16,14 +16,7 @@ class MyPage(models.Model):
         ('回答しない', '回答しない'),
     ]
 
-    # 交際ステータスの選択肢
-    RELATIONSHIP_CHOICES = [
-        ('未婚', '未婚'),
-        ('既婚', '既婚'),
-        ('恋人あり', '恋人あり'),
-        ('募集中', '募集中'),
-        ('秘密', '秘密'),
-    ]
+
 
     GRADE_CHOICES = [
         ('B1','B1'),
@@ -45,8 +38,8 @@ class MyPage(models.Model):
     # 基本情報
     name = models.CharField(max_length=100, verbose_name="名前")
     icon = models.ImageField(upload_to='icons/', blank=True, null=True, verbose_name="アイコン")
-    user_id = models.CharField(max_length=100, unique=True, verbose_name="ユーザID")
-    email = models.EmailField(max_length=100, verbose_name="メアド")
+    user_id = models.CharField(max_length=100, unique=True, verbose_name="学籍番号(数字6桁)")
+    email = models.EmailField(max_length=100, verbose_name="メールアドレス")
     password = models.CharField(max_length=100, verbose_name="パスワード")
     
     # プロフィール情報
@@ -76,13 +69,6 @@ class MyPage(models.Model):
     hobby = models.CharField(max_length=200, blank=True, null=True, verbose_name="趣味")
     birthplace = models.CharField(max_length=100, blank=True, null=True, verbose_name="出身")
     birth_date = models.DateField(verbose_name="誕生日", null=True, blank=True)
-    relationship_status = models.CharField(
-        max_length=50, 
-        choices=RELATIONSHIP_CHOICES, # プルダウンにする
-        blank=True, 
-        null=True, 
-        verbose_name="交際ステータス"
-    )
 
     def __str__(self):
         return self.name # ページの名前がその人の名前になる

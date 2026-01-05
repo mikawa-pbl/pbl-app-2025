@@ -424,13 +424,18 @@
                     </div>
 
                     {% if not is_member %}
-                    <a href="{% url 'nanakorobiyaoki:community_join' community.id %}" class="action-btn">
+                    <a href="{% url 'nanakorobiyaoki:community_join' community.id %}" class="action-btn"
+                        onclick="return confirm('本当に参加しますか？');">
                         <span class="material-icons-round">add</span> 参加する
                     </a>
                     {% else %}
                     <button class="action-btn" style="background: #e0e0e0; color: #666; cursor: default;">
                         <span class="material-icons-round">check</span> 参加済み
                     </button>
+                    <a href="{% url 'nanakorobiyaoki:community_leave' community.id %}" class="action-btn"
+                        style="background: #ef5350; margin-left: 10px;" onclick="return confirm('本当に退会しますか？');">
+                        <span class="material-icons-round">logout</span> 退会
+                    </a>
                     <!-- Post Button -->
                     <button id="openPostModal" class="action-btn"
                         style="margin-left: 10px; background: var(--primary-color);">

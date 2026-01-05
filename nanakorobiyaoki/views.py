@@ -188,6 +188,16 @@ def community_join(request, community_id):
     community.members.add(user)
     return redirect('nanakorobiyaoki:community_detail', community_id=community_id)
 
+def community_leave(request, community_id):
+    if 'user_id' not in request.session:
+        return redirect('nanakorobiyaoki:login')
+        
+    community = get_object_or_404(Community, id=community_id)
+    user = get_object_or_404(MyPage, user_id=request.session['user_id'])
+    
+    community.members.remove(user)
+    return redirect('nanakorobiyaoki:community_detail', community_id=community_id)
+
 def post_create(request, community_id):
     if 'user_id' not in request.session:
         return redirect('nanakorobiyaoki:login')

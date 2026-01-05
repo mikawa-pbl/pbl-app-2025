@@ -28,7 +28,6 @@ class MyPageEditForm(forms.ModelForm):
             'hobby', 
             'birthplace', 
             'birth_date', 
-            'relationship_status'
         ]
         
         # ユーザーID、メアド、パスワードは、セキュリティのためこのフォームでは編集不可とします
@@ -39,7 +38,7 @@ class MyPageEditForm(forms.ModelForm):
         }
 
 class LoginForm(forms.Form):
-    user_id = forms.CharField(label='ユーザーID', max_length=100)
+    user_id = forms.CharField(label='学籍番号', max_length=100)
     password = forms.CharField(label='パスワード', widget=forms.PasswordInput)
 
 from .models import Community, Post, Comment

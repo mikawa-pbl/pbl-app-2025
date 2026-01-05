@@ -1,0 +1,56 @@
+/* 検索フォームのコンテナ */
+#search-form {
+  display: flex;
+  /* 横並びにする */
+  align-items: center;
+  /* 垂直方向中央揃え */
+  padding: 0 0 10px 0;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 10px;
+  width: 100%;
+  /* 親要素の幅いっぱいにする */
+  box-sizing: border-box;
+  /* パディングを含める */
+}
+
+/* 検索窓 */
+#search-box {
+  flex-grow: 1;
+  /* 残りのスペースを埋める */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-right: none;
+  /* ボタンとくっつけるために右枠線を消す */
+  border-radius: 4px 0 0 4px;
+  /* 左側だけ角丸 */
+  box-sizing: border-box;
+  height: 36px;
+  /* 高さ合わせ */
+}
+
+/* 検索ボタン（虫眼鏡） */
+#search-button {
+  width: 36px;
+  /* 正方形にする */
+  height: 36px;
+  border: 1px solid #ccc;
+  background-color: #f8f8f8;
+  border-radius: 0 4px 4px 0;
+  /* 右側だけ角丸 */
+  cursor: pointer;
+  /* font-size: 1.2em;  <-- Remove this to let material icon size naturally or set explicitly */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #555;
+  padding: 0;
+}
+
+#search-button .material-symbols-rounded {
+  font-size: 20px;
+  /* アイコンサイズ調整 */
+}
+
+#search-button:hover {
+  background-color: #e0e0e0;
+}

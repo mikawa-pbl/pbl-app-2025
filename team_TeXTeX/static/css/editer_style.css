@@ -1,151 +1,402 @@
 /* styles.cssを継承 */
-@import url("{% static 'css/styles.css' %}"); 
+@import url("{% static 'css/styles.css' %}");
+
+/* Inline Mode Toggle Switch */
+#inline-mode-container {
+    display: flex;
+    justify-content: flex-start;
+    /* 左寄せ */
+    align-items: center;
+    padding-bottom: 10px;
+    /* 下のパディングのみ */
+    margin-bottom: 10px;
+    /* 下のマージンを追加 */
+    padding-left: 2px;
+    /* タブ（ボタン）の左端に合わせる */
+    /* 背景色と枠線を削除してサイドバーに馴染ませる */
+    border-bottom: 1px solid #ddd;
+    /* 横線を復活 */
+    /* background-color: #f8f9fa; */
+    /* border-radius: 4px; */
+    /* margin: 5px; */
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    /* 縦20 横30 */
+    height: 20px;
+    margin-right: 10px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    /* 16pxに戻す */
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: #2196F3;
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked+.slider:before {
+    transform: translateX(10px);
+    /* 30 - 16 - 4 = 10px */
+}
+
+.toggle-label {
+    font-size: 14px;
+    color: #333;
+}
 
 /* ======================================= */
 /* 3. サイドバーのスタイル */
 /* ======================================= */
+/* ======================================= */
+/* 3. サイドバーのスタイル */
+/* ======================================= */
 #sidebar {
-  width: 200px; 
-  background-color: #f4f4f4; 
-  padding: 10px 10px 20px 10px; 
-  box-shadow: -2px 0 5px rgba(0,0,0,0.1); 
-  flex-shrink: 0; 
-  order: 2; 
-  transition: transform 0.3s ease-in-out; 
-  overflow-y: auto; 
-  transform: translateX(0); 
+    width: 250px;
+    background-color: #f4f4f4;
+    padding: 10px 10px 20px 10px;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    order: 2;
+    transition: transform 0.3s ease-in-out;
+    overflow-y: hidden;
+    /* スクロールはコンテンツ部分のみ */
+    transform: translateX(0);
+    display: flex;
+    /* 追加 */
+    flex-direction: column;
+    /* 追加 */
 }
 
 /* sidebar内部のスタイル */
-#search-form {padding: 0 0 10px 0; border-bottom: 1px solid #ddd; margin-bottom: 10px;}
-#search-box {width: calc(100% - 18px); padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;}
-#sidebar-controls {display: flex; justify-content: space-between; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #ddd;}
-#sidebar-controls button {flex-grow: 1; margin: 0 2px; padding: 5px 0; cursor: pointer; border: 1px solid #ccc; background-color: #fff; border-radius: 3px; font-size: 12px;}
-#sidebar-controls button:hover {background-color: #e0e0e0;}
-#sidebar-content details {margin-bottom: 5px; border-radius: 4px; background-color: #fff; border: 1px solid #e0e0e0;}
-#sidebar-content summary {display: block; cursor: pointer; padding: 8px 10px; font-weight: bold; color: #333; outline: none; position: relative;}
-#sidebar-content summary::before {content: '▶'; font-size: 10px; position: absolute; right: 10px; transition: transform 0.2s;}
-#sidebar-content details[open] > summary::before {content: '▼'; transform: rotate(0deg);}
-#sidebar-content ul {list-style: none; padding: 0; margin: 0; border-top: 1px solid #e0e0e0;}
-#sidebar-content li {position: relative;}
-#sidebar-content li a {display: block; padding: 5px 25px; text-decoration: none; color: #555; font-size: 14px; cursor: pointer;}
-#sidebar-content li a:hover {background-color: #ddd;}
-.copy-checkmark {position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #007bff; font-weight: bold; font-size: 1.0em; animation: fadein 0.3s ease;}
-@keyframes fadein {from { opacity: 0; } to { opacity: 1; }}
+#search-form {
+    padding: 0 0 10px 0;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+    /* 縮小しない */
+}
+
+#search-box {
+    width: calc(100% - 18px);
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#sidebar-controls {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    flex-shrink: 0;
+    /* 縮小しない */
+}
+
+/* ... controls button ... */
+
+#inline-mode-container {
+    display: flex;
+    justify-content: flex-start;
+    /* 左寄せ */
+    align-items: center;
+    padding-bottom: 10px;
+    /* 下のパディングのみ */
+    margin-bottom: 10px;
+    /* 下のマージンを追加 */
+    padding-left: 2px;
+    /* タブ（ボタン）の左端に合わせる */
+    /* 背景色と枠線を削除してサイドバーに馴染ませる */
+    border-bottom: 1px solid #ddd;
+    /* 横線を復活 */
+    flex-shrink: 0;
+    /* 縮小しない */
+}
+
+/* ... toggle styles ... */
+
+#sidebar-content {
+    flex-grow: 1;
+    /* 残りの高さを占有 */
+    overflow-y: auto;
+    /* スクロール */
+    scrollbar-gutter: stable;
+    /* スクロールバーの領域を確保してガタつきを防ぐ */
+}
+
+#sidebar-content details {
+    margin-bottom: 5px;
+    border-radius: 4px;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+}
+
+#sidebar-controls button {
+    flex-grow: 1;
+    margin: 0 2px;
+    padding: 5px 0;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 3px;
+    font-size: 12px;
+    display: flex;
+    /* Added */
+    justify-content: center;
+    /* Added */
+    align-items: center;
+    /* Added */
+}
+
+#sidebar-controls button:hover {
+    background-color: #e0e0e0;
+}
+
+#sidebar-content details {
+    margin-bottom: 5px;
+    border-radius: 4px;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+}
+
+#sidebar-content summary {
+    display: block;
+    cursor: pointer;
+    padding: 8px 10px;
+    font-weight: bold;
+    color: #333;
+    outline: none;
+    position: relative;
+}
+
+#sidebar-content summary::before {
+    content: '▶';
+    font-size: 10px;
+    position: absolute;
+    right: 10px;
+    transition: transform 0.2s;
+}
+
+#sidebar-content details[open]>summary::before {
+    content: '▼';
+    transform: rotate(0deg);
+}
+
+#sidebar-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid #e0e0e0;
+    max-height: 300px;
+    /* 縦幅制限 */
+    overflow-y: auto;
+    /* スクロール */
+}
+
+#sidebar-content li {
+    position: relative;
+}
+
+#sidebar-content li a {
+    display: block;
+    padding: 5px 25px;
+    text-decoration: none;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+#sidebar-content li a:hover {
+    background-color: #ddd;
+}
+
+.copy-checkmark {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #007bff;
+    font-weight: bold;
+    font-size: 1.0em;
+    animation: fadein 0.3s ease;
+}
+
+@keyframes fadein {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
 
 
 /* ======================================= */
 /* 4. 主要コンテンツ領域のスタイル (エディタのレイアウト) */
 /* ======================================= */
 #main-content {
-  flex-grow: 1; 
-  padding: 10px 10px 20px 10px; 
-  background-color: #fff; 
-  overflow: hidden; 
-  order: 1; 
-  transition: margin-right 0.3s ease-in-out; 
-  margin-right: 0; 
-  
-  display: flex; 
-  flex-direction: column;
+    flex-grow: 1;
+    padding: 10px 10px 20px 10px;
+    background-color: #fff;
+    overflow: hidden;
+    order: 1;
+    transition: margin-right 0.3s ease-in-out;
+    margin-right: 0;
+
+    display: flex;
+    flex-direction: column;
 }
 
 /* エディタヘッダー（h2とボタンのコンテナ）のスタイル */
 .editor-header {
     display: flex;
-    justify-content: space-between; 
-    align-items: center; 
+    justify-content: space-between;
+    align-items: center;
     padding-bottom: 5px;
-    border-bottom: 1px solid #eee; 
-    margin-bottom: 5px; 
+    border-bottom: 1px solid #eee;
+    margin-bottom: 5px;
     width: 100%;
 }
 
 /* エリアの見出しの調整 */
-#editor-area h2, #preview-area h2 {
-    margin: 0; 
+#editor-area h2,
+#preview-area h2 {
+    margin: 0;
     font-size: 1.2em;
-    padding-bottom: 0; 
-    border-bottom: none; 
+    padding-bottom: 0;
+    border-bottom: none;
 }
 
 /* 更新ボタンのスタイル */
-#preview-button {
-    padding: 5px 10px; 
+#compile-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30px;
+    /* PDFツールバーと高さを揃える */
+    min-width: 30px;
+    /* 正方形にする */
+    padding: 0 8px;
+    /* アイコン用パディング */
     background-color: #007bff;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 12px; 
+    font-size: 14px;
+    /* フォントサイズも少し大きく */
     font-weight: bold;
     transition: background-color 0.2s;
 }
-#preview-button:hover {
+
+#compile-button span.material-symbols-rounded {
+    font-size: 20px;
+    /* アイコンサイズ */
+}
+
+#compile-button:hover {
     background-color: #0056b3;
 }
 
 
 /* エディタとプレビューのFlexコンテナ */
 #editor-interface {
-    flex-grow: 1; 
-    display: flex; 
+    flex-grow: 1;
+    display: flex;
     width: 100%;
 }
 
 /* 初期状態を幅50%に設定 */
 #editor-area {
-    flex-grow: 0; 
-    width: calc(50% - 13px); 
+    flex-grow: 0;
+    width: calc(50% - 13px);
     display: flex;
     flex-direction: column;
 }
 
 /* 初期状態を幅50%に設定 */
 #preview-area {
-    flex-grow: 0; 
-    width: calc(50% - 13px); 
+    flex-grow: 0;
+    width: calc(50% - 13px);
     display: flex;
     flex-direction: column;
 }
 
 /* スプリッターのスタイル */
 #splitter {
-    width: 6px; 
-    cursor: col-resize; 
+    width: 6px;
+    cursor: col-resize;
     background-color: #ccc;
-    flex-shrink: 0; 
-    margin: 0 10px; 
+    flex-shrink: 0;
+    margin: 0 10px;
     border-radius: 3px;
     transition: background-color 0.2s;
 }
+
 #splitter:hover {
     background-color: #007bff;
 }
 
 /* テキストエリア */
 #tex-input {
-    flex-grow: 1; 
+    flex-grow: 1;
     width: 100%;
-    min-height: 0; 
+    min-height: 0;
     padding: 10px;
     border: 1px solid #ddd;
     box-sizing: border-box;
-    font-family: 'Consolas', 'Courier New', monospace; 
+    font-family: 'Consolas', 'Courier New', monospace;
     font-size: 14px;
-    resize: none; 
+    resize: none;
 }
 
 
 /* プレビュー出力コンテナ */
 #tex-output {
-    flex-grow: 1; 
+    flex-grow: 1;
     padding: 10px;
     border: 1px solid #ddd;
     box-sizing: border-box;
-    overflow-y: auto; 
+    overflow-y: auto;
     background-color: #f8f8f8;
-    margin-top: 0; 
+    margin-top: 0;
 }
 
 
@@ -153,10 +404,280 @@
 /* 6. サイドバーが閉じるときの状態 (非チェック時) */
 /* ======================================= */
 
-#sidebar-toggle:not(:checked) ~ #header + #container #sidebar {
-  transform: translateX(100%); 
+#sidebar-toggle:not(:checked)~#header+#container #sidebar {
+    transform: translateX(100%);
 }
 
-#sidebar-toggle:not(:checked) ~ #header + #container #main-content {
-  margin-right: -200px; 
+#sidebar-toggle:not(:checked)~#header+#container #main-content {
+    margin-right: -250px;
+}
+
+/* お気に入り用スタイル */
+.star-icon {
+    cursor: pointer;
+    margin-right: 5px;
+    color: #ccc;
+    font-size: 1.2em;
+}
+
+
+/* PDF Toolbar Styles */
+#pdf-toolbar {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    /* 垂直方向中央揃え */
+}
+
+#pdf-toolbar button {
+    display: flex;
+    /* アイコン中央揃え */
+    justify-content: center;
+    align-items: center;
+    height: 30px;
+    /* コンパイルボタンなどの高さに合わせる */
+    min-width: 30px;
+    /* 正方形に近い比率 */
+    padding: 0 8px;
+    /* 横幅調整 */
+    background-color: #f8f9fa;
+    /* 明るめのグレー */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    /* コンパイルボタンと同じR */
+    cursor: pointer;
+    color: #555;
+    transition: all 0.2s;
+}
+
+#pdf-toolbar button span.material-symbols-rounded {
+    font-size: 18px;
+    /* アイコンサイズ調整 */
+}
+
+/* 100%ボタンは文字なので少し幅広調整 */
+#pdf-toolbar button#zoom-reset {
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 50px;
+}
+
+
+/* Spinner for Save Button */
+.spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 3px solid #fff;
+    width: 14px;
+    height: 14px;
+    -webkit-animation: spin 1s linear infinite;
+    /* Safari */
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+/* File Manager Popover (Modal) */
+.modal {
+    display: none;
+    position: fixed;
+    /* 画面全体を覆うクリック検出用レイヤー */
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: transparent;
+    /* 背景は透明 */
+}
+
+.modal-content {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    position: absolute;
+    /*絶対配置で制御 */
+    /* top/leftはJSで設定 */
+    /* width: 300px;  削除: 固定幅をやめる */
+    min-width: 500px;
+    max-width: 90vw;
+    /* 画面幅いっぱいまでは許容 */
+    /* min-width: unset; */
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0;
+    /* ヘッダーとボディでpadding管理 */
+    animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    border-radius: 6px 6px 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.modal-body {
+    padding: 0;
+}
+
+.file-toolbar {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    background-color: #fafafa;
+}
+
+.file-toolbar button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.file-toolbar button:hover {
+    background-color: #f0f0f0;
+}
+
+.file-toolbar button span {
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* ツリー表示用スタイル */
+/* ツリー表示用スタイル */
+.file-tree {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: auto;
+    /* 横スクロール許可 */
+    padding: 5px 0;
+}
+
+.file-list,
+.file-list ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.file-list ul {
+    padding-left: 20px;
+    /* インデント */
+    display: none;
+    /* 初期状態は閉じるかどうかはJSで制御、とりあえず表示 */
+    border-left: 1px solid #eee;
+    margin-left: 10px;
+}
+
+.file-list ul.expanded {
+    display: block;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 30px 6px 15px;
+    /* 右側に余白を追加 */
+    cursor: pointer;
+    font-size: 13px;
+    color: #444;
+    white-space: nowrap;
+    /* 折り返しなし */
+}
+
+.file-item:hover {
+    background-color: #f0f7ff;
+    color: #007bff;
+}
+
+.folder-item {
+    padding: 6px 30px 6px 15px;
+    /* 右側に余白を追加 */
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    align-items: center;
+    color: #555;
+    white-space: nowrap;
+    /* 折り返しなし */
+}
+
+.folder-item:hover {
+    background-color: #f8f9fa;
+}
+
+.file-icon {
+    font-size: 18px;
+    margin-right: 8px;
+    color: #888;
+}
+
+.folder-icon {
+    font-size: 18px;
+    margin-right: 8px;
+    color: #fbc02d;
+    /* フォルダ色 */
+}
+
+/* Closeボタンはヘッダー内でのみ表示 */
+.close-modal {
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* リンクスタイル */
+.clickable-header {
+    position: relative;
+    /* 位置計算の基準にはしないがマーカーとして */
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.clickable-header:hover {
+    background-color: #eef;
+    text-decoration: none;
+}
+
+.tree-highlight {
+    background-color: #e0f0ff !important;
+    border-left: 3px solid #007bff;
+    padding-left: 12px;
+    /* 補正 */
 }

@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   {% load static %}
   <!-- styles.cssとediter_style.cssを参照 -->
-  <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
-  <link rel="stylesheet" type="text/css" href="{% static 'css/editer_style.css' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}?v=17" />
+  <link rel="stylesheet" href="{% static 'css/editer_style.css' %}?v=41">
+  <link rel="stylesheet" href="{% static 'css/favorites_style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/search_style.css' %}" />
+  <!-- Google Fonts: Material Symbols Rounded -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <title>TeXTeX Editer</title>
   <!-- MathJaxを読み込み、クライアントサイドでTeXをレンダリングする -->
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -17,12 +23,17 @@
       tex: {
         inlineMath: [['$', '$'], ['\\(', '\\)']],
         displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      options: {
+        ignoreHtmlClass: 'mathjax_ignore',
+        processHtmlClass: 'mathjax_process'
       }
     };
   </script>
 </head>
+
 <body>
-  
+
   <!-- サイドバー開閉用のチェックボックスとアイコン -->
   <input type="checkbox" id="sidebar-toggle" checked>
   <label for="sidebar-toggle" id="sidebar-icon">
@@ -30,7 +41,7 @@
     <span></span>
     <span></span>
   </label>
-  
+
   <header id="header">
     <h1>TeXTeX Editer</h1>
   </header>
@@ -40,70 +51,161 @@
     <!-- サイドバーの追加 (order: 2 で右寄せ) -->
     <nav id="sidebar">
       <!-- 検索フォーム -->
-      <form id="search-form">
+      <form id="search-form" onsubmit="return false;">
         <input type="search" id="search-box" placeholder="検索...">
+        <button type="button" id="search-button"><span class="material-symbols-rounded">search</span></button>
       </form>
-      
+
       <!-- 全て開く/閉じるボタン -->
       <div id="sidebar-controls">
         <button id="expand-all">全て開く</button>
         <button id="collapse-all">全て閉じる</button>
       </div>
 
+      <!-- インライン数式モードトグル -->
+      <div id="inline-mode-container">
+        <label class="toggle-switch">
+          <input type="checkbox" id="inline-mode-toggle">
+          <span class="slider round"></span>
+        </label>
+        <span class="toggle-label mathjax_ignore">インライン数式($...$)</span>
+      </div>
+
       <!-- Djangoテンプレートタグでコンテンツを生成 -->
       <div id="sidebar-content">
+        <!-- お気に入りタブ -->
+        <details id="favorites-group" open data-group-title="お気に入り">
+          <summary>お気に入り</summary>
+          <ul id="favorites-list">
+            {% for item in favorite_contents %}
+            <li>
+              <span class="material-symbols-rounded star-icon active"
+                data-slug="{{ item.slug.function_slug }}">star</span>
+              <a href="{% url 'team_TeXTeX:function_template' function_slug=item.slug.function_slug %}" class="tex-item"
+                data-tex-code="{{ item.tex_code }}">{{ item.name }}</a>
+            </li>
+            {% endfor %}
+          </ul>
+        </details>
+
+        <!-- 通常のグループ -->
         {% for group in content %}
         <details {% if group.is_open %}open{% endif %} data-group-title="{{ group.title }}">
           <summary>{{ group.title }}</summary>
           <ul>
             {% for item in group.items %}
-            <!-- リンク先をガイド詳細ページに変更。コピー機能のためにdata-tex-codeを維持 -->
-            <li><a href="{% url 'team_TeXTeX:function_template' function_slug=item.slug %}" class="tex-item" data-tex-code="{{ item.tex_code }}">{{ item.name }}</a></li>
+            <li>
+              <!-- お気に入り済みか判定してクラス付与 -->
+              <span
+                class="material-symbols-rounded star-icon {% if item.slug.function_slug in favorites_list %}active{% endif %}"
+                data-slug="{{ item.slug.function_slug }}">star</span>
+              <!-- リンク先をガイド詳細ページに変更。コピー機能のためにdata-tex-codeを維持 -->
+              <a href="{% url 'team_TeXTeX:function_template' function_slug=item.slug.function_slug %}" class="tex-item"
+                data-tex-code="{{ item.tex_code }}">{{ item.name }}</a>
+            </li>
             {% endfor %}
           </ul>
         </details>
         {% endfor %}
       </div>
-      
+
     </nav>
 
     <!-- 主要コンテンツ領域 (order: 1 で左側) -->
     <main id="main-content">
-      
+
       <!-- エディタとプレビューのFlexコンテナ -->
       <div id="editor-interface">
         <div id="editor-area">
           <div class="editor-header">
-            <h2>TeXコード入力</h2>
-            <button id="preview-button">更新</button>
+            <h2>{{ project.name|default:"Project Root" }}/main.tex</h2>
+            <button id="compile-button" class="compile-btn" title="コンパイル"><span
+                class="material-symbols-rounded">play_arrow</span></button>
           </div>
-          <textarea id="tex-input" placeholder="ここにLaTeXコードを入力してください..."></textarea>
+          <textarea id="tex-input" placeholder="LaTeXコードを入力...">{{ file_content }}</textarea>
         </div>
-        
+
         <!-- リサイズ用スプリッター -->
-        <div id="splitter"></div> 
-        
+        <div id="splitter"></div>
+
         <div id="preview-area">
           <div class="editor-header">
-            <h2>プレビュー</h2>
+            <h2>PDFプレビュー</h2>
+            <div id="pdf-toolbar">
+              <button id="zoom-out" title="縮小"><span class="material-symbols-rounded">remove</span></button>
+              <button id="zoom-reset" title="100%">100%</button>
+              <button id="zoom-in" title="拡大"><span class="material-symbols-rounded">add</span></button>
+              <button id="save-pdf" title="保存"><span class="material-symbols-rounded">download</span></button>
+            </div>
           </div>
-          <div id="tex-output">
-            <p>結果がここに表示されます。</p>
+          <div id="pdf-render-container"
+            style="flex: 1; height: 100%; overflow: auto; background-color: #525659; display: flex; justify-content: center; padding: 10px;">
+            <canvas id="the-canvas" style="box-shadow: 0 0 10px rgba(0,0,0,0.5);"></canvas>
           </div>
         </div>
       </div>
-      
+
     </main>
   </div>
-  
+
   <!-- TeX画像ポップアップエリア -->
   <div id="tex-preview-popup" style="display: none;">
     <img id="tex-preview-image" src="" alt="LaTeX Preview">
   </div>
 
   <!-- JavaScriptファイルを読み込み -->
-  <script src="{% static 'scripts/sidebar_logic.js' %}"></script>
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="{% static 'scripts/sidebar_logic.js' %}?v=19"></script>
   <script src="{% static 'scripts/preview_logic.js' %}"></script>
-  
+  <script>
+    window.favoriteToggleUrl = "{% url 'team_TeXTeX:toggle_favorite' %}";
+  </script>
+  <script src="{% static 'scripts/favorites_logic.js' %}?v=4"></script>
+  <script src="{% static 'scripts/PDFviewer_logic.js' %}?v=2"></script>
+  <script>
+    window.saveFileUrl = "{% url 'team_TeXTeX:save_file' %}";
+    window.projectId = "{{ project.id }}";
+    window.csrfToken = "{{ csrf_token }}"; // 追加
+  </script>
+  <script src="{% static 'scripts/editor_logic.js' %}?v=2"></script>
+  <script src="{% static 'scripts/file_manager.js' %}?v=19"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const compileButton = document.getElementById('compile-button');
+      const projectId = "{{ project.id }}";
+      // 初期PDF URL
+      const initialPdfUrl = "{% if project %}{% url 'team_TeXTeX:compile_project' project_id=project.id %}{% endif %}";
+
+      // 初期表示
+      if (initialPdfUrl && window.loadPDF) {
+        window.loadPDF(initialPdfUrl);
+      }
+
+      if (compileButton && projectId) {
+        compileButton.addEventListener('click', function () {
+          // 保存してからコンパイル
+          if (window.saveAndCompile) {
+            window.saveAndCompile(() => {
+              // コンパイル＆リロード
+              const timestamp = new Date().getTime();
+              const pdfUrl = `{% url 'team_TeXTeX:compile_project' project_id=project.id %}?t=${timestamp}`;
+
+              if (window.loadPDF) {
+                window.loadPDF(pdfUrl);
+              }
+            });
+          } else {
+            // フォールバック
+            const timestamp = new Date().getTime();
+            const pdfUrl = `{% url 'team_TeXTeX:compile_project' project_id=project.id %}?t=${timestamp}`;
+            if (window.loadPDF) window.loadPDF(pdfUrl);
+          }
+        });
+      }
+    });
+  </script>
 </body>
+
 </html>

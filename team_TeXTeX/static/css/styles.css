@@ -19,7 +19,7 @@ body {
 }
 
 #header h1 {
-    margin: 0;
+  margin: 0;
 }
 
 #container {
@@ -64,21 +64,25 @@ body {
 #sidebar-icon span:nth-child(1) {
   transform: translateY(10px) rotate(45deg);
 }
+
 #sidebar-icon span:nth-child(2) {
   opacity: 0;
 }
+
 #sidebar-icon span:nth-child(3) {
   transform: translateY(-10px) rotate(-45deg);
 }
 
 /* 非チェック状態（閉じる状態）でハンバーガーアイコンに戻す */
-#sidebar-toggle:not(:checked) ~ #sidebar-icon span:nth-child(1) {
+#sidebar-toggle:not(:checked)~#sidebar-icon span:nth-child(1) {
   transform: translateY(0) rotate(0deg);
 }
-#sidebar-toggle:not(:checked) ~ #sidebar-icon span:nth-child(2) {
+
+#sidebar-toggle:not(:checked)~#sidebar-icon span:nth-child(2) {
   opacity: 1;
 }
-#sidebar-toggle:not(:checked) ~ #sidebar-icon span:nth-child(3) {
+
+#sidebar-toggle:not(:checked)~#sidebar-icon span:nth-child(3) {
   transform: translateY(0) rotate(0deg);
 }
 
@@ -86,30 +90,36 @@ body {
 /* TeX画像ポップアップのスタイル (共通UI) */
 /* ======================================= */
 #tex-preview-popup {
-    position: absolute;
-    z-index: 200;
-    border: 1px solid #333;
-    background-color: #fff;
-    padding: 5px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    border-radius: 4px;
-    pointer-events: none;
-    right: 220px;
-    top: 0;
+  position: fixed;
+  /* サイドバーの左側に表示 */
+  right: 260px;
+  /* 250px(sidebar) + 10px(margin) */
+  z-index: 1000;
+  background-color: white;
+  border: 1px solid #ccc;
+  /* 枠線を追加 */
+  padding: 5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  pointer-events: none;
+  top: 0;
+  transform: translateY(-50%);
+  /* 自身の高さの半分だけ上にずらして中央揃え */
 }
+
 #tex-preview-image {
-    display: block;
+  display: block;
 }
 
 .copyable-cell {
-    /* マウスカーソルをポインターに変更してクリックできることを示す */
-    cursor: pointer;
-    /* クリック可能であることを強調するために枠線や背景色を薄く設定 */
-    border-bottom: 1px dotted #aaa;
-    padding: 5px;
+  /* マウスカーソルをポインターに変更してクリックできることを示す */
+  cursor: pointer;
+  /* クリック可能であることを強調するために枠線や背景色を薄く設定 */
+  border-bottom: 1px dotted #aaa;
+  padding: 5px;
 }
 
 .copyable-cell:hover {
-    /* ホバー時に背景色を少し変える */
-    background-color: #f0f0f0;
+  /* ホバー時に背景色を少し変える */
+  background-color: #f0f0f0;
 }

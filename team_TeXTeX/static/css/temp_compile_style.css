@@ -1,0 +1,16 @@
+/* コンパイルボタン */
+.compile-btn {
+  padding: 5px 15px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.compile-btn:hover {
+  background-color: #218838;
+}

@@ -36,6 +36,15 @@
         {% endif %}
       </div>
       <div>
+        <label for="{{ form.laboratory.id_for_label }}" class="block text-sm font-medium text-slate-800">研究室（任意）</label>
+        {{ form.laboratory }}
+        {% if form.laboratory.errors %}
+        <p class="mt-1 text-sm text-red-600">
+          {{ form.laboratory.errors|join:", " }}
+        </p>
+        {% endif %}
+      </div>
+      <div>
         <label for="{{ form.password1.id_for_label }}" class="block text-sm font-medium text-slate-800">パスワード</label>
         {{ form.password1 }}
         {% if form.password1.errors %}

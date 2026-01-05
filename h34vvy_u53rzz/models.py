@@ -31,12 +31,31 @@ class H34vvyPermission(Permission):
     pass
 
 
+class Laboratory(models.Model):
+    """
+    研究室マスタ
+    """
+
+    name = models.CharField(max_length=100, unique=True, help_text="研究室名")
+
+    def __str__(self):
+        return self.name
+
+
 class H34vvyUser(AbstractUser):
     """
     チーム独自の認証・認可用ユーザアカウント
     """
 
     points = models.PositiveIntegerField(default=0, help_text="アプリ内ポイント")
+    laboratory = models.ForeignKey(
+        Laboratory,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="所属研究室",
+        related_name="h34vvy_users",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     # auth.models.PermissionsMixin で定義されている外部キーが

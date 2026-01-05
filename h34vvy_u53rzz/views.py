@@ -9,7 +9,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from .doors import DOORS
 from .forms import EntryForm, NamespacedLoginForm, SignupForm
-from .models import H34vvyUser, Entry
+from .models import H34vvyUser, Entry, Laboratory
 
 
 LOGIN_REDIRECT_FALLBACK = reverse_lazy("h34vvy_u53rzz:index")
@@ -106,6 +106,7 @@ def signup_view(request):
         if form.is_valid():
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password1"]
+            laboratory = form.cleaned_data["laboratory"]
             # auth_user側のユーザー名は衝突を避けるために接頭辞を付与
             if len(username) > 150:
                 form.add_error(
@@ -122,10 +123,11 @@ def signup_view(request):
                     try:
                         user = H34vvyUser.objects.db_manager(
                             "h34vvy_u53rzz"
-                        ).create_user(username=username, password=password)
+                        ).create_user(username=username, password=password, laboratory=laboratory)
                     except Exception:
                         # H34vvyUser作成に失敗したらユーザーを削除しておく
-                        user.delete()
+                        if "user" in locals():
+                            user.delete()
                         form.add_error(
                             None, "登録に失敗しました。時間をおいて再度お試しください。"
                         )
@@ -157,8 +159,9 @@ def logout_view(request):
 
 @login_required(login_url=LOGIN_URL)
 def ranking_view(request):
+    # User Ranking
     accounts = list(H34vvyUser.objects.order_by("-points", "username").all())
-    rankings = []
+    user_rankings = []
     last_points = None
     last_rank = 0
     for idx, account in enumerate(accounts, start=1):
@@ -166,14 +169,38 @@ def ranking_view(request):
             rank = last_rank
         else:
             rank = idx
-        rankings.append({"account": account, "rank": rank})
+        user_rankings.append({"account": account, "rank": rank})
         last_points = account.points
         last_rank = rank
+
+    # Laboratory Ranking
+    from django.db.models import Sum
+
+    labs = list(
+        Laboratory.objects.annotate(total_points=Sum("h34vvy_users__points"))
+        .order_by("-total_points")
+        .all()
+    )
+    lab_rankings = []
+    last_points = None
+    last_rank = 0
+    for idx, lab in enumerate(labs, start=1):
+        # total_points might be None if no users or no points, treat as 0
+        points = lab.total_points or 0
+        if points == last_points:
+            rank = last_rank
+        else:
+            rank = idx
+        lab_rankings.append({"lab": lab, "rank": rank, "points": points})
+        last_points = points
+        last_rank = rank
+
     return render(
         request,
         "teams/h34vvy_u53rzz/ranking.html",
         {
-            "rankings": rankings,
+            "user_rankings": user_rankings,
+            "lab_rankings": lab_rankings,
             "nav_active": "ranking",
             "current_user_id": request.user.id,
         },

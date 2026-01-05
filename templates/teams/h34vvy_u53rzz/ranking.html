@@ -34,36 +34,88 @@
   </p>
 </header>
 
-<div class="overflow-hidden rounded-xl bg-white shadow">
-  <table class="min-w-full divide-y divide-slate-200 text-sm">
-    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-      <tr>
-        <th class="px-4 py-3">順位</th>
-        <th class="px-4 py-3">ユーザー</th>
-        <th class="px-4 py-3 text-right">ポイント</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-slate-100">
-      {% for item in rankings %}
-      {% with account=item.account rank=item.rank %}
-      {% if account.user_id == current_user_id %}
-      <tr class="bg-blue-50/70 font-semibold text-blue-900">
-        {% else %}
-      <tr>
-        {% endif %}
-        <td class="px-4 py-3">{{ rank }}</td>
-        <td class="px-4 py-3">{{ account.username }}</td>
-        <td class="px-4 py-3 text-right font-semibold">{{ account.points }} pt</td>
-      </tr>
-      {% endwith %}
-      {% empty %}
-      <tr>
-        <td colspan="3" class="px-4 py-6 text-center text-slate-500">
-          まだランキング対象のユーザーがいません。
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+  <div class="overflow-hidden rounded-xl bg-white shadow">
+    <!-- Tabs implementation using CSS Radio Hack -->
+    <input type="radio" name="ranking_tab" id="tab_user" class="peer/user hidden" checked>
+    <input type="radio" name="ranking_tab" id="tab_lab" class="peer/lab hidden">
+
+    <!-- Tab Navigation -->
+    <div class="flex border-b border-slate-200 bg-slate-50">
+      <label for="tab_user"
+        class="flex-1 cursor-pointer py-3 text-center text-sm font-semibold text-slate-500 hover:text-slate-700 peer-checked/user:border-b-2 peer-checked/user:border-blue-600 peer-checked/user:text-blue-600">
+        個人ランキング
+      </label>
+      <label for="tab_lab"
+        class="flex-1 cursor-pointer py-3 text-center text-sm font-semibold text-slate-500 hover:text-slate-700 peer-checked/lab:border-b-2 peer-checked/lab:border-blue-600 peer-checked/lab:text-blue-600">
+        研究室ランキング
+      </label>
+    </div>
+
+    <!-- User Ranking Table -->
+    <div class="hidden peer-checked/user:block">
+      <table class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+          <tr>
+            <th class="px-4 py-3">順位</th>
+            <th class="px-4 py-3">ユーザー</th>
+            <th class="px-4 py-3 text-right">ポイント</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for item in user_rankings %}
+          {% with account=item.account rank=item.rank %}
+          {% if account.user_id == current_user_id %}
+          <tr class="bg-blue-50/70 font-semibold text-blue-900">
+            {% else %}
+          <tr>
+            {% endif %}
+            <td class="px-4 py-3">{{ rank }}</td>
+            <td class="px-4 py-3">
+              {{ account.username }}
+              {% if account.laboratory %}
+              <span class="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">{{ account.laboratory.name }}</span>
+              {% endif %}
+            </td>
+            <td class="px-4 py-3 text-right font-semibold">{{ account.points }} pt</td>
+          </tr>
+          {% endwith %}
+          {% empty %}
+          <tr>
+            <td colspan="3" class="px-4 py-6 text-center text-slate-500">
+              まだランキング対象のユーザーがいません。
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Laboratory Ranking Table -->
+    <div class="hidden peer-checked/lab:block">
+      <table class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+          <tr>
+            <th class="px-4 py-3">順位</th>
+            <th class="px-4 py-3">研究室</th>
+            <th class="px-4 py-3 text-right">合計ポイント</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for item in lab_rankings %}
+          <tr>
+            <td class="px-4 py-3">{{ item.rank }}</td>
+            <td class="px-4 py-3">{{ item.lab.name }}</td>
+            <td class="px-4 py-3 text-right font-semibold">{{ item.points }} pt</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" class="px-4 py-6 text-center text-slate-500">
+              まだランキング対象の研究室がいません。
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 {% endblock %}

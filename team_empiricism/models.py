@@ -80,8 +80,14 @@ class ExperimentPost(models.Model):
         help_text='Google Forms等のURLを入力してください'
     )
 
-    schedule = models.DateTimeField(
-        verbose_name='実施日時'
+    start_date = models.DateField(
+        verbose_name='募集開始日',
+        default=timezone.now
+    )
+
+    end_date = models.DateField(
+        verbose_name='募集終了日',
+        default=timezone.now
     )
 
     duration = models.CharField(

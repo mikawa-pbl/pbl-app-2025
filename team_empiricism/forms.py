@@ -8,15 +8,16 @@ class ExperimentPostForm(forms.ModelForm):
     class Meta:
         model = ExperimentPost
         fields = [
-            'organizer_name', 'edit_password', # 追加されたフィールド(V3)
-            'title', 'category', 'description', 'application_url',
-            'schedule', 'duration', 'location', 'reward',
-            'requirements', 'capacity', 'status'
+            'title', 'description', 'reward', 'duration',
+            'start_date', 'end_date', 'location', 'requirements',
+            'capacity', 'organizer_name', 'category', 'application_url',
+            'edit_password', 'status'
         ]
         # 'application_url': Google Forms 機能
         widgets = {
-            # HTML5の日時選択ピッカーを使用するための設定
-            'schedule': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            # HTML5の日付選択ピッカーを使用するための設定
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
             'description': forms.Textarea(attrs={'rows': 4}),
             'requirements': forms.Textarea(attrs={'rows': 3}),
             # パスワード入力を見えないように設定(V3)

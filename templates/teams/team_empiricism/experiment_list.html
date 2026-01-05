@@ -44,11 +44,15 @@
 <div class="row">
     {% for post in posts %}
     <div class="col-md-12 mb-3">
-        <div class="card shadow-sm h-100 {% if post.status == 'closed' %}bg-light text-muted border-0{% else %}border-warning{% endif %}">
+        <div class="card position-relative shadow-sm h-100 {% if post.status == 'closed' %}bg-light text-muted border-0{% else %}border-warning{% endif %}">
             <div class="card-body">
+                <div class="mb-2">
+                    <span class="badge bg-dark text-warning border border-warning">{{ post.get_category_display }}</span>
+                </div>
+                
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5 class="card-title mb-0">
-                        <a href="{% url 'experiment_detail' post.pk %}" class="text-decoration-none {% if post.status == 'closed' %}text-secondary{% else %}text-dark fw-bold{% endif %}">
+                        <a href="{% url 'experiment_detail' post.pk %}" class="stretched-link text-decoration-none {% if post.status == 'closed' %}text-secondary{% else %}text-dark fw-bold{% endif %}">
                             {{ post.title }}
                         </a>
                     </h5>
@@ -60,18 +64,12 @@
                     {% endif %}
                 </div>
                 
-                <div class="mb-2">
-                    <span class="badge bg-dark text-warning border border-warning">{{ post.get_category_display }}</span>
-                    <span class="ms-2 small text-muted"><i class="bi bi-person-fill"></i> {{ post.organizer_name }}</span>
-                    <span class="ms-2 small text-muted"><i class="bi bi-geo-alt"></i> {{ post.location }}</span>
-                    <span class="ms-2 small text-muted"><i class="bi bi-clock"></i> {{ post.schedule|date:"Y/m/d H:i" }}</span>
+                <div class="mb-3">
+                    <span class="badge bg-light text-dark border border-warning me-1 mb-1">謝礼: {{ post.reward }}</span>
+                    <span class="badge bg-light text-dark border border-warning me-1 mb-1">所要時間: {{ post.duration }}</span>
+                    <span class="badge bg-light text-dark border border-warning me-1 mb-1">募集期間: {{ post.start_date|date:"Y/m/d" }} ～ {{ post.end_date|date:"Y/m/d" }}</span>
+                    <span class="badge bg-light text-dark border border-warning me-1 mb-1">実施場所: {{ post.location }}</span>
                 </div>
-
-                <div class="alert alert-warning py-1 px-2 d-inline-block mb-2 text-dark small">
-                    <strong>謝礼:</strong> {{ post.reward }}
-                </div>
-
-                <p class="card-text text-truncate text-secondary">{{ post.description }}</p>
                 <div class="text-end small text-muted border-top pt-2">
                     更新: {{ post.updated_at|date:"Y/m/d" }}
                 </div>

@@ -173,7 +173,7 @@
 <div class="user-menu" id="user-menu">
   {% if request.session.takenoko_user_id %}
   <a href="{% url 'takenoko:listing_items' %}">出品した商品</a>
-  <a href="{% url 'takenoko:purchased_items' %}">購入した商品</a>
+  <a href="{% url 'takenoko:purchased_items' %}">取引した商品</a>
   <form
     action="{% url 'takenoko:logout' %}"
     method="post"

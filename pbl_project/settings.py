@@ -67,7 +67,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "h34vvy_u53rzz.middleware.H34vvySessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -151,16 +150,10 @@ DATABASES = {
     'team_tansaibou': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_tansaibou' / 'db.sqlite3',
-        'TEST': {
-            'DEPENDENCIES': [],
-        },
     },
     'team_shouronpou': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_shouronpou' / 'db.sqlite3',
-        'TEST': {
-            'DEPENDENCIES': [],
-        },
     },
     'agileca': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -209,14 +202,9 @@ DATABASES = {
 }
 
 
+
 # app_labelごとにDBを振り分けるルーター
 DATABASE_ROUTERS = ["routers.TeamPerAppRouter"]
-
-AUTHENTICATION_BACKENDS = [
-    "h34vvy_u53rzz.backends.H34vvyUserBackend",
-    # グローバルの認証バックエンド
-    # "django.contrib.auth.backends.ModelBackend",
-]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -240,9 +228,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "ja"
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "Asia/Tokyo"
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 

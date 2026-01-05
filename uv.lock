@@ -370,9 +370,6 @@ requires-dist = [
     { name = "requests" },
 ]
 
-[package.metadata.requires-dev]
-dev = []
-
 [[package]]
 name = "pdfminer-six"
 version = "20251107"

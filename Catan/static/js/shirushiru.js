@@ -87,8 +87,30 @@ function openDetailDialogFromRow(tr) {
     if (updatedElem) updatedElem.textContent = lastUpdated || '-';
     if (talkElem) talkElem.textContent = talk || '-';
 
+    // ゲストの場合は詳細ダイアログのボタンを「在室状況変更」に切り替える（表示時に判定）
+    const actionBtn = document.getElementById('detail-action-btn');
+    try {
+        if (actionBtn) {
+            const guestName = document.getElementById('user-name-cell') ? document.getElementById('user-name-cell').textContent.trim() : 'ゲスト';
+            if (name && name === guestName) {
+                actionBtn.textContent = '✏️ 在室状況変更';
+                actionBtn.onclick = function () { closeDetailDialog(); openDialog(); };
+                actionBtn.classList.add('status-button');
+                actionBtn.classList.remove('slack-dm-btn');
+            } else {
+                actionBtn.textContent = 'Slack（DM）へ移動';
+                actionBtn.onclick = function () { window.open('https://iimlabofficial.slack.com/archives/D06T65ZTJRW','_blank'); };
+                actionBtn.classList.remove('status-button');
+                actionBtn.classList.add('slack-dm-btn');
+            }
+        }
+    } catch (e) {
+        console.error('detail action button setup error', e);
+    }
 
     document.getElementById('detailDialog').classList.add('show');
+
+    
 }
 
 function closeDetailDialog() {

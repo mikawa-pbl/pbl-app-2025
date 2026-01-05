@@ -26,6 +26,11 @@
     form.filter{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
     .tags-box{display:flex;flex-wrap:wrap;gap:8px;}
     .tag-pill{background:var(--tag);color:#0b3a8c;padding:4px 8px;border-radius:999px;font-size:0.9rem;}
+
+    /* timeline window */
+    .timeline-window{max-height:60vh; overflow-y:auto; padding-right:8px;}
+    .day{margin-bottom:12px}
+
     .months{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;}
     .card{background:var(--card);padding:12px;border-radius:8px;border:1px solid rgba(15,23,42,0.03);}
     .card a.title{font-weight:600;color:#0f172a;text-decoration:none;}
@@ -128,37 +133,41 @@
 
     <section>
       <h2 style="margin:8px 0 12px 0;">日付あり</h2>
-      {# 日ごとにまとめる（expanded_posts による日単位の展開） #}
-      {% regroup expanded_posts by display_date|date:"Y年n月j日" as day_list %}
-      <div class="months">
-        {% for day in day_list %}
-          <div>
-            <h3 style="margin:0 0 8px 0;font-size:1rem;">{{ day.grouper }}</h3>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-              {% for entry in day.list %}
-                {# entry.post, entry.display_date, entry.is_range, entry.color_index #}
-                <article class="card {% if entry.is_range %}range color-{{ entry.color_index }}{% endif %}">
-                  <a class="title" href="{% url 'ssk:post_detail' entry.post.pk %}">{{ entry.post.title }}</a>
-                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;">
-                    <div class="meta" style="flex:1">
-                      {% for tag in entry.post.tags.all %}
-                        <span class="tag-pill">#{{ tag.name }}</span>
-                      {% endfor %}
+
+      {# Wrap the daily groups in a scrollable timeline window #}
+      <div id="timeline-window" class="timeline-window">
+        {% regroup expanded_posts by display_date|date:"Y年n月j日" as day_list %}
+        <div class="months">
+          {% for day in day_list %}
+            {# annotate day with ISO date for JS centering; use first entry's display_date #}
+            <div class="day" data-date="{{ day.list.0.display_date|date:'Y-m-d' }}">
+              <h3 style="margin:0 0 8px 0;font-size:1rem;">{{ day.grouper }}</h3>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                {% for entry in day.list %}
+                  {# entry.post, entry.display_date, entry.is_range, entry.color_index #}
+                  <article class="card {% if entry.is_range %}range color-{{ entry.color_index }}{% endif %}">
+                    <a class="title" href="{% url 'ssk:post_detail' entry.post.pk %}">{{ entry.post.title }}</a>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                      <div class="meta" style="flex:1">
+                        {% for tag in entry.post.tags.all %}
+                          <span class="tag-pill">#{{ tag.name }}</span>
+                        {% endfor %}
+                        {% if entry.is_range %}
+                          <span>{{ entry.post.start|date:"n/j" }} 〜 {{ entry.post.end|date:"n/j" }}</span>
+                        {% else %}
+                          <span>{{ entry.display_date|date:"n/j" }}</span>
+                        {% endif %}
+                      </div>
                       {% if entry.is_range %}
-                        <span>{{ entry.post.start|date:"n/j" }} 〜 {{ entry.post.end|date:"n/j" }}</span>
-                      {% else %}
-                        <span>{{ entry.display_date|date:"n/j" }}</span>
+                        <div class="range-badge">期間</div>
                       {% endif %}
                     </div>
-                    {% if entry.is_range %}
-                      <div class="range-badge">期間</div>
-                    {% endif %}
-                  </div>
-                </article>
-              {% endfor %}
+                  </article>
+                {% endfor %}
+              </div>
             </div>
-          </div>
-        {% endfor %}
+          {% endfor %}
+        </div>
       </div>
 
       {% if undated_posts.exists %}
@@ -184,7 +193,7 @@
   <!-- Floating New Post button (FAB) -->
   <a href="{% url 'ssk:post_create' %}" class="fab" aria-label="新規投稿" title="新規投稿">＋</a>
 
-  {# add simple JS at end of file to handle tag search/filtering #}
+  {# add simple JS at end of file to handle tag search/filtering and centering timeline #}
   <script>
     (function(){
       const input = document.getElementById('tag-search');
@@ -226,6 +235,37 @@
 
       // ensure initial state (in case selected tags exist)
       showTop5UnlessSelected();
+
+      // timeline centering: center nearest-to-now day on load
+      function centerTimeline(){
+        const win = document.getElementById('timeline-window');
+        if(!win) return;
+        const days = Array.from(win.querySelectorAll('.day[data-date]'));
+        if(!days.length) return;
+        const now = new Date();
+        const todayStr = now.toISOString().slice(0,10); // YYYY-MM-DD
+
+        // find first day >= today
+        let target = days.find(d => d.dataset.date >= todayStr);
+        if(!target){
+          // fallback: last day before today
+          for(let i=days.length-1;i>=0;i--){ if(days[i].dataset.date < todayStr){ target = days[i]; break; } }
+        }
+        if(!target) target = days[Math.floor(days.length/2)];
+
+        // choose element to center: first article inside day
+        const el = target.querySelector('article') || target;
+        // compute offset relative to scroll container
+        const rectEl = el.getBoundingClientRect();
+        const rectWin = win.getBoundingClientRect();
+        const offsetTop = rectEl.top - rectWin.top + win.scrollTop;
+        const centerPos = offsetTop - (win.clientHeight/2) + (rectEl.height/2);
+        win.scrollTo({ top: Math.max(0, Math.floor(centerPos)), behavior: 'smooth' });
+      }
+
+      // center after a short delay to allow layout
+      window.addEventListener('load', function(){ setTimeout(centerTimeline, 120); });
+
     })();
   </script>
 </body>

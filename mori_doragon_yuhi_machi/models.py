@@ -1,4 +1,14 @@
 from django.db import models
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
+import os
+
+STATIC_IMAGES_PATH = settings.BASE_DIR / 'mori_doragon_yuhi_machi' / 'static' / 'images'
+
+static_storage = FileSystemStorage(
+    location=STATIC_IMAGES_PATH,
+    base_url='/static/images/'
+)
 
 class Place(models.Model):
     name = models.CharField("場所の名前", max_length=100, unique=True) # 場所名は重複しないように unique=True を推奨
@@ -8,6 +18,14 @@ class Place(models.Model):
 
 class Member(models.Model):
     name = models.CharField("メンバー名", max_length=100)
+
+    photo = models.ImageField(
+        "顔写真",
+        storage=static_storage,  # ここで保存先を指定
+        upload_to='',            # サブフォルダは作らない
+        null=True,
+        blank=True
+    )
     
     # MemberモデルとPlaceモデルを「多対一」で関連付ける
     current_place = models.ForeignKey(

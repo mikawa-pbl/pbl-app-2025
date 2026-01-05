@@ -3,10 +3,10 @@
 <html lang="ja">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     html, body {
@@ -263,13 +263,15 @@
 
     // ===== 送信前に email を結合 =====
     function beforeSubmit(e) {
-      const local = $("email_local").value.trim();
+      const localInput = document.getElementById("email_local");
+      const hiddenEmail = document.getElementById("email");
+      const local = (localInput?.value || "").trim();
       if (!local) {
         e.preventDefault();
-        $("email_local").focus();
+        localInput?.focus();
         return false;
       }
-      $("email").value = local + "@tut.jp";
+      hiddenEmail.value = local + "@tut.jp";
       return true;
     }
 
@@ -285,7 +287,14 @@
       $("email_local").addEventListener("input", normalizeEmailLocal);
 
       // form submit
-      $("signupForm").addEventListener("submit", beforeSubmit);
+      document.getElementById("signupForm").addEventListener("submit", beforeSubmit);
+
+      // 値復元（サーバー送信後の再表示時にhiddenのemailからローカル部を復元）
+      const emailHidden = document.getElementById("email");
+      const emailLocal = document.getElementById("email_local");
+      if (emailHidden?.value && emailHidden.value.endsWith("@tut.jp")) {
+        emailLocal.value = emailHidden.value.replace(/@tut\.jp$/i, "");
+      }
 
       // 初期：空アイコン
       previewAvatar(null);
@@ -305,13 +314,19 @@
     <section class="card">
       <h1 class="title">新規登録</h1>
 
-      <form action="{% url 'takenoko:main' %}" id="signupForm" method="post" enctype="multipart/form-data">
+      <!-- フォーム全体のエラー -->
+      {% if form.non_field_errors %}
+        <div class="text-red-600 text-sm mb-3">
+          {{ form.non_field_errors.0 }}
+        </div>
+      {% endif %}
+
+      <form action="{% url 'takenoko:signup' %}" id="signupForm" method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <!-- ユーザーアイコン（ボタンは下） -->
+        <!-- ユーザーアイコン -->
         <div class="field">
           <label class="label">ユーザーアイコン</label>
-
           <div class="avatar-column">
             <div class="avatar">
               <img id="avatarImg" alt="ユーザーアイコン" style="display:none;">
@@ -328,13 +343,21 @@
               type="file"
               accept="image/*"
             />
+            {% if form.avatar.errors %}
+              <p class="text-red-600 text-sm">{{ form.avatar.errors.0 }}</p>
+            {% endif %}
           </div>
         </div>
 
         <!-- ニックネーム -->
         <div class="field">
           <label class="label" for="nickname">ニックネーム</label>
-          <input id="nickname" name="nickname" class="input" type="text" required placeholder="例：たけのこ太郎" />
+          <input id="nickname" name="nickname" class="input" type="text" required
+                 placeholder="例：たけのこ太郎"
+                 value="{{ form.nickname.value|default_if_none:'' }}" />
+          {% if form.nickname.errors %}
+            <p class="text-red-600 text-sm">{{ form.nickname.errors.0 }}</p>
+          {% endif %}
         </div>
 
         <!-- メールアドレス（末尾 @tut.jp 固定） -->
@@ -352,41 +375,42 @@
             />
             <div class="email-suffix">@tut.jp</div>
           </div>
-          <input type="hidden" id="email" name="email" value="" />
+          <input type="hidden" id="email" name="email" value="{{ form.email.value|default_if_none:'' }}" />
+          {% if form.email.errors %}
+            <p class="text-red-600 text-sm">{{ form.email.errors.0 }}</p>
+          {% endif %}
         </div>
 
-        <!-- 専攻（1〜5系・未定） -->
+        <!-- 専攻（Modelのchoicesから） -->
         <div class="field">
           <label class="label" for="major">専攻</label>
           <div class="select-wrap">
             <select id="major" name="major" class="select" required>
-              <option value="" selected disabled>選択してください</option>
-              <option value="1">1系</option>
-              <option value="2">2系</option>
-              <option value="3">3系</option>
-              <option value="4">4系</option>
-              <option value="5">5系</option>
-              <option value="0">未定</option>
+              <option value="" disabled {% if not form.major.value %}selected{% endif %}>選択してください</option>
+              {% for value, label in form.fields.major.choices %}
+                <option value="{{ value }}" {% if form.major.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
             </select>
           </div>
+          {% if form.major.errors %}
+            <p class="text-red-600 text-sm">{{ form.major.errors.0 }}</p>
+          {% endif %}
         </div>
 
-        <!-- 学年 -->
+        <!-- 学年（Modelのchoicesから） -->
         <div class="field">
           <label class="label" for="grade">学年</label>
           <div class="select-wrap">
             <select id="grade" name="grade" class="select" required>
-              <option value="" selected disabled>選択してください</option>
-              <option value="b1">学部1年</option>
-              <option value="b2">学部2年</option>
-              <option value="b3">学部3年</option>
-              <option value="b4">学部4年</option>
-              <option value="m1">修士1年</option>
-              <option value="m2">修士2年</option>
-              <option value="d">博士</option>
-              <option value="other">その他</option>
+              <option value="" disabled {% if not form.grade.value %}selected{% endif %}>選択してください</option>
+              {% for value, label in form.fields.grade.choices %}
+                <option value="{{ value }}" {% if form.grade.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
             </select>
           </div>
+          {% if form.grade.errors %}
+            <p class="text-red-600 text-sm">{{ form.grade.errors.0 }}</p>
+          {% endif %}
         </div>
 
         <!-- 学籍番号 -->
@@ -401,7 +425,12 @@
             pattern="[0-9]*"
             required
             placeholder="例：201101"
+            minlength="4" maxlength="6"
+            value="{{ form.student_id.value|default_if_none:'' }}"
           />
+          {% if form.student_id.errors %}
+            <p class="text-red-600 text-sm">{{ form.student_id.errors.0 }}</p>
+          {% endif %}
         </div>
 
         <!-- パスワード -->
@@ -417,9 +446,11 @@
             placeholder="8文字以上（推奨：英数混在）"
             autocomplete="new-password"
           />
+          {% if form.password.errors %}
+            <p class="text-red-600 text-sm">{{ form.password.errors.0 }}</p>
+          {% endif %}
         </div>
 
-        <!-- 登録ボタン -->
         <div class="actions">
           <button type="submit" class="submit-btn">登録する</button>
         </div>

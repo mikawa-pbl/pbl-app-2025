@@ -1,0 +1,171 @@
+{% extends 'teams/team_tansaibou/base.html' %}
+
+{% block title %}販売履歴編集 - Team 単細胞{% endblock %}
+
+{% block extra_style %}
+.form-container {
+    max-width: 600px;
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+h1 {
+    margin-bottom: 20px;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    font-size: 14px;
+}
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #45a049;
+}
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.required {
+    color: red;
+}
+.items-summary {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+.items-summary h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #555;
+}
+.items-summary ul {
+    margin: 0;
+    padding-left: 20px;
+}
+.items-summary li {
+    margin-bottom: 5px;
+}
+.total-amount {
+    font-size: 20px;
+    font-weight: bold;
+    color: #4CAF50;
+    margin-top: 10px;
+}
+.edit-note {
+    background: #fff3cd;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #856404;
+}
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>販売履歴編集</h1>
+
+    <div class="edit-note">
+        編集すると備考欄に編集ログが自動追記されます。
+    </div>
+
+    <div class="items-summary">
+        <h3>購入商品（変更不可）</h3>
+        <ul>
+            {% for item in transaction.items.all %}
+            <li>
+                {% if item.product %}
+                    {{ item.product.name }}
+                {% elif item.product_set %}
+                    {{ item.product_set.name }}
+                {% endif %}
+                x {{ item.quantity }} = ¥{{ item.subtotal|floatformat:0 }}
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="total-amount">合計: ¥{{ transaction.total_amount|floatformat:0 }}</div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="transaction_date">取引日時 <span class="required">*</span></label>
+            <input type="datetime-local" id="transaction_date" name="transaction_date"
+                   value="{{ transaction.transaction_date|date:'Y-m-d' }}T{{ transaction.transaction_date|time:'H:i' }}" required>
+        </div>
+        <div class="form-group">
+            <label for="recorded_by">担当者 <span class="required">*</span></label>
+            <select id="recorded_by" name="recorded_by" required>
+                <option value="">選択してください</option>
+                {% for member in members %}
+                <option value="{{ member.id }}" {% if member.id == transaction.recorded_by.id %}selected{% endif %}>
+                    {{ member.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="payment_method">支払方法 <span class="required">*</span></label>
+            <select id="payment_method" name="payment_method" required>
+                {% for value, label in payment_methods %}
+                <option value="{{ value }}" {% if value == transaction.payment_method %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="notes">備考</label>
+            <textarea id="notes" name="notes" placeholder="特記事項があれば入力してください">{{ transaction.notes }}</textarea>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">更新</button>
+            <a href="{% url 'team_tansaibou:sale_list' %}" class="btn btn-secondary">キャンセル</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -27,13 +27,13 @@ function saveStatus() {
     if (comCell) comCell.textContent = comment;
     
     // ステータスを更新
-    // if (statusCell) {
-    //     if (talkStatus === 'ok') {
-    //         statusCell.innerHTML = '<span class="status-ok">✅</span>';
-    //     } else {
-    //         statusCell.innerHTML = '<span class="status-ng">❌</span>';
-    //     }
-    // }
+    if (statusCell) {
+        if (talkStatus === 'ok') {
+            statusCell.innerHTML = '<span class="status-ok">🗣️</span>';
+        } else {
+            statusCell.innerHTML = '<span class="status-ng">🤫</span>';
+        }
+    }
 
     // 研究室（labで始まるkey）の場合、行に色を付ける
     if (userRow) {
@@ -44,12 +44,21 @@ function saveStatus() {
         }
     }
 
+    
+
     // ここでサーバーにデータを送信して永続化する処理を追加できます
     // 最終更新時刻を更新（ローカル表示用）
-    lastUpdated = new Date().toLocaleString();
+    lastUpdated = new Date().toLocaleString(undefined, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
 
     // 在室変更時の通知（サンプル）
-    alert('在室状況を更新しました');
+    // alert('在室状況を更新しました');
     closeDialog();
 }
 
@@ -61,18 +70,22 @@ function openDetailDialogFromRow(tr) {
     const name = tr.querySelector('td:nth-child(1)') ? tr.querySelector('td:nth-child(1)').textContent.trim() : '';
     const location = tr.querySelector('td:nth-child(2)') ? tr.querySelector('td:nth-child(2)').textContent.trim() : '';
     const comment = tr.querySelector('td:nth-child(3)') ? tr.querySelector('td:nth-child(3)').textContent.trim() : '';
+    const talk = tr.querySelector('td:nth-child(5)') ? tr.querySelector('td:nth-child(5)').textContent.trim() :'';
 
     const gradeElem = document.getElementById('detail-grade');
     const nameElem = document.getElementById('detail-name');
     const locElem = document.getElementById('detail-location');
     const comElem = document.getElementById('detail-comment');
     const updatedElem = document.getElementById('detail-updated');
+     const talkElem = document.getElementById('detail-talk');
+
 
     if (gradeElem) gradeElem.textContent = gradeHeading || '-';
     if (nameElem) nameElem.textContent = name || '-';
     if (locElem) locElem.textContent = location || '-';
     if (comElem) comElem.textContent = comment || '-';
     if (updatedElem) updatedElem.textContent = lastUpdated || '-';
+    if (talkElem) talkElem.textContent = talk || '-';
 
 
     document.getElementById('detailDialog').classList.add('show');

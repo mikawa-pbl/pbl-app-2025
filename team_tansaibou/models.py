@@ -56,11 +56,18 @@ class Member(models.Model):
         null=True,
         blank=True
     )
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
+    student_id = models.CharField('学籍番号', max_length=50, blank=True)
+    name = models.CharField('名前', max_length=100)
+    email = models.EmailField('メールアドレス', blank=True)
+
+    class Meta:
+        verbose_name = '担当者'
+        verbose_name_plural = '担当者'
 
     def __str__(self):
-        return f"{self.last_name} {self.first_name}"
+        if self.student_id:
+            return f"{self.name} ({self.student_id})"
+        return self.name
 
 
 class Product(models.Model):

@@ -1,26 +1,38 @@
-<nav
-  class="mb-6 flex flex-col gap-3 rounded-md bg-slate-900 px-4 py-3 text-white md:flex-row md:items-center md:justify-between"
->
-  <a
-    href="{% url 'h34vvy_u53rzz:index' %}"
-    class="font-semibold tracking-wider text-white no-underline"
-    >ドア開けてや</a
-  >
-  <div class="flex flex-wrap items-center gap-2 text-sm">
-    <a
-      href="{% url 'h34vvy_u53rzz:index' %}"
-      class="rounded px-3 py-1 text-slate-200 transition hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 {% if nav_active == 'index' %}bg-blue-600 text-white{% endif %}"
-      >ホーム</a
-    >
-    <a
-      href="{% url 'h34vvy_u53rzz:help' %}"
-      class="rounded px-3 py-1 text-slate-200 transition hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 {% if nav_active == 'help' %}bg-blue-600 text-white{% endif %}"
-      >助けを求める</a
-    >
-    <a
-      href="{% url 'h34vvy_u53rzz:timeline' %}"
-      class="rounded px-3 py-1 text-slate-200 transition hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 {% if nav_active == 'timeline' %}bg-blue-600 text-white{% endif %}"
-      >タイムライン</a
-    >
+{% load h34vvy_tags %}
+<nav class="mb-4 flex items-center justify-between rounded-md bg-slate-900 px-4 py-2 text-white">
+  <div class="text-sm font-semibold">ドア開けてや</div>
+  <div class="flex items-center gap-2 text-sm text-slate-100">
+    {% if user.is_authenticated %}
+    {% user_points user as nav_user_points %}
+    <span class="rounded bg-white/10 px-3 py-1">
+      {{ user.username }}
+      {% if nav_user_points is not None %}
+      / {{ nav_user_points }} pt
+      {% endif %}
+    </span>
+    <a href="{% url 'h34vvy_u53rzz:logout' %}"
+      class="rounded bg-white px-3 py-1 font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 hover:shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70">ログアウト</a>
+    {% else %}
+    <a href="{% url 'h34vvy_u53rzz:signup' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}"
+      class="rounded bg-white px-3 py-1 font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 hover:shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70">新規登録</a>
+    <a href="{% url 'h34vvy_u53rzz:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}"
+      class="rounded bg-white px-3 py-1 font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 hover:shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70">ログイン</a>
+    {% endif %}
   </div>
 </nav>
+<!-- 
+<nav
+  class="sticky z-30 w-full border-t border-slate-800 bg-slate-900/95 text-white backdrop-blur supports-[backdrop-filter]:bg-slate-900/80 top-[calc(100vh-4rem)]">
+  <div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+    <div class="flex flex-1 flex-wrap items-center gap-2 text-xs md:text-sm">
+      <a href="{% url 'h34vvy_u53rzz:index' %}"
+        class="rounded px-3 py-2 transition hover:bg-white/10 {% if nav_active == 'index' %}bg-blue-600 text-white{% else %}text-slate-200{% endif %}">ホーム</a>
+      <a href="{% url 'h34vvy_u53rzz:help' %}"
+        class="rounded px-3 py-2 transition hover:bg-white/10 {% if nav_active == 'help' %}bg-blue-600 text-white{% else %}text-slate-200{% endif %}">助けを求める</a>
+      <a href="{% url 'h34vvy_u53rzz:timeline' %}"
+        class="rounded px-3 py-2 transition hover:bg-white/10 {% if nav_active == 'timeline' %}bg-blue-600 text-white{% else %}text-slate-200{% endif %}">タイムライン</a>
+      <a href="{% url 'h34vvy_u53rzz:ranking' %}"
+        class="rounded px-3 py-2 transition hover:bg-white/10 {% if nav_active == 'ranking' %}bg-blue-600 text-white{% else %}text-slate-200{% endif %}">ランキング</a>
+    </div>
+  </div>
+</nav> -->

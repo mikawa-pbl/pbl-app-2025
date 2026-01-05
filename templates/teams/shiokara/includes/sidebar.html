@@ -1,0 +1,38 @@
+{% load static %}
+<!-- サイドバーナビゲーション -->
+<aside class="tut-sidebar">
+    <nav class="tut-sidebar-nav">
+        <h3 class="tut-sidebar-title">メニュー</h3>
+        <ul class="tut-sidebar-menu">
+            <li class="tut-sidebar-item {% if active_page == 'department_list' %}active{% endif %}">
+                <a href="{% url 'shiokara:department_list' %}">学科別 企業一覧</a>
+            </li>
+            <li class="tut-sidebar-item {% if active_page == 'company_search' %}active{% endif %}">
+                <a href="{% url 'shiokara:company_search' %}">企業検索</a>
+            </li>
+            <li class="tut-sidebar-item {% if active_page == 'my_page' %}active{% endif %}">
+                <a href="{% url 'shiokara:my_page' %}">マイページ</a>
+            </li>
+            <li class="tut-sidebar-item {% if active_page == 'feedback' %}active{% endif %}">
+                <a href="{% url 'shiokara:site_feedback' %}">サイト要望 💬</a>
+            </li>
+            <li class="tut-sidebar-item {% if active_page == 'sitemap' %}active{% endif %}">
+                <a href="{% url 'shiokara:sitemap' %}">サイトマップ</a>
+            </li>
+        </ul>
+        
+        {% if departments %}
+        <h3 class="tut-sidebar-title tut-sidebar-section">学科から探す</h3>
+        <ul class="tut-sidebar-submenu">
+            {% for dept in departments %}
+            <li class="tut-sidebar-subitem">
+                <a href="{% url 'shiokara:company_search' %}?dept={{ dept.short_name }}">
+                    {{ dept.name }}
+                    <span class="tut-sidebar-badge">{{ dept.companies.count }}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </nav>
+</aside>

@@ -14,7 +14,7 @@
   <div class="container">
     <div class="header">
       <div class="title">在室状況アプリ</div>
-      <a href="#" class="slack-text-btn" title="Slackへ遷移">Slack</a>
+      <a href="slack://open?team=T022EFBCLNA" class="slack-text-btn" title="Slackへ遷移">Slack</a>
       <div class="user-name">
         ゲスト
       </div>
@@ -57,31 +57,36 @@
         <th>場所</th>
         <th>コメント</th>
         <th></th>
+        <th class="displaynone"></th>
+  
       </tr>
       <tr class="in-lab">
-        <td>田中</td>
+        <td>小濱</td>
         <td>研究室（B4,M1）C3-502</td>
         <td>実験中</td>
         <td><span class="detail">詳細</span></td>
+        <td class="displaynone"></td>
       </tr>
       <tr>
         <td>伊藤</td>
         <td>授業</td>
         <td>15時まで授業</td>
         <td><span class="detail">詳細</span></td>
+        <td class="displaynone"></td>
       </tr>
       <tr class="in-lab">
-        <td>渡辺</td>
+        <td>石川</td>
         <td>3Dプリンタの部屋 C3-511</td>
         <td>造形中</td>
         <td><span class="detail">詳細</span></td>
+        <td class="displaynone"></td> 
       </tr>
       <tr id="user-row">
         <td id="user-name-cell">ゲスト</td>
         <td id="user-location-cell">-</td>
         <td id="user-comment-cell">-</td>
-        <!--<td id="user-status-cell">-</td>-->
         <td><span class="detail">詳細</span></td>
+        <td class="displaynone" id="user-status-cell"></td>
       </tr>
     </table>
 
@@ -114,7 +119,7 @@
       </tr>
     </table>
 
-    <div class="footer">画面イメージ図</div>
+    <div class="footer"></div>
   </div>
 
   <!-- 在室状況変更ボタン（固定表示） -->
@@ -141,8 +146,8 @@
 
         <label for="talkStatusSelect">話しかけステータス:</label>
         <select id="talkStatusSelect">
-          <option value="ok">✅ OK（話しかけていい）</option>
-          <option value="ng">❌ NG（話しかけないで）</option>
+          <option value="ok">🗣️ OK（話しかけていい）</option>
+          <option value="ng">🤫 NG（話しかけないで）</option>
         </select>
       </div>
       <div class="dialog-buttons">
@@ -158,14 +163,18 @@
       <button class="dialog-close" onclick="closeDetailDialog()" aria-label="閉じる">✖</button>
       <!-- 一番上に最終更新時刻（小さめ・中央表示） -->
       <div class="dialog-updated">最終更新: <span id="detail-updated">-</span></div>
+      <div class="dialog-profile-row">
+        <div class="profile-grade"><span id="detail-grade">-</span></div>
+        <div class="profile-name"><span id="detail-name">-</span></div>
+        <div><span id="detail-talk"></span></div>
+      </div>
       <div class="dialog-content">
-        <p><strong>学年:</strong> <span id="detail-grade">-</span></p>
-        <p><strong>名前:</strong> <span id="detail-name">-</span></p>
-        <p><strong>場所:</strong> <span id="detail-location">-</span></p>
-        <p><strong>コメント:</strong> <span id="detail-comment">-</span></p>
+        <div class="profile-place"><strong>場所:</strong> <span id="detail-location">-</span></div>
+        <div class="profile-comment"><strong>コメント:</strong> <span id="detail-comment">-</span></div>
+        <div class="profile-inlab"><strong>今日の在室時間:</strong> 計<span id="in-lab-time">600</span>分</div>
       </div>
       <div class="dialog-footer">
-        <button class="slack-dm-btn" onclick="/* フロントのみ: 実装は不要 */">Slack（DM）へ移動</button>
+        <button class="slack-dm-btn" onclick="window.open('https://iimlabofficial.slack.com/archives/D06T65ZTJRW','_blank')">Slack（DM）へ移動</button>
       </div>
     </div>
   </div>

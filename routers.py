@@ -1,7 +1,6 @@
 # routers.py （プロジェクト直下）
 class TeamPerAppRouter:
-    """
-    team_a アプリは team_a DB、team_b アプリは team_b DB へルーティングする。
+    """team_a アプリは team_a DB、team_b アプリは team_b DB へルーティングする。
     それ以外は default。
     """
 

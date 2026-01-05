@@ -95,27 +95,54 @@
     <div class="header">
         <h1>{{ post.title }}</h1>
         <div class="meta-info">
-            投稿日: {{ post.created_at|date:"Y/m/d H:i" }}
+            投稿日: {{ post.created_at|date:"Y/m/d H:i" }} | 
+            投稿者: {{ post.created_by.username|default:"ゲスト" }}
         </div>
     </div>
+
+    <h3>実験概要</h3>
+    <table class="info-table">
+        <tr>
+            <th>実施場所 (研究室)</th>
+            <td>{{ post.department }} / {{ post.laboratory }}</td>
+        </tr>
+        <tr>
+            <th>報酬</th>
+            <td>{{ post.reward }}</td>
+        </tr>
+        <tr>
+            <th>所要時間</th>
+            <td>{{ post.duration }} 分</td>
+        </tr>
+    </table>
 
     <h3>募集内容</h3>
     <div style="line-height: 1.8; white-space: pre-wrap;">{{ post.content|urlize }}</div>
 
-    <h3>参加条件</h3>
+    <h3>参加条件・配慮事項</h3>
     <table class="info-table">
         <tr>
-            <th>国籍</th>
-            <td>{{ post.get_condition_nationality_display|default:"特に指定なし" }}</td>
+            <th>国籍条件</th>
+            <td>{{ post.get_condition_nationality_display|default:"指定なし" }}</td>
         </tr>
         <tr>
-            <th>性別</th>
-            <td>{{ post.get_condition_gender_display|default:"特に指定なし" }}</td>
+            <th>性別条件</th>
+            <td>{{ post.get_condition_gender_display|default:"指定なし" }}</td>
         </tr>
         <tr>
-            <th>持病</th>
-            <td>{{ post.get_condition_has_disease_display|default:"特に指定なし" }}</td>
+            <th>対象年齢</th>
+            <td>{{ post.target_age|default:"指定なし" }}</td>
         </tr>
+        <tr>
+            <th>健康面の配慮</th>
+            <td>{{ post.health_notes|default:"特になし"|linebreaksbr }}</td>
+        </tr>
+        {% if post.free_notes %}
+        <tr>
+            <th>その他</th>
+            <td>{{ post.free_notes|linebreaksbr }}</td>
+        </tr>
+        {% endif %}
     </table>
 
     <h3>実験受け入れ可能時間</h3>
@@ -228,8 +255,10 @@
     </div>
 
     <div style="margin-top: 40px; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
-        <a href="{% url 'team_shouronpou:post_edit' post.pk %}" class="btn btn-primary" style="font-size: 0.9rem;">編集する</a>
-        <a href="{% url 'team_shouronpou:post_delete' post.pk %}" class="btn btn-danger" style="font-size: 0.9rem;">削除する</a>
+        {% if not post.created_by_id or login_user and post.created_by_id == login_user.id %}
+            <a href="{% url 'team_shouronpou:post_edit' post.pk %}" class="btn btn-primary" style="font-size: 0.9rem;">編集する</a>
+            <a href="{% url 'team_shouronpou:post_delete' post.pk %}" class="btn btn-danger" style="font-size: 0.9rem;">削除する</a>
+        {% endif %}
     </div>
 
 </div>

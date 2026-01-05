@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ログイン</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 400px; margin: 0 auto; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 5px 0 20px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #0056b3; }
+        .links { margin-top: 20px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h2>ログイン</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+            <p style="color: red; font-size: 0.9em;">ユーザー名またはパスワードが正しくありません。</p>
+        {% endif %}
+
+        <div style="text-align: left;">
+            <label>ユーザー名</label>
+            {{ form.username }}
+            
+            <label>パスワード</label>
+            {{ form.password }}
+        </div>
+
+        <button type="submit">ログイン</button>
+    </form>
+
+    <div class="links">
+        <a href="{% url 'team_shouronpou:signup' %}">アカウントをお持ちでない方はこちら（新規登録）</a>
+        <br><br>
+        <a href="{% url 'team_shouronpou:post_list' %}">一覧画面に戻る</a>
+    </div>
+</body>
+</html>

@@ -85,16 +85,18 @@ tr:hover {
 <table>
     <thead>
         <tr>
-            <th>姓</th>
-            <th>名</th>
+            <th>名前</th>
+            <th>学籍番号</th>
+            <th>メール</th>
             <th>操作</th>
         </tr>
     </thead>
     <tbody>
         {% for member in members %}
         <tr>
-            <td>{{ member.last_name }}</td>
-            <td>{{ member.first_name }}</td>
+            <td>{{ member.name }}</td>
+            <td>{{ member.student_id|default:"-" }}</td>
+            <td>{{ member.email|default:"-" }}</td>
             <td class="actions">
                 <a href="{% url 'team_tansaibou:member_edit' member.id %}" class="btn btn-secondary btn-sm">編集</a>
                 <form action="{% url 'team_tansaibou:member_delete' member.id %}" method="post" style="margin: 0;" onsubmit="return confirm('本当に削除しますか？');">

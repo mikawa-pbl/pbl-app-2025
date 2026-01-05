@@ -3,10 +3,10 @@
 <html lang="ja">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     html, body {
@@ -123,7 +123,7 @@
       box-shadow: 0 0 0 4px rgba(100,156,228,0.15);
     }
 
-    /* required + 先頭optionが空の時、プレースホルダーっぽく */
+    /* 商品状態はrequiredなのでこれで薄色placeholder化できる */
     .select-wrap .select:invalid {
       color: #888;
     }
@@ -164,29 +164,25 @@
       color: rgba(100,156,228,0.9);
       font-size: 28px;
     }
-
-    .upload-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: none;
-      background: #649CE4;
-      color: white;
-      font-size: 14px;
-      font-weight: 700;
-      border-radius: 999px;
-      padding: 10px 14px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .upload-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .file-input {
-      display: none;
-    }
-
+      .thumb .remove-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 26px;
+        height: 26px;
+        border-radius: 999px;
+        border: none;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
+      }
+      .thumb .remove-btn:focus { outline: 2px solid rgba(100,156,228,0.6); }
     /* ===== 学年タグ（複数） ===== */
     .chips {
       display: flex;
@@ -198,9 +194,8 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: #FBFEF9;
-      border: 1px solid #8C8EFC;
-      color: #6B6EE8;
+      background: #EAF2FF;
+      color: #2A5DB0;
       border-radius: 999px;
       padding: 6px 10px;
       font-size: 13px;
@@ -210,7 +205,7 @@
       border: none;
       background: transparent;
       cursor: pointer;
-      color: #6B6EE8;
+      color: #2A5DB0;
       font-size: 14px;
       line-height: 1;
       padding: 0;
@@ -235,7 +230,6 @@
       cursor: pointer;
     }
 
-    /* PCで余白少し増やす */
     @media (min-width: 768px) {
       .card { padding: 28px; }
       .title { font-size: 22px; }
@@ -243,7 +237,6 @@
   </style>
 
   <script>
-    // 元いた場所に戻る（安全版）
     function goBack() {
       if (window.history.length > 1) {
         history.back();
@@ -260,6 +253,21 @@
 
     function $(id){ return document.getElementById(id); }
 
+    function syncInputFiles() {
+      const dt = new DataTransfer();
+      selectedFiles.forEach(f => dt.items.add(f));
+      $("images").files = dt.files;
+    }
+
+    // ★ 追加：画像を取り消す（削除）
+    function removeImage(index) {
+      if (index < 0 || index >= selectedFiles.length) return;
+
+      selectedFiles.splice(index, 1);
+      syncInputFiles();
+      renderThumbs();
+    }
+
     function renderThumbs() {
       const thumbs = $("thumbs");
       thumbs.innerHTML = "";
@@ -268,7 +276,7 @@
         const url = URL.createObjectURL(file);
         const box = document.createElement("div");
         box.className = "thumb";
-        box.innerHTML = `<img src="${url}" alt="画像${idx+1}">`;
+        box.innerHTML = `<img src="${url}" alt="画像${idx+1}"><button type="button" class="remove-btn" aria-label="画像を削除" onclick="removeImage(${idx})">×</button>`;
         thumbs.appendChild(box);
       });
 
@@ -282,6 +290,18 @@
       $("pickBtn").disabled = (selectedFiles.length >= MAX_IMAGES);
     }
 
+    function removeImage(index) {
+      if (index < 0 || index >= selectedFiles.length) return;
+      selectedFiles.splice(index, 1);
+      const dt = new DataTransfer();
+      selectedFiles.forEach(f => dt.items.add(f));
+      if (selectedFiles.length === 0) {
+        $("images").value = "";
+      }
+      $("images").files = dt.files;
+      renderThumbs();
+    }
+
     function addImages(fileList) {
       const files = Array.from(fileList || []);
       if (files.length === 0) return;
@@ -289,14 +309,18 @@
       const canAdd = Math.max(0, MAX_IMAGES - selectedFiles.length);
       selectedFiles = selectedFiles.concat(files.slice(0, canAdd));
 
-      const dt = new DataTransfer();
-      selectedFiles.forEach(f => dt.items.add(f));
-      $("images").files = dt.files;
-
+      syncInputFiles();
       renderThumbs();
     }
 
-    // ===== 学年タグ（複数選択） =====
+    // ===== 対象学年タグ select の色（required無しでも薄色placeholder化） =====
+    function updateGradeSelectColor() {
+      const sel = $("gradeSelect");
+      if (!sel) return;
+      sel.style.color = sel.value ? "#333" : "#888";
+    }
+
+    // ===== 対象学年タグ（複数選択） =====
     function addGradeTag() {
       const sel = $("gradeSelect");
       const val = sel.value;
@@ -318,7 +342,8 @@
       chip.innerHTML = `${text}<button type="button" aria-label="削除" onclick="removeGradeTag('${val}')">×</button>`;
       $("gradeChips").appendChild(chip);
 
-      sel.value = ""; // placeholder表示に戻す
+      sel.value = "";
+      updateGradeSelectColor();
     }
 
     function removeGradeTag(val) {
@@ -328,49 +353,80 @@
       if (hidden) hidden.remove();
     }
 
-    // ===== 価格入力（最大99999 / 数字のみ） =====
+    // ===== カテゴリタグ選択（複数選択） =====
+    function updateTagSelectColor() {
+      const sel = $("tagSelect");
+      if (!sel) return;
+      sel.style.color = sel.value ? "#333" : "#888";
+    }
+
+    function addCategoryTag() {
+      const sel = $("tagSelect");
+      const val = sel.value;
+      const text = sel.options[sel.selectedIndex]?.text || "";
+      if (!val) return;
+
+      const exists = document.querySelector(`input[name="tags"][value="${val}"]`);
+      if (exists) return;
+
+      const hidden = document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = "tags";
+      hidden.value = val;
+      $("tagHidden").appendChild(hidden);
+
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.setAttribute("data-tag", val);
+      chip.innerHTML = `${text}<button type="button" aria-label="削除" onclick="removeCategoryTag('${val}')">×</button>`;
+      $("tagChips").appendChild(chip);
+
+      sel.value = "";
+      updateTagSelectColor();
+    }
+
+    function removeCategoryTag(val) {
+      const chip = document.querySelector(`.chip[data-tag="${val}"]`);
+      if (chip) chip.remove();
+      const hidden = document.querySelector(`input[name="tags"][value="${val}"]`);
+      if (hidden) hidden.remove();
+    }
+
+    // ===== 価格入力（最大999999 / 数字のみ） =====
     function normalizePrice() {
       const el = $("price");
       el.value = el.value.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
       el.value = el.value.replace(/[^0-9]/g, "");
       const n = Number(el.value || 0);
-      if (n > 99999) el.value = "99999";
-    }
-
-    // ===== 学年タグが空なら送信させない（見た目統一しつつバリデーション） =====
-    function validateBeforeSubmit(e) {
-      const gradeCount = document.querySelectorAll('input[name="grades"]').length;
-      if (gradeCount === 0) {
-        e.preventDefault();
-        // requiredを付けると :invalid が効いてフォーカスも当てられる
-        const sel = $("gradeSelect");
-        sel.setAttribute("required", "required");
-        sel.reportValidity(); // ブラウザ標準の警告
-        sel.focus();
-        return false;
-      }
-      // gradesがあるならrequiredは不要（追加用selectなので）
-      $("gradeSelect").removeAttribute("required");
-      return true;
+      if (n > 999999) el.value = "999999";
     }
 
     window.addEventListener("DOMContentLoaded", () => {
       renderThumbs();
+
       $("images").addEventListener("change", (e) => addImages(e.target.files));
       $("price").addEventListener("input", normalizePrice);
 
-      // 初期状態：見た目統一のためrequiredを付けて薄色にする
-      // ただし送信前にgradesがあるかを判定するので安心
-      $("gradeSelect").setAttribute("required", "required");
+      updateGradeSelectColor();
+      $("gradeSelect").addEventListener("change", updateGradeSelectColor);
 
-      $("sellForm").addEventListener("submit", validateBeforeSubmit);
+      updateTagSelectColor();
+      $("tagSelect").addEventListener("change", updateTagSelectColor);
+
+      // エラー再表示時、選択を復元（必要なときだけ配列に値が入る）
+      PRESELECTED_GRADES.forEach(val => {
+        addHiddenAndChip("grades", val, getOptionText("gradeSelect", val), "gradeChips", "grade");
+      });
+      PRESELECTED_TAGS.forEach(val => {
+        addHiddenAndChip("tags", val, getOptionText("tagSelect", val), "tagChips", "tag");
+      });
     });
   </script>
 </head>
 
 <body>
   {% include "teams/takenoko/Components/header.html" %}
-  <!-- 戻る -->
+
   <button type="button" class="back-btn" onclick="goBack()" aria-label="戻る">
     <i class="fas fa-arrow-alt-circle-left"></i>
   </button>
@@ -379,8 +435,16 @@
     <section class="card">
       <h1 class="title">商品を出品</h1>
 
-      <form id="sellForm" method="post" enctype="multipart/form-data">
+      <form action="{% url 'takenoko:item_create' %}" id="sellForm" method="post" enctype="multipart/form-data">
         {% csrf_token %}
+
+        {% if messages %}
+          <ul class="mb-3">
+            {% for message in messages %}
+              <li class="text-red-600 text-sm">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
 
         <!-- 画像（最大5枚） -->
         <div class="field">
@@ -421,18 +485,18 @@
             type="text"
             inputmode="numeric"
             pattern="[0-9]*"
-            maxlength="5"
+            maxlength="6"
             required
-            placeholder="例：5000（¥99,999まで）"
+            placeholder="例：5000（¥999,999まで）"
           />
         </div>
 
         <!-- 商品詳細 -->
         <div class="field">
-          <label class="label" for="detail">商品詳細</label>
+          <label class="label" for="description">商品詳細</label>
           <textarea
-            id="detail"
-            name="detail"
+            id="description"
+            name="description"
             class="textarea"
             maxlength="300"
             required
@@ -445,17 +509,15 @@
           <label class="label" for="condition">商品状態</label>
           <div class="select-wrap">
             <select id="condition" name="condition" class="select" required>
-              <option value="" selected disabled>選択してください</option>
-              <option value="new">新品・未使用</option>
-              <option value="like_new">未使用に近い</option>
-              <option value="good">目立った傷や汚れなし</option>
-              <option value="fair">やや傷や汚れあり</option>
-              <option value="poor">傷や汚れあり</option>
+              <option value="" disabled {% if not form.condition.value %}selected{% endif %}>選択してください</option>
+              {% for value, label in form.fields.condition.choices %}
+                <option value="{{ value }}" {% if form.condition.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
             </select>
           </div>
         </div>
 
-        <!-- 対象学年タグ（複数） -->
+        <!-- 対象学年タグ（複数可） ※任意 -->
         <div class="field">
           <label class="label" for="gradeSelect">対象学年タグ（複数可）</label>
 
@@ -463,13 +525,9 @@
             <div class="select-wrap" style="flex:1;">
               <select id="gradeSelect" class="select">
                 <option value="" selected disabled>追加する学年を選択</option>
-                <option value="b1">学部1年</option>
-                <option value="b2">学部2年</option>
-                <option value="b3">学部3年</option>
-                <option value="b4">学部4年</option>
-                <option value="m1">修士1年</option>
-                <option value="m2">修士2年</option>
-                <option value="d">博士</option>
+                {% for value, label in form.fields.grades.choices %}
+                  <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
               </select>
             </div>
 
@@ -480,6 +538,29 @@
 
           <div id="gradeHidden"></div>
           <div class="chips" id="gradeChips"></div>
+        </div>
+
+        <!-- カテゴリタグ（複数可） ※任意 -->
+        <div class="field">
+          <label class="label" for="tagSelect">カテゴリタグ（複数可）</label>
+
+          <div style="display:flex; gap:10px;">
+            <div class="select-wrap" style="flex:1;">
+              <select id="tagSelect" class="select">
+                <option value="" selected disabled>追加するタグを選択</option>
+                {% for value, label in form.fields.tags.choices %}
+                  <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <button type="button" class="upload-btn" onclick="addCategoryTag()">
+              <i class="fas fa-tag"></i> 追加
+            </button>
+          </div>
+
+          <div id="tagHidden"></div>
+          <div class="chips" id="tagChips"></div>
         </div>
 
         <!-- 出品ボタン -->

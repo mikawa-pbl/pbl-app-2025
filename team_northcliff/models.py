@@ -12,6 +12,8 @@ class Member(models.Model):
 class User(models.Model):
     name = models.CharField(max_length=100, verbose_name="ユーザー名")
     points = models.IntegerField(default=10, verbose_name="保有ポイント")
+    latitude = models.FloatField(blank=True, null=True, verbose_name="緯度")
+    longitude = models.FloatField(blank=True, null=True, verbose_name="経度")
 
     def __str__(self):
         return f"{self.name} ({self.points}P)"
@@ -31,6 +33,8 @@ class Facility(models.Model):
 
     facility_id = models.CharField(max_length=10, unique=True, choices=FACILITY_CHOICES)
     name = models.CharField(max_length=100, verbose_name="施設名")
+    latitude = models.FloatField(blank=True, null=True, verbose_name="緯度")
+    longitude = models.FloatField(blank=True, null=True, verbose_name="経度")
 
     def __str__(self):
         return self.name

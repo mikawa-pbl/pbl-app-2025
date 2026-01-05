@@ -1,0 +1,45 @@
+{% extends 'teams/team_TMR/base.html' %}
+
+{% block title %}{% if form.instance.pk %}ES編集{% else %}ES作成{% endif %}{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-6 text-gray-800">
+    {% if form.instance.pk %}ES編集{% else %}ES作成{% endif %}
+</h2>
+
+<form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Company -->
+    <div>
+        <label for="{{ form.company.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.company.label }}:</label>
+        <input type="text" name="{{ form.company.name }}" id="{{ form.company.id_for_label }}"
+               value="{{ form.company.value|default_if_none:'' }}"
+               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+               required>
+    </div>
+
+    <!-- Question -->
+    <div>
+        <label for="{{ form.question.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.question.label }}:</label>
+        <textarea name="{{ form.question.name }}" id="{{ form.question.id_for_label }}" rows="3"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required>{{ form.question.value|default_if_none:'' }}</textarea>
+    </div>
+    
+    <!-- Answer -->
+    <div>
+        <label for="{{ form.answer.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.answer.label }}:</label>
+        <textarea name="{{ form.answer.name }}" id="{{ form.answer.id_for_label }}" rows="10"
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required>{{ form.answer.value|default_if_none:'' }}</textarea>
+    </div>
+
+    <div>
+        <button type="submit"
+                class="w-full md:w-auto flex justify-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            保存する
+        </button>
+    </div>
+</form>
+{% endblock %}

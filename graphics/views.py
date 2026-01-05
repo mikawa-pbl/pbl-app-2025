@@ -89,17 +89,17 @@ def search_courses(request):
             if semester == '通年':
                 courses = courses.filter(semester__contains='通年')
             elif semester == '前':
-                courses = courses.filter(Q(semester__contains='前期') & ~Q(semester__contains='前期１') & ~Q(semester__contains='前期２'))
+                courses = courses.filter(Q(semester__contains='前期') & ~Q(semester__contains='前期1') & ~Q(semester__contains='前期2'))
             elif semester == '後':
-                courses = courses.filter(Q(semester__contains='後期') & ~Q(semester__contains='後期１') & ~Q(semester__contains='後期２'))
+                courses = courses.filter(Q(semester__contains='後期') & ~Q(semester__contains='後期1') & ~Q(semester__contains='後期2'))
             elif semester == '前1':
-                courses = courses.filter(semester__contains='前期１')
+                courses = courses.filter(semester__contains='前期1')
             elif semester == '前2':
-                courses = courses.filter(semester__contains='前期２')
+                courses = courses.filter(semester__contains='前期2')
             elif semester == '後1':
-                courses = courses.filter(semester__contains='後期１')
+                courses = courses.filter(semester__contains='後期1')
             elif semester == '後2':
-                courses = courses.filter(semester__contains='後期２')
+                courses = courses.filter(semester__contains='後期2')
 
         # 選択必修でフィルタ
         if required and required != '全体':

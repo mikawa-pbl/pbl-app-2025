@@ -16,7 +16,7 @@ def post_list(request):
             pass
 
     mode = request.GET.get("mode", "and")  # "and" または "or"
-    posts = Post.objects.prefetch_related("tags").order_by("date")
+    posts = Post.objects.prefetch_related("tags").order_by("start")
 
     if tag_ids:
         if mode == "or":
@@ -31,18 +31,21 @@ def post_list(request):
     tags = Tag.objects.annotate(num_posts=Count("posts")).order_by("-num_posts", "name")
 
     # 分割: 日付あり / 日付なし をテンプレートで別表示できるようにする
-    dated_posts = posts.filter(date__isnull=False).order_by("date", "created_at")
-    undated_posts = posts.filter(date__isnull=True).order_by("-created_at")
+    dated_posts = posts.filter(start__isnull=False).order_by("start", "created_at")
+    undated_posts = posts.filter(start__isnull=True).order_by("-created_at")
 
     # Assign a color index to each post interval so overlapping intervals get different colors.
     # Greedy coloring: keep track of last end date for each color, reuse color when it does not overlap.
     post_color = {}
-    color_ends = []  # list of end dates per color
+    color_ends = []  # list of end datetimes per color
     # Build list of unique posts with intervals, sorted by start date
     intervals = []
     for p in dated_posts:
-        start = p.date
-        end = p.end_date if getattr(p, "end_date", None) else start
+        start = p.start.date() if p.start else None
+        # compute end date from p.end (if none, same as start)
+        end = p.end.date() if getattr(p, "end", None) else start
+        if start is None:
+            continue
         if end is None or end < start:
             end = start
         intervals.append((p, start, end))
@@ -64,9 +67,11 @@ def post_list(request):
     # Expand ranged posts into entries for each date in their interval, attach color_index
     expanded_posts = []
     for post in dated_posts:
-        start = post.date
-        end = post.end_date if getattr(post, "end_date", None) else start
+        start = post.start.date() if post.start else None
+        end = post.end.date() if getattr(post, "end", None) else start
         # if end_date is before start, treat as single day
+        if start is None:
+            continue
         if end is None or end < start:
             end = start
         d = start
@@ -82,7 +87,7 @@ def post_list(request):
     expanded_posts.sort(key=lambda e: (
         e.display_date,
         0 if e.is_range else 1,                 # range entries first
-        e.post.date or e.post.created_at,
+        e.post.start.date() if e.post.start else e.post.created_at,
         e.post.created_at
     ))
 
@@ -100,23 +105,24 @@ def post_create(request):
     if request.method == "POST":
         form = PostForm(request.POST)
         if form.is_valid():
-            # date (start) + optional end_date saved separately
+            cleaned = form.cleaned_data
             post = Post(
-                title=form.cleaned_data["title"],
-                date=form.cleaned_data.get("date"),
-                end_date=form.cleaned_data.get("end_date"),
-                body=form.cleaned_data["body"],
+                title=cleaned["title"],
+                start=cleaned.get("start"),
+                end=cleaned.get("end"),
+                body=cleaned["body"],
+                all_day=cleaned.get("all_day", True),
             )
             post.save()
 
             # set password if provided (only on create)
-            pwd = form.cleaned_data.get("password")
+            pwd = cleaned.get("password")
             if pwd:
                 post.set_password(pwd)
                 post.save()
 
             # タグ文字列をパースして ManyToMany に紐づけ (既存処理)
-            tags_text = form.cleaned_data.get("tags_text", "")
+            tags_text = cleaned.get("tags_text", "")
             names = []
 
             # スペース区切り（全角スペースも対応）
@@ -184,10 +190,12 @@ def post_edit(request, pk):
     if request.method == "POST":
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
-            post.title = form.cleaned_data["title"]
-            post.date = form.cleaned_data.get("date")
-            post.end_date = form.cleaned_data.get("end_date")
-            post.body = form.cleaned_data["body"]
+            cleaned = form.cleaned_data
+            post.title = cleaned["title"]
+            post.start = cleaned.get("start")
+            post.end = cleaned.get("end")
+            post.body = cleaned["body"]
+            post.all_day = cleaned.get("all_day", True)
             post.save()
 
             # clear the unlock flag after a successful edit (optional)
@@ -197,7 +205,7 @@ def post_edit(request, pk):
                 pass
 
             # タグ文字列をパースして post.tags を更新
-            tags_text = form.cleaned_data.get("tags_text", "")
+            tags_text = cleaned.get("tags_text", "")
             names = []
             for raw in tags_text.replace("　", " ").split():
                 token = raw.strip()
@@ -217,10 +225,14 @@ def post_edit(request, pk):
         tags_initial = " ".join("#" + t.name for t in post.tags.all())
         initial = {"tags_text": tags_initial}
         # prefill date/end_date when available
-        if post.date is not None:
-            initial["date"] = post.date
-        if getattr(post, "end_date", None) is not None:
-            initial["end_date"] = post.end_date
+        if post.start is not None:
+            initial["start_date"] = post.start.date()
+            if not post.all_day and post.start.time() is not None:
+                initial["start_time"] = post.start.time().replace(microsecond=0)
+        if getattr(post, "end", None) is not None:
+            initial["end_date"] = post.end.date()
+            if not post.all_day and post.end.time() is not None:
+                initial["end_time"] = post.end.time().replace(microsecond=0)
         form = PostForm(instance=post, initial=initial)
 
     all_tag_names = list(Tag.objects.order_by("name").values_list("name", flat=True))

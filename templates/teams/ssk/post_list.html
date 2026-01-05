@@ -145,7 +145,7 @@
                         <span class="tag-pill">#{{ tag.name }}</span>
                       {% endfor %}
                       {% if entry.is_range %}
-                        <span>{{ entry.post.date|date:"n/j" }} 〜 {{ entry.post.end_date|date:"n/j" }}</span>
+                        <span>{{ entry.post.start|date:"n/j" }} 〜 {{ entry.post.end|date:"n/j" }}</span>
                       {% else %}
                         <span>{{ entry.display_date|date:"n/j" }}</span>
                       {% endif %}

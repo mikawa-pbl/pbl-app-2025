@@ -9,7 +9,16 @@
 *URL （IEEE xplore/ACM DL）
 
 
+### データベースを更新したとき
+(PBLプロジェクトのトップで)
+uv run python manage.py makemigration --database=teachers
+uv run python manage.py migrate --database=teachers
+
+### データベースへの接続（確認)
 uv run python manage.py dbshell --database=teachers
+
+### サーバーの稼働
+uv run python manage.py runserver
 
 ## SQLite Command
 INSERT INTO teachers_paper(title, author, year, booktitle, url, doi) VALUES ("高度専門人材育成訓練演習の作り方", "Ohmura Ren", "2025", "TUT紀要", "http://usl.cs.tut.ac.jp", "doi://11.22.33.44");

@@ -1,6 +1,9 @@
 # papers/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
+from django.http import FileResponse, Http404
+from django.conf import settings
+from pathlib import Path
 
 from .models import Paper
 from .forms import PaperForm
@@ -120,3 +123,23 @@ def paper_search(request):
     }
     return render(request, 'teams/teachers/paper_search.html', context)
 
+
+def media_proxy(request, path):
+    """
+    MEDIA_ROOT 配下のファイルを /teachers/media/<path> で返す。
+    ※開発/閉じた環境向け。公開環境ではWebサーバ配信が推奨。
+    """
+    if not getattr(settings, "MEDIA_ROOT", None):
+        raise Http404("MEDIA_ROOT is not set")
+
+    media_root = Path(settings.MEDIA_ROOT).resolve()
+    target = (media_root / path).resolve()
+
+    # ディレクトリトラバーサル対策
+    if media_root not in target.parents and target != media_root:
+        raise Http404("Invalid path")
+
+    if not target.exists() or not target.is_file():
+        raise Http404("File not found")
+
+    return FileResponse(open(target, "rb"))

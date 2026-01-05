@@ -96,22 +96,23 @@
       <div class="filebox section">
         {% if paper.paper_figure %}
           <div><span class="k muted">画像ファイル</span><br>
-            <a class="btn" href="{{ paper.paper_figure.url }}" target="_blank">ファイルを開く</a>
+            <a class="btn" href="{% url 'teachers:media_proxy' paper.paper_figure.name %}" target="_blank">ファイルを開く</a>
           </div>
 
           {# 画像拡張子のときだけ img 表示 #}
-          {% with u=paper.paper_figure.url|lower %}
-            {% if u|slice:"-4:" == ".png" or u|slice:"-4:" == ".jpg" or u|slice:"-5:" == ".jpeg" %}
-              <div style="margin-top:10px;">
-                <img class="figure" src="{{ paper.paper_figure.url }}" alt="figure">
-              </div>
+          {% with n=paper.paper_figure.name|lower %}
+            {% if n|slice:"-4:" == ".png" or n|slice:"-4:" == ".jpg" or n|slice:"-5:" == ".jpeg" %}
+            <div style="margin-top:10px;">
+              <img class="figure" src="{% url 'teachers:media_proxy' paper.paper_figure.name %}" alt="figure">
+            </div>
             {% else %}
-              <div class="help">※PDFの場合はリンクから開いてください</div>
+            <div class="help">※PDFの場合はリンクから開いてください</div>
             {% endif %}
           {% endwith %}
         {% else %}
           <div class="muted">画像ファイル：なし</div>
         {% endif %}
+
       </div>
     </div>
   </div>

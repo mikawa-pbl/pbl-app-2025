@@ -483,7 +483,7 @@
 
             } catch (error) {
                 // 既存のクールタイムエラー処理を維持
-                if (error && error.message && error.message.includes('１０分以内')) {
+                if (error && error.message && error.message.includes('分以内')) {
                     alert(error.message);
                 } else if (error && error.message && error.message.includes('位置情報が利用できない')) {
                     alert(error.message);

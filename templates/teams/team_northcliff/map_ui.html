@@ -478,8 +478,8 @@
                 state.targetFacilityId = null;
 
             } catch(error) { 
-                if (error && error.message && error.message.includes('１０分以内に')) {
-                    alert('１０分以内に同一の施設情報を投稿することはできません');
+                if (error && error.message && error.message.includes('分以内に')) {
+                    alert('5分以内に同一の施設情報を投稿することはできません');
                 } else {
                     alert(error.message || '投稿に失敗しました');
                 }

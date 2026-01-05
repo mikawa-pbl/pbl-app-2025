@@ -168,7 +168,7 @@
             <div class="search-field search-building">
                 <div class="search-label">棟</div>
                 <select id="building_id" name="building_id" class="search-input">
-                    <option value="">選択</option>
+                    <option value="init">選択</option>
                     <option value="A" {% if building_id == "A" %}selected{% endif %}>A</option>
                     <option value="A1" {% if building_id == "A1" %}selected{% endif %}>A1</option>
                     <option value="A2" {% if building_id == "A2" %}selected{% endif %}>A2</option>
@@ -211,14 +211,34 @@
                 <div id="zoom-floor" class="map-wrapper-inner" 
                      data-dot-x="{{ x|default:'none' }}" 
                      data-dot-y="{{ y|default:'none' }}">
+
+                     
+                    
+                    {% if floor_image_url %}
+                        <img src="{{ floor_image_url }}" alt="フロア画像">  
+                        {% if x is not None and y is not None %}
+                        <div class="cursor-dot" style="left: {{ x }}%; top: {{ y }}%;"></div>
+                        {% endif %}
+                    {% else %}
+                        {% if building_id == "init" or building_id == "" %} <!--検索できていない場合-->
+                            <img src="images/gikajika_input.png" alt="検索してね＾＾">
+                        {% else %}
+                            <img src="images/gikajika.png" alt="エラー＾＾"><!--作ってない-->
+                        {% endif %}
+                    {% endif %}
+
+
+                     <!--
                     {% if floor_image_url %}
                         <img src="{{ floor_image_url }}" alt="フロア画像">
                         {% if x is not None and y is not None %}
                         <div class="cursor-dot" style="left: {{ x }}%; top: {{ y }}%;"></div>
                         {% endif %}
                     {% else %}
-                        <img src="images/A-3.png" alt="フロア画像">
+                        <img src="images/gikajika.png" alt="存在しないフロアです">
                     {% endif %}
+
+                    -->
                 </div>
             </div>
         </section>

@@ -241,27 +241,30 @@
                 }
 
             } else {
-                // === ロック中 (解除ボタン or 投稿ボタン) ===
+                // === ロック中 (メッセージ) ===
                 const note = document.createElement('p');
                 note.textContent = '詳細を見るにはポイントが必要です。';
                 note.style.color = '#666'; note.style.marginTop = '8px';
                 div.appendChild(note);
-
-                // 解除ボタン
-                const unlockBtn = document.createElement('button');
-                unlockBtn.className = 'popup-btn btn-unlock';
-                unlockBtn.textContent = '最新情報を取得 (1P消費)';
-                unlockBtn.onclick = () => openUnlockModal(facility.id);
-                div.appendChild(unlockBtn);
-
-                // 投稿ボタン
-                const postBtn = document.createElement('button');
-                postBtn.className = 'popup-btn btn-post';
-                postBtn.style.marginTop = '5px';
-                postBtn.textContent = '投稿する';
-                postBtn.onclick = () => openPostModal(facility.id);
-                div.appendChild(postBtn);
             }
+
+            // === ボタンは常に表示 ===
+            
+            // 解除ボタン
+            const unlockBtn = document.createElement('button');
+            unlockBtn.className = 'popup-btn btn-unlock';
+            unlockBtn.textContent = '最新情報を取得 (1P消費)';
+            unlockBtn.onclick = () => openUnlockModal(facility.id);
+            div.appendChild(unlockBtn);
+
+            // 投稿ボタン
+            const postBtn = document.createElement('button');
+            postBtn.className = 'popup-btn btn-post';
+            postBtn.style.marginTop = '5px';
+            postBtn.textContent = '投稿する';
+            postBtn.onclick = () => openPostModal(facility.id);
+            div.appendChild(postBtn);
+
             return div;
         }
 

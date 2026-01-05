@@ -252,14 +252,8 @@
                 if (isUnlocked) {
                     const statusDisplay = statusMap[facility.latest_status] || '情報なし';
                     cardContent += `<div><span class="text-sm font-medium text-gray-700">現在の状況：</span><span class="text-base font-bold">${statusDisplay}</span></div>`;
-                } else {
-                    cardContent += `
-                        <div class="flex space-x-2">
-                            <button class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" data-action="unlock" data-id="${facility.id}">最新情報を取得 (1P消費)</button>
-                            <button class="flex-none px-3 py-2 font-medium text-white bg-green-600 rounded-md hover:bg-green-700" data-action="post" data-facility-id="${facility.id}">投稿する</button>
-                        </div>
-                    `;
-                }
+                } 
+                // else: ロック中のメッセージなどは特にないので何もしない（ボタンは下に追加）
 
                 facilityCard.innerHTML = cardContent;
                 facilityList.appendChild(facilityCard);
@@ -283,7 +277,17 @@
                     });
                     facilityCard.appendChild(commentsContainer);
                 }
+
+                // --- ボタンは常に表示（最後に追記） ---
+                const btnContainer = document.createElement('div');
+                btnContainer.className = 'flex space-x-2 mt-4';
+                btnContainer.innerHTML = `
+                    <button class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" data-action="unlock" data-id="${facility.id}">最新情報を取得 (1P消費)</button>
+                    <button class="flex-none px-3 py-2 font-medium text-white bg-green-600 rounded-md hover:bg-green-700" data-action="post" data-facility-id="${facility.id}">投稿する</button>
+                `;
+                facilityCard.appendChild(btnContainer);
             });
+
         }
         
         // --- 距離表示だけを更新 ---

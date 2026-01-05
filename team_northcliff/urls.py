@@ -10,6 +10,7 @@ urlpatterns = [
     # API endpoints
     path("api/<str:username>/user-data/", api.user_data_view, name="api_user_data"),
     path("api/facilities/", api.facilities_view, name="api_facilities"),
+    path("api/users/", api.users_list_view, name="api_users_list"),
     path("api/<str:username>/access-facility/", api.access_facility_view, name="api_access_facility"),
     path("api/<str:username>/create-post/", api.create_post_view, name="api_create_post"),
 ]

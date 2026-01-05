@@ -202,3 +202,10 @@ def create_post_view(request, username):
         'post_id': post.id,
         'points': user.points,
     })
+
+@require_http_methods(["GET"])
+def users_list_view(request):
+    """全ユーザーのリストを取得"""
+    users = User.objects.using("team_northcliff").all().order_by('id')
+    user_list = [{'name': u.name} for u in users]
+    return JsonResponse({'users': user_list})

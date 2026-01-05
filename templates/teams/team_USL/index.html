@@ -144,7 +144,7 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background-color: blue;
+            background-color: red;
             transform: translate(-50%, -50%);
             pointer-events: none;
             box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
@@ -197,7 +197,7 @@
 
     <main class="content">
         <section class="map-card-all">
-            <h2 class="map-title">全体マップ</h2>
+            <h2 class="map-title">全体マップ (拡大できます)</h2>
             <div class="map-wrapper-all">
                 <div id="zoom-all" class="map-wrapper-inner">
                     <img src="images/campus_all.png" alt="全体マップ">
@@ -276,8 +276,19 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // 全体マップ: (20%, 50%) を中心に 1.4倍
-        applySmartZoom('zoom-all', 55, 50, 1.7);
+
+        const buildingSelect = document.getElementById('building_id');
+        const selectedBuilding = buildingSelect.value;
+
+        if (selectedBuilding === "A" || selectedBuilding === "A1" || selectedBuilding === "A2") {
+            // 全体マップ: (55%, 50%) を中心に 1.7倍
+            applySmartZoom('zoom-all', 57, 52, 3.6);
+        }
+        else{
+            // 全体マップ: (55%, 50%) を中心に 1.7倍
+            applySmartZoom('zoom-all', 55, 50, 1.7);
+        }
+        
 
         // 詳細マップ
         const elemFloor = document.getElementById('zoom-floor');

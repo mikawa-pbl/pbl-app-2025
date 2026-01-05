@@ -90,7 +90,7 @@
             box-sizing: border-box;
         }
 
-        .map-card {
+        .map-card-all, .map-card-floor {
             background-color: #ffffff;
             border-radius: 8px;
             padding: 10px;
@@ -103,19 +103,28 @@
             margin: 0 0 6px;
         }
 
-        /* ズーム機能を有効にするための外枠の設定 */
-        .map-wrapper {
+        .map-wrapper-all {
             position: relative;
             width: 100%;
-            height: 350px; /* スマホで操作しやすい高さを確保 */
+            height: 220px; 
             background-color: #fafafa;
             border: 1px solid #ddd;
             border-radius: 4px;
-            overflow: hidden; /* 枠外にはみ出した画像を表示しない */
-            touch-action: none; /* ブラウザ標準のスクロールを無効化（ズーム操作を優先） */
+            overflow: hidden; 
+            touch-action: none;
         }
 
-        /* 実際に動く中身のコンテナ */
+        .map-wrapper-floor {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            touch-action: none;
+        }
+
         .map-wrapper-inner {
             position: relative;
             width: 100%;
@@ -127,7 +136,7 @@
             display: block;
             width: 100%;
             height: 100%;
-            object-fit: contain; /* 画像の全体が見えるように収める */
+            object-fit: contain;
         }
 
         .cursor-dot {
@@ -143,11 +152,7 @@
         }
 
         @media (min-width: 768px) {
-            .search-header {
-                padding: 16px 24px 10px;
-            }
             .content {
-                padding: 16px 24px 24px;
                 max-width: 480px;
                 margin: 0 auto;
             }
@@ -185,27 +190,27 @@
                 <button type="submit" aria-label="検索">🔍</button>
             </div>
         </form>
-
         {% if error_message %}
             <div class="error">{{ error_message }}</div>
         {% endif %}
     </header>
 
     <main class="content">
-
-        <section class="map-card">
+        <section class="map-card-all">
             <h2 class="map-title">全体マップ</h2>
-            <div class="map-wrapper">
+            <div class="map-wrapper-all">
                 <div id="zoom-all" class="map-wrapper-inner">
                     <img src="images/campus_all.png" alt="全体マップ">
                 </div>
             </div>
         </section>
 
-        <section class="map-card">
+        <section class="map-card-floor">
             <h2 class="map-title">詳細マップ（フロアマップ）</h2>
-            <div class="map-wrapper">
-                <div id="zoom-floor" class="map-wrapper-inner">
+            <div class="map-wrapper-floor">
+                <div id="zoom-floor" class="map-wrapper-inner" 
+                     data-dot-x="{{ x|default:'none' }}" 
+                     data-dot-y="{{ y|default:'none' }}">
                     {% if floor_image_url %}
                         <img src="{{ floor_image_url }}" alt="フロア画像">
                         {% if x is not None and y is not None %}
@@ -217,34 +222,80 @@
                 </div>
             </div>
         </section>
-
     </main>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // --- 全体マップの設定 ---
-        const elemAll = document.getElementById('zoom-all');
-        const panzoomAll = Panzoom(elemAll, {
-            maxScale: 5,        // 最大5倍
-            minScale: 1,        // 最小1倍
-            contain: 'outside', // 拡大時に画像の端で止まるようにする
-            step: 0.2           // ズームの滑らかさ
-        });
-
-        // 親要素でホイールによるズームも有効にする（PC用）
-        elemAll.parentElement.addEventListener('wheel', panzoomAll.zoomWithWheel);
-
-        // --- 詳細マップの設定 ---
-        const elemFloor = document.getElementById('zoom-floor');
-        const panzoomFloor = Panzoom(elemFloor, {
-            maxScale: 8,        // 詳細なので少し高めに設定
+    function applySmartZoom(id, xPct, yPct, scale) {
+        const elem = document.getElementById(id);
+        if (!elem) return;
+        
+        const img = elem.querySelector('img');
+        
+        // Panzoomの初期化
+        const panzoom = Panzoom(elem, {
+            maxScale: 8,
             minScale: 1,
             contain: 'outside'
         });
 
-        elemFloor.parentElement.addEventListener('wheel', panzoomFloor.zoomWithWheel);
+        elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+
+        // 実際の移動処理
+        const doMove = () => {
+            // ブラウザがレイアウト計算を終えるのを僅かに待つ
+            setTimeout(() => {
+                const w = elem.offsetWidth;
+                const h = elem.offsetHeight;
+
+                // 指定座標が枠の真ん中に来るように計算
+                const targetX = (xPct / 100) * w;
+                const targetY = (yPct / 100) * h;
+                
+                const panX = (w / 2) - targetX;
+                const panY = (h / 2) - targetY;
+
+                // ズームを先に適用
+                panzoom.zoom(scale, { animate: false });
+                
+                // 次のフレームで移動を適用（contain: 'outside' の判定を確実にするため）
+                requestAnimationFrame(() => {
+                    panzoom.pan(panX * scale, panY * scale, { animate: false });
+                });
+            }, 100);
+        };
+
+        // 画像が読み込み済みかチェック
+        if (img.complete) {
+            doMove();
+        } else {
+            img.onload = doMove;
+        }
+
+        return panzoom;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // 全体マップ: (20%, 50%) を中心に 1.4倍
+        applySmartZoom('zoom-all', 55, 50, 1.7);
+
+        // 詳細マップ
+        const elemFloor = document.getElementById('zoom-floor');
+        const dotX = elemFloor.getAttribute('data-dot-x');
+        const dotY = elemFloor.getAttribute('data-dot-y');
+
+        /*
+        if (dotX && dotX !== 'none' && dotY && dotY !== 'none') {
+            applySmartZoom('zoom-floor', parseFloat(dotX), parseFloat(dotY), 3.0);
+        } else {
+            applySmartZoom('zoom-floor', 50, 50, 1);
+        }
+        */
+       
+        applySmartZoomapplySmartZoom('zoom-floor', 50, 50, 1);
+
     });
 </script>
+
 </body>
 </html>

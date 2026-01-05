@@ -134,10 +134,22 @@ def user_register(request):
         if form.is_valid():
             user = form.save()  # フォームのデータを保存し、保存されたインスタンスを取得
             request.session['user_id'] = user.user_id # 自動ログイン
-            return redirect('nanakorobiyaoki:user_profile_edit', user_id=user.user_id)  # user_id を渡してリダイレクト
+            return redirect('nanakorobiyaoki:user_register_confirm', user_id=user.user_id)  # 確認画面へリダイレクト
     else:
         form = UserRegisterForm()
     return render(request, 'teams/nanakorobiyaoki/user_register.html', {'form': form})
+
+def user_register_confirm(request, user_id):
+    if 'user_id' not in request.session:
+        return redirect('nanakorobiyaoki:index')
+        
+    user = get_object_or_404(MyPage, user_id=user_id)
+    
+    # セッションユーザーと一致するか確認 (セキュリティ)
+    if user.user_id != request.session['user_id']:
+         return redirect('nanakorobiyaoki:index')
+
+    return render(request, 'teams/nanakorobiyaoki/user_register_confirm.html', {'user': user})
 
 
 from .models import Community, Post, Comment
@@ -218,6 +230,20 @@ def post_create(request, community_id):
             post.save()
             return redirect('nanakorobiyaoki:community_detail', community_id=community_id)
     
+    return redirect('nanakorobiyaoki:community_detail', community_id=community_id)
+
+def post_delete(request, post_id):
+    if 'user_id' not in request.session:
+        return redirect('nanakorobiyaoki:login')
+        
+    post = get_object_or_404(Post, id=post_id)
+    
+    # 投稿者本人かチェック
+    if post.author.user_id != request.session['user_id']:
+        return redirect('nanakorobiyaoki:community_detail', community_id=post.community.id)
+        
+    community_id = post.community.id
+    post.delete()
     return redirect('nanakorobiyaoki:community_detail', community_id=community_id)
 
 def post_detail(request, post_id):

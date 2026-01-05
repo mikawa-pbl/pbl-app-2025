@@ -7,9 +7,12 @@ class UserRegisterForm(forms.ModelForm):
         fields = [
             'name',
             'email',
-            'password',
             'user_id',
-                  ]  
+            'password',
+                  ]
+        widgets = {
+            'password': forms.PasswordInput(),
+        }
 
 class MyPageEditForm(forms.ModelForm):
     class Meta:

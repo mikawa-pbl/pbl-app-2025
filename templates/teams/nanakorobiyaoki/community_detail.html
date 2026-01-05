@@ -542,10 +542,16 @@
             <div class="post-card">
                 <div class="post-header">
                     <div class="post-author-avatar"></div> <!-- Placeholder avatar -->
-                    <div>
+                    <div style="flex: 1;">
                         <div class="post-author-name">{{ post.author.name }}</div>
                         <div class="post-date">{{ post.created_at|date:"Y年n月j日 H:i" }}</div>
                     </div>
+                    {% if post.author.user_id == request.session.user_id %}
+                    <a href="{% url 'nanakorobiyaoki:post_delete' post.id %}" class="icon-btn"
+                        onclick="return confirm('本当に削除しますか？');" style="color: #ff5252;">
+                        <span class="material-icons-round">delete</span>
+                    </a>
+                    {% endif %}
                 </div>
                 <div class="post-content">
                     {{ post.content|linebreaksbr }}

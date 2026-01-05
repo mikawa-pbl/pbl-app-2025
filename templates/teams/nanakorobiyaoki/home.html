@@ -381,7 +381,7 @@
     <nav class="sidebar">
         <div class="logo">
             <div class="logo-icon">T</div>
-            TUT Connect <span style="font-size: 0.7rem; color: #999; font-weight: 400; margin-top: 4px;">Beta</span>
+            TUT Connect <span style="font-size: 0.7rem; color: #999; font-weight: 400; margin-top: 4px;"></span>
         </div>
 
         <ul class="nav-menu">
@@ -456,7 +456,8 @@
 
             <div class="grid">
                 {% for community in joined_communities %}
-                <div class="card">
+                <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}" class="card"
+                    style="text-decoration: none; color: inherit; display: flex;">
                     <div class="card-header">
                         <div class="card-icon">
                             {% if community.image %}
@@ -488,11 +489,11 @@
 
                     <div class="card-footer">
                         <span class="member-count">{{ community.members.count }} メンバー</span>
-                        <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}" class="go-btn">
+                        <span class="go-btn">
                             移動する <span class="material-icons-round" style="font-size: 16px;">arrow_forward</span>
-                        </a>
+                        </span>
                     </div>
-                </div>
+                </a>
                 {% empty %}
                 <div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 40px;">
                     参加しているコミュニティはありません。<br>

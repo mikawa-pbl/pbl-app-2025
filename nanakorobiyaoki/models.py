@@ -36,7 +36,7 @@ class MyPage(models.Model):
     ]
 
     # 基本情報
-    name = models.CharField(max_length=100, verbose_name="名前")
+    name = models.CharField(max_length=100, verbose_name="名前(フルネーム推奨)")
     icon = models.ImageField(upload_to='icons/', blank=True, null=True, verbose_name="アイコン")
     user_id = models.CharField(max_length=100, unique=True, verbose_name="学籍番号(数字6桁)")
     email = models.EmailField(max_length=100, verbose_name="メールアドレス")

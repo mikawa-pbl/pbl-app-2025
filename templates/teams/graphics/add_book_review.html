@@ -315,6 +315,22 @@
             </div>
 
             <div class="form-group">
+                <label for="{{ subject_form.year.id_for_label }}">{{ subject_form.year.label }}</label>
+                {{ subject_form.year }}
+                {% if subject_form.year.errors %}
+                    <div class="error">{{ subject_form.year.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ subject_form.semester.id_for_label }}">{{ subject_form.semester.label }}</label>
+                {{ subject_form.semester }}
+                {% if subject_form.semester.errors %}
+                    <div class="error">{{ subject_form.semester.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
                 <label for="{{ subject_form.review.id_for_label }}">{{ subject_form.review.label }}</label>
                 {{ subject_form.review }}
                 {% if subject_form.review.errors %}

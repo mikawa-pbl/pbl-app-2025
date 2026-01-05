@@ -82,6 +82,24 @@ class SubjectReviewForm(forms.ModelForm):
         required=False
     )
 
+    # 年度選択フィールド
+    year = forms.ChoiceField(
+        label='年度',
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        }),
+        required=False
+    )
+
+    # 開講学期選択フィールド
+    semester = forms.ChoiceField(
+        label='開講学期',
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+        }),
+        required=False
+    )
+
     rating = forms.IntegerField(
         min_value=0,
         max_value=5,

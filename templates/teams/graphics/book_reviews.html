@@ -283,7 +283,9 @@
                     <!-- 科目レビュー -->
                     <h3>🎓 {{ review.subject }}</h3>
                     <div class="review-meta">
-                        <strong>開講情報:</strong> {{ review.course_info }}<br>
+                        <strong>年度:</strong> {{ review.year }}年度<br>
+                        <strong>開講学期:</strong> {{ review.semester }}<br>
+                        <strong>担当教員:</strong> {{ review.teachers|default:"情報なし" }}<br>
                         <strong>おすすめ度:</strong>
                         {% for i in "12345" %}
                             {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}

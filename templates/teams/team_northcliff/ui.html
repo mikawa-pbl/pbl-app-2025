@@ -35,9 +35,6 @@
     <header class="sticky top-0 z-10 flex items-center justify-between w-full px-4 py-3 bg-white shadow-sm">
         <h1 class="text-lg font-bold text-gray-800">技科大 混雑マップ</h1>
         <div class="flex items-center space-x-3">
-            <button id="get-location-btn" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
-                現在情報の取得📍
-            </button>
             <span id="points-display" class="text-base font-bold text-blue-600">保有: ...</span>
             <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         </div>
@@ -137,7 +134,6 @@
         const postModalTitle = document.getElementById('post-modal-title');
         const postStatusSelect = document.getElementById('post-status');
         const postCommentInput = document.getElementById('post-comment');
-        const getLocationBtn = document.getElementById('get-location-btn');
         const postModalDistance = document.getElementById('post-modal-distance');
         const postDistanceError = document.getElementById('post-distance-error');
 
@@ -192,6 +188,20 @@
             return json;
         }
 
+        // --- 位置情報許可のハンドリング ---
+        function handleLocationPermission() {
+            if (state.isLocationAcquired) return true;
+            // 起動時に位置情報を要求する通知（DBの位置情報を使用することを示す）
+            const confirmed = confirm("投稿や距離の表示には、位置情報が必要です。\n（登録された位置情報を使用します）\n\n許可しますか？");
+            if (confirmed) {
+                state.isLocationAcquired = true;
+                updateAllDistancesUI();
+                return true;
+            }
+            alert("位置情報を許可しないと、この機能は利用できません。");
+            return false;
+        }
+
         // --- 初期データ読み込み ---
         async function initializeApp() {
             try {
@@ -201,6 +211,9 @@
                 state.points = userData.points;
                 state.userLocation = { latitude: userData.latitude, longitude: userData.longitude };
                 pointsDisplay.textContent = `保有: ${state.points}P`;
+
+                // 起動時に位置情報を要求
+                handleLocationPermission();
 
                 // 施設一覧を取得
                 const facilitiesData = await apiCall('/team_northcliff/api/facilities/');
@@ -239,14 +252,8 @@
                 if (isUnlocked) {
                     const statusDisplay = statusMap[facility.latest_status] || '情報なし';
                     cardContent += `<div><span class="text-sm font-medium text-gray-700">現在の状況：</span><span class="text-base font-bold">${statusDisplay}</span></div>`;
-                } else {
-                    cardContent += `
-                        <div class="flex space-x-2">
-                            <button class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" data-action="unlock" data-id="${facility.id}">最新情報を取得 (1P消費)</button>
-                            <button class="flex-none px-3 py-2 font-medium text-white bg-green-600 rounded-md hover:bg-green-700" data-action="post" data-facility-id="${facility.id}">投稿する</button>
-                        </div>
-                    `;
-                }
+                } 
+                // else: ロック中のメッセージなどは特にないので何もしない（ボタンは下に追加）
 
                 facilityCard.innerHTML = cardContent;
                 facilityList.appendChild(facilityCard);
@@ -270,7 +277,17 @@
                     });
                     facilityCard.appendChild(commentsContainer);
                 }
+
+                // --- ボタンは常に表示（最後に追記） ---
+                const btnContainer = document.createElement('div');
+                btnContainer.className = 'flex space-x-2 mt-4';
+                btnContainer.innerHTML = `
+                    <button class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" data-action="unlock" data-id="${facility.id}">最新情報を取得 (1P消費)</button>
+                    <button class="flex-none px-3 py-2 font-medium text-white bg-green-600 rounded-md hover:bg-green-700" data-action="post" data-facility-id="${facility.id}">投稿する</button>
+                `;
+                facilityCard.appendChild(btnContainer);
             });
+
         }
         
         // --- 距離表示だけを更新 ---
@@ -299,25 +316,8 @@
                 document.body.classList.remove('overflow-hidden');
             }
         }
-        
-        // --- 位置情報許可のハンドリング ---
-        function handleLocationPermission() {
-            if (state.isLocationAcquired) return true;
-            const confirmed = confirm("投稿や距離の表示には、現在地情報の利用許可が必要です。（デモのため実際の位置情報は使用されません）\n\n許可しますか？");
-            if (confirmed) {
-                state.isLocationAcquired = true;
-                updateAllDistancesUI();
-                return true;
-            }
-            alert("位置情報を許可しないと、この機能は利用できません。");
-            return false;
-        }
 
         // --- イベントリスナー ---
-        getLocationBtn.addEventListener('click', () => {
-             handleLocationPermission();
-        });
-
         facilityList.addEventListener('click', async (event) => {
             const btn = event.target.closest('button');
             if (!btn) return;

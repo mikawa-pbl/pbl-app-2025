@@ -10,7 +10,13 @@
 <h2>アプリ利用ユーザー</h2>
 <ul>
     {% for user in users %}
-    <li><a href="/team_northcliff/ui/{{ user.name }}/">{{ user.name }}</a></li>
+    <!-- 変更: 各ユーザごとに UI と Map UI の2つのリンクを表示 -->
+    <li>
+        {{ user.name }} —
+        <a href="/team_northcliff/ui/{{ user.name }}/">UI</a>
+        <span style="margin:0 6px;">|</span>
+        <a href="/team_northcliff/map_ui/{{ user.name }}/">Map UI</a>
+    </li>
     {% endfor %}
 </ul>
 </body>

@@ -87,6 +87,7 @@ class SubjectReview(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course_offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, verbose_name="開講情報")
     review = models.TextField(max_length=500, verbose_name="レビュー")
+    rating = models.IntegerField(default=0, verbose_name="おすすめ度（0-5）")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新日時")
 
@@ -105,13 +106,13 @@ class BookReview(models.Model):
     科目ごとにおすすめの参考書をユーザが投稿できる
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    course_offering = models.ForeignKey(CourseOffering, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="開講情報")
-    subject = models.CharField(max_length=50, blank=True, verbose_name="科目名")
-    isbn = models.CharField(max_length=50, verbose_name="ISBN")
+    subject = models.CharField(max_length=200, verbose_name="科目名")
+    isbn = models.CharField(max_length=50, verbose_name="ISBN", blank=True, default='')
     title = models.CharField(max_length=200, verbose_name="書籍タイトル", null=True, blank=True)
     author = models.CharField(max_length=200, verbose_name="著者", null=True, blank=True)
     publication_date = models.CharField(max_length=20, verbose_name="発行日", null=True, blank=True)
-    review = models.TextField(max_length=200, verbose_name="レビュー")
+    review = models.TextField(max_length=500, verbose_name="レビュー")
+    rating = models.IntegerField(default=0, verbose_name="おすすめ度（0-5）")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新日時")
 
@@ -121,6 +122,4 @@ class BookReview(models.Model):
         verbose_name_plural = "参考書レビュー"
 
     def __str__(self):
-        if self.course_offering:
-            return f"{self.course_offering.subject.name} - ISBN:{self.isbn}"
         return f"{self.subject} - ISBN:{self.isbn}"

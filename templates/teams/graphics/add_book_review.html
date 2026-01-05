@@ -197,6 +197,65 @@
             color: #991b1b;
             border-left-color: #ef4444;
         }
+        /* レビュータイプ選択タブ */
+        .review-type-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .tab-button {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--secondary-color);
+            transition: all 0.3s ease;
+            margin-bottom: -2px;
+        }
+        .tab-button:hover {
+            color: var(--primary-color);
+        }
+        .tab-button.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        .review-form-container {
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* スター評価 */
+        .star-rating {
+            display: flex;
+            gap: 5px;
+            font-size: 32px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .star {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #ddd;
+        }
+        .star:hover,
+        .star.active {
+            color: #FFA500;
+        }
+        .star.active {
+            content: '★';
+        }
     </style>
 </head>
 <body>
@@ -223,7 +282,7 @@
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
     <div class="container">
-    <h2>参考書レビュー追加</h2>
+    <h2>レビュー追加</h2>
 
     {% if messages %}
         {% for message in messages %}
@@ -233,35 +292,105 @@
         {% endfor %}
     {% endif %}
 
-    <form method="post">
-        {% csrf_token %}
+    <!-- レビュータイプ選択タブ -->
+    <div class="review-type-tabs">
+        <button type="button" class="tab-button active" onclick="switchTab('subject')">科目レビュー</button>
+        <button type="button" class="tab-button" onclick="switchTab('book')">参考書レビュー</button>
+    </div>
 
-        <div class="form-group">
-            <label for="{{ form.subject.id_for_label }}">{{ form.subject.label }}</label>
-            {{ form.subject }}
-            {% if form.subject.errors %}
-                <div class="error">{{ form.subject.errors }}</div>
-            {% endif %}
-        </div>
+    <!-- 科目レビューフォーム -->
+    <div id="subject-review-form" class="review-form-container">
+        <form method="post" action="{% url 'graphics:add_subject_review' %}">
+            {% csrf_token %}
 
-        <div class="form-group">
-            <label for="{{ form.isbn.id_for_label }}">{{ form.isbn.label }}</label>
-            {{ form.isbn }}
-            {% if form.isbn.errors %}
-                <div class="error">{{ form.isbn.errors }}</div>
-            {% endif %}
-        </div>
+            <div class="form-group">
+                <label for="{{ subject_form.subject_name.id_for_label }}">{{ subject_form.subject_name.label }} *部分一致で入力補完</label>
+                <div class="autocomplete-container">
+                    {{ subject_form.subject_name }}
+                    <div id="subject-subject-suggestions" class="autocomplete-suggestions"></div>
+                </div>
+                {% if subject_form.subject_name.errors %}
+                    <div class="error">{{ subject_form.subject_name.errors }}</div>
+                {% endif %}
+            </div>
 
-        <div class="form-group">
-            <label for="{{ form.review.id_for_label }}">{{ form.review.label }}</label>
-            {{ form.review }}
-            {% if form.review.errors %}
-                <div class="error">{{ form.review.errors }}</div>
-            {% endif %}
-        </div>
+            <div class="form-group">
+                <label for="{{ subject_form.review.id_for_label }}">{{ subject_form.review.label }}</label>
+                {{ subject_form.review }}
+                {% if subject_form.review.errors %}
+                    <div class="error">{{ subject_form.review.errors }}</div>
+                {% endif %}
+            </div>
 
-        <button type="submit">登録</button>
-    </form>
+            <div class="form-group">
+                <label>おすすめ度</label>
+                <div class="star-rating" id="subject-star-rating">
+                    <span class="star" data-value="1">☆</span>
+                    <span class="star" data-value="2">☆</span>
+                    <span class="star" data-value="3">☆</span>
+                    <span class="star" data-value="4">☆</span>
+                    <span class="star" data-value="5">☆</span>
+                </div>
+                {{ subject_form.rating }}
+                {% if subject_form.rating.errors %}
+                    <div class="error">{{ subject_form.rating.errors }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit">科目レビューを登録</button>
+        </form>
+    </div>
+
+    <!-- 参考書レビューフォーム -->
+    <div id="book-review-form" class="review-form-container" style="display: none;">
+        <form method="post" action="{% url 'graphics:add_book_review' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ book_form.subject.id_for_label }}">{{ book_form.subject.label }} *部分一致で入力補完</label>
+                <div class="autocomplete-container">
+                    {{ book_form.subject }}
+                    <div id="book-subject-suggestions" class="autocomplete-suggestions"></div>
+                </div>
+                {% if book_form.subject.errors %}
+                    <div class="error">{{ book_form.subject.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ book_form.isbn.id_for_label }}">{{ book_form.isbn.label }}</label>
+                {{ book_form.isbn }}
+                {% if book_form.isbn.errors %}
+                    <div class="error">{{ book_form.isbn.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ book_form.review.id_for_label }}">{{ book_form.review.label }}</label>
+                {{ book_form.review }}
+                {% if book_form.review.errors %}
+                    <div class="error">{{ book_form.review.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>おすすめ度</label>
+                <div class="star-rating" id="book-star-rating">
+                    <span class="star" data-value="1">☆</span>
+                    <span class="star" data-value="2">☆</span>
+                    <span class="star" data-value="3">☆</span>
+                    <span class="star" data-value="4">☆</span>
+                    <span class="star" data-value="5">☆</span>
+                </div>
+                {{ book_form.rating }}
+                {% if book_form.rating.errors %}
+                    <div class="error">{{ book_form.rating.errors }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit">参考書レビューを登録</button>
+        </form>
+    </div>
 
     <a href="{% url 'graphics:book_reviews' %}" class="back-link">← レビュー一覧に戻る</a>
     <br>
@@ -276,16 +405,218 @@
             overlay.classList.toggle('active');
         }
 
-        // ISBNフィールドからハイフンをリアルタイムで除去
+        // タブ切り替え関数
+        function switchTab(tabType) {
+            // タブボタンのアクティブ状態を切り替え
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // フォームの表示切り替え
+            const subjectForm = document.getElementById('subject-review-form');
+            const bookForm = document.getElementById('book-review-form');
+
+            if (tabType === 'subject') {
+                subjectForm.style.display = 'block';
+                bookForm.style.display = 'none';
+            } else {
+                subjectForm.style.display = 'none';
+                bookForm.style.display = 'block';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            // ISBNフィールドからハイフンをリアルタイムで除去
             const isbnInput = document.getElementById('id_isbn');
             if (isbnInput) {
                 isbnInput.addEventListener('input', function(e) {
-                    // ハイフンのみを除去（他の文字はそのまま残してサーバー側でエラーにする）
                     e.target.value = e.target.value.replace(/-/g, '');
                 });
             }
+
+            // スター評価機能
+            setupStarRating('subject-star-rating', 'subject-rating-value');
+            setupStarRating('book-star-rating', 'book-rating-value');
+
+            // 科目名オートコンプリート
+            setupSubjectReviewAutocomplete();  // 科目レビュー用
+            setupBookReviewAutocomplete();      // 参考書レビュー用
         });
+
+        // スター評価のセットアップ
+        function setupStarRating(ratingContainerId, hiddenInputId) {
+            const container = document.getElementById(ratingContainerId);
+            const hiddenInput = document.getElementById(hiddenInputId);
+
+            if (!container || !hiddenInput) return;
+
+            const stars = container.querySelectorAll('.star');
+
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const value = parseInt(this.getAttribute('data-value'));
+                    hiddenInput.value = value;
+
+                    // すべての星をリセット
+                    stars.forEach(s => {
+                        s.classList.remove('active');
+                        s.textContent = '☆';
+                    });
+
+                    // クリックされた星までをアクティブに
+                    for (let i = 0; i < value; i++) {
+                        stars[i].classList.add('active');
+                        stars[i].textContent = '★';
+                    }
+                });
+
+                // ホバーエフェクト
+                star.addEventListener('mouseenter', function() {
+                    const value = parseInt(this.getAttribute('data-value'));
+                    stars.forEach((s, index) => {
+                        if (index < value) {
+                            s.textContent = '★';
+                        } else {
+                            s.textContent = '☆';
+                        }
+                    });
+                });
+            });
+
+            // マウスが離れたら選択された状態に戻す
+            container.addEventListener('mouseleave', function() {
+                const currentValue = parseInt(hiddenInput.value) || 0;
+                stars.forEach((s, index) => {
+                    if (index < currentValue) {
+                        s.textContent = '★';
+                        s.classList.add('active');
+                    } else {
+                        s.textContent = '☆';
+                        s.classList.remove('active');
+                    }
+                });
+            });
+        }
+
+        // 科目レビューの科目名オートコンプリート
+        function setupSubjectReviewAutocomplete() {
+            const subjectInput = document.getElementById('id_subject_name');
+            const suggestionsDiv = document.getElementById('subject-subject-suggestions');
+
+            if (!subjectInput || !suggestionsDiv) {
+                return;
+            }
+
+            let debounceTimer;
+
+            subjectInput.addEventListener('input', function() {
+                const query = this.value.trim();
+
+                clearTimeout(debounceTimer);
+
+                if (query.length === 0) {
+                    suggestionsDiv.classList.remove('active');
+                    suggestionsDiv.innerHTML = '';
+                    return;
+                }
+
+                debounceTimer = setTimeout(() => {
+                    fetch(`{% url 'graphics:subject_autocomplete' %}?q=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            suggestionsDiv.innerHTML = '';
+
+                            if (data.subjects && data.subjects.length > 0) {
+                                data.subjects.forEach(subject => {
+                                    const item = document.createElement('div');
+                                    item.className = 'autocomplete-item';
+                                    item.textContent = subject;
+                                    item.addEventListener('click', function() {
+                                        subjectInput.value = subject;
+                                        suggestionsDiv.classList.remove('active');
+                                        suggestionsDiv.innerHTML = '';
+                                    });
+                                    suggestionsDiv.appendChild(item);
+                                });
+                                suggestionsDiv.classList.add('active');
+                            } else {
+                                suggestionsDiv.classList.remove('active');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching subject suggestions:', error);
+                        });
+                }, 300);
+            });
+
+            // 入力フィールド外をクリックしたら候補を非表示
+            document.addEventListener('click', function(event) {
+                if (!subjectInput.contains(event.target) && !suggestionsDiv.contains(event.target)) {
+                    suggestionsDiv.classList.remove('active');
+                }
+            });
+        }
+
+        // 参考書レビューの科目名オートコンプリート
+        function setupBookReviewAutocomplete() {
+            const bookSubjectInput = document.getElementById('book-subject-input');
+            const bookSubjectSuggestionsDiv = document.getElementById('book-subject-suggestions');
+
+            if (!bookSubjectInput || !bookSubjectSuggestionsDiv) {
+                console.log('Book autocomplete: Elements not found');
+                return;
+            }
+            console.log('Book autocomplete initialized');
+
+            let bookSubjectDebounceTimer;
+
+            bookSubjectInput.addEventListener('input', function() {
+                const query = this.value.trim();
+
+                clearTimeout(bookSubjectDebounceTimer);
+
+                if (query.length === 0) {
+                    bookSubjectSuggestionsDiv.classList.remove('active');
+                    bookSubjectSuggestionsDiv.innerHTML = '';
+                    return;
+                }
+
+                bookSubjectDebounceTimer = setTimeout(() => {
+                    fetch(`{% url 'graphics:subject_autocomplete' %}?q=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            bookSubjectSuggestionsDiv.innerHTML = '';
+
+                            if (data.subjects && data.subjects.length > 0) {
+                                data.subjects.forEach(subject => {
+                                    const item = document.createElement('div');
+                                    item.className = 'autocomplete-item';
+                                    item.textContent = subject;
+                                    item.addEventListener('click', function() {
+                                        bookSubjectInput.value = subject;
+                                        bookSubjectSuggestionsDiv.classList.remove('active');
+                                        bookSubjectSuggestionsDiv.innerHTML = '';
+                                    });
+                                    bookSubjectSuggestionsDiv.appendChild(item);
+                                });
+                                bookSubjectSuggestionsDiv.classList.add('active');
+                            } else {
+                                bookSubjectSuggestionsDiv.classList.remove('active');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching subject suggestions:', error);
+                        });
+                }, 300);
+            });
+
+            // 入力フィールド外をクリックしたら候補を非表示
+            document.addEventListener('click', function(event) {
+                if (!bookSubjectInput.contains(event.target) && !bookSubjectSuggestionsDiv.contains(event.target)) {
+                    bookSubjectSuggestionsDiv.classList.remove('active');
+                }
+            });
+        }
     </script>
 </body>
 </html>

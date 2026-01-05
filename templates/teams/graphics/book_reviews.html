@@ -245,7 +245,7 @@
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
     <div class="container">
-    <h2>参考書レビュー一覧</h2>
+    <h2>レビュー一覧</h2>
 
     {% if messages %}
         {% for message in messages %}
@@ -261,17 +261,40 @@
     {% if reviews %}
         {% for review in reviews %}
             <div class="review-card">
-                <h3>{{ review.subject }}</h3>
-                <div class="review-meta">
-                    <strong>書籍タイトル:</strong> {{ review.title|default:"None" }}<br>
-                    <strong>著者:</strong> {{ review.author|default:"None" }}<br>
-                    <strong>発行日:</strong> {{ review.publication_date|default:"None" }}<br>
-                    <strong>ISBN:</strong> {{ review.isbn }} |
-                    <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }} (JST)
-                </div>
-                <div class="review-text">
-                    {{ review.review|linebreaks }}
-                </div>
+                {% if review.type == 'book' %}
+                    <!-- 参考書レビュー -->
+                    <h3>📚 {{ review.subject }}</h3>
+                    <div class="review-meta">
+                        <strong>書籍タイトル:</strong> {{ review.title|default:"情報なし" }}<br>
+                        <strong>著者:</strong> {{ review.author|default:"情報なし" }}<br>
+                        <strong>発行日:</strong> {{ review.publication_date|default:"情報なし" }}<br>
+                        <strong>ISBN:</strong> {{ review.isbn|default:"なし" }}<br>
+                        <strong>おすすめ度:</strong>
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                        ({{ review.rating }}/5)<br>
+                        <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }} (JST)
+                    </div>
+                    <div class="review-text">
+                        {{ review.review|linebreaks }}
+                    </div>
+                {% else %}
+                    <!-- 科目レビュー -->
+                    <h3>🎓 {{ review.subject }}</h3>
+                    <div class="review-meta">
+                        <strong>開講情報:</strong> {{ review.course_info }}<br>
+                        <strong>おすすめ度:</strong>
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                        ({{ review.rating }}/5)<br>
+                        <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }} (JST)
+                    </div>
+                    <div class="review-text">
+                        {{ review.review|linebreaks }}
+                    </div>
+                {% endif %}
             </div>
         {% endfor %}
     {% else %}

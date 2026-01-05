@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
-from .models import Member, BookReview, CourseOffering, Teacher
-from .forms import BookReviewForm
+from .models import Member, BookReview, SubjectReview, CourseOffering, Teacher
+from .forms import BookReviewForm, SubjectReviewForm
 from .utils import fetch_book_info_from_openbd   
 
 
@@ -18,38 +18,108 @@ def members(request):
 
 def add_book_review(request):
     """
-    参考書レビュー追加ビュー
+    レビュー追加ビュー（科目レビュー・参考書レビュー）
     """
+    book_form = BookReviewForm()
+    subject_form = SubjectReviewForm()
+
     if request.method == 'POST':
-        form = BookReviewForm(request.POST)
-        if form.is_valid():
+        book_form = BookReviewForm(request.POST)
+        if book_form.is_valid():
             # graphicsデータベースに保存
-            review = form.save(commit=False)
+            review = book_form.save(commit=False)
 
             # ISBNから書籍情報を取得
-            isbn = review.isbn
-            book_info = fetch_book_info_from_openbd(isbn)
+            if review.isbn:
+                isbn = review.isbn
+                book_info = fetch_book_info_from_openbd(isbn)
 
-            if book_info:
-                review.title = book_info.get('title')
-                review.author = book_info.get('author')
-                review.publication_date = book_info.get('publication_date')
+                if book_info:
+                    review.title = book_info.get('title')
+                    review.author = book_info.get('author')
+                    review.publication_date = book_info.get('publication_date')
 
             review.save(using='graphics')
             messages.success(request, '参考書レビューを登録しました。')
             return redirect('graphics:book_reviews')
-    else:
-        form = BookReviewForm()
 
-    return render(request, 'teams/graphics/add_book_review.html', {'form': form})
+    context = {
+        'book_form': book_form,
+        'subject_form': subject_form,
+    }
+    return render(request, 'teams/graphics/add_book_review.html', context)
+
+
+def add_subject_review(request):
+    """
+    科目レビュー追加ビュー
+    """
+    if request.method == 'POST':
+        form = SubjectReviewForm(request.POST)
+        if form.is_valid():
+            subject_name = form.cleaned_data.get('subject_name')
+
+            # 科目名からCourseOfferingを取得（最新のものを優先）
+            course_offering = CourseOffering.objects.using('graphics').filter(
+                subject__name=subject_name
+            ).order_by('-year').first()
+
+            if not course_offering:
+                messages.error(request, f'科目「{subject_name}」が見つかりませんでした。')
+                return redirect('graphics:add_book_review')
+
+            # graphicsデータベースに保存
+            review = form.save(commit=False)
+            review.course_offering = course_offering
+            review.save(using='graphics')
+            messages.success(request, '科目レビューを登録しました。')
+            return redirect('graphics:book_reviews')
+
+    # POSTでない場合やバリデーションエラーの場合は、add_book_reviewにリダイレクト
+    return redirect('graphics:add_book_review')
 
 
 def book_reviews(request):
     """
-    参考書レビュー一覧ビュー
+    レビュー一覧ビュー（参考書レビュー・科目レビュー）
     """
-    reviews = BookReview.objects.using('graphics').all()
-    return render(request, 'teams/graphics/book_reviews.html', {'reviews': reviews})
+    # 参考書レビューと科目レビューを取得
+    book_reviews = BookReview.objects.using('graphics').all()
+    subject_reviews = SubjectReview.objects.using('graphics').all()
+
+    # 両方のレビューをリストにまとめて、作成日時でソート
+    all_reviews = []
+
+    # 参考書レビューをリストに追加（subjectが空でないもののみ）
+    for review in book_reviews:
+        if review.subject:  # subjectが空でない場合のみ追加
+            all_reviews.append({
+                'type': 'book',
+                'subject': review.subject,
+                'isbn': review.isbn,
+                'title': review.title,
+                'author': review.author,
+                'publication_date': review.publication_date,
+                'review': review.review,
+                'rating': review.rating,
+                'created_at': review.created_at,
+            })
+
+    # 科目レビューをリストに追加
+    for review in subject_reviews:
+        all_reviews.append({
+            'type': 'subject',
+            'subject': review.course_offering.subject.name,
+            'course_info': f"{review.course_offering.year}年度 {review.course_offering.semester} {review.course_offering.grade}",
+            'review': review.review,
+            'rating': review.rating,
+            'created_at': review.created_at,
+        })
+
+    # 作成日時でソート（新しい順）
+    all_reviews.sort(key=lambda x: x['created_at'], reverse=True)
+
+    return render(request, 'teams/graphics/book_reviews.html', {'reviews': all_reviews})
 
 
 def search_courses(request):

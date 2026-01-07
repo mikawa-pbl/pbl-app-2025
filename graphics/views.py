@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
-from .models import Member, BookReview, SubjectReview, CourseOffering, Teacher, GraphicsUser
+from .models import Member, BookReview, SubjectReview, CourseOffering, Teacher, GraphicsUser, Book
 from .forms import BookReviewForm, SubjectReviewForm, SignupForm, LoginForm, PasswordResetRequestForm, PasswordResetForm
 from .utils import (
     fetch_book_info_from_openbd,
@@ -63,15 +63,31 @@ def add_book_review(request):
             if user_id:
                 review.user_id = user_id
 
-            # ISBNから書籍情報を取得
+            # ISBNから書籍情報を取得または作成
             if review.isbn:
                 isbn = review.isbn
-                book_info = fetch_book_info_from_openbd(isbn)
 
-                if book_info:
-                    review.title = book_info.get('title')
-                    review.author = book_info.get('author')
-                    review.publication_date = book_info.get('publication_date')
+                # 既存の書籍レコードを検索
+                try:
+                    book = Book.objects.using('graphics').get(isbn=isbn)
+                except Book.DoesNotExist:
+                    # 書籍が存在しない場合、APIから情報を取得して作成
+                    book_info = fetch_book_info_from_openbd(isbn)
+
+                    if book_info:
+                        book = Book.objects.using('graphics').create(
+                            isbn=isbn,
+                            title=book_info.get('title'),
+                            author=book_info.get('author'),
+                            publication_date=book_info.get('publication_date'),
+                            cover_image_url=book_info.get('cover_image_url')
+                        )
+                    else:
+                        # API情報がない場合は空の書籍レコードを作成
+                        book = Book.objects.using('graphics').create(isbn=isbn)
+
+                # レビューに書籍を関連付け
+                review.book = book
 
             review.save(using='graphics')
             messages.success(request, '参考書レビューを登録しました。')
@@ -282,6 +298,37 @@ def subject_autocomplete(request):
         subjects = Subject.objects.using('graphics').filter(name__icontains=query).values_list('name', flat=True)[:10]
         return JsonResponse({'subjects': list(subjects)})
     return JsonResponse({'subjects': []})
+
+
+def isbn_lookup(request):
+    """
+    ISBN検索API
+    ISBNコードから書籍情報を取得
+    """
+    isbn = request.GET.get('isbn', '')
+    if not isbn:
+        return JsonResponse({'success': False, 'error': 'ISBNを入力してください'})
+
+    # ハイフンを除去
+    isbn = isbn.replace('-', '')
+
+    # ISBNのバリデーション
+    if len(isbn) != 13 or not isbn.isdigit():
+        return JsonResponse({'success': False, 'error': 'ISBNコードは13桁の数字で入力してください'})
+
+    # OpenBD APIから情報を取得
+    book_info = fetch_book_info_from_openbd(isbn)
+
+    if book_info:
+        return JsonResponse({
+            'success': True,
+            'title': book_info.get('title'),
+            'author': book_info.get('author'),
+            'publication_date': book_info.get('publication_date'),
+            'cover_image_url': book_info.get('cover_image_url')
+        })
+    else:
+        return JsonResponse({'success': False, 'error': '書籍情報が見つかりませんでした'})
 
 
 def signup(request):

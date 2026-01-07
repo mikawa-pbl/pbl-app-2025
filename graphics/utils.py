@@ -55,15 +55,58 @@ def format_publication_date(pubdate_raw):
     return None
 
 
-def fetch_book_info_from_openbd(isbn):
+def fetch_cover_image_from_google_books(isbn):
     """
-    Fetch book information from OpenBD API
+    Fetch book cover image from Google Books API
 
     Args:
         isbn (str): ISBN code
 
     Returns:
-        dict: Book information (title, author, publication_date) or None
+        str: Cover image URL or None
+    """
+    url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
+
+    try:
+        with urllib.request.urlopen(url, timeout=10) as response:
+            data = json.loads(response.read().decode('utf-8'))
+
+            if data.get('totalItems', 0) > 0 and 'items' in data:
+                volume_info = data['items'][0].get('volumeInfo', {})
+                image_links = volume_info.get('imageLinks', {})
+
+                # Try to get the highest quality image available
+                cover_url = (
+                    image_links.get('extraLarge') or
+                    image_links.get('large') or
+                    image_links.get('medium') or
+                    image_links.get('small') or
+                    image_links.get('thumbnail') or
+                    image_links.get('smallThumbnail')
+                )
+
+                # Convert to HTTPS if available
+                if cover_url and cover_url.startswith('http:'):
+                    cover_url = cover_url.replace('http:', 'https:')
+
+                return cover_url
+
+    except Exception as e:
+        print(f"Google Books API Error: {e}")
+        return None
+
+    return None
+
+
+def fetch_book_info_from_openbd(isbn):
+    """
+    Fetch book information from OpenBD API and Google Books API
+
+    Args:
+        isbn (str): ISBN code
+
+    Returns:
+        dict: Book information (title, author, publication_date, cover_image_url) or None
     """
     url = f"https://api.openbd.jp/v1/get?isbn={isbn}"
 
@@ -91,10 +134,20 @@ def fetch_book_info_from_openbd(isbn):
                     pubdate_raw = book_data['summary']['pubdate']
                     publication_date = format_publication_date(pubdate_raw)
 
+                # Get cover image URL from OpenBD
+                cover_image_url = None
+                if 'summary' in book_data and 'cover' in book_data['summary']:
+                    cover_image_url = book_data['summary']['cover']
+
+                # If OpenBD doesn't have cover image, try Google Books API
+                if not cover_image_url or cover_image_url.strip() == '':
+                    cover_image_url = fetch_cover_image_from_google_books(isbn)
+
                 return {
                     'title': title,
                     'author': author,
-                    'publication_date': publication_date
+                    'publication_date': publication_date,
+                    'cover_image_url': cover_image_url
                 }
             else:
                 return None
@@ -155,13 +208,29 @@ def format_review_data(review, review_type='book'):
         dict: Formatted review data
     """
     if review_type == 'book':
+        # Bookモデルから情報を取得（存在しない場合は旧フィールドを使用）
+        if review.book:
+            isbn = review.book.isbn
+            title = review.book.title
+            author = review.book.author
+            publication_date = review.book.publication_date
+            cover_image_url = review.book.cover_image_url
+        else:
+            # 旧データ用のフォールバック
+            isbn = review.isbn
+            title = review.title
+            author = review.author
+            publication_date = review.publication_date
+            cover_image_url = review.cover_image_url
+
         return {
             'type': 'book',
             'subject': review.subject,
-            'isbn': review.isbn,
-            'title': review.title,
-            'author': review.author,
-            'publication_date': review.publication_date,
+            'isbn': isbn,
+            'title': title,
+            'author': author,
+            'publication_date': publication_date,
+            'cover_image_url': cover_image_url,
             'review': review.review,
             'rating': review.rating,
             'created_at': review.created_at,

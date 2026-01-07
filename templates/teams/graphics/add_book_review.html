@@ -381,6 +381,23 @@
                 {% endif %}
             </div>
 
+            <!-- 書籍情報表示エリア -->
+            <div id="book-info-display" style="display: none; margin-bottom: 25px; padding: 20px; background-color: #f0f9ff; border: 2px solid #0ea5e9; border-radius: 8px;">
+                <h3 style="margin-top: 0; color: #0369a1; font-size: 18px; margin-bottom: 15px;">書籍情報</h3>
+                <div style="display: flex; gap: 20px;">
+                    <div id="book-cover-container" style="flex-shrink: 0;">
+                        <img id="book-cover-image" src="" alt="書籍の表紙" style="max-width: 150px; max-height: 200px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <p style="margin: 8px 0;"><strong>タイトル:</strong> <span id="book-title"></span></p>
+                        <p style="margin: 8px 0;"><strong>著者:</strong> <span id="book-author"></span></p>
+                        <p style="margin: 8px 0;"><strong>発行日:</strong> <span id="book-publication-date"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div id="book-info-error" style="display: none; margin-bottom: 25px; padding: 15px; background-color: #fef2f2; color: #991b1b; border-left: 4px solid #ef4444; border-radius: 8px;"></div>
+            <div id="book-info-loading" style="display: none; margin-bottom: 25px; padding: 15px; background-color: #f0f9ff; color: #0369a1; border-left: 4px solid #0ea5e9; border-radius: 8px;">書籍情報を取得中...</div>
+
             <div class="form-group">
                 <label for="{{ book_form.review.id_for_label }}">{{ book_form.review.label }}</label>
                 {{ book_form.review }}
@@ -442,11 +459,31 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // ISBNフィールドからハイフンをリアルタイムで除去
+            // ISBNフィールドからハイフンをリアルタイムで除去し、書籍情報を取得
             const isbnInput = document.getElementById('id_isbn');
             if (isbnInput) {
+                let isbnDebounceTimer;
+
                 isbnInput.addEventListener('input', function(e) {
+                    // ハイフンを除去
                     e.target.value = e.target.value.replace(/-/g, '');
+
+                    const isbn = e.target.value.trim();
+
+                    // デバウンス処理
+                    clearTimeout(isbnDebounceTimer);
+
+                    // 表示をリセット
+                    hideBookInfo();
+
+                    // ISBNが13桁の場合のみ検索
+                    if (isbn.length === 13 && /^\d+$/.test(isbn)) {
+                        showBookInfoLoading();
+
+                        isbnDebounceTimer = setTimeout(() => {
+                            fetchBookInfo(isbn);
+                        }, 500);
+                    }
                 });
             }
 
@@ -458,6 +495,73 @@
             setupSubjectReviewAutocomplete();  // 科目レビュー用
             setupBookReviewAutocomplete();      // 参考書レビュー用
         });
+
+        // 書籍情報を取得する関数
+        function fetchBookInfo(isbn) {
+            fetch(`{% url 'graphics:isbn_lookup' %}?isbn=${encodeURIComponent(isbn)}`)
+                .then(response => response.json())
+                .then(data => {
+                    hideBookInfoLoading();
+
+                    if (data.success) {
+                        displayBookInfo(data);
+                    } else {
+                        showBookInfoError(data.error || '書籍情報が見つかりませんでした');
+                    }
+                })
+                .catch(error => {
+                    hideBookInfoLoading();
+                    showBookInfoError('書籍情報の取得中にエラーが発生しました');
+                    console.error('Error fetching book info:', error);
+                });
+        }
+
+        // 書籍情報を表示する関数
+        function displayBookInfo(data) {
+            const displayDiv = document.getElementById('book-info-display');
+            const coverImage = document.getElementById('book-cover-image');
+            const coverContainer = document.getElementById('book-cover-container');
+            const titleSpan = document.getElementById('book-title');
+            const authorSpan = document.getElementById('book-author');
+            const publicationDateSpan = document.getElementById('book-publication-date');
+
+            titleSpan.textContent = data.title || '情報なし';
+            authorSpan.textContent = data.author || '情報なし';
+            publicationDateSpan.textContent = data.publication_date || '情報なし';
+
+            if (data.cover_image_url) {
+                coverImage.src = data.cover_image_url;
+                coverContainer.style.display = 'block';
+            } else {
+                coverContainer.style.display = 'none';
+            }
+
+            displayDiv.style.display = 'block';
+        }
+
+        // エラーメッセージを表示
+        function showBookInfoError(message) {
+            const errorDiv = document.getElementById('book-info-error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // ローディング表示
+        function showBookInfoLoading() {
+            document.getElementById('book-info-loading').style.display = 'block';
+        }
+
+        // ローディング非表示
+        function hideBookInfoLoading() {
+            document.getElementById('book-info-loading').style.display = 'none';
+        }
+
+        // 書籍情報を非表示
+        function hideBookInfo() {
+            document.getElementById('book-info-display').style.display = 'none';
+            document.getElementById('book-info-error').style.display = 'none';
+            document.getElementById('book-info-loading').style.display = 'none';
+        }
 
         // スター評価のセットアップ
         function setupStarRating(ratingContainerId, hiddenInputId) {

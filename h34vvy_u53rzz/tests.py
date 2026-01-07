@@ -1,8 +1,5 @@
-import json
 from django.test import TestCase
-from django.urls import reverse
 
-from .models import User, Facility, FacilityAccess
 
 
 class FailTest(TestCase):

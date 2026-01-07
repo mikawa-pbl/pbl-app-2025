@@ -11,6 +11,7 @@ urlpatterns = [
     path('search/', views.search_courses, name='search_courses'),
     path('api/teacher-autocomplete/', views.teacher_autocomplete, name='teacher_autocomplete'),
     path('api/subject-autocomplete/', views.subject_autocomplete, name='subject_autocomplete'),
+    path('api/isbn-lookup/', views.isbn_lookup, name='isbn_lookup'),
     path('signup/', views.signup, name='signup'),
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout'),

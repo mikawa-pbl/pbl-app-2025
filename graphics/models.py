@@ -136,6 +136,27 @@ class SubjectReview(models.Model):
         return f"{self.course_offering} - {self.review[:50]}"
 
 
+class Book(models.Model):
+    """
+    書籍マスタ
+    書籍情報を一元管理
+    """
+    isbn = models.CharField(max_length=50, unique=True, primary_key=True, verbose_name="ISBN")
+    title = models.CharField(max_length=200, verbose_name="書籍タイトル", null=True, blank=True)
+    author = models.CharField(max_length=200, verbose_name="著者", null=True, blank=True)
+    publication_date = models.CharField(max_length=20, verbose_name="発行日", null=True, blank=True)
+    cover_image_url = models.URLField(max_length=500, verbose_name="表紙画像URL", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="更新日時")
+
+    class Meta:
+        verbose_name = "書籍"
+        verbose_name_plural = "書籍"
+
+    def __str__(self):
+        return f"{self.title or 'タイトル不明'} (ISBN: {self.isbn})"
+
+
 class BookReview(models.Model):
     """
     参考書レビューモデル
@@ -144,10 +165,13 @@ class BookReview(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey('GraphicsUser', on_delete=models.CASCADE, verbose_name="投稿者", null=True, blank=True)
     subject = models.CharField(max_length=200, verbose_name="科目名")
+    book = models.ForeignKey('Book', on_delete=models.CASCADE, verbose_name="書籍", null=True, blank=True)
+    # 後方互換性のため一時的に残す（マイグレーション後に削除）
     isbn = models.CharField(max_length=50, verbose_name="ISBN", blank=True, default='')
     title = models.CharField(max_length=200, verbose_name="書籍タイトル", null=True, blank=True)
     author = models.CharField(max_length=200, verbose_name="著者", null=True, blank=True)
     publication_date = models.CharField(max_length=20, verbose_name="発行日", null=True, blank=True)
+    cover_image_url = models.URLField(max_length=500, verbose_name="表紙画像URL", null=True, blank=True)
     review = models.TextField(max_length=500, verbose_name="レビュー")
     rating = models.IntegerField(default=0, verbose_name="おすすめ度（0-5）")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
@@ -159,4 +183,6 @@ class BookReview(models.Model):
         verbose_name_plural = "参考書レビュー"
 
     def __str__(self):
+        if self.book:
+            return f"{self.subject} - {self.book.title}"
         return f"{self.subject} - ISBN:{self.isbn}"

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>参考書レビュー一覧</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: #f8fafc; }
+        header { background: #2563eb; color: white; padding: 20px; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .book-card { background: white; padding: 25px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; gap: 20px; text-decoration: none; color: inherit; transition: transform 0.2s; }
+        .book-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .book-cover img { max-width: 120px; max-height: 160px; border-radius: 4px; }
+        .book-info h3 { color: #0f172a; margin-bottom: 10px; }
+        .book-meta { color: #64748b; margin: 5px 0; }
+        .back-link { display: inline-block; color: #2563eb; text-decoration: none; margin-top: 20px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header><h1>参考書レビュー一覧</h1></header>
+    <div class="container">
+        <h2>書籍ごとのレビュー</h2>
+        {% for item in books %}
+        <a href="{% url 'graphics:book_detail' item.book.isbn %}" class="book-card">
+            {% if item.book.cover_image_url %}
+            <div class="book-cover">
+                <img src="{{ item.book.cover_image_url }}" alt="{{ item.book.title }}">
+            </div>
+            {% endif %}
+            <div class="book-info">
+                <h3>{{ item.book.title|default:"タイトル不明" }}</h3>
+                <div class="book-meta">著者: {{ item.book.author|default:"不明" }}</div>
+                <div class="book-meta">ISBN: {{ item.book.isbn }}</div>
+                <div class="book-meta">レビュー数: {{ item.review_count }}件</div>
+            </div>
+        </a>
+        {% empty %}
+        <p style="text-align: center; color: #94a3b8; padding: 40px;">レビューがありません</p>
+        {% endfor %}
+        <a href="{% url 'graphics:index' %}" class="back-link">← トップページに戻る</a>
+    </div>
+</body>
+</html>

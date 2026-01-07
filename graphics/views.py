@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Member, BookReview, SubjectReview, CourseOffering, Teacher, GraphicsUser, Book
 from .forms import BookReviewForm, SubjectReviewForm, SignupForm, LoginForm, PasswordResetRequestForm, PasswordResetForm
 from .utils import (
@@ -27,7 +28,14 @@ def login_required(view_func):
 
 
 def index(request):
-    return render(request, 'teams/graphics/index.html')
+    # 最近の5件の科目レビューを取得
+    recent_subject_reviews = SubjectReview.objects.using('graphics').all().order_by('-created_at')[:5]
+
+    context = {
+        'recent_subject_reviews': recent_subject_reviews,
+    }
+
+    return render(request, 'teams/graphics/index.html', context)
 
 
 def members(request):
@@ -258,6 +266,21 @@ def search_courses(request):
 
         total_count = courses.count()
 
+        # ページネーション (1ページあたり10件)
+        paginator = Paginator(courses, 10)
+        page = request.GET.get('page', 1)
+
+        try:
+            courses = paginator.page(page)
+        except PageNotAnInteger:
+            # ページ番号が整数でない場合、最初のページを表示
+            courses = paginator.page(1)
+        except EmptyPage:
+            # ページ番号が範囲外の場合、最後のページを表示
+            courses = paginator.page(paginator.num_pages)
+    else:
+        total_count = 0
+
     context = {
         'courses': courses,
         'total_count': total_count,
@@ -387,6 +410,127 @@ def logout(request):
     request.session.pop('graphics_user_nickname', None)
     messages.success(request, 'ログアウトしました。')
     return redirect('graphics:index')
+
+
+def course_detail(request, course_id):
+    """
+    科目詳細ページ
+    科目情報と関連するレビュー（科目レビュー・参考書レビュー）を表示
+    """
+    try:
+        course = CourseOffering.objects.using('graphics').get(id=course_id)
+    except CourseOffering.DoesNotExist:
+        messages.error(request, '科目が見つかりませんでした。')
+        return redirect('graphics:search_courses')
+
+    # この科目に関連する科目レビューを取得
+    subject_reviews = SubjectReview.objects.using('graphics').filter(
+        course_offering=course
+    ).order_by('-created_at')
+
+    # この科目に関連する参考書レビューを取得
+    book_reviews = BookReview.objects.using('graphics').filter(
+        subject=course.subject.name
+    ).order_by('-created_at')
+
+    # 書籍ごとにグループ化
+    books_dict = {}
+    for review in book_reviews:
+        if review.book:
+            isbn = review.book.isbn
+            if isbn not in books_dict:
+                books_dict[isbn] = {
+                    'book': review.book,
+                    'review_count': 0,
+                    'avg_rating': 0,
+                    'total_rating': 0,
+                }
+            books_dict[isbn]['review_count'] += 1
+            books_dict[isbn]['total_rating'] += review.rating
+
+    # 平均評価を計算
+    books_with_reviews = []
+    for isbn, data in books_dict.items():
+        data['avg_rating'] = data['total_rating'] / data['review_count'] if data['review_count'] > 0 else 0
+        books_with_reviews.append(data)
+
+    # 担当教員のリストを取得
+    teachers = course.teachers.all()
+    teacher_names = ', '.join([teacher.name for teacher in teachers])
+
+    # 学科のリストを取得
+    departments = course.departments.all()
+    department_names = ', '.join([dept.name for dept in departments])
+
+    context = {
+        'course': course,
+        'teacher_names': teacher_names,
+        'department_names': department_names,
+        'subject_reviews': subject_reviews,
+        'books_with_reviews': books_with_reviews,
+    }
+
+    return render(request, 'teams/graphics/course_detail.html', context)
+
+
+def subject_review_list(request):
+    """
+    科目レビュー一覧ページ
+    """
+    reviews = SubjectReview.objects.using('graphics').all().order_by('-created_at')
+
+    context = {
+        'reviews': reviews,
+    }
+
+    return render(request, 'teams/graphics/subject_review_list.html', context)
+
+
+def book_review_list(request):
+    """
+    参考書レビュー一覧ページ
+    書籍ごとにグループ化して表示
+    """
+    # 全ての書籍を取得
+    books = Book.objects.using('graphics').all().order_by('-created_at')
+
+    # 各書籍のレビュー数を追加
+    books_with_count = []
+    for book in books:
+        review_count = BookReview.objects.using('graphics').filter(book=book).count()
+        if review_count > 0:  # レビューがある書籍のみ
+            books_with_count.append({
+                'book': book,
+                'review_count': review_count,
+            })
+
+    context = {
+        'books': books_with_count,
+    }
+
+    return render(request, 'teams/graphics/book_review_list.html', context)
+
+
+def book_detail(request, isbn):
+    """
+    書籍詳細ページ
+    特定の書籍に対する全レビューを表示
+    """
+    try:
+        book = Book.objects.using('graphics').get(isbn=isbn)
+    except Book.DoesNotExist:
+        messages.error(request, '書籍が見つかりませんでした。')
+        return redirect('graphics:book_review_list')
+
+    # この書籍に対するレビューを取得
+    reviews = BookReview.objects.using('graphics').filter(book=book).order_by('-created_at')
+
+    context = {
+        'book': book,
+        'reviews': reviews,
+    }
+
+    return render(request, 'teams/graphics/book_detail.html', context)
 
 
 @login_required

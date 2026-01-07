@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ book.title }} - 書籍詳細</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: #f8fafc; }
+        header { background: #2563eb; color: white; padding: 20px; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .book-header { background: white; padding: 30px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; gap: 30px; }
+        .book-cover img { max-width: 200px; max-height: 280px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .book-info h2 { color: #0f172a; margin-bottom: 15px; }
+        .book-meta { color: #64748b; margin: 8px 0; }
+        .section { background: white; padding: 25px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .section h3 { color: #0f172a; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; }
+        .review-card { background: #f8fafc; padding: 20px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #10b981; }
+        .rating { color: #FFA500; font-size: 18px; margin: 10px 0; }
+        .date { color: #94a3b8; font-size: 14px; }
+        .back-link { display: inline-block; color: #2563eb; text-decoration: none; margin-top: 20px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header><h1>書籍詳細</h1></header>
+    <div class="container">
+        <div class="book-header">
+            {% if book.cover_image_url %}
+            <div class="book-cover">
+                <img src="{{ book.cover_image_url }}" alt="{{ book.title }}">
+            </div>
+            {% endif %}
+            <div class="book-info">
+                <h2>{{ book.title|default:"タイトル不明" }}</h2>
+                <div class="book-meta"><strong>著者:</strong> {{ book.author|default:"不明" }}</div>
+                <div class="book-meta"><strong>発行日:</strong> {{ book.publication_date|default:"不明" }}</div>
+                <div class="book-meta"><strong>ISBN:</strong> {{ book.isbn }}</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>📝 レビュー ({{ reviews.count }}件)</h3>
+            {% for review in reviews %}
+            <div class="review-card">
+                <p style="color: #64748b; margin-bottom: 10px;"><strong>科目:</strong> {{ review.subject }}</p>
+                <div class="rating">
+                    {% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}
+                    ({{ review.rating }}/5)
+                </div>
+                <p>{{ review.review }}</p>
+                <div class="date">投稿日: {{ review.created_at|date:"Y年m月d日" }}</div>
+            </div>
+            {% empty %}
+            <p style="text-align: center; color: #94a3b8; padding: 40px;">まだレビューがありません</p>
+            {% endfor %}
+        </div>
+
+        <a href="{% url 'graphics:book_review_list' %}" class="back-link">← 参考書一覧に戻る</a>
+    </div>
+</body>
+</html>

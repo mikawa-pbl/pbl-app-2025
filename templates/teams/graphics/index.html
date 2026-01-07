@@ -367,9 +367,14 @@
             {% if request.session.graphics_user_id %}
                 <li><a href="{% url 'graphics:my_reviews' %}" onclick="toggleMenu()">マイレビュー</a></li>
                 <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
+                <li><a href="{% url 'graphics:subject_review_list' %}" onclick="toggleMenu()">科目レビュー一覧</a></li>
+                <li><a href="{% url 'graphics:book_review_list' %}" onclick="toggleMenu()">参考書レビュー一覧</a></li>
                 <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
                 <li><a href="{% url 'graphics:logout' %}" onclick="toggleMenu()">ログアウト</a></li>
             {% else %}
+                <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
+                <li><a href="{% url 'graphics:subject_review_list' %}" onclick="toggleMenu()">科目レビュー一覧</a></li>
+                <li><a href="{% url 'graphics:book_review_list' %}" onclick="toggleMenu()">参考書レビュー一覧</a></li>
                 <li><a href="{% url 'graphics:login' %}" onclick="toggleMenu()">ログイン</a></li>
                 <li><a href="{% url 'graphics:signup' %}" onclick="toggleMenu()">サインアップ</a></li>
             {% endif %}
@@ -424,6 +429,28 @@
                 </a>
             {% endif %}
         </div>
+
+        <!-- 最近のレビュー -->
+        {% if recent_subject_reviews %}
+        <section class="recent-reviews" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin: 40px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="color: #0f172a; font-size: 24px; margin: 0;">📋 最近の科目レビュー</h3>
+                <a href="{% url 'graphics:subject_review_list' %}" style="color: #2563eb; text-decoration: none; font-weight: 600; font-size: 14px;">すべて見る →</a>
+            </div>
+            {% for review in recent_subject_reviews %}
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #2563eb;">
+                <h4 style="color: #0f172a; margin-bottom: 10px;">{{ review.course_offering.subject.name }}</h4>
+                <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">{{ review.course_offering.year }}年度 {{ review.course_offering.semester }}</p>
+                <div style="color: #FFA500; font-size: 16px; margin: 8px 0;">
+                    {% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}
+                    ({{ review.rating }}/5)
+                </div>
+                <p style="color: #334155; line-height: 1.6;">{{ review.review|truncatewords:30 }}</p>
+                <p style="color: #94a3b8; font-size: 13px; margin-top: 10px;">{{ review.created_at|date:"Y年m月d日" }}</p>
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
 
         <section class="description">
             <div class="description-intro">

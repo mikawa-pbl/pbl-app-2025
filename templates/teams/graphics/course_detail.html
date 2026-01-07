@@ -1,0 +1,101 @@
+{% load tz %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.subject.name }} - 科目詳細</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; line-height: 1.6; }
+        header { background: #2563eb; color: white; padding: 20px 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        header h1 { font-size: 24px; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .course-header { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .course-header h2 { color: #0f172a; margin-bottom: 15px; }
+        .course-meta { color: #64748b; margin: 5px 0; }
+        .section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .section h3 { color: #0f172a; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; }
+        .review-card { background: #f8fafc; padding: 20px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #2563eb; }
+        .review-card .rating { color: #FFA500; font-size: 18px; margin: 10px 0; }
+        .review-card .date { color: #94a3b8; font-size: 14px; }
+        .book-review-card { display: flex; gap: 20px; background: #f8fafc; padding: 20px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #10b981; }
+        .book-cover { flex-shrink: 0; }
+        .book-cover img { max-width: 100px; max-height: 140px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .back-link { display: inline-block; color: #2563eb; text-decoration: none; margin-top: 20px; font-weight: 600; }
+        .back-link:hover { color: #1d4ed8; }
+        .no-reviews { color: #94a3b8; text-align: center; padding: 40px; }
+        .review-btn { display: inline-block; background: #2563eb; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-top: 10px; font-weight: 600; transition: all 0.2s; }
+        .review-btn:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3); }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>TUT 参考書レビューシステム</h1>
+    </header>
+
+    <div class="container">
+        <div class="course-header">
+            <h2>{{ course.subject.name }}</h2>
+            <div class="course-meta"><strong>年度:</strong> {{ course.year }}年度</div>
+            <div class="course-meta"><strong>開講学期:</strong> {{ course.semester }}</div>
+            <div class="course-meta"><strong>対象年次:</strong> {{ course.grade }}</div>
+            <div class="course-meta"><strong>担当教員:</strong> {{ teacher_names }}</div>
+            <div class="course-meta"><strong>開講学科:</strong> {{ department_names }}</div>
+            <div class="course-meta"><strong>必修:</strong> {% if course.is_required %}必修{% else %}選択{% endif %}</div>
+        </div>
+
+        <div class="section">
+            <h3>🎓 科目レビュー ({{ subject_reviews.count }}件)</h3>
+            {% if subject_reviews %}
+                {% for review in subject_reviews %}
+                <div class="review-card">
+                    <div class="rating">
+                        {% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}
+                        ({{ review.rating }}/5)
+                    </div>
+                    <p>{{ review.review }}</p>
+                    <div class="date">投稿日: {{ review.created_at|date:"Y年m月d日" }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-reviews">まだレビューがありません</div>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h3>📚 この科目の参考書 ({{ books_with_reviews|length }}冊)</h3>
+            {% if books_with_reviews %}
+                {% for item in books_with_reviews %}
+                <div class="book-review-card">
+                    {% if item.book.cover_image_url %}
+                    <div class="book-cover">
+                        <img src="{{ item.book.cover_image_url }}" alt="{{ item.book.title }}">
+                    </div>
+                    {% endif %}
+                    <div style="flex-grow: 1;">
+                        <h4>{{ item.book.title|default:"タイトル不明" }}</h4>
+                        <p style="color: #64748b; margin: 5px 0;">著者: {{ item.book.author|default:"不明" }}</p>
+                        <div class="rating">
+                            平均評価:
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= item.avg_rating|floatformat:"0" %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                            ({{ item.avg_rating|floatformat:"1" }}/5)
+                        </div>
+                        <p style="color: #64748b; margin: 10px 0;">レビュー数: {{ item.review_count }}件</p>
+                        <a href="{% url 'graphics:book_detail' item.book.isbn %}" style="display: inline-block; background: #2563eb; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-top: 10px; font-weight: 600; transition: background 0.2s;">
+                            📝 レビューを見る
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-reviews">まだ参考書レビューがありません</div>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'graphics:search_courses' %}" class="back-link">← 検索結果に戻る</a>
+    </div>
+</body>
+</html>

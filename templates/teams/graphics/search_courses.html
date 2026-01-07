@@ -348,6 +348,7 @@
 
         .course-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
         }
 
         .course-header {
@@ -471,6 +472,48 @@
 
         .autocomplete-item:hover {
             background: #f5f5f5;
+        }
+
+        /* ページネーション */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 40px;
+            padding: 20px 0;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            transition: all 0.2s;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .pagination a:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination .current {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .pagination .disabled {
+            opacity: 0.4;
+            pointer-events: none;
         }
 
         @media (max-width: 1024px) {
@@ -619,7 +662,7 @@
                 {% if courses %}
                     <div class="course-grid">
                         {% for course in courses %}
-                            <div class="course-card">
+                            <a href="{% url 'graphics:course_detail' course.id %}" class="course-card" style="text-decoration: none; color: inherit; display: block; transition: transform 0.2s;">
                                 <div class="course-header">
                                     <span class="course-grade">{{ course.grade }}</span>
                                     <span class="course-semester">{{ course.semester }}</span>
@@ -635,9 +678,38 @@
                                         {% endfor %}
                                     {% endif %}
                                 </div>
-                            </div>
+                            </a>
                         {% endfor %}
                     </div>
+
+                    <!-- ページネーション -->
+                    {% if courses.has_other_pages %}
+                    <div class="pagination">
+                        {% if courses.has_previous %}
+                            <a href="?{% for key, value in search_params.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">&laquo; 最初</a>
+                            <a href="?{% for key, value in search_params.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ courses.previous_page_number }}">&lsaquo; 前へ</a>
+                        {% else %}
+                            <span class="disabled">&laquo; 最初</span>
+                            <span class="disabled">&lsaquo; 前へ</span>
+                        {% endif %}
+
+                        {% for num in courses.paginator.page_range %}
+                            {% if courses.number == num %}
+                                <span class="current">{{ num }}</span>
+                            {% elif num > courses.number|add:'-3' and num < courses.number|add:'3' %}
+                                <a href="?{% for key, value in search_params.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if courses.has_next %}
+                            <a href="?{% for key, value in search_params.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ courses.next_page_number }}">次へ &rsaquo;</a>
+                            <a href="?{% for key, value in search_params.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ courses.paginator.num_pages }}">最後 &raquo;</a>
+                        {% else %}
+                            <span class="disabled">次へ &rsaquo;</span>
+                            <span class="disabled">最後 &raquo;</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 {% else %}
                     <div class="no-results">
                         <div class="no-results-icon">🔍</div>

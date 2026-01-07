@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>参考書レビュー一覧 - TUT 参考書レビューシステム</title>
+    <title>マイレビュー - TUT 参考書レビューシステム</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -126,25 +126,18 @@
             font-size: 32px;
             font-weight: 700;
         }
-        .add-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
-            color: white;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 8px;
+        .user-info {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+            padding: 20px;
+            border-radius: 12px;
             margin-bottom: 30px;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            border: 2px solid rgba(37, 99, 235, 0.2);
         }
-        .add-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
-            background: linear-gradient(135deg, var(--primary-hover) 0%, #1540c0 100%);
+        .user-info p {
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
         }
         .review-card {
             background: white;
@@ -219,6 +212,24 @@
             color: #065f46;
             border-left-color: #10b981;
         }
+        .review-count {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .review-count p {
+            color: #334155;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+        .review-count span {
+            color: var(--primary-color);
+            font-size: 24px;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -236,8 +247,10 @@
     <nav class="nav-menu" id="navMenu">
         <ul>
             <li><a href="{% url 'graphics:index' %}" onclick="toggleMenu()">ホーム</a></li>
+            <li><a href="{% url 'graphics:my_reviews' %}" onclick="toggleMenu()">マイレビュー</a></li>
             <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
             <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
+            <li><a href="{% url 'graphics:logout' %}" onclick="toggleMenu()">ログアウト</a></li>
         </ul>
     </nav>
 
@@ -245,68 +258,76 @@
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
     <div class="container">
-    <h2>レビュー一覧</h2>
+        <h2>マイレビュー</h2>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="messages {{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-
-    <a href="{% url 'graphics:add_book_review' %}" class="add-button">+ 新しいレビューを追加</a>
-
-    {% timezone "Asia/Tokyo" %}
-    {% if reviews %}
-        {% for review in reviews %}
-            <div class="review-card">
-                {% if review.type == 'book' %}
-                    <!-- 参考書レビュー -->
-                    <h3>📚 {{ review.subject }}</h3>
-                    <div class="review-meta">
-                        <strong>書籍タイトル:</strong> {{ review.title|default:"情報なし" }}<br>
-                        <strong>著者:</strong> {{ review.author|default:"情報なし" }}<br>
-                        <strong>発行日:</strong> {{ review.publication_date|default:"情報なし" }}<br>
-                        <strong>ISBN:</strong> {{ review.isbn|default:"なし" }}<br>
-                        <strong>おすすめ度:</strong>
-                        {% for i in "12345" %}
-                            {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
-                        {% endfor %}
-                        ({{ review.rating }}/5)<br>
-                        <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }} (JST)
-                    </div>
-                    <div class="review-text">
-                        {{ review.review|linebreaks }}
-                    </div>
-                {% else %}
-                    <!-- 科目レビュー -->
-                    <h3>🎓 {{ review.subject }}</h3>
-                    <div class="review-meta">
-                        <strong>年度:</strong> {{ review.year }}年度<br>
-                        <strong>開講学期:</strong> {{ review.semester }}<br>
-                        <strong>担当教員:</strong> {{ review.teachers|default:"情報なし" }}<br>
-                        <strong>おすすめ度:</strong>
-                        {% for i in "12345" %}
-                            {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
-                        {% endfor %}
-                        ({{ review.rating }}/5)<br>
-                        <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }} (JST)
-                    </div>
-                    <div class="review-text">
-                        {{ review.review|linebreaks }}
-                    </div>
-                {% endif %}
-            </div>
-        {% endfor %}
-    {% else %}
-        <div class="no-reviews">
-            まだレビューが投稿されていません。最初のレビューを投稿してください。
+        <div class="user-info">
+            <p>{{ request.session.graphics_user_nickname }} さんの投稿レビュー</p>
         </div>
-    {% endif %}
-    {% endtimezone %}
 
-    <a href="{% url 'graphics:index' %}" class="back-link">← トップページに戻る</a>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="messages {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="review-count">
+            <p>投稿数: <span>{{ reviews|length }}</span>件</p>
+        </div>
+
+        {% timezone "Asia/Tokyo" %}
+        {% if reviews %}
+            {% for review in reviews %}
+                <div class="review-card">
+                    {% if review.type == 'book' %}
+                        <!-- 参考書レビュー -->
+                        <h3>📚 {{ review.subject }}</h3>
+                        <div class="review-meta">
+                            <strong>書籍タイトル:</strong> {{ review.title|default:"情報なし" }}<br>
+                            <strong>著者:</strong> {{ review.author|default:"情報なし" }}<br>
+                            <strong>発行日:</strong> {{ review.publication_date|default:"情報なし" }}<br>
+                            <strong>ISBN:</strong> {{ review.isbn|default:"なし" }}<br>
+                            <strong>おすすめ度:</strong>
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                            ({{ review.rating }}/5)<br>
+                            <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }} (JST)
+                        </div>
+                        <div class="review-text">
+                            {{ review.review|linebreaks }}
+                        </div>
+                    {% else %}
+                        <!-- 科目レビュー -->
+                        <h3>🎓 {{ review.subject }}</h3>
+                        <div class="review-meta">
+                            <strong>年度:</strong> {{ review.year }}年度<br>
+                            <strong>開講学期:</strong> {{ review.semester }}<br>
+                            <strong>担当教員:</strong> {{ review.teachers|default:"情報なし" }}<br>
+                            <strong>おすすめ度:</strong>
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                            ({{ review.rating }}/5)<br>
+                            <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }} (JST)
+                        </div>
+                        <div class="review-text">
+                            {{ review.review|linebreaks }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-reviews">
+                まだレビューを投稿していません。最初のレビューを投稿してください。
+            </div>
+        {% endif %}
+        {% endtimezone %}
+
+        <a href="{% url 'graphics:index' %}">← ホームに戻る</a>
+        <br>
+        <a href="{% url 'graphics:add_book_review' %}" style="margin-top: 10px; display: inline-block;">レビューを投稿する →</a>
     </div>
 
     <script>

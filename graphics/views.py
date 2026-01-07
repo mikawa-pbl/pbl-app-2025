@@ -2,9 +2,23 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
-from .models import Member, BookReview, SubjectReview, CourseOffering, Teacher
-from .forms import BookReviewForm, SubjectReviewForm
-from .utils import fetch_book_info_from_openbd   
+from .models import Member, BookReview, SubjectReview, CourseOffering, Teacher, GraphicsUser
+from .forms import BookReviewForm, SubjectReviewForm, SignupForm, LoginForm, PasswordResetRequestForm, PasswordResetForm
+from .utils import fetch_book_info_from_openbd
+
+
+# ログインチェック用デコレータ
+def login_required(view_func):
+    """
+    ログインが必要なビューに適用するデコレータ
+    """
+    def wrapper(request, *args, **kwargs):
+        user_id = request.session.get('graphics_user_id')
+        if not user_id:
+            messages.warning(request, 'ログインが必要です。')
+            return redirect('graphics:login')
+        return view_func(request, *args, **kwargs)
+    return wrapper   
 
 
 def index(request):
@@ -16,6 +30,7 @@ def members(request):
     return render(request, 'teams/graphics/members.html', {'members': qs})
 
 
+@login_required
 def add_book_review(request):
     """
     レビュー追加ビュー（科目レビュー・参考書レビュー）
@@ -55,6 +70,11 @@ def add_book_review(request):
         if book_form.is_valid():
             # graphicsデータベースに保存
             review = book_form.save(commit=False)
+
+            # ログインユーザーを設定
+            user_id = request.session.get('graphics_user_id')
+            if user_id:
+                review.user_id = user_id
 
             # ISBNから書籍情報を取得
             if review.isbn:
@@ -150,6 +170,12 @@ def add_subject_review(request):
             # graphicsデータベースに保存
             review = form.save(commit=False)
             review.course_offering = course_offering
+
+            # ログインユーザーを設定
+            user_id = request.session.get('graphics_user_id')
+            if user_id:
+                review.user_id = user_id
+
             review.save(using='graphics')
             messages.success(request, '科目レビューを登録しました。')
             return redirect('graphics:book_reviews')
@@ -208,6 +234,7 @@ def book_reviews(request):
     return render(request, 'teams/graphics/book_reviews.html', {'reviews': all_reviews})
 
 
+@login_required
 def search_courses(request):
     """
     科目検索ビュー
@@ -321,3 +348,113 @@ def subject_autocomplete(request):
         subjects = Subject.objects.using('graphics').filter(name__icontains=query).values_list('name', flat=True)[:10]
         return JsonResponse({'subjects': list(subjects)})
     return JsonResponse({'subjects': []})
+
+
+def signup(request):
+    """
+    サインアップビュー
+    """
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, 'アカウントを作成しました。ログインしてください。')
+            return redirect('graphics:login')
+    else:
+        form = SignupForm()
+
+    return render(request, 'teams/graphics/signup.html', {'form': form})
+
+
+def login(request):
+    """
+    ログインビュー
+    """
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email_prefix = form.cleaned_data['email_prefix'].strip().lower()
+            password = form.cleaned_data['password']
+
+            # 完全なメールアドレスを生成
+            email = f"{email_prefix}@tut.jp"
+
+            try:
+                user = GraphicsUser.objects.using('graphics').get(email__iexact=email)
+
+                if user.check_password(password):
+                    # セッションにユーザーIDを保存
+                    request.session['graphics_user_id'] = user.user_id
+                    request.session['graphics_user_nickname'] = user.nickname
+                    messages.success(request, f'ようこそ、{user.nickname}さん！')
+                    return redirect('graphics:index')
+                else:
+                    messages.error(request, 'メールアドレスまたはパスワードが間違っています。')
+            except GraphicsUser.DoesNotExist:
+                messages.error(request, 'メールアドレスまたはパスワードが間違っています。')
+    else:
+        form = LoginForm()
+
+    return render(request, 'teams/graphics/login.html', {'form': form})
+
+
+def logout(request):
+    """
+    ログアウトビュー
+    """
+    request.session.pop('graphics_user_id', None)
+    request.session.pop('graphics_user_nickname', None)
+    messages.success(request, 'ログアウトしました。')
+    return redirect('graphics:index')
+
+
+def my_reviews(request):
+    """
+    自分の投稿したレビュー一覧
+    """
+    user_id = request.session.get('graphics_user_id')
+    if not user_id:
+        messages.warning(request, 'ログインが必要です。')
+        return redirect('graphics:login')
+
+    # ユーザーが投稿したレビューを取得
+    book_reviews = BookReview.objects.using('graphics').filter(user_id=user_id)
+    subject_reviews = SubjectReview.objects.using('graphics').filter(user_id=user_id)
+
+    all_reviews = []
+
+    # 参考書レビューをリストに追加
+    for review in book_reviews:
+        if review.subject:
+            all_reviews.append({
+                'type': 'book',
+                'subject': review.subject,
+                'isbn': review.isbn,
+                'title': review.title,
+                'author': review.author,
+                'publication_date': review.publication_date,
+                'review': review.review,
+                'rating': review.rating,
+                'created_at': review.created_at,
+            })
+
+    # 科目レビューをリストに追加
+    for review in subject_reviews:
+        teachers = review.course_offering.teachers.all()
+        teacher_names = ', '.join([teacher.name for teacher in teachers])
+
+        all_reviews.append({
+            'type': 'subject',
+            'subject': review.course_offering.subject.name,
+            'year': review.course_offering.year,
+            'semester': review.course_offering.semester,
+            'teachers': teacher_names,
+            'review': review.review,
+            'rating': review.rating,
+            'created_at': review.created_at,
+        })
+
+    # 作成日時でソート（新しい順）
+    all_reviews.sort(key=lambda x: x['created_at'], reverse=True)
+
+    return render(request, 'teams/graphics/my_reviews.html', {'reviews': all_reviews})

@@ -1,0 +1,342 @@
+{% load tz %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マイレビュー - TUT 参考書レビューシステム</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --secondary-hover: #475569;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            background-color: var(--light-bg);
+        }
+        /* ヘッダー */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+        }
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        /* ハンバーガーメニュー */
+        .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            z-index: 1000;
+        }
+        .hamburger span {
+            width: 30px;
+            height: 3px;
+            background-color: white;
+            transition: all 0.3s;
+        }
+        /* メニュー */
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: white;
+            transition: right 0.3s ease;
+            z-index: 1002;
+            padding-top: 60px;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+        }
+        .nav-menu.active {
+            right: 0;
+        }
+        .nav-menu ul {
+            list-style: none;
+        }
+        .nav-menu li {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .nav-menu a {
+            display: block;
+            padding: 18px 30px;
+            color: #1e293b;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .nav-menu a:hover {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+            padding-left: 35px;
+        }
+        /* オーバーレイ */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+        .overlay.active {
+            display: block;
+        }
+        /* コンテナ */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            padding-top: 100px;
+        }
+        h2 {
+            color: #0f172a;
+            margin-bottom: 30px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .user-info {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(37, 99, 235, 0.2);
+        }
+        .user-info p {
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+        }
+        .review-card {
+            background: white;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        .review-card:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+        .review-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        .review-meta {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 15px;
+            display: grid;
+            gap: 8px;
+            line-height: 1.6;
+        }
+        .review-meta strong {
+            color: #334155;
+            font-weight: 600;
+        }
+        .review-text {
+            line-height: 1.8;
+            color: #475569;
+            font-size: 15px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            color: var(--primary-hover);
+            transform: translateX(-3px);
+        }
+        .no-reviews {
+            padding: 40px 20px;
+            text-align: center;
+            color: #64748b;
+            background: white;
+            border-radius: 8px;
+            border: 2px dashed var(--border-color);
+            font-size: 16px;
+        }
+        .messages {
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+            font-weight: 500;
+        }
+        .success {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border-left-color: #10b981;
+        }
+        .review-count {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .review-count p {
+            color: #334155;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+        .review-count span {
+            color: var(--primary-color);
+            font-size: 24px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header>
+        <h1>TUT 参考書レビューシステム</h1>
+        <button class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <!-- ナビゲーションメニュー -->
+    <nav class="nav-menu" id="navMenu">
+        <ul>
+            <li><a href="{% url 'graphics:index' %}" onclick="toggleMenu()">ホーム</a></li>
+            <li><a href="{% url 'graphics:my_reviews' %}" onclick="toggleMenu()">マイレビュー</a></li>
+            <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
+            <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
+            <li><a href="{% url 'graphics:logout' %}" onclick="toggleMenu()">ログアウト</a></li>
+        </ul>
+    </nav>
+
+    <!-- オーバーレイ -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="container">
+        <h2>マイレビュー</h2>
+
+        <div class="user-info">
+            <p>{{ request.session.graphics_user_nickname }} さんの投稿レビュー</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="messages {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="review-count">
+            <p>投稿数: <span>{{ reviews|length }}</span>件</p>
+        </div>
+
+        {% timezone "Asia/Tokyo" %}
+        {% if reviews %}
+            {% for review in reviews %}
+                <div class="review-card">
+                    {% if review.type == 'book' %}
+                        <!-- 参考書レビュー -->
+                        <h3>📚 {{ review.subject }}</h3>
+                        <div class="review-meta">
+                            <strong>書籍タイトル:</strong> {{ review.title|default:"情報なし" }}<br>
+                            <strong>著者:</strong> {{ review.author|default:"情報なし" }}<br>
+                            <strong>発行日:</strong> {{ review.publication_date|default:"情報なし" }}<br>
+                            <strong>ISBN:</strong> {{ review.isbn|default:"なし" }}<br>
+                            <strong>おすすめ度:</strong>
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                            ({{ review.rating }}/5)<br>
+                            <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }} (JST)
+                        </div>
+                        <div class="review-text">
+                            {{ review.review|linebreaks }}
+                        </div>
+                    {% else %}
+                        <!-- 科目レビュー -->
+                        <h3>🎓 {{ review.subject }}</h3>
+                        <div class="review-meta">
+                            <strong>年度:</strong> {{ review.year }}年度<br>
+                            <strong>開講学期:</strong> {{ review.semester }}<br>
+                            <strong>担当教員:</strong> {{ review.teachers|default:"情報なし" }}<br>
+                            <strong>おすすめ度:</strong>
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                            ({{ review.rating }}/5)<br>
+                            <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }} (JST)
+                        </div>
+                        <div class="review-text">
+                            {{ review.review|linebreaks }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-reviews">
+                まだレビューを投稿していません。最初のレビューを投稿してください。
+            </div>
+        {% endif %}
+        {% endtimezone %}
+
+        <a href="{% url 'graphics:index' %}">← ホームに戻る</a>
+        <br>
+        <a href="{% url 'graphics:add_book_review' %}" style="margin-top: 10px; display: inline-block;">レビューを投稿する →</a>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const overlay = document.getElementById('overlay');
+            navMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

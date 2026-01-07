@@ -279,7 +279,7 @@
         /* クイックアクションバー */
         .quick-actions {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin: 40px 0;
             padding: 30px;
@@ -364,8 +364,15 @@
     <nav class="nav-menu" id="navMenu">
         <ul>
             <li><a href="{% url 'graphics:index' %}" onclick="toggleMenu()">ホーム</a></li>
-            <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
-            <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
+            {% if request.session.graphics_user_id %}
+                <li><a href="{% url 'graphics:my_reviews' %}" onclick="toggleMenu()">マイレビュー</a></li>
+                <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
+                <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
+                <li><a href="{% url 'graphics:logout' %}" onclick="toggleMenu()">ログアウト</a></li>
+            {% else %}
+                <li><a href="{% url 'graphics:login' %}" onclick="toggleMenu()">ログイン</a></li>
+                <li><a href="{% url 'graphics:signup' %}" onclick="toggleMenu()">サインアップ</a></li>
+            {% endif %}
         </ul>
     </nav>
 
@@ -378,17 +385,44 @@
             <h2>TUT 参考書レビューシステムへようこそ</h2>
         </section>
 
+        <!-- ログイン状態表示 -->
+        {% if request.session.graphics_user_id %}
+            <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%); padding: 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; border: 2px solid rgba(37, 99, 235, 0.2);">
+                <p style="color: var(--primary-color); font-size: 18px; font-weight: 700; margin: 0;">
+                    ログイン中: {{ request.session.graphics_user_nickname }} さん
+                </p>
+            </div>
+        {% endif %}
+
         <!-- クイックアクションバー -->
         <div class="quick-actions">
-            <a href="{% url 'graphics:search_courses' %}" class="quick-action-btn secondary">
-                <div class="quick-action-btn-text">
-                    <span>📚</span>
-                    <span class="quick-action-btn-label">レビューを検索</span>
-                </div>
-            </a>
-            <a href="{% url 'graphics:add_book_review' %}" class="quick-action-btn primary">
-                <span>✍️</span> レビューを投稿
-            </a>
+            {% if request.session.graphics_user_id %}
+                <a href="{% url 'graphics:my_reviews' %}" class="quick-action-btn secondary">
+                    <div class="quick-action-btn-text">
+                        <span>📝</span>
+                        <span class="quick-action-btn-label">マイレビュー</span>
+                    </div>
+                </a>
+                <a href="{% url 'graphics:search_courses' %}" class="quick-action-btn secondary">
+                    <div class="quick-action-btn-text">
+                        <span>📚</span>
+                        <span class="quick-action-btn-label">レビューを検索</span>
+                    </div>
+                </a>
+                <a href="{% url 'graphics:add_book_review' %}" class="quick-action-btn primary">
+                    <span>✍️</span> レビューを投稿
+                </a>
+            {% else %}
+                <a href="{% url 'graphics:login' %}" class="quick-action-btn primary">
+                    <span>🔐</span> ログイン
+                </a>
+                <a href="{% url 'graphics:signup' %}" class="quick-action-btn secondary">
+                    <div class="quick-action-btn-text">
+                        <span>📝</span>
+                        <span class="quick-action-btn-label">サインアップ</span>
+                    </div>
+                </a>
+            {% endif %}
         </div>
 
         <section class="description">

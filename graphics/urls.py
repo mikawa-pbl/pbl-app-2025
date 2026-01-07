@@ -11,4 +11,8 @@ urlpatterns = [
     path('search/', views.search_courses, name='search_courses'),
     path('api/teacher-autocomplete/', views.teacher_autocomplete, name='teacher_autocomplete'),
     path('api/subject-autocomplete/', views.subject_autocomplete, name='subject_autocomplete'),
+    path('signup/', views.signup, name='signup'),
+    path('login/', views.login, name='login'),
+    path('logout/', views.logout, name='logout'),
+    path('my-reviews/', views.my_reviews, name='my_reviews'),
 ]

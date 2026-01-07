@@ -1,5 +1,6 @@
 from django import forms
-from .models import BookReview, SubjectReview, CourseOffering
+from django.core.exceptions import ValidationError
+from .models import BookReview, SubjectReview, CourseOffering, GraphicsUser
 
 
 class BookReviewForm(forms.ModelForm):
@@ -121,3 +122,135 @@ class SubjectReviewForm(forms.ModelForm):
         labels = {
             'review': 'レビュー',
         }
+
+
+class SignupForm(forms.ModelForm):
+    """
+    サインアップフォーム
+    """
+    email_prefix = forms.CharField(
+        label="メールアドレス",
+        max_length=100,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '例: s123456'}),
+        help_text="@tut.jpは自動的に付加されます"
+    )
+
+    password = forms.CharField(
+        label="パスワード",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        min_length=8,
+        help_text="8文字以上"
+    )
+
+    password_confirm = forms.CharField(
+        label="パスワード（確認）",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        min_length=8,
+        help_text="確認のため再度入力してください"
+    )
+
+    class Meta:
+        model = GraphicsUser
+        fields = ['nickname', 'password']
+        widgets = {
+            'nickname': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ニックネーム'}),
+        }
+        labels = {
+            'nickname': 'ニックネーム',
+        }
+
+    def clean_email_prefix(self):
+        email_prefix = (self.cleaned_data.get("email_prefix") or "").strip().lower()
+        if not email_prefix:
+            raise ValidationError("メールアドレスを入力してください。")
+
+        # @が含まれている場合はエラー
+        if "@" in email_prefix:
+            raise ValidationError("@以前の部分のみを入力してください。")
+
+        # 完全なメールアドレスを生成
+        email = f"{email_prefix}@tut.jp"
+
+        # 既存チェック
+        if GraphicsUser.objects.using('graphics').filter(email__iexact=email).exists():
+            raise ValidationError("このメールアドレスは既に登録されています。")
+
+        return email_prefix
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        password_confirm = cleaned_data.get("password_confirm")
+
+        if password and password_confirm and password != password_confirm:
+            raise ValidationError("パスワードが一致しません。")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        raw_password = self.cleaned_data["password"]
+        email_prefix = self.cleaned_data["email_prefix"]
+
+        # 完全なメールアドレスを設定
+        user.email = f"{email_prefix}@tut.jp"
+        user.set_password(raw_password)
+
+        if commit:
+            user.save(using='graphics')
+        return user
+
+
+class LoginForm(forms.Form):
+    """
+    ログインフォーム
+    """
+    email_prefix = forms.CharField(
+        label="メールアドレス",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '例: s123456'}),
+        help_text="@tut.jpは自動的に付加されます"
+    )
+    password = forms.CharField(
+        label="パスワード",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+
+
+class PasswordResetRequestForm(forms.Form):
+    """
+    パスワードリセット申請フォーム
+    """
+    email_prefix = forms.CharField(
+        label="メールアドレス",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '例: s123456'}),
+        help_text="@tut.jpは自動的に付加されます"
+    )
+
+
+class PasswordResetForm(forms.Form):
+    """
+    パスワードリセットフォーム
+    """
+    password = forms.CharField(
+        label="新しいパスワード",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        min_length=8,
+        help_text="8文字以上"
+    )
+
+    password_confirm = forms.CharField(
+        label="新しいパスワード（確認）",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        min_length=8,
+        help_text="確認のため再度入力してください"
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        password_confirm = cleaned_data.get("password_confirm")
+
+        if password and password_confirm and password != password_confirm:
+            raise ValidationError("パスワードが一致しません。")
+
+        return cleaned_data

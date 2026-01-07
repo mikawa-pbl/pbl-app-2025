@@ -1,7 +1,42 @@
 from django.db import models
+from django.contrib.auth.hashers import make_password, check_password
 import uuid
 
 # Create your models here.
+
+class GraphicsUser(models.Model):
+    """
+    Graphics用のユーザーモデル
+    """
+    user_id = models.CharField("ユーザーID", max_length=50, unique=True, primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.EmailField("メールアドレス", unique=True)
+    password = models.CharField("パスワードハッシュ", max_length=128)
+    nickname = models.CharField("ニックネーム", max_length=50)
+    is_verified = models.BooleanField("メール認証済み", default=False)
+    verification_token = models.CharField("認証トークン", max_length=100, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
+
+    def set_password(self, raw_password):
+        """パスワードをハッシュ化して保存"""
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        """パスワードを検証"""
+        return check_password(raw_password, self.password)
+
+    def generate_verification_token(self):
+        """認証トークンを生成"""
+        import secrets
+        self.verification_token = secrets.token_urlsafe(32)
+        return self.verification_token
+
+    class Meta:
+        verbose_name = "ユーザー"
+        verbose_name_plural = "ユーザー"
+
+    def __str__(self):
+        return f"{self.nickname} ({self.email})"
+
 
 class Member(models.Model):
     first_name = models.CharField(max_length=100)
@@ -85,6 +120,7 @@ class SubjectReview(models.Model):
     科目そのものに対するレビュー
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey('GraphicsUser', on_delete=models.CASCADE, verbose_name="投稿者", null=True, blank=True)
     course_offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, verbose_name="開講情報")
     review = models.TextField(max_length=500, verbose_name="レビュー")
     rating = models.IntegerField(default=0, verbose_name="おすすめ度（0-5）")
@@ -106,6 +142,7 @@ class BookReview(models.Model):
     科目ごとにおすすめの参考書をユーザが投稿できる
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey('GraphicsUser', on_delete=models.CASCADE, verbose_name="投稿者", null=True, blank=True)
     subject = models.CharField(max_length=200, verbose_name="科目名")
     isbn = models.CharField(max_length=50, verbose_name="ISBN", blank=True, default='')
     title = models.CharField(max_length=200, verbose_name="書籍タイトル", null=True, blank=True)

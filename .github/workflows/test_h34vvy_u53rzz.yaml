@@ -1,0 +1,14 @@
+name: Test h34vvy_u53rzz
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "h34vvy_u53rzz/**"
+
+jobs:
+  call-workflow:
+    uses: ./.github/workflows/reusable_team_ci.yaml
+    with:
+      target_app: "h34vvy_u53rzz"

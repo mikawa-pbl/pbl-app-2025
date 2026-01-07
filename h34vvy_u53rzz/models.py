@@ -8,6 +8,9 @@ from .doors import DOORS
 
 DOOR_LABEL_MAP = {door.id: door.label for door in DOORS}
 
+class DammyModel(models.Model):
+    """migrationを行わない、ダミーのモデル."""
+    name = models.CharField(max_length=100)
 
 class H34vvySession(AbstractBaseSession):
     """

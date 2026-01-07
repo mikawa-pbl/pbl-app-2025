@@ -4,7 +4,12 @@ from django.db.models import Q
 from django.http import JsonResponse
 from .models import Member, BookReview, SubjectReview, CourseOffering, Teacher, GraphicsUser
 from .forms import BookReviewForm, SubjectReviewForm, SignupForm, LoginForm, PasswordResetRequestForm, PasswordResetForm
-from .utils import fetch_book_info_from_openbd
+from .utils import (
+    fetch_book_info_from_openbd,
+    get_year_choices,
+    get_semester_choices,
+    get_all_reviews
+)
 
 
 # ログインチェック用デコレータ
@@ -37,27 +42,9 @@ def add_book_review(request):
     """
     book_form = BookReviewForm()
 
-    # 年度の選択肢を取得
-    years = CourseOffering.objects.using('graphics').values_list('year', flat=True).distinct().order_by('-year')
-    year_choices = [(year, f'{year}年度') for year in years]
-
-    # 開講学期の選択肢を取得
-    semesters = CourseOffering.objects.using('graphics').values_list('semester', flat=True).distinct().order_by('semester')
-
-    # 除外する学期と表示名の変更
-    exclude_semesters = ['2年通年', '前2＋後1', '前期＋後1']
-    display_names = {
-        '前期1': '前1',
-        '前期2': '前2',
-        '後期1': '後1',
-        '後期2': '後2',
-    }
-
-    semester_choices = []
-    for sem in semesters:
-        if sem not in exclude_semesters:
-            display_name = display_names.get(sem, sem)
-            semester_choices.append((sem, display_name))
+    # 年度と学期の選択肢を取得
+    year_choices = get_year_choices()
+    semester_choices = get_semester_choices()
 
     subject_form = SubjectReviewForm()
     subject_form.fields['year'].choices = year_choices
@@ -103,25 +90,8 @@ def add_subject_review(request):
     """
     if request.method == 'POST':
         # 年度と開講学期の選択肢を取得
-        years = CourseOffering.objects.using('graphics').values_list('year', flat=True).distinct().order_by('-year')
-        year_choices = [(year, f'{year}年度') for year in years]
-
-        semesters = CourseOffering.objects.using('graphics').values_list('semester', flat=True).distinct().order_by('semester')
-
-        # 除外する学期と表示名の変更
-        exclude_semesters = ['2年通年', '前2＋後1', '前期＋後1']
-        display_names = {
-            '前期1': '前1',
-            '前期2': '前2',
-            '後期1': '後1',
-            '後期2': '後2',
-        }
-
-        semester_choices = []
-        for sem in semesters:
-            if sem not in exclude_semesters:
-                display_name = display_names.get(sem, sem)
-                semester_choices.append((sem, display_name))
+        year_choices = get_year_choices()
+        semester_choices = get_semester_choices()
 
         form = SubjectReviewForm(request.POST)
         form.fields['year'].choices = year_choices
@@ -189,47 +159,11 @@ def book_reviews(request):
     レビュー一覧ビュー（参考書レビュー・科目レビュー）
     """
     # 参考書レビューと科目レビューを取得
-    book_reviews = BookReview.objects.using('graphics').all()
-    subject_reviews = SubjectReview.objects.using('graphics').all()
+    book_reviews_qs = BookReview.objects.using('graphics').all()
+    subject_reviews_qs = SubjectReview.objects.using('graphics').all()
 
-    # 両方のレビューをリストにまとめて、作成日時でソート
-    all_reviews = []
-
-    # 参考書レビューをリストに追加（subjectが空でないもののみ）
-    for review in book_reviews:
-        if review.subject:  # subjectが空でない場合のみ追加
-            all_reviews.append({
-                'type': 'book',
-                'subject': review.subject,
-                'isbn': review.isbn,
-                'title': review.title,
-                'author': review.author,
-                'publication_date': review.publication_date,
-                'review': review.review,
-                'rating': review.rating,
-                'created_at': review.created_at,
-            })
-
-    # 科目レビューをリストに追加
-    for review in subject_reviews:
-        # 担当教員のリストを取得
-        teachers = review.course_offering.teachers.all()
-        teacher_names = ', '.join([teacher.name for teacher in teachers])
-
-        all_reviews.append({
-            'type': 'subject',
-            'subject': review.course_offering.subject.name,
-            'year': review.course_offering.year,
-            'semester': review.course_offering.semester,
-            'course_info': f"{review.course_offering.year}年度 {review.course_offering.semester} {review.course_offering.grade}",
-            'teachers': teacher_names,
-            'review': review.review,
-            'rating': review.rating,
-            'created_at': review.created_at,
-        })
-
-    # 作成日時でソート（新しい順）
-    all_reviews.sort(key=lambda x: x['created_at'], reverse=True)
+    # ヘルパー関数でレビューを整形・結合・ソート
+    all_reviews = get_all_reviews(book_reviews_qs, subject_reviews_qs)
 
     return render(request, 'teams/graphics/book_reviews.html', {'reviews': all_reviews})
 
@@ -408,53 +342,18 @@ def logout(request):
     return redirect('graphics:index')
 
 
+@login_required
 def my_reviews(request):
     """
     自分の投稿したレビュー一覧
     """
     user_id = request.session.get('graphics_user_id')
-    if not user_id:
-        messages.warning(request, 'ログインが必要です。')
-        return redirect('graphics:login')
 
     # ユーザーが投稿したレビューを取得
-    book_reviews = BookReview.objects.using('graphics').filter(user_id=user_id)
-    subject_reviews = SubjectReview.objects.using('graphics').filter(user_id=user_id)
+    book_reviews_qs = BookReview.objects.using('graphics').filter(user_id=user_id)
+    subject_reviews_qs = SubjectReview.objects.using('graphics').filter(user_id=user_id)
 
-    all_reviews = []
-
-    # 参考書レビューをリストに追加
-    for review in book_reviews:
-        if review.subject:
-            all_reviews.append({
-                'type': 'book',
-                'subject': review.subject,
-                'isbn': review.isbn,
-                'title': review.title,
-                'author': review.author,
-                'publication_date': review.publication_date,
-                'review': review.review,
-                'rating': review.rating,
-                'created_at': review.created_at,
-            })
-
-    # 科目レビューをリストに追加
-    for review in subject_reviews:
-        teachers = review.course_offering.teachers.all()
-        teacher_names = ', '.join([teacher.name for teacher in teachers])
-
-        all_reviews.append({
-            'type': 'subject',
-            'subject': review.course_offering.subject.name,
-            'year': review.course_offering.year,
-            'semester': review.course_offering.semester,
-            'teachers': teacher_names,
-            'review': review.review,
-            'rating': review.rating,
-            'created_at': review.created_at,
-        })
-
-    # 作成日時でソート（新しい順）
-    all_reviews.sort(key=lambda x: x['created_at'], reverse=True)
+    # ヘルパー関数でレビューを整形・結合・ソート
+    all_reviews = get_all_reviews(book_reviews_qs, subject_reviews_qs)
 
     return render(request, 'teams/graphics/my_reviews.html', {'reviews': all_reviews})

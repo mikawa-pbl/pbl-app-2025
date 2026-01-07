@@ -3,6 +3,21 @@ from django.core.exceptions import ValidationError
 from .models import BookReview, SubjectReview, CourseOffering, GraphicsUser
 
 
+class PasswordConfirmMixin:
+    """
+    パスワード確認フィールドのバリデーションを提供するミックスイン
+    """
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        password_confirm = cleaned_data.get("password_confirm")
+
+        if password and password_confirm and password != password_confirm:
+            raise ValidationError("パスワードが一致しません。")
+
+        return cleaned_data
+
+
 class BookReviewForm(forms.ModelForm):
     """
     参考書レビュー入力フォーム
@@ -124,7 +139,7 @@ class SubjectReviewForm(forms.ModelForm):
         }
 
 
-class SignupForm(forms.ModelForm):
+class SignupForm(PasswordConfirmMixin, forms.ModelForm):
     """
     サインアップフォーム
     """
@@ -177,16 +192,6 @@ class SignupForm(forms.ModelForm):
 
         return email_prefix
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        password_confirm = cleaned_data.get("password_confirm")
-
-        if password and password_confirm and password != password_confirm:
-            raise ValidationError("パスワードが一致しません。")
-
-        return cleaned_data
-
     def save(self, commit=True):
         user = super().save(commit=False)
         raw_password = self.cleaned_data["password"]
@@ -227,7 +232,7 @@ class PasswordResetRequestForm(forms.Form):
     )
 
 
-class PasswordResetForm(forms.Form):
+class PasswordResetForm(PasswordConfirmMixin, forms.Form):
     """
     パスワードリセットフォーム
     """
@@ -244,13 +249,3 @@ class PasswordResetForm(forms.Form):
         min_length=8,
         help_text="確認のため再度入力してください"
     )
-
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        password_confirm = cleaned_data.get("password_confirm")
-
-        if password and password_confirm and password != password_confirm:
-            raise ValidationError("パスワードが一致しません。")
-
-        return cleaned_data

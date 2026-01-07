@@ -170,7 +170,7 @@ def create_post_view(request, username):
         )
 
     # --- クールタイム: 同一ユーザーが同一施設に10分以内に投稿していないかチェック ---
-    ten_minutes_ago = timezone.now() - timedelta(minutes=10)
+    ten_minutes_ago = timezone.now() - timedelta(minutes=5)
     recent_same_posts = Post.objects.using("team_northcliff").filter(
         user=user,
         facility=facility,
@@ -178,7 +178,7 @@ def create_post_view(request, username):
     ).order_by('-created_at')
     if recent_same_posts.exists():
         return JsonResponse(
-            {'error': '１０分以内に同一の施設情報を投稿することはできません'},
+            {'error': '5分以内に同一の施設情報を投稿することはできません'},
             status=400
         )
     
@@ -202,3 +202,10 @@ def create_post_view(request, username):
         'post_id': post.id,
         'points': user.points,
     })
+
+@require_http_methods(["GET"])
+def users_list_view(request):
+    """全ユーザーのリストを取得"""
+    users = User.objects.using("team_northcliff").all().order_by('id')
+    user_list = [{'name': u.name} for u in users]
+    return JsonResponse({'users': user_list})

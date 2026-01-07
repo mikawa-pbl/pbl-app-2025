@@ -3,11 +3,10 @@
 <html lang="ja">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     html, body {
@@ -165,29 +164,25 @@
       color: rgba(100,156,228,0.9);
       font-size: 28px;
     }
-
-    .upload-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: none;
-      background: #649CE4;
-      color: white;
-      font-size: 14px;
-      font-weight: 700;
-      border-radius: 999px;
-      padding: 10px 14px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .upload-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .file-input {
-      display: none;
-    }
-
+      .thumb .remove-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 26px;
+        height: 26px;
+        border-radius: 999px;
+        border: none;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
+      }
+      .thumb .remove-btn:focus { outline: 2px solid rgba(100,156,228,0.6); }
     /* ===== 学年タグ（複数） ===== */
     .chips {
       display: flex;
@@ -258,6 +253,21 @@
 
     function $(id){ return document.getElementById(id); }
 
+    function syncInputFiles() {
+      const dt = new DataTransfer();
+      selectedFiles.forEach(f => dt.items.add(f));
+      $("images").files = dt.files;
+    }
+
+    // ★ 追加：画像を取り消す（削除）
+    function removeImage(index) {
+      if (index < 0 || index >= selectedFiles.length) return;
+
+      selectedFiles.splice(index, 1);
+      syncInputFiles();
+      renderThumbs();
+    }
+
     function renderThumbs() {
       const thumbs = $("thumbs");
       thumbs.innerHTML = "";
@@ -266,7 +276,7 @@
         const url = URL.createObjectURL(file);
         const box = document.createElement("div");
         box.className = "thumb";
-        box.innerHTML = `<img src="${url}" alt="画像${idx+1}">`;
+        box.innerHTML = `<img src="${url}" alt="画像${idx+1}"><button type="button" class="remove-btn" aria-label="画像を削除" onclick="removeImage(${idx})">×</button>`;
         thumbs.appendChild(box);
       });
 
@@ -280,6 +290,18 @@
       $("pickBtn").disabled = (selectedFiles.length >= MAX_IMAGES);
     }
 
+    function removeImage(index) {
+      if (index < 0 || index >= selectedFiles.length) return;
+      selectedFiles.splice(index, 1);
+      const dt = new DataTransfer();
+      selectedFiles.forEach(f => dt.items.add(f));
+      if (selectedFiles.length === 0) {
+        $("images").value = "";
+      }
+      $("images").files = dt.files;
+      renderThumbs();
+    }
+
     function addImages(fileList) {
       const files = Array.from(fileList || []);
       if (files.length === 0) return;
@@ -287,10 +309,7 @@
       const canAdd = Math.max(0, MAX_IMAGES - selectedFiles.length);
       selectedFiles = selectedFiles.concat(files.slice(0, canAdd));
 
-      const dt = new DataTransfer();
-      selectedFiles.forEach(f => dt.items.add(f));
-      $("images").files = dt.files;
-
+      syncInputFiles();
       renderThumbs();
     }
 
@@ -373,7 +392,7 @@
       if (hidden) hidden.remove();
     }
 
-    // ===== 価格入力（最大99999 / 数字のみ） =====
+    // ===== 価格入力（最大999999 / 数字のみ） =====
     function normalizePrice() {
       const el = $("price");
       el.value = el.value.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
@@ -384,25 +403,22 @@
 
     window.addEventListener("DOMContentLoaded", () => {
       renderThumbs();
+
       $("images").addEventListener("change", (e) => addImages(e.target.files));
       $("price").addEventListener("input", normalizePrice);
 
       updateGradeSelectColor();
       $("gradeSelect").addEventListener("change", updateGradeSelectColor);
-      
+
       updateTagSelectColor();
       $("tagSelect").addEventListener("change", updateTagSelectColor);
 
-      // エラー再表示時、選択を復元
+      // エラー再表示時、選択を復元（必要なときだけ配列に値が入る）
       PRESELECTED_GRADES.forEach(val => {
-        if (!document.querySelector(`input[name="grades"][value="${val}"]`)) {
-          addHiddenAndChip("grades", val, getOptionText("gradeSelect", val), "gradeChips", "grade");
-        }
+        addHiddenAndChip("grades", val, getOptionText("gradeSelect", val), "gradeChips", "grade");
       });
       PRESELECTED_TAGS.forEach(val => {
-        if (!document.querySelector(`input[name="tags"][value="${val}"]`)) {
-          addHiddenAndChip("tags", val, getOptionText("tagSelect", val), "tagChips", "tag");
-        }
+        addHiddenAndChip("tags", val, getOptionText("tagSelect", val), "tagChips", "tag");
       });
     });
   </script>
@@ -507,7 +523,6 @@
 
           <div style="display:flex; gap:10px;">
             <div class="select-wrap" style="flex:1;">
-              <!-- ★requiredなし：空でも送信できる -->
               <select id="gradeSelect" class="select">
                 <option value="" selected disabled>追加する学年を選択</option>
                 {% for value, label in form.fields.grades.choices %}
@@ -521,10 +536,7 @@
             </button>
           </div>
 
-          <!-- hidden inputs（選んだ分だけ送る。0個なら送られない＝任意） -->
           <div id="gradeHidden"></div>
-
-          <!-- 表示チップ -->
           <div class="chips" id="gradeChips"></div>
         </div>
 

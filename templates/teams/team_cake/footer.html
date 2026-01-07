@@ -8,6 +8,36 @@
     </div>
 </footer>
 
+<!-- Back to Top Button -->
+<button id="backToTopBtn"
+    class="fixed bottom-8 right-8 bg-[#F5E829] hover:bg-yellow-400 text-black p-3 rounded-full shadow-2xl ring-1 ring-black transition-opacity duration-300 opacity-0 invisible z-50"
+    aria-label="トップに戻る">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+    </svg>
+</button>
+
+<script>
+    const backToTopBtn = document.getElementById('backToTopBtn');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            backToTopBtn.classList.remove('opacity-0', 'invisible');
+            backToTopBtn.classList.add('opacity-100', 'visible');
+        } else {
+            backToTopBtn.classList.add('opacity-0', 'invisible');
+            backToTopBtn.classList.remove('opacity-100', 'visible');
+        }
+    });
+
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+</script>
+
 </body>
 
 </html>

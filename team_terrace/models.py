@@ -4,6 +4,9 @@ import uuid
 
 from django.db import models
 
+class DammyModel(models.Model):
+    """migrationを行わない、ダミーのモデル."""
+    name = models.CharField(max_length=100)
 
 class Member(models.Model):
     """チームメンバーを表すモデル.

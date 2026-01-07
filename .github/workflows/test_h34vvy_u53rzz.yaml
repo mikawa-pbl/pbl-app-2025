@@ -4,8 +4,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - "h34vvy_u53rzz/**"
 
 jobs:
   call-workflow:

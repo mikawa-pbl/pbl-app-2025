@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>レビュー編集 - TUT 参考書レビューシステム</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            background-color: var(--light-bg);
+        }
+
+        /* ヘッダー */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+        }
+
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* コンテナ */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            padding-top: 100px;
+        }
+
+        h2 {
+            color: #0f172a;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .review-info {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .review-info h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .review-meta {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .review-meta strong {
+            color: #334155;
+            font-weight: 600;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #334155;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .messages {
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+            font-weight: 500;
+        }
+
+        .error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border-left-color: #ef4444;
+        }
+
+        .warning-text {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            color: #92400e;
+            font-size: 14px;
+        }
+
+        /* 星評価 */
+        .star-rating {
+            display: flex;
+            gap: 8px;
+            margin: 15px 0;
+            align-items: center;
+        }
+
+        .star {
+            font-size: 32px;
+            cursor: pointer;
+            color: #ddd;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .star.active {
+            color: #FFA500;
+        }
+
+        .star:hover {
+            transform: scale(1.1);
+        }
+
+        .rating-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #334155;
+            font-weight: 600;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header>
+        <h1>TUT 参考書レビューシステム</h1>
+    </header>
+
+    <div class="container">
+        <h2>レビューを編集</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="messages {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="review-info">
+            {% if review_type == 'book' %}
+                <h3>📚 参考書レビュー</h3>
+                <div class="review-meta">
+                    <strong>科目:</strong> {{ review.subject }}<br>
+                    {% if review.book %}
+                        <strong>書籍タイトル:</strong> {{ review.book.title|default:"情報なし" }}<br>
+                        <strong>著者:</strong> {{ review.book.author|default:"情報なし" }}<br>
+                        <strong>ISBN:</strong> {{ review.book.isbn }}<br>
+                    {% endif %}
+                    <strong>おすすめ度:</strong>
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                    ({{ review.rating }}/5)
+                </div>
+            {% else %}
+                <h3>🎓 科目レビュー</h3>
+                <div class="review-meta">
+                    <strong>科目:</strong> {{ review.course_offering.subject.name }}<br>
+                    <strong>年度:</strong> {{ review.course_offering.year }}年度<br>
+                    <strong>開講学期:</strong> {{ review.course_offering.semester }}<br>
+                    <strong>おすすめ度:</strong>
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                    ({{ review.rating }}/5)
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="warning-text">
+            ⚠️ 編集できるのはレビュー内容と評価（星の数）です。科目名やISBNなどは変更できません。
+        </div>
+
+        <div class="form-container">
+            <form method="POST" id="editForm">
+                {% csrf_token %}
+
+                <!-- 星評価 -->
+                <div class="form-group">
+                    <label class="rating-label">おすすめ度</label>
+                    <div class="star-rating">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                        <span id="rating-text" style="margin-left: 10px; color: #64748b;">0/5</span>
+                    </div>
+                    {{ form.rating }}
+                    {% if form.rating.errors %}
+                        <div class="error">{{ form.rating.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- レビュー内容 -->
+                <div class="form-group">
+                    <label for="{{ form.review.id_for_label }}">{{ form.review.label }}</label>
+                    {{ form.review }}
+                    {% if form.review.errors %}
+                        <div class="error">{{ form.review.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">💾 更新する</button>
+                    <a href="{% url 'graphics:my_reviews' %}" class="btn btn-secondary">← キャンセル</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 星評価の初期化
+        const stars = document.querySelectorAll('.star');
+        const ratingInput = document.getElementById('{% if review_type == "book" %}edit-book-rating-value{% else %}edit-subject-rating-value{% endif %}');
+        const ratingText = document.getElementById('rating-text');
+
+        // 現在の評価を取得して表示
+        let currentRating = parseInt(ratingInput.value) || 0;
+
+        function updateStars(rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+            ratingText.textContent = rating + '/5';
+            ratingInput.value = rating;
+            currentRating = rating;
+        }
+
+        // 初期表示
+        updateStars(currentRating);
+
+        // 星をクリックしたときの処理
+        stars.forEach((star, index) => {
+            star.addEventListener('click', () => {
+                const rating = index + 1;
+                updateStars(rating);
+            });
+
+            star.addEventListener('mouseenter', () => {
+                const rating = index + 1;
+                stars.forEach((s, i) => {
+                    if (i < rating) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        // マウスが離れたら元の評価に戻す
+        document.querySelector('.star-rating').addEventListener('mouseleave', () => {
+            updateStars(currentRating);
+        });
+    </script>
+</body>
+</html>

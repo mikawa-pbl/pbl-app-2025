@@ -26,4 +26,7 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout'),
     path('my-reviews/', views.my_reviews, name='my_reviews'),
+    # レビュー編集
+    path('book-reviews/edit/<uuid:review_id>/', views.edit_book_review, name='edit_book_review'),
+    path('subject-reviews/edit/<uuid:review_id>/', views.edit_subject_review, name='edit_subject_review'),
 ]

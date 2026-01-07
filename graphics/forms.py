@@ -249,3 +249,55 @@ class PasswordResetForm(PasswordConfirmMixin, forms.Form):
         min_length=8,
         help_text="確認のため再度入力してください"
     )
+
+
+class BookReviewEditForm(forms.ModelForm):
+    """
+    参考書レビュー編集フォーム（レビュー内容と評価を編集可能）
+    """
+    rating = forms.IntegerField(
+        min_value=0,
+        max_value=5,
+        widget=forms.HiddenInput(attrs={'id': 'edit-book-rating-value'}),
+        label='おすすめ度'
+    )
+
+    class Meta:
+        model = BookReview
+        fields = ['review', 'rating']
+        widgets = {
+            'review': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'この参考書のレビューを書いてください',
+                'rows': 5
+            }),
+        }
+        labels = {
+            'review': 'レビュー内容',
+        }
+
+
+class SubjectReviewEditForm(forms.ModelForm):
+    """
+    科目レビュー編集フォーム（レビュー内容と評価を編集可能）
+    """
+    rating = forms.IntegerField(
+        min_value=0,
+        max_value=5,
+        widget=forms.HiddenInput(attrs={'id': 'edit-subject-rating-value'}),
+        label='おすすめ度'
+    )
+
+    class Meta:
+        model = SubjectReview
+        fields = ['review', 'rating']
+        widgets = {
+            'review': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'この科目のレビューを書いてください',
+                'rows': 5
+            }),
+        }
+        labels = {
+            'review': 'レビュー内容',
+        }

@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Member, BookReview, SubjectReview, CourseOffering, Teacher, GraphicsUser, Book
-from .forms import BookReviewForm, SubjectReviewForm, SignupForm, LoginForm, PasswordResetRequestForm, PasswordResetForm
+from .forms import BookReviewForm, SubjectReviewForm, SignupForm, LoginForm, PasswordResetRequestForm, PasswordResetForm, BookReviewEditForm, SubjectReviewEditForm
 from .utils import (
     fetch_book_info_from_openbd,
     get_year_choices,
@@ -544,7 +544,102 @@ def my_reviews(request):
     book_reviews_qs = BookReview.objects.using('graphics').filter(user_id=user_id)
     subject_reviews_qs = SubjectReview.objects.using('graphics').filter(user_id=user_id)
 
-    # ヘルパー関数でレビューを整形・結合・ソート
-    all_reviews = get_all_reviews(book_reviews_qs, subject_reviews_qs)
+    # レビューにIDを追加（編集用）
+    book_reviews_list = []
+    for review in book_reviews_qs:
+        book_reviews_list.append({
+            'id': review.id,
+            'type': 'book',
+            'subject': review.subject,
+            'title': review.book.title if review.book else None,
+            'author': review.book.author if review.book else None,
+            'publication_date': review.book.publication_date if review.book else None,
+            'isbn': review.book.isbn if review.book else review.isbn,
+            'rating': review.rating,
+            'review': review.review,
+            'created_at': review.created_at,
+        })
+
+    subject_reviews_list = []
+    for review in subject_reviews_qs:
+        # 担当教員名を取得
+        teachers_names = ', '.join([teacher.name for teacher in review.course_offering.teachers.all()]) if review.course_offering else '情報なし'
+        subject_reviews_list.append({
+            'id': review.id,
+            'type': 'subject',
+            'subject': review.course_offering.subject.name if review.course_offering else '情報なし',
+            'year': review.course_offering.year if review.course_offering else '情報なし',
+            'semester': review.course_offering.semester if review.course_offering else '情報なし',
+            'teachers': teachers_names,
+            'rating': review.rating,
+            'review': review.review,
+            'created_at': review.created_at,
+        })
+
+    # レビューを結合してソート
+    all_reviews = book_reviews_list + subject_reviews_list
+    all_reviews.sort(key=lambda x: x['created_at'], reverse=True)
 
     return render(request, 'teams/graphics/my_reviews.html', {'reviews': all_reviews})
+
+
+@login_required
+def edit_book_review(request, review_id):
+    """
+    参考書レビュー編集ビュー
+    """
+    user_id = request.session.get('graphics_user_id')
+
+    try:
+        review = BookReview.objects.using('graphics').get(id=review_id, user_id=user_id)
+    except BookReview.DoesNotExist:
+        messages.error(request, 'レビューが見つからないか、編集権限がありません。')
+        return redirect('graphics:my_reviews')
+
+    if request.method == 'POST':
+        form = BookReviewEditForm(request.POST, instance=review)
+        if form.is_valid():
+            updated_review = form.save(commit=False)
+            updated_review.save(using='graphics')
+            messages.success(request, '参考書レビューを更新しました。')
+            return redirect('graphics:my_reviews')
+    else:
+        form = BookReviewEditForm(instance=review)
+
+    context = {
+        'form': form,
+        'review': review,
+        'review_type': 'book'
+    }
+    return render(request, 'teams/graphics/edit_review.html', context)
+
+
+@login_required
+def edit_subject_review(request, review_id):
+    """
+    科目レビュー編集ビュー
+    """
+    user_id = request.session.get('graphics_user_id')
+
+    try:
+        review = SubjectReview.objects.using('graphics').get(id=review_id, user_id=user_id)
+    except SubjectReview.DoesNotExist:
+        messages.error(request, 'レビューが見つからないか、編集権限がありません。')
+        return redirect('graphics:my_reviews')
+
+    if request.method == 'POST':
+        form = SubjectReviewEditForm(request.POST, instance=review)
+        if form.is_valid():
+            updated_review = form.save(commit=False)
+            updated_review.save(using='graphics')
+            messages.success(request, '科目レビューを更新しました。')
+            return redirect('graphics:my_reviews')
+    else:
+        form = SubjectReviewEditForm(instance=review)
+
+    context = {
+        'form': form,
+        'review': review,
+        'review_type': 'subject'
+    }
+    return render(request, 'teams/graphics/edit_review.html', context)

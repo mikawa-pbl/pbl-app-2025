@@ -230,6 +230,25 @@
             font-size: 24px;
             font-weight: 700;
         }
+        .edit-button {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .edit-button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -298,6 +317,7 @@
                         <div class="review-text">
                             {{ review.review|linebreaks }}
                         </div>
+                        <a href="{% url 'graphics:edit_book_review' review.id %}" class="edit-button">✏️ 編集</a>
                     {% else %}
                         <!-- 科目レビュー -->
                         <h3>🎓 {{ review.subject }}</h3>
@@ -315,6 +335,7 @@
                         <div class="review-text">
                             {{ review.review|linebreaks }}
                         </div>
+                        <a href="{% url 'graphics:edit_subject_review' review.id %}" class="edit-button">✏️ 編集</a>
                     {% endif %}
                 </div>
             {% endfor %}

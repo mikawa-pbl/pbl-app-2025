@@ -1,0 +1,14 @@
+name: Test team_terrace
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "team_terrace/**"
+
+jobs:
+  call-workflow:
+    uses: ./.github/workflows/reusable_team_ci.yaml
+    with:
+      target_app: "team_terrace"

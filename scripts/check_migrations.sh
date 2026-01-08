@@ -3,7 +3,7 @@
 # Migration Integrity Check Script
 # Checks if any existing migration files have been modified or deleted compared to the main branch.
 
-set -e
+set -Eeuo pipefail
 
 TARGET_BRANCH="origin/main"
 CURRENT_HEAD=$(git rev-parse HEAD)
@@ -36,5 +36,4 @@ if [ -n "$CHANGED_MIGRATIONS" ]; then
   exit 1
 else
   echo "Migration integrity check passed. No existing migrations were modified or deleted."
-  exit 0
 fi

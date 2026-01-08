@@ -34,7 +34,7 @@ jobs:
 
 ### 2. `pbl_project/settings.py`の設定（重要）
 
-テスト実行時のデータベース依存関係エラー（Circular dependency）を防ぐため、pbl_projects/settings.pyの`DATABASES`に以下を追記してください。
+テスト実行時のデータベース依存関係エラー（Circular dependency）を防ぐため、pbl_project/settings.pyの`DATABASES`に以下を追記してください。
 
 ```python
     '<チーム名>': {
@@ -68,11 +68,11 @@ class MyTeamTests(TestCase):
 
     def setUp(self):
         # テストデータの作成（テスト実行のたびにリセットされます）
-        MyModel.objects.create(name="test data")
+        MyModel.objects.using('<チーム名>').create(name="test data")
 
     def test_example(self):
         # テストの実行
-        count = MyModel.objects.count()
+        count = MyModel.objects.using('<チーム名>').count()
         self.assertEqual(count, 1)
 ```
 

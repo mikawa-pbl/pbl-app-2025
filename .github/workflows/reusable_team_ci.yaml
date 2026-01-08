@@ -34,9 +34,6 @@ jobs:
           echo "Checking for missing migrations or model validity..."
           uv run python manage.py makemigrations ${{ inputs.target_app }} --check --dry-run
         
-      - name: Make Migrations Execution
-        run: uv run python manage.py makemigrations ${{ inputs.target_app }}
-
       - name: Migrate
         run: uv run python manage.py migrate --database ${{ inputs.target_app }}
 

@@ -5,11 +5,6 @@ app_name = "graphics"
 urlpatterns = [
     path('', views.index, name='index'),
     path('members/', views.members, name='members'),
-    # 旧レビュー一覧（後方互換性のため残す）
-    path('book-reviews/', views.book_reviews, name='book_reviews'),
-    # 新しいレビュー関連URL
-    path('subject-reviews/', views.subject_review_list, name='subject_review_list'),
-    path('book-reviews-list/', views.book_review_list, name='book_review_list'),
     path('course/<int:course_id>/', views.course_detail, name='course_detail'),
     path('book/<str:isbn>/', views.book_detail, name='book_detail'),
     # レビュー追加

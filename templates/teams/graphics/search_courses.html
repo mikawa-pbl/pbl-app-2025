@@ -516,6 +516,32 @@
             pointer-events: none;
         }
 
+        /* 星評価スタイル */
+        .star-rating {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .star-filled {
+            color: #FFA500;
+        }
+        .star-half {
+            position: relative;
+            display: inline-block;
+            color: #cbd5e1;
+        }
+        .star-half::before {
+            content: '★';
+            position: absolute;
+            left: 0;
+            width: 50%;
+            overflow: hidden;
+            color: #FFA500;
+        }
+        .star-empty {
+            color: #cbd5e1;
+        }
+
         @media (max-width: 1024px) {
             .container.has-results {
                 padding-left: 0;
@@ -668,7 +694,31 @@
                                     <span class="course-semester">{{ course.semester }}</span>
                                 </div>
                                 <div class="course-title">{{ course.subject.name }}</div>
-                                <div class="course-rating">☆☆☆☆☆ 0.0(0)</div>
+                                <div class="course-rating">
+                                    <span class="star-rating" id="courseRating{{ forloop.counter }}"></span>
+                                    <span style="margin-left: 5px;">{{ course.avg_rating|floatformat:1 }}({{ course.review_count }})</span>
+                                </div>
+                                <script>
+                                    (function() {
+                                        const avgRating = {{ course.avg_rating }};
+                                        const fullStars = Math.floor(avgRating);
+                                        const hasHalfStar = (avgRating - fullStars) >= 0.5;
+                                        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+                                        let starsHtml = '';
+                                        for (let i = 0; i < fullStars; i++) {
+                                            starsHtml += '<span class="star-filled">★</span>';
+                                        }
+                                        if (hasHalfStar) {
+                                            starsHtml += '<span class="star-half">☆</span>';
+                                        }
+                                        for (let i = 0; i < emptyStars; i++) {
+                                            starsHtml += '<span class="star-empty">☆</span>';
+                                        }
+
+                                        document.getElementById('courseRating{{ forloop.counter }}').innerHTML = starsHtml;
+                                    })();
+                                </script>
                                 <div class="course-tags">
                                     {% if course.dept_count == 5 %}
                                         <span class="course-tag tag-common">共通科目</span>

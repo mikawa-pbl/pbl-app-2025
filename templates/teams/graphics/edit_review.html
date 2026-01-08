@@ -218,6 +218,31 @@
             font-weight: 600;
             font-size: 15px;
         }
+        /* 星評価表示用スタイル */
+        .star-rating-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .star-filled {
+            color: #FFA500;
+        }
+        .star-half {
+            position: relative;
+            display: inline-block;
+            color: #cbd5e1;
+        }
+        .star-half::before {
+            content: '★';
+            position: absolute;
+            left: 0;
+            width: 50%;
+            overflow: hidden;
+            color: #FFA500;
+        }
+        .star-empty {
+            color: #cbd5e1;
+        }
     </style>
 </head>
 <body>
@@ -248,9 +273,15 @@
                         <strong>ISBN:</strong> {{ review.book.isbn }}<br>
                     {% endif %}
                     <strong>おすすめ度:</strong>
-                    {% for i in "12345" %}
-                        {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
-                    {% endfor %}
+                    <span class="star-rating-display">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <span class="star-filled">★</span>
+                            {% else %}
+                                <span class="star-empty">☆</span>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
                     ({{ review.rating }}/5)
                 </div>
             {% else %}
@@ -260,9 +291,15 @@
                     <strong>年度:</strong> {{ review.course_offering.year }}年度<br>
                     <strong>開講学期:</strong> {{ review.course_offering.semester }}<br>
                     <strong>おすすめ度:</strong>
-                    {% for i in "12345" %}
-                        {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
-                    {% endfor %}
+                    <span class="star-rating-display">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <span class="star-filled">★</span>
+                            {% else %}
+                                <span class="star-empty">☆</span>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
                     ({{ review.rating }}/5)
                 </div>
             {% endif %}

@@ -68,11 +68,11 @@ class MyTeamTests(TestCase):
 
     def setUp(self):
         # テストデータの作成（テスト実行のたびにリセットされます）
-        MyModel.objects.create(name="test data")
+        MyModel.objects.using('<チーム名>').create(name="test data")
 
     def test_example(self):
         # テストの実行
-        count = MyModel.objects.count()
+        count = MyModel.objects.using('<チーム名>').count()
         self.assertEqual(count, 1)
 ```
 

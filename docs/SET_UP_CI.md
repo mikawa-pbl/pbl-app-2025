@@ -34,7 +34,7 @@ jobs:
 
 ### 2. `pbl_project/settings.py`の設定（重要）
 
-テスト実行時のデータベース依存関係エラー（Circular dependency）を防ぐため、pbl_projects/settings.pyの`DATABASES`に以下を追記してください。
+テスト実行時のデータベース依存関係エラー（Circular dependency）を防ぐため、pbl_project/settings.pyの`DATABASES`に以下を追記してください。
 
 ```python
     '<チーム名>': {

@@ -23,7 +23,7 @@ echo "Checking for modified or deleted migration files between $MERGE_BASE and $
 # Filter for paths matching '*/migrations/*.py'
 # Exclude __init__.py
 CHANGED_MIGRATIONS=$(git diff --name-status "$MERGE_BASE" "$CURRENT_HEAD" | \
-  grep -E '^(M|D|R[0-9]{1,3}|C[0-9]{1,3})\t' | \
+  grep -E '^(M|D|R[0-9]{1,3}|C[0-9]{1,3})\s' | \
   grep '/migrations/.*\.py$' | \
   grep -v '__init__.py' || true)
 

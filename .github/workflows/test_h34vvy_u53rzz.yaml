@@ -6,7 +6,8 @@ on:
       - main
     paths:
       - "h34vvy_u53rzz/**"
-
+      - ".github/workflows/h34vvy_u53rzz.yaml"
+      - ".github/workflows/reusable_team_ci.yaml"
 jobs:
   call-workflow:
     uses: ./.github/workflows/reusable_team_ci.yaml

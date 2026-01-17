@@ -94,9 +94,10 @@ class MyTeamTests(TestCase):
 CIは以下の順序で実行され、問題があればその時点で失敗（Fail）します。
 
 ### 1. makemigrationsの実行チェック
-- **内容**: `models.py` の変更に対するマイグレーションファイルが作成されているか、整合性が取れているかを確認します（`--check` オプションを使用）。
+
+- **内容**: `models.py` の変更に対するマイグレーションファイルが作成されているかを確認します（`--check` オプションを使用）。
 - **落ちる例**:
-  - `models.py` にフィールドを追加したが、`makemigrations` を実行してファイルをコミットし忘れた場合。
+  - `models.py` にフィールドを追加したが、`makemigrations` を実行して生成されたmigrationsファイルをコミットし忘れた場合。
   - **エラー**: `SystemCheckError: System check identified some issues...`
 
 ### 2. database migrationの実行

@@ -41,7 +41,7 @@ jobs:
           uv run python manage.py makemigrations ${{ inputs.target_app }} --check --dry-run
         
       - name: Migrate
-        run: uv run python manage.py migrate --database ${{ inputs.target_app }}
+        run: uv run python manage.py migrate --database ${{ inputs.target_app }} --noinput
 
       - name: Start Server & Health Check
         run: |

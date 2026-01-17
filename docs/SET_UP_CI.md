@@ -103,20 +103,19 @@ CIは以下の順序で実行され、問題があればその時点で失敗（
 
 - **内容**: `models.py` の変更に対するマイグレーションファイルが作成されているかを確認します（`--check` オプションを使用）。
 - **落ちる例**:
-  - `models.py` にフィールドを追加したが、`makemigrations` を実行して生成されたmigrationsファイルをコミットし忘れた場合。
-  - **エラー**: `SystemCheckError: System check identified some issues...`
+  - `models.py` にフィールドを追加したが、`makemigrations` を実行して生成されたmigrationsファイルをコミットし忘れた場合
+（例: `Migrations for　<チーム名>...`（以後、追加を忘れているファイルの一覧が出ます））。
 
 
 
 ### 3. サーバー起動チェック
 - **内容**: 開発サーバー（`runserver`）をバックグラウンドで起動し、HTTPリクエストに応答するかを確認します。
 - **落ちる例**:
-  - `views.py` や `urls.py` に `ImportError` や `SyntaxError` があり、Djangoが起動しない場合。
-  - **エラー**: `Server process died.` / `Server failed to respond.`
+  - `views.py` や `urls.py` に `ImportError` や `SyntaxError` があり、Djangoが起動しない場合（例：`Server process died.` / `Server failed to respond.`など）。
 
 ### 4. テストの実行
-- **内容**: `tests.py` に記述されたユニットテストを実行します。
+- **内容**: `<チーム名>/tests.py` に記述されたユニットテストを実行します。
 - **落ちる例**:
-  - 実装したロジックがテストの期待値と異なる場合。
-  - **エラー**: `AssertionError`
+  - 実装したロジックがテストの期待値と異なる場合（ 例：`AssertionError`）。
+  - テスト中で循環参照をしている場合（例：test1.pyで`import test2`を入れており、また、test2.pyでも`import test1`を入れている）（例：`django.core.exceptions.ImproperlyConfigured`）
 

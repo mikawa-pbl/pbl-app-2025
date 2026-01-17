@@ -1,0 +1,14 @@
+name: Test team_tansaibou
+
+on:
+  pull_request:
+    branches:
+      - h34vvy_u53rzz/ci_migration_change_test_b
+    paths:
+      - "team_tansaibou/**"
+
+jobs:
+  call-workflow:
+    uses: ./.github/workflows/reusable_team_ci.yaml
+    with:
+      target_app: "team_tansaibou"

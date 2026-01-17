@@ -24,6 +24,8 @@ on:
       - main
     paths:
       - "<チームのディレクトリ名>/**"
+      - ".github/workflows/<チーム名>.yaml"
+      - ".github/workflows/reusable_team_ci.yaml"
 
 jobs:
   call-workflow:

@@ -48,7 +48,7 @@ jobs:
         'NAME': BASE_DIR / '<チーム名>' / 'db.sqlite3',
         # ▼ここから追加
         'TEST': {
-            'DEPENDENCIES': [],  # 依存関係を空に設定
+            'DEPENDENCIES': [],  # 外部のデータベース(defaultなど)を使用していない場合、依存関係を空に設定する
         },
         # ▲ここまで追加
     },

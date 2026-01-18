@@ -40,7 +40,7 @@ jobs:
 
 ### 2. `pbl_project/settings.py`の設定（重要）
 
-テスト実行時のデータベース依存関係エラー（Circular dependency）を防ぐため、pbl_project/settings.pyの`DATABASES`に以下を追記してください。
+始めてtestsを書いた後、`uv run python manage.py test <チーム名>`を実行すると、`django.core.exceptions.ImproperlyConfigured: Circular dependency in TEST[DEPENDENCIES]`というエラーが出ることがあります。この場合、テスト実行時のデータベース依存関係エラーが発生しているため、pbl_project/settings.pyの`DATABASES`に以下を追記してください。
 
 ```python
     '<チーム名>': {

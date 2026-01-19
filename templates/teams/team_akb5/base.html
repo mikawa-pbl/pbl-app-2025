@@ -6,6 +6,17 @@
     <title>{% block title %}Team AKB5{% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        /* Fix Leaflet zoom control conflict with Pico.css */
+        .leaflet-control-zoom-in,
+        .leaflet-control-zoom-out {
+            text-decoration: none !important;
+            color: #333 !important;
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
     {% block head %}{% endblock %}
 </head>
 <body>

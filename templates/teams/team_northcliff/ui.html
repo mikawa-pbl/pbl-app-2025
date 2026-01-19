@@ -261,6 +261,12 @@
                 state.userId = userData.user_id;
                 state.points = userData.points;
                 state.userLocation = { latitude: userData.latitude, longitude: userData.longitude };
+                
+                // 5分以内の閲覧権限を反映
+                if (userData.accessible_facility_ids) {
+                    userData.accessible_facility_ids.forEach(id => state.userFacilityAccess.add(id));
+                }
+
                 pointsDisplay.textContent = `保有: ${state.points}P`;
 
                 // 起動時に位置情報を要求
@@ -335,8 +341,16 @@
                 // --- ボタンは常に表示（最後に追記） ---
                 const btnContainer = document.createElement('div');
                 btnContainer.className = 'flex space-x-2 mt-4';
+                
+                let checkBtnHtml = '';
+                if (isUnlocked) {
+                   checkBtnHtml = `<button class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" data-action="update" data-id="${facility.id}">情報を更新</button>`;
+                } else {
+                   checkBtnHtml = `<button class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" data-action="unlock" data-id="${facility.id}">最新情報を取得 (1P消費)</button>`;
+                }
+
                 btnContainer.innerHTML = `
-                    <button class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" data-action="unlock" data-id="${facility.id}">最新情報を取得 (1P消費)</button>
+                    ${checkBtnHtml}
                     <button class="flex-none px-3 py-2 font-medium text-white bg-green-600 rounded-md hover:bg-green-700" data-action="post" data-facility-id="${facility.id}">投稿する</button>
                 `;
                 facilityCard.appendChild(btnContainer);
@@ -371,17 +385,47 @@
             }
         }
 
+        // --- 共通アクション実行 ---
+        async function executeUnlockInList(fid) {
+            try {
+                await apiCall(`/team_northcliff/api/${username}/access-facility/`, 'POST', { facility_id: fid });
+                // ポイント同期
+                const res = await apiCall(`/team_northcliff/api/${username}/user-data/`);
+                state.points = res.points;
+                state.userFacilityAccess.add(fid);
+                pointsDisplay.textContent = `保有: ${state.points}P`;
+                
+                // 施設再取得
+                const fData = await apiCall('/team_northcliff/api/facilities/');
+                state.facilities = fData.facilities;
+                render();
+            } catch (error) {
+                console.error('アクセスエラー:', error);
+                alert('情報取得に失敗しました');
+            }
+        }
+
         // --- イベントリスナー ---
         facilityList.addEventListener('click', async (event) => {
             const btn = event.target.closest('button');
             if (!btn) return;
 
             const action = btn.dataset.action;
+            
+            // --- Unlock (課金確認あり) ---
             if (action === 'unlock') {
                 if (state.points <= 0) { alert('ポイントが足りません'); return; }
                 state.targetFacilityId = parseInt(btn.dataset.id);
                 openModal(confirmModal);
                 return;
+            }
+
+            // --- Update (課金確認なし・無料) ---
+            if (action === 'update') {
+               const fid = parseInt(btn.dataset.id);
+               // モーダルなしで即実行
+               await executeUnlockInList(fid);
+               return;
             }
 
             if (action === 'post') {
@@ -424,23 +468,16 @@
         });
 
         cancelUnlockBtn.addEventListener('click', () => {
-            closeModal(confirmModal);
-            state.targetFacilityId = null;
+             closeModal(confirmModal);
+             state.targetFacilityId = null;
         });
-
+ 
         confirmUnlockBtn.addEventListener('click', async () => {
-            try {
-                await apiCall(`/team_northcliff/api/${username}/access-facility/`, 'POST', { facility_id: state.targetFacilityId });
-                state.points -= 1;
-                state.userFacilityAccess.add(state.targetFacilityId);
-                pointsDisplay.textContent = `保有: ${state.points}P`;
-                render();
-            } catch (error) {
-                console.error('アクセスエラー:', error);
-                alert('情報取得に失敗しました');
-            }
-            closeModal(confirmModal);
-            state.targetFacilityId = null;
+             const fid = state.targetFacilityId;
+             closeModal(confirmModal);
+             state.targetFacilityId = null;
+             // 確認後は実行するだけ
+             await executeUnlockInList(fid);
         });
 
         cancelPostBtn.addEventListener('click', () => {

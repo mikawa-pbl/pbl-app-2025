@@ -12,7 +12,18 @@ class UserRegisterForm(forms.ModelForm):
                   ]
         widgets = {
             'password': forms.PasswordInput(),
+            'email': forms.EmailInput(attrs={
+                'pattern': r'.*@tut\.jp$',
+                'title': '豊橋技術科学大学のメールアドレスを入力してください',
+                'placeholder': 'example@tut.jp'
+            }),
         }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email and not email.endswith('@tut.jp'):
+            raise forms.ValidationError("大学のメールアドレスである必要があります。")
+        return email
 
 class MyPageEditForm(forms.ModelForm):
     class Meta:

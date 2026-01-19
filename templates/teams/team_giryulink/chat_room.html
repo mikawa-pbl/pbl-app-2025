@@ -85,6 +85,67 @@
             font-weight: 700;
         }
         
+        .confirmation-section {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+        }
+        
+        .confirmation-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .confirmation-status {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .status-icon {
+            font-size: 1rem;
+        }
+        
+        .confirm-btn {
+            width: 100%;
+            padding: 10px;
+            background: #ffc107;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        
+        .confirm-btn:hover {
+            background: #ffb300;
+        }
+        
+        .confirm-btn:disabled {
+            background: #e0e0e0;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        .transaction-completed {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
         .messages-container {
             flex: 1;
             overflow-y: auto;
@@ -210,6 +271,40 @@
                 <div class="product-price">¥{{ chat_room.product.price|floatformat:0 }}</div>
             </div>
         </div>
+        
+        {% if chat_room.product.is_sold and not chat_room.product.is_completed %}
+        <div class="confirmation-section">
+            <div class="confirmation-title">購入同意</div>
+            <div class="confirmation-status">
+                <div class="status-item">
+                    <span class="status-icon">{% if chat_room.product.seller_confirmed %}✅{% else %}⏳{% endif %}</span>
+                    <span>出品者: {% if chat_room.product.seller_confirmed %}同意済み{% else %}待機中{% endif %}</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-icon">{% if chat_room.product.buyer_confirmed %}✅{% else %}⏳{% endif %}</span>
+                    <span>購入者: {% if chat_room.product.buyer_confirmed %}同意済み{% else %}待機中{% endif %}</span>
+                </div>
+            </div>
+            {% if current_user.id == chat_room.seller_id and not chat_room.product.seller_confirmed %}
+            <form method="post" action="{% url 'team_giryulink:confirm_purchase' chat_room.id %}">
+                {% csrf_token %}
+                <button type="submit" class="confirm-btn">購入同意する</button>
+            </form>
+            {% elif current_user.id == chat_room.buyer_id and not chat_room.product.buyer_confirmed %}
+            <form method="post" action="{% url 'team_giryulink:confirm_purchase' chat_room.id %}">
+                {% csrf_token %}
+                <button type="submit" class="confirm-btn">購入同意する</button>
+            </form>
+            {% else %}
+            <button class="confirm-btn" disabled>同意済み</button>
+            {% endif %}
+        </div>
+        {% elif chat_room.product.is_completed %}
+        <div class="confirmation-section transaction-completed">
+            <div class="confirmation-title">✅ 取引完了</div>
+            <p style="margin: 0; font-size: 0.85rem;">両者が購入に同意しました。取引は完了です。</p>
+        </div>
+        {% endif %}
     </header>
     
     <div class="messages-container" id="messagesContainer">

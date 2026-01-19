@@ -19,29 +19,29 @@
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                 <tr>
-                    <th scope="col" class="px-6 py-3">名前</th>
-                    <th scope="col" class="px-6 py-3">学籍番号</th>
-                    <th scope="col" class="px-6 py-3">メール</th>
-                    <th scope="col" class="px-6 py-3">操作</th>
+                    <th scope="col" class="px-4 py-3">名前</th>
+                    <th scope="col" class="hidden md:table-cell px-4 py-3">学籍番号</th>
+                    <th scope="col" class="hidden md:table-cell px-4 py-3">メール</th>
+                    <th scope="col" class="px-4 py-3">操作</th>
                 </tr>
             </thead>
             <tbody>
                 {% for member in members %}
                 <tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="px-6 py-4 font-medium text-gray-900">{{ member.name }}</td>
-                    <td class="px-6 py-4">{{ member.student_id|default:"-" }}</td>
-                    <td class="px-6 py-4">{{ member.email|default:"-" }}</td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-2">
+                    <td class="px-4 py-4 font-medium text-gray-900">{{ member.name }}</td>
+                    <td class="hidden md:table-cell px-4 py-4">{{ member.student_id|default:"-" }}</td>
+                    <td class="hidden md:table-cell px-4 py-4">{{ member.email|default:"-" }}</td>
+                    <td class="px-4 py-4">
+                        <div class="flex flex-col md:flex-row gap-1">
                             <a href="{% url 'team_tansaibou:member_edit' member.id %}"
-                               class="text-white bg-gray-500 hover:bg-gray-600 font-medium rounded-lg text-xs px-3 py-1.5">
+                               class="text-white bg-gray-500 hover:bg-gray-600 font-medium rounded-lg text-xs px-3 py-1.5 text-center">
                                 編集
                             </a>
                             <form action="{% url 'team_tansaibou:member_delete' member.id %}" method="post" class="inline"
                                   onsubmit="return confirm('本当に削除しますか？');">
                                 {% csrf_token %}
                                 <button type="submit"
-                                        class="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-xs px-3 py-1.5">
+                                        class="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-xs px-3 py-1.5 w-full">
                                     削除
                                 </button>
                             </form>

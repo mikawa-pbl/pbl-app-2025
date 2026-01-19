@@ -19,39 +19,39 @@
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                 <tr>
-                    <th scope="col" class="px-6 py-3">ID</th>
-                    <th scope="col" class="px-6 py-3">商品名</th>
-                    <th scope="col" class="px-6 py-3">価格</th>
-                    <th scope="col" class="px-6 py-3">在庫</th>
-                    <th scope="col" class="px-6 py-3">説明</th>
-                    <th scope="col" class="px-6 py-3">状態</th>
-                    <th scope="col" class="px-6 py-3">操作</th>
+                    <th scope="col" class="hidden md:table-cell px-4 py-3">ID</th>
+                    <th scope="col" class="px-4 py-3">商品名</th>
+                    <th scope="col" class="px-4 py-3">価格</th>
+                    <th scope="col" class="hidden md:table-cell px-4 py-3">原価</th>
+                    <th scope="col" class="px-4 py-3">在庫</th>
+                    <th scope="col" class="hidden md:table-cell px-4 py-3">状態</th>
+                    <th scope="col" class="px-4 py-3">操作</th>
                 </tr>
             </thead>
             <tbody>
                 {% for product in products %}
                 <tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="px-6 py-4 text-gray-500">{{ product.id }}</td>
-                    <td class="px-6 py-4 font-medium text-gray-900">{{ product.name }}</td>
-                    <td class="px-6 py-4 font-bold text-blue-600">¥{{ product.current_price|floatformat:0 }}</td>
-                    <td class="px-6 py-4">{{ product.stock }}個</td>
-                    <td class="px-6 py-4 text-gray-500">{{ product.description|default:"-"|truncatewords:10 }}</td>
-                    <td class="px-6 py-4">
+                    <td class="hidden md:table-cell px-4 py-4 text-gray-500">{{ product.id }}</td>
+                    <td class="px-4 py-4 font-medium text-gray-900">{{ product.name }}</td>
+                    <td class="px-4 py-4 font-bold text-blue-600">¥{{ product.current_price|floatformat:0 }}</td>
+                    <td class="hidden md:table-cell px-4 py-4 text-gray-600">¥{{ product.cost_price|floatformat:0 }}</td>
+                    <td class="px-4 py-4">{{ product.stock }}</td>
+                    <td class="hidden md:table-cell px-4 py-4">
                         {% if product.is_active %}
                         <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">販売中</span>
                         {% else %}
                         <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">停止中</span>
                         {% endif %}
                     </td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-2">
+                    <td class="px-4 py-4">
+                        <div class="flex flex-col md:flex-row gap-1">
                             <a href="{% url 'team_tansaibou:product_edit' product.id %}"
-                               class="text-white bg-gray-500 hover:bg-gray-600 font-medium rounded-lg text-xs px-3 py-1.5">
+                               class="text-white bg-gray-500 hover:bg-gray-600 font-medium rounded-lg text-xs px-3 py-1.5 text-center">
                                 編集
                             </a>
                             <a href="{% url 'team_tansaibou:product_restock' product.id %}"
-                               class="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-xs px-3 py-1.5">
-                                在庫補充
+                               class="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-xs px-3 py-1.5 text-center">
+                                補充
                             </a>
                         </div>
                     </td>

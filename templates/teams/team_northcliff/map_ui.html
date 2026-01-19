@@ -152,6 +152,12 @@
                 state.userId = userData.user_id;
                 state.points = userData.points;
                 state.userLocation = { latitude: userData.latitude, longitude: userData.longitude };
+                
+                // 5分以内の閲覧権限を反映
+                if (userData.accessible_facility_ids) {
+                    userData.accessible_facility_ids.forEach(id => state.userFacilityAccess.add(id));
+                }
+
                 updatePoints();
 
                 // 起動時に位置情報を要求
@@ -310,8 +316,15 @@
             // 解除ボタン
             const unlockBtn = document.createElement('button');
             unlockBtn.className = 'popup-btn btn-unlock';
-            unlockBtn.textContent = '最新情報を取得 (1P消費)';
-            unlockBtn.onclick = () => openUnlockModal(facility.id);
+            
+            if (isUnlocked) {
+                unlockBtn.textContent = '情報を更新';
+                // アンロック済みなら確認なしで実行
+                unlockBtn.onclick = () => executeUnlock(facility.id);
+            } else {
+                unlockBtn.textContent = '最新情報を取得 (1P消費)';
+                unlockBtn.onclick = () => openUnlockModal(facility.id);
+            }
             div.appendChild(unlockBtn);
 
             // 投稿ボタン
@@ -427,14 +440,18 @@
         };
 
         // アンロック実行
-        document.getElementById('confirm-unlock-btn').onclick = async () => {
-            const fid = state.targetFacilityId;
+        async function executeUnlock(fid) {
             try {
                 await apiCall(`/team_northcliff/api/${username}/access-facility/`, 'POST', { facility_id: fid });
-                state.points -= 1;
+                // 成功時のみ状態更新（ポイントは消費されていないかもしれないが、Backendが管理）
+                // APIレスポンスに現在のポイントが含まれているのでそれを反映
+                const res = await apiCall(`/team_northcliff/api/${username}/user-data/`);
+                state.points = res.points; // 正確なポイントに更新
                 state.userFacilityAccess.add(fid);
                 updatePoints();
-                closeModal(confirmModal);
+                
+                // 施設情報を再取得して最新化
+                await loadFacilities();
                 
                 // ポップアップを維持して内容を更新
                 const marker = markersMap[fid];
@@ -443,11 +460,16 @@
                     // ポップアップが開いていれば中身を書き換え
                     if (map.hasLayer(marker.getPopup())) {
                         marker.setPopupContent(generatePopupContent(f));
-                    } else {
-                        marker.openPopup();
                     }
                 }
-            } catch(e) { alert(e.message); state.targetFacilityId = null; }
+            } catch(e) { alert(e.message); }
+        }
+
+        document.getElementById('confirm-unlock-btn').onclick = async () => {
+             const fid = state.targetFacilityId;
+             closeModal(confirmModal);
+             await executeUnlock(fid);
+             state.targetFacilityId = null;
         };
 
         // 投稿実行

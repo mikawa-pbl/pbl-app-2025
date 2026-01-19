@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
-from .models import Good
-from .forms import GoodsForm
+from .models import Good, SOSMessage
+from .forms import GoodsForm, SOSMessageForm
 from types import SimpleNamespace
 from django.db import connections
 from pathlib import Path
@@ -8,12 +8,16 @@ import mimetypes
 import uuid
 from django.http import FileResponse, Http404
 from django.conf import settings
+from django.utils import timezone
 
 # def index(request):
 #     return render(request, 'teams/team_cake/index.html')
 
 def _get_index_context():
     try:
+        # Auto-delete expired goods before fetching
+        Good.objects.using('team_cake').filter(expiration_time__lt=timezone.now()).delete()
+        
         # 通常はORMで取得（UUIDField の変換が走る）
         qs = Good.objects.using('team_cake').all()
         
@@ -21,8 +25,10 @@ def _get_index_context():
         all_goods = list(qs)
         slider_goods = all_goods[-3:] if len(all_goods) >= 3 else all_goods
         slider_goods = list(reversed(slider_goods))
+
+        sos_message = SOSMessage.objects.using('team_cake').filter(is_active=True).order_by('-created_at').first()
         
-        return {'goods': qs, 'slider_goods': slider_goods}
+        return {'goods': qs, 'slider_goods': slider_goods, 'sos_message': sos_message}
     except ValueError:
         # DB に古い整数 ID 等、UUID として変換できない値が入っている場合のフォールバック。
         # テンプレートは objects の `.name` / `.price` を参照する想定のため SimpleNamespace を作る。
@@ -36,7 +42,7 @@ def _get_index_context():
         slider_goods = goods[-3:] if len(goods) >= 3 else goods
         slider_goods = list(reversed(slider_goods))
         
-        return {'goods': goods, 'slider_goods': slider_goods}
+        return {'goods': goods, 'slider_goods': slider_goods, 'sos_message': None}
 
 def index(request):
     context = _get_index_context()
@@ -167,6 +173,20 @@ def delete_good(request, pk):
 
         return redirect('team_cake:index')
     return redirect('team_cake:index')
+
+
+
+def add_sos_message(request):
+    if request.method == 'POST':
+        form = SOSMessageForm(request.POST)
+        if form.is_valid():
+            sos = form.save(commit=False)
+            sos.save(using='team_cake')
+            return redirect('team_cake:index')
+    else:
+        form = SOSMessageForm()
+    
+    return render(request, 'teams/team_cake/add_sos_message.html', {'form': form})
 
 
 def serve_template_image(request, filename: str):

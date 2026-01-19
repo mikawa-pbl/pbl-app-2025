@@ -67,6 +67,37 @@
             white-space: pre-wrap;
         }
         
+        .edit-section {
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            margin: 20px 0;
+        }
+        
+        .edit-btn {
+            background: #2196f3;
+            color: #fff;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+            transition: all 0.2s ease;
+        }
+        
+        .edit-btn:hover {
+            background: #1976d2;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+        
         .seller-section {
             display: flex;
             align-items: center;
@@ -305,6 +336,16 @@
             <div class="product-price">¥{{ product.price|floatformat:0 }}</div>
             <div class="product-description">{{ product.description|default:"商品の説明はありません。" }}</div>
         </div>
+        
+        <!-- 編集セクション（自分の商品で未購入の場合のみ表示） -->
+        {% if current_user and current_user.id == product.user_id and not product.is_sold %}
+        <div class="edit-section">
+            <a href="{% url 'team_giryulink:edit_product' product.id %}" class="edit-btn">
+                <span>✏️</span>
+                <span>商品情報を編集</span>
+            </a>
+        </div>
+        {% endif %}
         
         <div class="seller-section">
             <div class="seller-info">

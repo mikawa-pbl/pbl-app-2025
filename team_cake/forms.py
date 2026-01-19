@@ -8,7 +8,10 @@ class GoodsForm(forms.ModelForm):
 
     class Meta:
         model = Good
-        fields = ['name', 'description', 'price', 'original_price']
+        fields = ['name', 'description', 'price', 'original_price', 'expiration_time']
+        widgets = {
+            'expiration_time': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'}),
+        }
 
 
 class SOSMessageForm(forms.ModelForm):

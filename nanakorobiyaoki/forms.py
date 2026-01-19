@@ -15,7 +15,6 @@ class UserRegisterForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={
                 'pattern': r'.*@tut\.jp$',
                 'title': '豊橋技術科学大学のメールアドレスを入力してください',
-                'placeholder': 'example@tut.jp'
             }),
         }
 
@@ -58,7 +57,7 @@ class LoginForm(forms.Form):
 class CommunityForm(forms.ModelForm):
     class Meta:
         model = Community
-        fields = ['name', 'description', 'image']
+        fields = ['name', 'description', 'category', 'image']
 
 class PostForm(forms.ModelForm):
     class Meta:

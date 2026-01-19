@@ -28,12 +28,19 @@ def index(request):
 def home(request):
     if 'user_id' not in request.session:
         return redirect('nanakorobiyaoki:index')
-        
-    # 全コミュニティ一覧 (community_listの内容も統合)
-    all_communities = Community.objects.all().order_by('-created_at')
-            
+    
+    user = get_object_or_404(MyPage, user_id=request.session['user_id'])
+    category = request.GET.get('category')
+    
+    # サイドバー等で使用される joined_communities をここでも取得してフィルタリング
+    joined_communities = user.communities.all().order_by('-created_at')
+    if category and category != 'すべて':
+        joined_communities = joined_communities.filter(category=category)
+    
+    # コンテキストプロセッサーと重複するが、フィルタリング後のリストを優先させる
     return render(request, 'teams/nanakorobiyaoki/home.html', {
-        'communities': all_communities
+        'joined_communities': joined_communities,
+        'current_category': category or 'すべて'
     })
 
 def members(request):
@@ -49,6 +56,8 @@ def logout_view(request):
 
 
 def mypage(request):
+    if 'user_id' not in request.session:
+        return redirect('nanakorobiyaoki:index')
     qs = MyPage.objects.all()
     return render(request, 'teams/nanakorobiyaoki/mypage.html', {'mypage': qs})
 
@@ -63,6 +72,8 @@ def user_profile(request, user_id):
     return render(request, 'teams/nanakorobiyaoki/mypage.html', context)
 
 def users(request):
+    if 'user_id' not in request.session:
+        return redirect('nanakorobiyaoki:index')
     all_users = MyPage.objects.all()
     context = {
         'users': all_users
@@ -70,6 +81,8 @@ def users(request):
     return render(request, 'teams/nanakorobiyaoki/users.html', context)
 
 def user_profile_edit(request, user_id):
+    if 'user_id' not in request.session:
+        return redirect('nanakorobiyaoki:index')
     user_data = get_object_or_404(MyPage, user_id=user_id)
     if request.method == 'POST':
         form = MyPageEditForm(request.POST, request.FILES, instance=user_data)
@@ -120,6 +133,8 @@ def community_create(request):
     return render(request, 'teams/nanakorobiyaoki/community_form.html', {'form': form})
 
 def community_detail(request, community_id):
+    if 'user_id' not in request.session:
+        return redirect('nanakorobiyaoki:index')
     community = get_object_or_404(Community, id=community_id)
     posts = community.posts.all().order_by('-created_at')
     is_member = False
@@ -191,6 +206,8 @@ def post_delete(request, post_id):
     return redirect('nanakorobiyaoki:community_detail', community_id=community_id)
 
 def post_detail(request, post_id):
+    if 'user_id' not in request.session:
+        return redirect('nanakorobiyaoki:index')
     post = get_object_or_404(Post, id=post_id)
     comments = post.comments.all().order_by('created_at')
     comment_form = CommentForm()
@@ -215,15 +232,27 @@ def comment_create(request, post_id):
     return redirect('nanakorobiyaoki:post_detail', post_id=post_id)
 
 def community_list(request):
+    if 'user_id' not in request.session:
+        return redirect('nanakorobiyaoki:index')
     query = request.GET.get('q')
+    category = request.GET.get('category')
+    
+    communities = Community.objects.all()
+    
     if query:
-        communities = Community.objects.filter(
+        communities = communities.filter(
             Q(name__icontains=query) | Q(description__icontains=query)
-        ).distinct().order_by('-created_at')
-    else:
-        communities = Community.objects.all().order_by('-created_at')
+        )
+    
+    if category and category != 'すべて':
+        communities = communities.filter(category=category)
+        
+    communities = communities.distinct().order_by('-created_at')
+    
     return render(request, 'teams/nanakorobiyaoki/community_list.html', {
         'communities': communities,
+        'current_category': category or 'すべて',
+        'q': query or ''
     })
 
 def message_inbox(request):

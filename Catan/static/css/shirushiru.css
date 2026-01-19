@@ -35,6 +35,19 @@
     font-size: 13px;
 }
 
+/* コメント表示を高さ制限付きのスクロール領域にする */
+.scroll-comment {
+    max-height: 6rem; /* 必要なら調整: 例 6rem (~96px) */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* iOS 滑らかスクロール */
+    padding: 6px 8px;
+    box-sizing: border-box;
+    background: #fff; /* 必要なら薄い背景色に */
+    white-space: pre-wrap; /* 改行を保持して折返す */
+    word-break: break-word;
+    border-radius: 4px;
+}
+
 .profile-inlab {
     text-align: center;
     margin-bottom: 8px;
@@ -282,7 +295,8 @@ td {
 }
 
 .dialog-content select,
-.dialog-content input {
+.dialog-content input,
+.dialog-content textarea {
     width: 100%;
     padding: 8px;
     border: 1px solid #aaa;
@@ -291,6 +305,11 @@ td {
     box-sizing: border-box; /* 幅をパディング・ボーダー込みで一致させる */
     font-size: 14px;
     line-height: 1.4;
+}
+
+.dialog-content textarea {
+    resize: vertical;
+    min-height: 3.2rem;
 }
 
 .dialog-buttons {

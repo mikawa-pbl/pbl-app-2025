@@ -79,13 +79,47 @@ def get_or_create_teacher(teacher_name):
     return teacher
 
 
+def map_department_to_system(department_name):
+    """
+    学科名を系に変換する
+
+    機械 → 1系
+    電気 → 2系
+    情報 → 3系
+    化学・環境 → 4系
+    建築 → 5系
+    その他 → None（登録しない）
+    """
+    # 系へのマッピング
+    if '機械' in department_name:
+        return '1系'
+    elif '電気' in department_name or '電子' in department_name:
+        return '2系'
+    elif '情報' in department_name or '知能' in department_name:
+        return '3系'
+    elif '化学' in department_name or '生命' in department_name or '環境' in department_name:
+        return '4系'
+    elif '建築' in department_name or '都市' in department_name:
+        return '5系'
+    else:
+        # その他の学科は登録しない
+        return None
+
+
 def get_or_create_department(department_name):
-    """学科マスタの取得または作成"""
+    """学科マスタの取得または作成（系にマッピング）"""
+    # 学科名を系に変換
+    system_name = map_department_to_system(department_name)
+
+    if system_name is None:
+        # 5つの系に該当しない場合はNoneを返す
+        return None
+
     department, created = Department.objects.using('graphics').get_or_create(
-        name=department_name
+        name=system_name
     )
     if created:
-        print(f"  [新規学科] {department_name}")
+        print(f"  [新規学科] {system_name}")
     return department
 
 
@@ -114,38 +148,57 @@ def process_csv_file(csv_path, year):
             # 科目マスタの取得または作成
             subject = get_or_create_subject(subject_name)
 
-            # 開講情報の重複チェック
-            existing = CourseOffering.objects.using('graphics').filter(
+            # 教員と学科を事前に処理
+            teachers = parse_teachers(teacher_str)
+            departments_str = parse_departments(department_str)
+
+            # 学科オブジェクトを取得（5系に該当するもののみ）
+            departments = []
+            for dept_name in departments_str:
+                department = get_or_create_department(dept_name)
+                if department is not None:
+                    departments.append(department)
+
+            # 5つの系のいずれにも該当しない場合はスキップ
+            if not departments:
+                print(f"  [スキップ] {subject_name} ({year}年度, {semester}, {grade}) - 5つの系に該当しない")
+                continue
+
+            # 教員オブジェクトを取得
+            teacher_objs = [get_or_create_teacher(t) for t in teachers]
+
+            # 開講情報の重複チェック（科目、年度、学期、学年、選択必須、担当教員、学科が完全一致）
+            existing = None
+            candidates = CourseOffering.objects.using('graphics').filter(
                 subject=subject,
                 year=year,
                 semester=semester,
-                grade=grade
-            ).first()
+                grade=grade,
+                is_required=is_required
+            )
+
+            for candidate in candidates:
+                # 担当教員が完全一致するか確認
+                candidate_teachers = set(candidate.teachers.all())
+                if candidate_teachers != set(teacher_objs):
+                    continue
+
+                # 学科が完全一致するか確認
+                candidate_departments = set(candidate.departments.all())
+                if candidate_departments != set(departments):
+                    continue
+
+                # 完全一致する開講情報が見つかった
+                existing = candidate
+                break
 
             if existing:
-                # 既存の開講情報がある場合、教員と学科を追加
-                teachers = parse_teachers(teacher_str)
-                departments = parse_departments(department_str)
-
-                # 時間割番号とナンバリングを更新
+                # 完全に同じ開講情報が既に存在する場合は、時間割番号とナンバリングのみ更新
                 if timetable_number:
                     existing.timetable_number = timetable_number
                 if numbering:
                     existing.numbering = numbering
                 existing.save()
-
-                # 教員を追加
-                for teacher_name in teachers:
-                    teacher = get_or_create_teacher(teacher_name)
-                    if teacher not in existing.teachers.all():
-                        existing.teachers.add(teacher)
-
-                # 学科を追加
-                for dept_name in departments:
-                    department = get_or_create_department(dept_name)
-                    if department not in existing.departments.all():
-                        existing.departments.add(department)
-
                 print(f"  [更新] {subject_name} ({year}年度, {semester}, {grade})")
             else:
                 # 新規開講情報を作成
@@ -160,18 +213,99 @@ def process_csv_file(csv_path, year):
                 )
 
                 # 教員を追加
-                teachers = parse_teachers(teacher_str)
-                for teacher_name in teachers:
-                    teacher = get_or_create_teacher(teacher_name)
+                for teacher in teacher_objs:
                     course_offering.teachers.add(teacher)
 
                 # 学科を追加
-                departments = parse_departments(department_str)
-                for dept_name in departments:
-                    department = get_or_create_department(dept_name)
+                for department in departments:
                     course_offering.departments.add(department)
 
                 print(f"  [新規] {subject_name} ({year}年度, {semester}, {grade})")
+
+
+def consolidate_grades():
+    """
+    科目名、担当教員、選択必須、開講学期、開講学科が一致し、学年だけが異なる開講情報を統合する
+    例: 同じ条件でB3とB4 → B3, B4
+    """
+    print("\n" + "=" * 80)
+    print("学年統合処理開始")
+    print("=" * 80)
+
+    # 全ての開講情報を取得
+    all_offerings = CourseOffering.objects.using('graphics').all()
+
+    # subject, year, semester, is_required でグループ化
+    from collections import defaultdict
+    grouped = defaultdict(list)
+
+    for offering in all_offerings:
+        key = (offering.subject.id, offering.year, offering.semester, offering.is_required)
+        grouped[key].append(offering)
+
+    consolidated_count = 0
+
+    for key, offerings in grouped.items():
+        if len(offerings) <= 1:
+            # 1件しかない場合はスキップ
+            continue
+
+        # 担当教員と学科が完全に一致するグループを探す
+        processed = set()
+
+        for i, first in enumerate(offerings):
+            if i in processed:
+                continue
+
+            first_teachers = set(first.teachers.all())
+            first_departments = set(first.departments.all())
+
+            # 統合可能なグループを探す
+            to_merge = [first]
+            to_merge_indices = [i]
+
+            for j, other in enumerate(offerings):
+                if j <= i or j in processed:
+                    continue
+
+                other_teachers = set(other.teachers.all())
+                other_departments = set(other.departments.all())
+
+                # 担当教員と学科が完全に一致するか確認
+                if (first_teachers == other_teachers and
+                    first_departments == other_departments):
+                    to_merge.append(other)
+                    to_merge_indices.append(j)
+
+            if len(to_merge) <= 1:
+                continue
+
+            # 学年を統合（重複を除去）
+            grades_set = set()
+            for offering in to_merge:
+                # カンマ区切りで複数学年が含まれている可能性があるため、分割して追加
+                for grade in offering.grade.split(','):
+                    grades_set.add(grade.strip())
+
+            merged_grade = ', '.join(sorted(grades_set))
+
+            # 最初のレコードに統合
+            first.grade = merged_grade
+            first.save()
+
+            # 他のレコードを削除
+            for other in to_merge[1:]:
+                other.delete()
+
+            # 処理済みとしてマーク
+            for idx in to_merge_indices:
+                processed.add(idx)
+
+            consolidated_count += len(to_merge) - 1
+            print(f"  [統合] {first.subject.name} ({first.year}年度, {first.semester}): {merged_grade}")
+
+    print(f"\n統合完了: {consolidated_count}件の開講情報を統合")
+    print("=" * 80)
 
 
 def main():
@@ -210,6 +344,9 @@ def main():
         process_csv_file(csv_file, year)
 
     print("\n処理完了")
+
+    # 学年統合処理を実行
+    consolidate_grades()
 
     # 統計情報を表示
     print("\n=== データベース統計 ===")

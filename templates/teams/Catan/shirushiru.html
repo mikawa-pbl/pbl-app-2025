@@ -100,13 +100,13 @@
         <th></th>
       </tr>
       <tr class="in-lab">
-        <td>中村</td>
+        <td>小林(あ)</td>
         <td>研究室（B4,M1）C3-502</td>
         <td>プログラミング中</td>
         <td><span class="detail">詳細</span></td>
       </tr>
       <tr>
-        <td>小林</td>
+        <td>小林(わ)</td>
         <td>自宅</td>
         <td>体調不良</td>
         <td><span class="detail">詳細</span></td>
@@ -132,10 +132,10 @@
       <div class="dialog-content">
         <label for="locationSelect">場所:</label>
         <select id="locationSelect">
-          <option key="lab1" value="研究室（B4,M1）C3-502">研究室（B4,M1）C3-502</option>
-          <option key="lab2" value="研究室（M2）C3-503">研究室（M2）C3-503</option>
-          <option key="lab3" value="3Dプリンタの部屋 C3-511">3Dプリンタの部屋 C3-511</option>
-          <option key="lab4" value="ゼミ室 C3-513">ゼミ室 C3-513</option>
+          <option key="lab1" class="lab-option" value="研究室（B4,M1）C3-502">研究室（B4,M1）C3-502</option>
+          <option key="lab2" class="lab-option" value="研究室（M2）C3-503">研究室（M2）C3-503</option>
+          <option key="lab3" class="lab-option" value="3Dプリンタの部屋 C3-511">3Dプリンタの部屋 C3-511</option>
+          <option key="lab4" class="lab-option" value="ゼミ室 C3-513">ゼミ室 C3-513</option>
           <option key="class" value="授業">授業</option>
           <option key="oncampus" value="学内">学内</option>
           <option key="absent" value="不在">不在</option>
@@ -146,8 +146,8 @@
 
         <label for="talkStatusSelect">話しかけステータス:</label>
         <select id="talkStatusSelect">
-          <option value="ok">🗣️ OK（話しかけていい）</option>
-          <option value="ng">🤫 NG（話しかけないで）</option>
+          <option value="ok">🗣️ OK（話しかけていいよ）</option>
+          <option value="ng">🤫 NG（集中してるよ）</option>
         </select>
       </div>
       <div class="dialog-buttons">
@@ -174,7 +174,7 @@
         <div class="profile-inlab"><strong>今日の在室時間:</strong> 計<span id="in-lab-time">600</span>分</div>
       </div>
       <div class="dialog-footer">
-        <button class="slack-dm-btn" onclick="window.open('https://iimlabofficial.slack.com/archives/D06T65ZTJRW','_blank')">Slack（DM）へ移動</button>
+        <button id="detail-action-btn" class="slack-dm-btn" onclick="window.open('https://iimlabofficial.slack.com/archives/D06T65ZTJRW','_blank')">Slack（DM）へ移動</button>
       </div>
     </div>
   </div>

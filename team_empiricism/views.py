@@ -20,6 +20,9 @@ class ExperimentListView(ListView):
     paginate_by = 10  # ページネーション
 
     def get_queryset(self):
+        # 一覧表示時に自動処理を実行（要件3.6）
+        ExperimentPost.process_automatic_updates()
+        
         queryset = ExperimentPost.objects.all()
         
         # --- フィルタリング (検索) 機能 ---

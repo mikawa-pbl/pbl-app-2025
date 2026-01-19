@@ -39,6 +39,7 @@
             touch-action: manipulation;
         }
     }
+
 </style>
 {% endblock %}
 
@@ -191,9 +192,9 @@
 
         </div>
 
-        <!-- Sidebar (Right) - Cart -->
-        <div class="w-full lg:w-96 flex-shrink-0 lg:h-full">
-            <div class="cyber-card rounded-xl lg:h-full flex flex-col lg:overflow-hidden">
+        <!-- Sidebar (Right) - Cart (Desktop only) -->
+        <div class="hidden lg:flex w-96 flex-shrink-0 lg:h-full">
+            <div class="cyber-card rounded-xl lg:h-full flex flex-col lg:overflow-hidden w-full">
                 <div class="p-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
                     <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                         <svg class="w-5 h-5 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -232,6 +233,96 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- Mobile Floating Cart Button -->
+<button id="mobile-cart-btn" data-drawer-target="mobile-cart-drawer" data-drawer-show="mobile-cart-drawer" data-drawer-placement="bottom"
+    aria-controls="mobile-cart-drawer"
+    class="lg:hidden fixed bottom-4 right-4 z-40 bg-gray-800 text-white rounded-full p-4 shadow-xl flex items-center gap-3 hover:bg-gray-900 transition-all">
+    <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312" />
+    </svg>
+    <span id="mobile-cart-badge" class="hidden absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">0</span>
+    <span id="mobile-cart-total" class="font-bold text-lg">¥0</span>
+</button>
+
+<!-- Mobile Cart Drawer (Flowbite) -->
+<div id="mobile-cart-drawer"
+    class="fixed bottom-0 left-0 right-0 z-50 w-full overflow-y-auto transition-transform bg-white rounded-t-2xl translate-y-full"
+    tabindex="-1" aria-labelledby="drawer-bottom-label">
+
+    <!-- Drag Handle -->
+    <div class="flex justify-center pt-2 pb-1">
+        <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+        <h5 id="drawer-bottom-label" class="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <svg class="w-6 h-6 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312" />
+            </svg>
+            カート
+        </h5>
+        <div class="flex items-center gap-3">
+            <button type="button" onclick="clearCart()" class="text-sm text-red-600 hover:text-red-800 font-medium">全削除</button>
+            <button type="button" data-drawer-hide="mobile-cart-drawer" aria-controls="mobile-cart-drawer"
+                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex items-center justify-center">
+                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+                <span class="sr-only">閉じる</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Items -->
+    <div id="mobile-cart-items" class="overflow-y-auto p-4 space-y-3 max-h-[40vh]">
+        <div class="flex flex-col items-center justify-center h-32 text-gray-400">
+            <svg class="w-12 h-12 mb-2 text-gray-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 10V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v4m3-2 .917 11.923A1 1 0 0 1 17.92 21H6.08a1 1 0 0 1-.997-1.077L6 8h12Z" />
+            </svg>
+            <p class="text-sm">商品を選択してください</p>
+        </div>
+    </div>
+
+    <!-- Checkout Form (Mobile) -->
+    <div class="p-4 border-t border-gray-200 bg-gray-50 space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label for="mobile_recorded_by" class="block mb-1 text-sm font-medium text-gray-700">担当者</label>
+                <select id="mobile_recorded_by" class="cyber-input text-sm">
+                    <option value="">選択</option>
+                    {% for member in members %}
+                    <option value="{{ member.id }}">{{ member.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="mobile_payment_method" class="block mb-1 text-sm font-medium text-gray-700">支払方法</label>
+                <select id="mobile_payment_method" class="cyber-input text-sm">
+                    {% for value, label in payment_methods %}
+                    <option value="{{ value }}" {% if value == 'cash' %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Total & Checkout Button -->
+        <div class="pt-2">
+            <div class="flex justify-between items-end mb-3">
+                <span class="text-gray-600 font-medium">合計</span>
+                <span id="mobile-cart-total-display" class="text-3xl font-bold text-gray-900">¥0</span>
+            </div>
+            <button type="button" onclick="mobileCheckout()" id="mobile-checkout-btn" disabled
+                class="w-full text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-lg px-5 py-4 text-center disabled:bg-gray-300 disabled:cursor-not-allowed transition-all">
+                会計する
+            </button>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -281,7 +372,6 @@
         const qty = parseInt(newQuantity);
 
         if (isNaN(qty) || newQuantity === '' || newQuantity === null) {
-            // Don't update UI immediately to allow typing, but logic handled on blur/change
             return;
         }
 
@@ -292,7 +382,10 @@
 
         if (qty > item.stock) {
             alert(`${item.name}の在庫が不足しています（在庫: ${item.stock}）`);
-            document.getElementById(`qty-${index}`).value = item.stock; // Reset to max
+            const qtyInput = document.getElementById(`qty-${index}`);
+            const mobileQtyInput = document.getElementById(`mobile-qty-${index}`);
+            if (qtyInput) qtyInput.value = item.stock;
+            if (mobileQtyInput) mobileQtyInput.value = item.stock;
             item.quantity = item.stock;
         } else {
             item.quantity = qty;
@@ -301,7 +394,6 @@
     }
 
     function validateNumberInput(event) {
-        // 許可するキー: 数字、バックスペース、Delete、矢印キー、Tab
         const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
         if (allowedKeys.includes(event.key)) {
             return true;
@@ -320,94 +412,206 @@
         }
     }
 
+    // Generate cart item HTML (shared between desktop and mobile)
+    function generateCartItemHTML(item, index, isMobile = false) {
+        const subtotal = item.price * item.quantity;
+        const prefix = isMobile ? 'mobile-' : '';
+        const deleteVisibility = isMobile ? '' : 'opacity-0 group-hover:opacity-100';
+
+        return `
+        <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm flex justify-between items-center group relative">
+            <div class="flex-1 pr-4">
+                <h4 class="font-bold text-gray-900 text-base mb-1">${item.name}</h4>
+                <div class="text-sm text-gray-700">¥${item.price.toLocaleString()}</div>
+            </div>
+
+            <div class="flex flex-col items-end gap-2">
+                <div class="font-bold text-gray-900">¥${subtotal.toLocaleString()}</div>
+                <div class="flex items-center rounded-md border border-gray-300 bg-gray-50">
+                    <button type="button" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded-l-md transition-colors text-lg font-bold" onclick="updateQuantity(${index}, ${item.quantity - 1})">−</button>
+                    <input type="number" id="${prefix}qty-${index}" value="${item.quantity}" min="1" max="${item.stock}"
+                        class="w-12 h-8 text-center text-base border-0 border-x border-gray-300 bg-transparent p-0 focus:ring-0"
+                        onkeydown="validateNumberInput(event)" onchange="updateQuantity(${index}, this.value)">
+                    <button type="button" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded-r-md transition-colors text-lg font-bold" onclick="updateQuantity(${index}, ${item.quantity + 1})">+</button>
+                </div>
+            </div>
+
+            <button onclick="removeFromCart(${index})" class="absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full p-1 ${deleteVisibility} transition-opacity hover:bg-red-200 shadow-sm" title="削除">
+                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
+                </svg>
+            </button>
+        </div>`;
+    }
+
+    function getEmptyCartHTML() {
+        return `
+        <div class="flex flex-col items-center justify-center h-full text-gray-400 py-8">
+            <svg class="w-12 h-12 mb-2 text-gray-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v4m3-2 .917 11.923A1 1 0 0 1 17.92 21H6.08a1 1 0 0 1-.997-1.077L6 8h12Z"/>
+            </svg>
+            <p class="text-sm">商品を選択してください</p>
+        </div>`;
+    }
+
     function updateCart() {
+        // Desktop elements
         const cartItemsDiv = document.getElementById('cart-items');
         const cartTotalSpan = document.getElementById('cart-total');
         const checkoutBtn = document.getElementById('checkout-btn');
         const cartItemsInput = document.getElementById('cart_items_input');
 
+        // Mobile elements
+        const mobileCartItems = document.getElementById('mobile-cart-items');
+        const mobileCartBadge = document.getElementById('mobile-cart-badge');
+        const mobileCartTotal = document.getElementById('mobile-cart-total');
+        const mobileCartTotalDisplay = document.getElementById('mobile-cart-total-display');
+        const mobileCheckoutBtn = document.getElementById('mobile-checkout-btn');
+
+        const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
         if (cart.length === 0) {
-            cartItemsDiv.innerHTML = `
-            <div class="flex flex-col items-center justify-center h-full text-gray-400">
-                <svg class="w-12 h-12 mb-2 text-gray-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v4m3-2 .917 11.923A1 1 0 0 1 17.92 21H6.08a1 1 0 0 1-.997-1.077L6 8h12Z"/>
-                </svg>
-                <p class="text-sm">商品を選択してください</p>
-            </div>`;
+            // Desktop
+            cartItemsDiv.innerHTML = getEmptyCartHTML();
             cartTotalSpan.textContent = '¥0';
             checkoutBtn.disabled = true;
             checkoutBtn.textContent = '会計する';
             checkoutBtn.classList.add('bg-gray-300', 'cursor-not-allowed');
             checkoutBtn.classList.remove('bg-gray-800', 'hover:bg-gray-900', 'shadow-lg');
             cartItemsInput.value = '[]';
+
+            // Mobile
+            mobileCartItems.innerHTML = getEmptyCartHTML();
+            mobileCartBadge.classList.add('hidden');
+            mobileCartTotal.textContent = '¥0';
+            mobileCartTotalDisplay.textContent = '¥0';
+            mobileCheckoutBtn.disabled = true;
+            mobileCheckoutBtn.textContent = '会計する';
+            mobileCheckoutBtn.classList.add('bg-gray-300', 'cursor-not-allowed');
+            mobileCheckoutBtn.classList.remove('bg-gray-800', 'hover:bg-gray-900');
             return;
         }
 
-        let html = '';
+        let desktopHTML = '';
+        let mobileHTML = '';
         let total = 0;
 
         cart.forEach((item, index) => {
-            const subtotal = item.price * item.quantity;
-            total += subtotal;
-
-            html += `
-            <div class="bg-white border boundary-gray-200 rounded-lg p-3 shadow-sm flex justify-between items-center group relative">
-                <div class="flex-1 pr-4">
-                    <h4 class="font-bold text-gray-900 text-base mb-1">${item.name}</h4>
-                    <div class="text-sm text-gray-700">¥${item.price.toLocaleString()}</div>
-                </div>
-                
-                <div class="flex flex-col items-end gap-2">
-                    <div class="font-bold text-gray-900">¥${subtotal.toLocaleString()}</div>
-                    <div class="flex items-center rounded-md border border-gray-300 bg-gray-50">
-                        <button type="button" class="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded-l-md transition-colors" onclick="updateQuantity(${index}, ${item.quantity - 1})">-</button>
-                        <input type="number" id="qty-${index}" value="${item.quantity}" min="1" max="${item.stock}" 
-                            class="w-10 h-7 text-center text-sm border-0 border-x border-gray-300 bg-transparent p-0 focus:ring-0"
-                            onkeydown="validateNumberInput(event)" onchange="updateQuantity(${index}, this.value)">
-                        <button type="button" class="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded-r-md transition-colors" onclick="updateQuantity(${index}, ${item.quantity + 1})">+</button>
-                    </div>
-                </div>
-                
-                <button onclick="removeFromCart(${index})" class="absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 shadow-sm" title="削除">
-                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
-                    </svg>
-                </button>
-            </div>
-        `;
+            total += item.price * item.quantity;
+            desktopHTML += generateCartItemHTML(item, index, false);
+            mobileHTML += generateCartItemHTML(item, index, true);
         });
 
-        cartItemsDiv.innerHTML = html;
+        // Desktop update
+        cartItemsDiv.innerHTML = desktopHTML;
         cartTotalSpan.textContent = `¥${total.toLocaleString()}`;
         checkoutBtn.disabled = false;
         checkoutBtn.textContent = `会計する (¥${total.toLocaleString()})`;
         checkoutBtn.classList.remove('bg-gray-300', 'cursor-not-allowed');
         checkoutBtn.classList.add('bg-gray-800', 'hover:bg-gray-900', 'shadow-lg');
-
         cartItemsInput.value = JSON.stringify(cart);
+
+        // Mobile update
+        mobileCartItems.innerHTML = mobileHTML;
+        mobileCartBadge.textContent = itemCount;
+        mobileCartBadge.classList.remove('hidden');
+        mobileCartTotal.textContent = `¥${total.toLocaleString()}`;
+        mobileCartTotalDisplay.textContent = `¥${total.toLocaleString()}`;
+        mobileCheckoutBtn.disabled = false;
+        mobileCheckoutBtn.textContent = `会計する (¥${total.toLocaleString()})`;
+        mobileCheckoutBtn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+        mobileCheckoutBtn.classList.add('bg-gray-800', 'hover:bg-gray-900');
     }
 
+    // Sync values when mobile drawer opens (Flowbite triggers this via data attributes)
+    function syncMobileCartValues() {
+        const recordedBy = document.getElementById('recorded_by').value;
+        const paymentMethod = document.getElementById('payment_method').value;
+        document.getElementById('mobile_recorded_by').value = recordedBy;
+        document.getElementById('mobile_payment_method').value = paymentMethod;
+    }
+
+    function mobileCheckout() {
+        if (cart.length === 0) {
+            alert('カートに商品を追加してください');
+            return;
+        }
+
+        // Sync mobile values to desktop form
+        const mobileRecordedBy = document.getElementById('mobile_recorded_by').value;
+        const mobilePaymentMethod = document.getElementById('mobile_payment_method').value;
+
+        if (!mobileRecordedBy) {
+            alert('担当者を選択してください');
+            return;
+        }
+
+        document.getElementById('recorded_by').value = mobileRecordedBy;
+        document.getElementById('payment_method').value = mobilePaymentMethod;
+
+        // Save to localStorage
+        localStorage.setItem('last_recorded_by', mobileRecordedBy);
+        localStorage.setItem('last_payment_method', mobilePaymentMethod);
+
+        // Update transaction time to now
+        const now = new Date();
+        const dateTimeString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        document.getElementById('transaction_date').value = dateTimeString;
+
+        // Submit form
+        document.getElementById('checkout-form').submit();
+    }
+
+    // Desktop form submit handler
     document.getElementById('checkout-form').addEventListener('submit', function (e) {
         if (cart.length === 0) {
             e.preventDefault();
             alert('カートに商品を追加してください');
         } else {
             const recordedBy = document.getElementById('recorded_by').value;
+            const paymentMethod = document.getElementById('payment_method').value;
             if (recordedBy) {
                 localStorage.setItem('last_recorded_by', recordedBy);
+            }
+            if (paymentMethod) {
+                localStorage.setItem('last_payment_method', paymentMethod);
             }
         }
     });
 
+    // Initialize on page load
     window.addEventListener('DOMContentLoaded', function () {
+        // Set current time
         const now = new Date();
         const dateTimeString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
         document.getElementById('transaction_date').value = dateTimeString;
 
+        // Restore last recorded_by
         const lastRecordedBy = localStorage.getItem('last_recorded_by');
         if (lastRecordedBy) {
             document.getElementById('recorded_by').value = lastRecordedBy;
+            document.getElementById('mobile_recorded_by').value = lastRecordedBy;
         }
+
+        // Restore last payment_method
+        const lastPaymentMethod = localStorage.getItem('last_payment_method');
+        if (lastPaymentMethod) {
+            document.getElementById('payment_method').value = lastPaymentMethod;
+            document.getElementById('mobile_payment_method').value = lastPaymentMethod;
+        }
+
+        // Sync mobile select changes to desktop
+        document.getElementById('mobile_recorded_by').addEventListener('change', function() {
+            document.getElementById('recorded_by').value = this.value;
+        });
+        document.getElementById('mobile_payment_method').addEventListener('change', function() {
+            document.getElementById('payment_method').value = this.value;
+        });
+
+        // Sync values when mobile cart button is clicked (before drawer opens)
+        document.getElementById('mobile-cart-btn').addEventListener('click', function() {
+            syncMobileCartValues();
+        });
     });
 </script>
 {% endblock %}

@@ -65,6 +65,58 @@
         </div>
     </div>
 
+    <!-- 損益サマリーカード -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
+            <div class="text-base text-gray-700 font-medium mb-1">本日の粗利益</div>
+            <div id="totalProfit" class="text-2xl font-bold text-green-600">
+                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-24 mx-auto"></div>
+            </div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
+            <div class="text-base text-gray-700 font-medium mb-1">利益率</div>
+            <div id="profitMargin" class="text-2xl font-bold text-gray-900">
+                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-16 mx-auto"></div>
+            </div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
+            <div class="text-base text-gray-700 font-medium mb-1">総売上</div>
+            <div id="totalRevenue" class="text-2xl font-bold text-blue-600">
+                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-20 mx-auto"></div>
+            </div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
+            <div class="text-base text-gray-700 font-medium mb-1">総原価</div>
+            <div id="totalCost" class="text-2xl font-bold text-gray-600">
+                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-20 mx-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商品別利益テーブル -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-5 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-green-500">商品別利益（本日）</h3>
+        <div class="relative overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-500">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                    <tr>
+                        <th scope="col" class="px-4 py-3">商品名</th>
+                        <th scope="col" class="px-4 py-3 w-16">販売数</th>
+                        <th scope="col" class="px-4 py-3 w-24">売上</th>
+                        <th scope="col" class="px-4 py-3 w-24">原価</th>
+                        <th scope="col" class="px-4 py-3 w-24">利益</th>
+                        <th scope="col" class="px-4 py-3 w-20">利益率</th>
+                    </tr>
+                </thead>
+                <tbody id="profitTable">
+                    <tr class="animate-pulse"><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-24"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-12"></div></td></tr>
+                    <tr class="animate-pulse"><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-20"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-12"></div></td></tr>
+                    <tr class="animate-pulse"><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-28"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-12"></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- 時間帯別グラフ -->
     <div class="bg-white border border-gray-200 rounded-lg shadow p-5 mb-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-500">時間帯別 売上・取引件数</h3>
@@ -385,6 +437,60 @@ async function fetchDailyComparison() {
     }
 }
 
+// 損益分析
+async function fetchProfitAnalysis() {
+    try {
+        const response = await fetch('{% url "team_tansaibou:api_profit_analysis" %}');
+        const data = await response.json();
+
+        // サマリー更新
+        document.getElementById('totalProfit').textContent = formatCurrency(data.total_profit);
+        document.getElementById('profitMargin').textContent = data.profit_margin + '%';
+        document.getElementById('totalRevenue').textContent = formatCurrency(data.total_revenue);
+        document.getElementById('totalCost').textContent = formatCurrency(data.total_cost);
+
+        // 利益に応じて色を変更
+        const profitEl = document.getElementById('totalProfit');
+        if (data.total_profit >= 0) {
+            profitEl.classList.remove('text-red-600');
+            profitEl.classList.add('text-green-600');
+        } else {
+            profitEl.classList.remove('text-green-600');
+            profitEl.classList.add('text-red-600');
+        }
+
+        // 商品別利益テーブル
+        const tbody = document.getElementById('profitTable');
+
+        if (data.products.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">本日の販売データがありません</td></tr>';
+            return;
+        }
+
+        let html = '';
+        data.products.forEach(item => {
+            const profitClass = item.profit >= 0 ? 'text-green-600' : 'text-red-600';
+            const marginClass = item.margin >= 30 ? 'text-green-600' : (item.margin >= 20 ? 'text-yellow-600' : 'text-red-600');
+
+            html += `
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-4 py-3 font-medium text-gray-900">${item.name}</td>
+                    <td class="px-4 py-3">${item.quantity}</td>
+                    <td class="px-4 py-3 font-bold text-blue-600">${formatCurrency(item.revenue)}</td>
+                    <td class="px-4 py-3 text-gray-600">${formatCurrency(item.cost)}</td>
+                    <td class="px-4 py-3 font-bold ${profitClass}">${formatCurrency(item.profit)}</td>
+                    <td class="px-4 py-3 font-medium ${marginClass}">${item.margin}%</td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    } catch (error) {
+        console.error('Error fetching profit analysis:', error);
+        document.getElementById('profitTable').innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-red-500">データの取得に失敗しました</td></tr>';
+    }
+}
+
 // 人気ランキング
 async function fetchProductRanking() {
     try {
@@ -499,6 +605,7 @@ async function refreshAll() {
     try {
         await Promise.all([
             fetchTodaySales(),
+            fetchProfitAnalysis(),
             fetchHourlyStats(),
             fetchYearlyComparison(),
             fetchDailyComparison(),

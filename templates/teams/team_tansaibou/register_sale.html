@@ -381,11 +381,12 @@
     }
 
     function triggerCartAnimation() {
-        // モバイルカートボタンのバウンス（Tailwind animate-bounce）
+        // モバイルカートボタンのwiggleアニメーション（カスタム）
         const mobileCartBtn = document.getElementById('mobile-cart-btn');
         if (mobileCartBtn) {
-            mobileCartBtn.classList.add('animate-bounce');
-            setTimeout(() => mobileCartBtn.classList.remove('animate-bounce'), 500);
+            mobileCartBtn.classList.remove('animate-wiggle');
+            void mobileCartBtn.offsetWidth; // リフロー強制で再トリガー
+            mobileCartBtn.classList.add('animate-wiggle');
         }
     }
 

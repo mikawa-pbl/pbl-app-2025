@@ -92,6 +92,14 @@ class CompanyReview(models.Model):
 
     created_at = models.DateTimeField("作成日時", auto_now_add=True)
 
+    # いいね機能（多対多）
+    liked_by = models.ManyToManyField(
+        'Person',
+        related_name='liked_reviews',
+        verbose_name='いいねしたユーザー',
+        blank=True,
+    )
+
     class Meta:
         verbose_name = "企業口コミ"
         verbose_name_plural = "企業口コミ"

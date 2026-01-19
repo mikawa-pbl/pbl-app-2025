@@ -730,9 +730,20 @@ def company_detail(request, pk):
 
     avg_rating = qs.aggregate(avg=Avg("rating"))["avg"]
 
+    # 各口コミに対して、ログインユーザーがいいねしているかの情報を追加
+    reviews_with_likes = []
+    for review in reviews:
+        review_dict = {
+            'review': review,
+            'like_count': review.liked_by.count(),
+            'user_liked': person and review.liked_by.filter(pk=person.pk).exists() if person else False,
+        }
+        reviews_with_likes.append(review_dict)
+
     context = {
         "company": company,
         "reviews": reviews,
+        "reviews_with_likes": reviews_with_likes,
         "avg_rating": avg_rating,
         "sort": sort,
         "points_awarded": points_awarded,
@@ -868,6 +879,43 @@ def toggle_favorite(request, pk):
         return JsonResponse({"ok": True, "added": added})
 
     return redirect("shiokara:company_detail", pk=company.pk)
+
+
+@csrf_exempt
+def toggle_review_like(request, review_id):
+    """
+    口コミのいいねを追加/削除する。POST を想定。
+    """
+    review = get_object_or_404(CompanyReview.objects.using(DB_ALIAS), pk=review_id)
+    person = get_current_person(request)
+    if not person:
+        return JsonResponse({"ok": False, "error": "ログインが必要です"}, status=401)
+
+    # リフレッシュ
+    person = Person.objects.using(DB_ALIAS).get(pk=person.pk)
+
+    # トグル
+    exists = review.liked_by.filter(pk=person.pk).exists()
+    try:
+        if exists:
+            review.liked_by.remove(person)
+            liked = False
+        else:
+            review.liked_by.add(person)
+            liked = True
+    except Exception:
+        liked = not exists
+
+    # いいね数を取得
+    like_count = review.liked_by.count()
+
+    # AJAX リクエストには JSON を返す
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({"ok": True, "liked": liked, "like_count": like_count})
+
+    # 非AJAX時は企業詳細に戻る
+    return redirect("shiokara:company_detail", pk=review.company.pk)
+
 
 def append_review_to_fixture(review: CompanyReview) -> None:
     """投稿されたレビューを JSON フィクスチャに 1 件追記する"""

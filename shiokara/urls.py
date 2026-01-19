@@ -25,4 +25,5 @@ urlpatterns = [
     path("company/<int:pk>/post/",
          views.company_experience_post,
          name="company_experience_post"),
+    path("review/<int:review_id>/like/", views.toggle_review_like, name="review_like"),
 ]

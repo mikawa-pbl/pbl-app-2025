@@ -936,5 +936,33 @@
       "rating": 4,
       "created_at": "2026-01-19T07:34:36.363593+00:00"
     }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 69,
+    "fields": {
+      "company": 42,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "1234",
+      "rating": 4,
+      "created_at": "2026-01-19T07:41:45.704245+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 70,
+    "fields": {
+      "company": 11,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "1234",
+      "rating": 4,
+      "created_at": "2026-01-19T07:43:58.657024+00:00"
+    }
   }
 ]

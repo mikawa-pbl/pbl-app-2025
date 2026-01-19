@@ -184,6 +184,63 @@
         margin-top: 12px;
     }
 
+    /* いいねボタンのスタイル */
+    .review-like-section {
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .like-form {
+        display: inline-block;
+    }
+
+    .like-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: #f5f5f5;
+        border: 2px solid #e0e0e0;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.95rem;
+    }
+
+    .like-btn:hover {
+        background: #ffe0e0;
+        border-color: #ffb0b0;
+        transform: scale(1.05);
+    }
+
+    .like-btn.liked {
+        background: #ffe0e0;
+        border-color: #ff6b6b;
+    }
+
+    .like-btn.liked:hover {
+        background: #ffcccc;
+    }
+
+    .like-icon {
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+
+    .like-count {
+        font-weight: 600;
+        color: #666;
+        min-width: 20px;
+        text-align: left;
+    }
+
+    .like-btn.liked .like-count {
+        color: #cc0000;
+    }
+
     .empty-state {
         text-align: center;
         padding: 40px 20px;
@@ -425,7 +482,8 @@
 
             {% if reviews %}
             <div class="review-list">
-                {% for review in reviews %}
+                {% for item in reviews_with_likes %}
+                {% with review=item.review %}
                 <div class="review-card">
                     <div class="review-header">
                         <div class="review-rating">★{{ review.rating }}</div>
@@ -437,7 +495,19 @@
                         </div>
                     </div>
                     <div class="review-comment">{{ review.comment|linebreaksbr }}</div>
+                    
+                    <!-- いいねボタン -->
+                    <div class="review-like-section">
+                        <form class="like-form" method="post" action="{% url 'shiokara:review_like' review.id %}" data-review-id="{{ review.id }}">
+                            {% csrf_token %}
+                            <button type="submit" class="like-btn {% if item.user_liked %}liked{% endif %}" aria-pressed="{{ item.user_liked|yesno:'true,false' }}">
+                                <span class="like-icon">{% if item.user_liked %}❤️{% else %}🤍{% endif %}</span>
+                                <span class="like-count">{{ item.like_count }}</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
+                {% endwith %}
                 {% endfor %}
             </div>
             {% else %}
@@ -673,6 +743,54 @@
                   else { btn.textContent = '☆ お気に入りに追加'; btn.setAttribute('aria-pressed','false'); }
                 }
               }).catch(function(){ form.submit(); });
+          });
+        });
+        </script>
+
+        {% comment %} Like toggle AJAX handler for reviews {% endcomment %}
+        <script>
+        document.addEventListener('DOMContentLoaded', function(){
+          var forms = document.querySelectorAll('.like-form');
+          forms.forEach(function(form){
+            form.addEventListener('submit', function(ev){
+              ev.preventDefault();
+              var btn = form.querySelector('.like-btn');
+              var icon = btn.querySelector('.like-icon');
+              var countSpan = btn.querySelector('.like-count');
+              var csrftoken = form.querySelector('input[name=csrfmiddlewaretoken]')?.value;
+              
+              fetch(form.action, { 
+                method: 'POST', 
+                headers: { 
+                  'X-Requested-With':'XMLHttpRequest', 
+                  'X-CSRFToken': csrftoken 
+                } 
+              })
+              .then(r=>r.json())
+              .then(function(data){
+                if(data && data.ok){
+                  // いいね状態を更新
+                  if(data.liked){
+                    btn.classList.add('liked');
+                    btn.setAttribute('aria-pressed','true');
+                    icon.textContent = '❤️';
+                  } else {
+                    btn.classList.remove('liked');
+                    btn.setAttribute('aria-pressed','false');
+                    icon.textContent = '🤍';
+                  }
+                  // いいね数を更新
+                  countSpan.textContent = data.like_count;
+                  
+                  // アニメーション効果
+                  btn.style.transform = 'scale(1.2)';
+                  setTimeout(function(){ btn.style.transform = 'scale(1)'; }, 200);
+                }
+              })
+              .catch(function(){ 
+                form.submit(); 
+              });
+            });
           });
         });
         </script>

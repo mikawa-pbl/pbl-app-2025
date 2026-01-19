@@ -2,6 +2,6 @@
   "html.validate.scripts": false,
   "javascript.validate.enable": false,
   "files.associations": {
-    "*.html": "django-html"
+    "*.html": "html"
   }
 }

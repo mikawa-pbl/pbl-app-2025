@@ -22,5 +22,6 @@ class MenuRating(models.Model):
     # ★追加：投稿日時（Amazonっぽく並べ替え用）
     created_at = models.DateTimeField(auto_now_add=True)
 
+
     def __str__(self):
         return f"Rating for {self.menu_name} - Taste: {self.taste_score}, Volume: {self.volume_score}"

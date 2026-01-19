@@ -85,13 +85,20 @@ def index(request):
     search_query = request.GET.get('search', '').strip()
     
     # Filter products by search query if provided
+    # Exclude products where both buyer and seller have confirmed (completed transactions)
     if search_query:
         products = Product.objects.filter(
             models.Q(title__icontains=search_query) | 
             models.Q(description__icontains=search_query)
+        ).exclude(
+            seller_confirmed=True,
+            buyer_confirmed=True
         ).order_by("-id")
     else:
-        products = Product.objects.order_by("-id")  # newest first
+        products = Product.objects.exclude(
+            seller_confirmed=True,
+            buyer_confirmed=True
+        ).order_by("-id")  # newest first
     
     # add formatted_price for template (e.g. "¥1,234")
     for p in products:
@@ -449,3 +456,35 @@ def edit_product(request, pk):
         "product": product,
         "current_user": current_user,
     })
+
+
+@login_required
+@require_POST
+def confirm_purchase(request, room_id):
+    """Confirm purchase from either seller or buyer side"""
+    from .models import ChatRoom
+    
+    current_user = get_current_user(request)
+    chat_room = get_object_or_404(ChatRoom, id=room_id)
+    product = chat_room.product
+    
+    # Check if user is part of this transaction
+    if chat_room.seller_id != current_user.id and chat_room.buyer_id != current_user.id:
+        messages.error(request, 'このチャットにアクセスできません。')
+        return redirect("team_giryulink:index")
+    
+    # Update confirmation status based on user role
+    if chat_room.seller_id == current_user.id:
+        product.seller_confirmed = True
+        messages.success(request, '購入を同意しました。')
+    elif chat_room.buyer_id == current_user.id:
+        product.buyer_confirmed = True
+        messages.success(request, '購入を同意しました。')
+    
+    product.save()
+    
+    # Check if both parties have confirmed
+    if product.seller_confirmed and product.buyer_confirmed:
+        messages.success(request, '取引が完了しました！商品はトップページから削除されます。')
+    
+    return redirect("team_giryulink:chat_room", room_id=room_id)

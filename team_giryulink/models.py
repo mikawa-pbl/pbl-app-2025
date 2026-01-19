@@ -41,6 +41,8 @@ class Product(models.Model):
     user = models.ForeignKey(GiryulinkUser, on_delete=models.CASCADE, related_name='products', null=True, blank=True)
     buyer = models.ForeignKey(GiryulinkUser, on_delete=models.SET_NULL, related_name='purchased_products', null=True, blank=True)
     purchased_at = models.DateTimeField(null=True, blank=True)
+    seller_confirmed = models.BooleanField(default=False)
+    buyer_confirmed = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
@@ -49,6 +51,11 @@ class Product(models.Model):
     def is_sold(self):
         """Check if product is already sold"""
         return self.buyer is not None
+    
+    @property
+    def is_completed(self):
+        """Check if transaction is completed (both parties confirmed)"""
+        return self.seller_confirmed and self.buyer_confirmed
 
 class ChatRoom(models.Model):
     """Chat room for a product transaction"""

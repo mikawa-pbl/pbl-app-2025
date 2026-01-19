@@ -66,6 +66,7 @@ def signup(request):
         password1 = request.POST.get('password1', '')
         password2 = request.POST.get('password2', '')
         store_name = request.POST.get('store_name', '').strip()
+        email = request.POST.get('email', '').strip()
         description = request.POST.get('description', '').strip()
 
         errors = []
@@ -93,6 +94,7 @@ def signup(request):
             store = Store(
                 username=username,
                 name=store_name,
+                email=email,
                 description=description
             )
             store.set_password(password1)

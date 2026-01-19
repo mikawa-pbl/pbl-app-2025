@@ -146,11 +146,10 @@
             color: #e53935;
         }
         
-        /* Delete Button */
-        .delete-btn {
+        /* Action Buttons */
+        .action-btn {
             position: absolute;
             top: 8px;
-            right: 8px;
             background: #e53935;
             color: #fff;
             border: none;
@@ -160,6 +159,21 @@
             font-weight: 600;
             cursor: pointer;
             z-index: 10;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .delete-btn {
+            right: 8px;
+        }
+        
+        .edit-btn {
+            right: 70px;
+            background: #2196f3;
+        }
+        
+        .action-btn:hover {
+            opacity: 0.85;
         }
         
         /* Sold Badge */
@@ -336,9 +350,12 @@
                 </a>
                 
                 {% if current_user and product.user_id == current_user.id %}
-                <form method="post" action="{% url 'team_giryulink:delete' product.id %}" style="display: inline;">
+                {% if not product.is_sold %}
+                <a href="{% url 'team_giryulink:edit_product' product.id %}" class="action-btn edit-btn">編集</a>
+                {% endif %}
+                <form method="post" action="{% url 'team_giryulink:delete_product' product.id %}" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" class="delete-btn" onclick="return confirm('本当に削除しますか？')">削除</button>
+                    <button type="submit" class="action-btn delete-btn" onclick="return confirm('本当に削除しますか？')">削除</button>
                 </form>
                 {% elif current_user and not product.is_sold %}
                 <form method="post" action="{% url 'team_giryulink:purchase_product' product.id %}" style="display: inline;">

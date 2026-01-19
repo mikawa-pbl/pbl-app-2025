@@ -370,15 +370,56 @@ def add_product_page(request):
 
 
 def my_page(request):
-    """My page - user's products"""
+    """My page - redirects to my_products"""
+    return redirect("team_giryulink:my_products")
+
+
+@login_required
+def edit_product(request, pk):
+    """Edit a product"""
+    from .forms import ProductEditForm
+    
     current_user = get_current_user(request)
-    if not current_user:
-        messages.warning(request, "ログインが必要です。")
-        return redirect("team_giryulink:login")
+    product = get_object_or_404(Product, pk=pk)
     
-    my_products = Product.objects.filter(user=current_user).order_by('-id')
+    # Check if current user is the owner
+    if product.user_id != current_user.id:
+        messages.error(request, 'この商品を編集する権限がありません。')
+        return redirect("team_giryulink:my_products")
     
-    return render(request, "teams/team_giryulink/my_page.html", {
-        "my_products": my_products,
+    # Check if product is already sold
+    if product.is_sold:
+        messages.error(request, '購入済みの商品は編集できません。')
+        return redirect("team_giryulink:my_products")
+    
+    if request.method == 'POST':
+        form = ProductEditForm(request.POST, request.FILES)
+        if form.is_valid():
+            product.title = form.cleaned_data['title']
+            product.price = form.cleaned_data['price']
+            product.description = form.cleaned_data['description']
+            
+            # Handle image update
+            if 'image' in request.FILES:
+                # Delete old image if it exists
+                if product.image:
+                    if os.path.isfile(product.image.path):
+                        os.remove(product.image.path)
+                product.image = request.FILES['image']
+            
+            product.save()
+            messages.success(request, '商品情報を更新しました。')
+            return redirect("team_giryulink:my_products")
+    else:
+        # Pre-fill form with existing data
+        form = ProductEditForm(initial={
+            'title': product.title,
+            'price': product.price,
+            'description': product.description,
+        })
+    
+    return render(request, "teams/team_giryulink/edit_product.html", {
+        "form": form,
+        "product": product,
         "current_user": current_user,
     })

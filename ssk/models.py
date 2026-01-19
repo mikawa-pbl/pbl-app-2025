@@ -7,8 +7,8 @@ class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
-        # 表示上は #を付けたいならここで
-        return f"#{self.name}"
+        # 表示上は #を付けない（タグ名のみ）
+        return self.name
 
 
 class Post(models.Model):

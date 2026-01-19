@@ -152,7 +152,10 @@ def post_detail(request, pk):
     Show a single post (イベントの本文を表示).
     """
     post = get_object_or_404(Post.objects.prefetch_related("tags"), pk=pk)
-    return render(request, "teams/ssk/post_detail.html", {"post": post})
+    # whether this post has been unlocked for editing/deleting in this session
+    unlocked = bool(request.session.get(f"unlocked_post_{pk}"))
+    qs = request.GET.urlencode() if request.GET else ""
+    return render(request, "teams/ssk/post_detail.html", {"post": post, "unlocked": unlocked, "qs": qs})
 
 def post_unlock(request, pk):
     """
@@ -160,8 +163,16 @@ def post_unlock(request, pk):
     """
     post = get_object_or_404(Post, pk=pk)
     # If no password is set, go straight to edit.
+    # determine requested next action (edit/delete/detail)
+    next_action = (request.POST.get('next') or request.GET.get('next') or 'edit')
+    # If no password is set, mark unlocked and redirect to desired action
     if not post.password_hash:
-        return redirect("ssk:post_edit", pk=pk)
+        request.session[f"unlocked_post_{pk}"] = True
+        if next_action == 'delete':
+            return redirect('ssk:post_delete', pk=pk)
+        if next_action == 'detail':
+            return redirect('ssk:post_detail', pk=pk)
+        return redirect('ssk:post_edit', pk=pk)
 
     error = None
     if request.method == "POST":
@@ -169,14 +180,19 @@ def post_unlock(request, pk):
         if post.check_password(pwd):
             # mark unlocked in session
             request.session[f"unlocked_post_{pk}"] = True
-            # redirect to edit page
-            return redirect("ssk:post_edit", pk=pk)
+            # redirect according to requested next action
+            if next_action == 'delete':
+                return redirect('ssk:post_delete', pk=pk)
+            if next_action == 'detail':
+                return redirect('ssk:post_detail', pk=pk)
+            return redirect('ssk:post_edit', pk=pk)
         else:
             error = "パスワードが間違っています。"
 
     return render(request, "teams/ssk/post_unlock.html", {
         "post": post,
         "error": error,
+        "next": next_action,
     })
 
 
@@ -221,8 +237,8 @@ def post_edit(request, pk):
 
             return redirect("ssk:post_detail", pk=post.pk)
     else:
-        # 現在のタグから tags_text を事前入力（"#name #name" 形式で表示）
-        tags_initial = " ".join("#" + t.name for t in post.tags.all())
+        # 現在のタグから tags_text を事前入力（"name name" 形式で表示）
+        tags_initial = " ".join(t.name for t in post.tags.all())
         initial = {"tags_text": tags_initial}
         # prefill date/end_date when available
         if post.start is not None:
@@ -241,11 +257,24 @@ def post_edit(request, pk):
 
 def post_delete(request, pk):
     """
-    Delete a post. Confirm via POST.
+    Delete a post. Require unlock for password-protected posts (same behavior as edit).
     """
     post = get_object_or_404(Post, pk=pk)
+    # If the post is password-protected and not unlocked in session, ask for unlock first
+    if post.password_hash and not request.session.get(f"unlocked_post_{pk}"):
+        from django.urls import reverse
+        return redirect(reverse('ssk:post_unlock', kwargs={'pk': pk}) + '?next=delete')
+
     if request.method == "POST":
+        # at this point either the post is not protected or the session is unlocked
         post.delete()
+        # clear the unlock flag after deletion
+        try:
+            del request.session[f"unlocked_post_{pk}"]
+        except KeyError:
+            pass
         return redirect("ssk:post_list")
-    # If GET, show detail page (or you can implement a separate confirm page).
-    return render(request, "teams/ssk/post_detail.html", {"post": post})
+
+    # If GET and unlocked (or not protected), show a confirmation/detail page
+    unlocked = bool(request.session.get(f"unlocked_post_{pk}"))
+    return render(request, "teams/ssk/post_detail.html", {"post": post, "unlocked": unlocked})

@@ -105,12 +105,12 @@
                 {% if forloop.counter0 < 5 or tag.id in selected_tag_ids %}
                   <label class="tag-pill tag-item" data-name="{{ tag.name|lower }}">
                     <input type="checkbox" name="tag" value="{{ tag.id }}" {% if tag.id in selected_tag_ids %}checked{% endif %} style="margin-right:6px;">
-                    #{{ tag.name }}
+                    {{ tag.name }}
                   </label>
                 {% else %}
                   <label class="tag-pill tag-item hidden" data-name="{{ tag.name|lower }}" style="display:none;">
                     <input type="checkbox" name="tag" value="{{ tag.id }}" {% if tag.id in selected_tag_ids %}checked{% endif %} style="margin-right:6px;">
-                    #{{ tag.name }}
+                    {{ tag.name }}
                   </label>
                 {% endif %}
               {% endfor %}
@@ -126,7 +126,7 @@
               <option value="or" {% if selected_mode == "or" %}selected{% endif %}>OR</option>
             </select>
           </label>
-          <button type="submit" style="background:var(--accent);color:var(--accent-contrast);border:none;padding:8px 12px;border-radius:8px;">絞り込む</button>
+          <span style="color:var(--muted);font-size:0.95rem;">タグをチェックすると自動で絞り込みます</span>
           <a href="{% url 'ssk:post_list' %}" style="color:var(--muted);text-decoration:none;padding:8px;">クリア</a>
         </div>
       </form>
@@ -151,7 +151,7 @@
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;">
                       <div class="meta" style="flex:1">
                         {% for tag in entry.post.tags.all %}
-                          <span class="tag-pill">#{{ tag.name }}</span>
+                          <span class="tag-pill">{{ tag.name }}</span>
                         {% endfor %}
                         {% if entry.is_range %}
                           <span>{{ entry.post.start|date:"n/j" }} 〜 {{ entry.post.end|date:"n/j" }}</span>
@@ -180,7 +180,7 @@
                 <a class="title" href="{% url 'ssk:post_detail' post.pk %}">{{ post.title }}</a>
                 <div class="meta">
                   {% for tag in post.tags.all %}
-                    <span class="tag-pill">#{{ tag.name }}</span>
+                    <span class="tag-pill">{{ tag.name }}</span>
                   {% endfor %}
                 </div>
               </li>
@@ -237,6 +237,22 @@
       // ensure initial state (in case selected tags exist)
       showTop5UnlessSelected();
 
+      // auto-submit filter form when tag checkbox changes
+      function attachTagAutoSubmit(){
+        const filterForm = document.querySelector('form.filter');
+        if(!filterForm) return;
+        const checkboxes = Array.from(filterForm.querySelectorAll('.tag-item input[type="checkbox"]'));
+        checkboxes.forEach(cb => {
+          cb.addEventListener('change', function(){
+            // submit the GET form to apply filters immediately
+            // small debounce to allow multiple quick clicks
+            if(window._ssk_filter_timeout) clearTimeout(window._ssk_filter_timeout);
+            window._ssk_filter_timeout = setTimeout(()=>{ filterForm.submit(); }, 120);
+          });
+        });
+      }
+      attachTagAutoSubmit();
+
       // timeline centering: center nearest-to-now day on load
       function centerTimeline(){
         const win = document.getElementById('timeline-window');
@@ -288,6 +304,26 @@
       }
       // attach after load/layout
       window.addEventListener('load', function(){ setTimeout(attachCardClickHandlers, 150); });
+
+      // preserve current querystring when navigating to details so filters remain
+      (function attachQueryToLinks(){
+        const qs = window.location.search || '';
+        if(!qs) return;
+        // update data-href and <a> hrefs inside cards
+        document.querySelectorAll('.card[data-href]').forEach(card => {
+          const base = card.getAttribute('data-href');
+          if(base && !base.includes('?')) card.setAttribute('data-href', base + qs);
+          const a = card.querySelector('a.title');
+          if(a && a.getAttribute('href') && !a.getAttribute('href').includes('?')) a.setAttribute('href', a.getAttribute('href') + qs);
+        });
+        // also update undated list items
+        document.querySelectorAll('li.card[data-href]').forEach(li => {
+          const base = li.getAttribute('data-href');
+          if(base && !base.includes('?')) li.setAttribute('data-href', base + qs);
+          const a = li.querySelector('a.title');
+          if(a && a.getAttribute('href') && !a.getAttribute('href').includes('?')) a.setAttribute('href', a.getAttribute('href') + qs);
+        });
+      })();
 
     })();
   </script>

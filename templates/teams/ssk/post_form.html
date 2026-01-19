@@ -83,7 +83,7 @@
         <p>
           {{ form.tags_text.label_tag }}<br>
           {{ form.tags_text }}
-          <small>（スペース区切りで複数指定。例: #授業 #休講）</small>
+          <small>（スペース区切りで複数指定。例: 授業 休講）</small>
         </p>
 
         <!-- client-side warning (hidden by default) -->
@@ -183,7 +183,7 @@
         cb.style.marginRight = '6px';
 
         const txt = document.createElement('span');
-        txt.textContent = '#' + name;
+        txt.textContent = name;
         txt.style.color = '#0f172a';
 
         cb.addEventListener('change', function(){
@@ -199,9 +199,9 @@
           if(cb.checked){
             // Replace the token currently being edited (last token before cursor) with the selected tag.
             if(tokensBefore.length){
-              tokensBefore[tokensBefore.length-1] = '#' + name;
+              tokensBefore[tokensBefore.length-1] = name;
             } else {
-              tokensBefore.push('#' + name);
+              tokensBefore.push(name);
             }
           } else {
             // Remove the tag (normalized) from both before/after tokens
@@ -210,7 +210,7 @@
           }
 
           const newTokens = tokensBefore.concat(tokensAfter);
-          tagInput.value = newTokens.map(t => (t.startsWith('#') ? t : ('#' + t.replace(/^#+/, '')))).join(' ') + (newTokens.length ? ' ' : '');
+          tagInput.value = newTokens.map(t => t.replace(/^#+/, '')).join(' ') + (newTokens.length ? ' ' : '');
           tagInput.focus();
           // trigger input handlers to update suggestion box and warnings
           tagInput.dispatchEvent(new Event('input'));

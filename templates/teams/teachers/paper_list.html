@@ -1,0 +1,61 @@
+{% extends "teams/teachers/base.html" %}
+{% block title %}論文一覧 | Paper DB{% endblock %}
+
+{% block content %}
+  <div class="card" style="margin-top:16px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+      <h2 style="margin:0; font-size:18px;">論文一覧</h2>
+      <span class="muted" style="font-size:13px;">
+        {{ papers|length }} 件
+      </span>
+    </div>
+
+    <div style="overflow-x:auto; margin-top:12px;">
+      <table style="width:100%; border-collapse:collapse; font-size:14px;">
+        <thead>
+          <tr style="background:#f8fafc;">
+            {% comment %} ソートリンク（昇順・降順トグル） {% endcomment %}
+            <th>{% include "teams/teachers/sort_th.html" with label="題目" key="title" %}</th>
+            <th>{% include "teams/teachers/sort_th.html" with label="著者" key="author" %}</th>
+            <th style="width:70px; text-align:right;">
+              {% include "teams/teachers/sort_th.html" with label="年" key="year" %}
+            </th>
+            <th>{% include "teams/teachers/sort_th.html" with label="掲載誌" key="booktitle" %}</th>
+            <th style="width:90px;">
+              {% include "teams/teachers/sort_th.html" with label="登録者" key="submitter" %}
+            </th>
+            <th style="width:150px;">
+              {% include "teams/teachers/sort_th.html" with label="登録時刻" key="submit_time" %}
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for paper in papers %}
+            <tr style="border-top:1px solid var(--line);">
+              <td style="padding:10px 8px;">
+                <a href="{% url 'teachers:paper_detail' paper.pk %}">
+                  {{ paper.title }}
+                </a>
+              </td>
+              <td style="padding:10px 8px;">{{ paper.author }}</td>
+              <td style="padding:10px 8px; text-align:right;">{{ paper.year }}</td>
+              <td style="padding:10px 8px;">{{ paper.booktitle }}</td>
+              <td style="padding:10px 8px;">{{ paper.submitter }}</td>
+              <td style="padding:10px 8px;">
+                {{ paper.submit_time|date:"Y-m-d H:i" }}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="muted" style="padding:14px; text-align:center;">
+                登録されている論文はありません
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+

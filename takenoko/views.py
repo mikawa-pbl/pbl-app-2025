@@ -33,6 +33,11 @@ def main(request):
     # アクティブな商品を取得（新着順）
     items = Item.objects.filter(status='active').order_by('-created_at')
     
+    # ログイン中のユーザー自身の商品を除外
+    current_user = get_current_user(request)
+    if current_user:
+        items = items.exclude(seller=current_user)
+    
     # タグでフィルタリング
     if selected_tag:
         items = items.filter(tags__name=selected_tag).distinct()

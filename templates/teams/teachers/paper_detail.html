@@ -1,0 +1,120 @@
+{% extends "teams/teachers/base.html" %}
+{% block title %}{{ paper.title }} | Paper DB{% endblock %}
+
+{% block content %}
+  <div class="grid">
+    <div class="card">
+      <div style="display:flex; gap:10px; align-items:flex-start; justify-content:space-between;">
+        <div>
+          <h2 style="font-size:20px; margin:0 0 6px;">{{ paper.title }}</h2>
+          <div class="muted" style="font-size:13px;">
+            {{ paper.author }} ・ {{ paper.year }} ・ {{ paper.booktitle }}
+          </div>
+        </div>
+        <span class="badge">ID: {{ paper.id }}</span>
+      </div>
+
+      <div class="section">
+        <h3>メタ情報</h3>
+        <div class="meta">
+          <div class="k">DOI</div><div>{{ paper.doi }}</div>
+          <div class="k">URL</div><div><a href="{{ paper.url }}" target="_blank">{{ paper.url }}</a></div>
+          <div class="k">登録者</div><div>{{ paper.submitter }}</div>
+          <div class="k">登録時刻</div><div>{{ paper.submit_time|date:"Y-m-d H:i" }}</div>
+          <div class="k">キーワード</div><div>{{ paper.keywords|default:"—" }}</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>どんな論文か</h3>
+        <div class="text">{{ paper.imp_overview|linebreaksbr }}</div>
+      </div>
+
+      <div class="section">
+        <h3>先行研究との比較</h3>
+        <div class="text">{{ paper.imp_comparison|linebreaksbr }}</div>
+      </div>
+
+      <div class="section">
+        <h3>中心的アイデア</h3>
+        <div class="text">{{ paper.imp_idea|linebreaksbr }}</div>
+      </div>
+
+      <div class="section">
+        <h3>有効性（検証方法と結果）</h3>
+        <div class="text">{{ paper.imp_usefulness|linebreaksbr }}</div>
+      </div>
+
+      <div class="section">
+        <h3>議論（利点・欠点・制限）</h3>
+        <div class="text">{{ paper.imp_discussion|linebreaksbr }}</div>
+      </div>
+
+      {% if paper.imp_relation %}
+      <div class="section">
+        <h3>自身の研究との関連性</h3>
+        <div class="text">{{ paper.imp_relation|linebreaksbr }}</div>
+      </div>
+      {% endif %}
+
+      {% if paper.note %}
+      <div class="section">
+        <h3>その他</h3>
+        <div class="text">{{ paper.note|linebreaksbr }}</div>
+      </div>
+      {% endif %}
+
+      <div class="footer-actions">
+        <a class="btn primary" href="{% url 'teachers:paper_update' paper.pk %}">編集</a>
+        <a class="btn danger" href="{% url 'teachers:paper_delete' paper.pk %}">削除</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>添付ファイル</h2>
+
+      <div class="filebox section" style="border-top:none; padding-top:0;">
+        {% if paper.paper_file %}
+          <div><span class="k muted">論文PDF</span><br>
+            <a class="btn" href="{% url 'teachers:media_proxy' paper.paper_file.name %}"
+            target="_blank">開く</a>
+          </div>
+        {% else %}
+          <div class="muted">論文PDF：なし</div>
+        {% endif %}
+      </div>
+
+      <div class="filebox section">
+        {% if paper.rc_slide %}
+          <div><span class="k muted">輪講スライド</span><br>
+            <a class="btn" href="{% url 'teachers:media_proxy' paper.rc_slide.name %}" target="_blank">開く</a>
+          </div>
+        {% else %}
+          <div class="muted">輪講スライド：なし</div>
+        {% endif %}
+      </div>
+
+      <div class="filebox section">
+
+       {% if paper.paper_figure %}
+           <a class="btn" href="{% url 'teachers:media_proxy' paper.paper_figure.name %}" target="_blank">ファイルを開く</a>
+          </div>
+
+          {# 画像拡張子のときだけ img 表示 #}
+          {% with n=paper.paper_figure.name|lower %}
+            {% if n|slice:"-4:" == ".png" or n|slice:"-4:" == ".jpg" or n|slice:"-5:" == ".jpeg" %}
+            <div style="margin-top:10px;">
+              <img class="figure" src="{% url 'teachers:media_proxy' paper.paper_figure.name %}" alt="figure">
+            </div>
+            {% else %}
+            <div class="help">※PDFの場合はリンクから開いてください</div>
+            {% endif %}
+          {% endwith %}
+        {% else %}
+          <div class="muted">画像ファイル：なし</div>
+        {% endif %}
+          
+      </div>
+    </div>
+  </div>
+{% endblock %}

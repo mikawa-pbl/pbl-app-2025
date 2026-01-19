@@ -131,6 +131,11 @@
         color: white;
       }
 
+      .feature-box-active {
+        background-color: #B8E6D5;
+        border: 2px solid #649CE4 !important;
+      }
+
       /* 右端の円 */
       .feature-circle {
         position: absolute;
@@ -240,11 +245,14 @@
                 <div class="feature-circle"></div>
               </div>
             </a>
+          {% endif %}
         {% empty %}
           <p style="padding: 16px; color: #999;">タグが登録されていません</p>
         {% endfor %}
       </div>
-      <button class="feature-circle">¥0</button>
+      <a href="{% url 'takenoko:main' %}?price=free" style="text-decoration: none;">
+        <button class="feature-circle">¥0</button>
+      </a>
     </div>
 
     <!-- 商品一覧 -->

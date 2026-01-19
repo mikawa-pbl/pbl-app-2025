@@ -187,6 +187,45 @@
         cursor: pointer;
       }
 
+      /* トグルボタンスタイル */
+      .status-toggle-container {
+        display: flex;
+        gap: 12px;
+        margin-top: 48px;
+        width: 640px;
+      }
+
+      .status-btn {
+        flex: 1;
+        height: 48px;
+        border-radius: 16px;
+        font-weight: 700;
+        border: 2px solid #649ce4;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .status-btn.sell {
+        background: #f96796;
+        color: white;
+        border-color: #f96796;
+      }
+
+      .status-btn.sell:hover {
+        opacity: 0.9;
+      }
+
+      .status-btn.reopen {
+        background: #eaf2ff;
+        color: #2a5db0;
+        border-color: #649ce4;
+      }
+
+      .status-btn.reopen:hover {
+        background: #d8e6ff;
+      }
+
       .danger-btn {
         flex: 1;
         height: 40px;
@@ -336,6 +375,36 @@
       </div>
     </div>
 
+    <!-- ステータス切り替えトグル（交渉中の商品のみ表示） -->
+    {% if item.status == 'negotiation' %}
+    <div
+      style="position: relative; left: 544px; width: 640px; margin-top: 12px"
+    >
+      <p class="info-label">取引状況</p>
+      <div class="status-toggle-container">
+        <form
+          method="post"
+          action="{% url 'takenoko:toggle_item_status' %}"
+          style="flex: 1"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="item_id" value="{{ item.pk }}" />
+          <input type="hidden" name="status" value="sold" />
+          <button type="submit" class="status-btn sell">売却確定</button>
+        </form>
+        <form
+          method="post"
+          action="{% url 'takenoko:toggle_item_status' %}"
+          style="flex: 1"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="item_id" value="{{ item.pk }}" />
+          <input type="hidden" name="status" value="active" />
+          <button type="submit" class="status-btn reopen">販売再開</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
     <!-- 削除確認モーダル -->
     <div id="deleteModal" class="modal-bg">
       <div class="modal-box">

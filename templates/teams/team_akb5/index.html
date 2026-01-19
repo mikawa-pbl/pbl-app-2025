@@ -6,6 +6,10 @@
     <article>
         <header>
             <h2>Welcome to Team AKB5</h2>
+            <p>
+                <a href="{% url 'team_akb5:user' %}" role="button">User View</a>
+                <a href="{% url 'team_akb5:admin' %}" role="button" class="secondary">Admin View</a>
+            </p>
         </header>
     </article>
 {% endblock %}

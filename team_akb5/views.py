@@ -27,13 +27,30 @@ class AdminView(ListView):
     template_name = "teams/team_akb5/admin.html"
     context_object_name = "reports"
     ordering = ["-created_at"]
+    admin_password = "password"
+
+    def _render_admin(self, request):
+        queryset = self.get_queryset()
+        context = self.get_context_data(object_list=queryset)
+        context["admin_password"] = self.admin_password
+        return render(request, self.template_name, context)
+
+    def get(self, request, *args, **kwargs):
+        return render(request, "teams/team_akb5/admin_login.html")
 
     def post(self, request, *args, **kwargs):
+        password = request.POST.get("admin_password", "")
+        if password != self.admin_password:
+            return render(
+                request,
+                "teams/team_akb5/admin_login.html",
+                {"error": "パスワードが違います。"},
+            )
         report_id = request.POST.get("report_id")
         if report_id:
             report = StatusReport.objects.using("team_akb5").get(id=report_id)
             report.delete()
-        return redirect("team_akb5:admin")
+        return self._render_admin(request)
 
 
 class StatusReportCreateView(CreateView):

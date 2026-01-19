@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 
+from .labs import LABORATORIES
 from .models import Entry
 
 
@@ -33,6 +34,16 @@ class SignupForm(forms.Form):
                 "class": "w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40",
                 "placeholder": "もう一度入力してください",
                 "autocomplete": "new-password",
+            }
+        ),
+    )
+    laboratory = forms.ChoiceField(
+        label="研究室",
+        choices=[("", "未所属")] + [(lab.id, lab.name) for lab in LABORATORIES],
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "class": "w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40",
             }
         ),
     )

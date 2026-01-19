@@ -4,9 +4,12 @@ from django.contrib.sessions.models import SessionManager
 from django.db import models
 
 from .doors import DOORS
+from .labs import LABORATORIES
+
 
 
 DOOR_LABEL_MAP = {door.id: door.label for door in DOORS}
+LAB_LABEL_MAP = {lab.id: lab.name for lab in LABORATORIES}
 
 
 class H34vvySession(AbstractBaseSession):
@@ -31,12 +34,20 @@ class H34vvyPermission(Permission):
     pass
 
 
+
+
 class H34vvyUser(AbstractUser):
     """
     チーム独自の認証・認可用ユーザアカウント
     """
 
     points = models.PositiveIntegerField(default=0, help_text="アプリ内ポイント")
+    laboratory = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        help_text="所属研究室ID",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     # auth.models.PermissionsMixin で定義されている外部キーが
@@ -53,6 +64,12 @@ class H34vvyUser(AbstractUser):
         related_name="h34vvy_user_set",
         related_query_name="h34vvy_user",
     )
+
+    @property
+    def lab_label(self) -> str:
+        if not self.laboratory:
+            return "未所属"
+        return LAB_LABEL_MAP.get(self.laboratory, self.laboratory)
 
 
 # 後でなくす

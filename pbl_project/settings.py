@@ -124,6 +124,9 @@ DATABASES = {
     "h34vvy_u53rzz": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "h34vvy_u53rzz" / "db.sqlite3",
+        "TEST": {
+            "DEPENDENCIES": [],
+        },
     },
     "team_TeXTeX": {
         "ENGINE": "django.db.backends.sqlite3",

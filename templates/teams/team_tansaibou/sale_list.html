@@ -25,77 +25,76 @@
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                 <tr>
-                    <th scope="col" class="px-6 py-3">取引日</th>
-                    <th scope="col" class="px-6 py-3">担当者</th>
-                    <th scope="col" class="px-6 py-3">支払方法</th>
-                    <th scope="col" class="px-6 py-3">合計金額</th>
-                    <th scope="col" class="px-6 py-3">備考</th>
-                    <th scope="col" class="px-6 py-3">詳細</th>
-                    <th scope="col" class="px-6 py-3">操作</th>
+                    <th scope="col" class="px-4 py-3">取引日</th>
+                    <th scope="col" class="hidden md:table-cell px-4 py-3">担当者</th>
+                    <th scope="col" class="px-4 py-3">支払方法</th>
+                    <th scope="col" class="px-4 py-3">金額</th>
+                    <th scope="col" class="hidden lg:table-cell px-4 py-3">備考</th>
+                    <th scope="col" class="px-4 py-3">操作</th>
                 </tr>
             </thead>
             <tbody>
                 {% for transaction in transactions %}
                 <tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="px-6 py-4">{{ transaction.transaction_date }}</td>
-                    <td class="px-6 py-4">{{ transaction.recorded_by.name }}</td>
-                    <td class="px-6 py-4">
-                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                    <td class="px-4 py-4 text-xs md:text-sm">{{ transaction.transaction_date }}</td>
+                    <td class="hidden md:table-cell px-4 py-4">{{ transaction.recorded_by.name }}</td>
+                    <td class="px-4 py-4">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">
                             {{ transaction.get_payment_method_display }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 font-bold text-blue-600 text-right">¥{{ transaction.total_amount|floatformat:0 }}</td>
-                    <td class="px-6 py-4">{{ transaction.notes|default:"-" }}</td>
-                    <td class="px-6 py-4">
-                        <button type="button"
-                                class="text-blue-600 hover:underline text-sm cursor-pointer"
-                                onclick="toggleItems({{ transaction.id }})">
-                            <span id="toggle-{{ transaction.id }}">▼ 詳細を見る</span>
-                        </button>
-                    </td>
-                    <td class="px-6 py-4">
-                        <a href="{% url 'team_tansaibou:sale_edit' transaction.id %}"
-                           class="text-white bg-gray-500 hover:bg-gray-600 font-medium rounded-lg text-xs px-3 py-1.5">
-                            編集
-                        </a>
+                    <td class="px-4 py-4 font-bold text-blue-700">¥{{ transaction.total_amount|floatformat:0 }}</td>
+                    <td class="hidden lg:table-cell px-4 py-4">{{ transaction.notes|default:"-" }}</td>
+                    <td class="px-4 py-4">
+                        <div class="flex flex-col md:flex-row gap-1">
+                            <button type="button"
+                                    class="text-blue-600 hover:underline text-xs cursor-pointer"
+                                    onclick="toggleItems({{ transaction.id }})">
+                                <span id="toggle-{{ transaction.id }}">詳細</span>
+                            </button>
+                            <a href="{% url 'team_tansaibou:sale_edit' transaction.id %}"
+                               class="text-white bg-gray-500 hover:bg-gray-600 font-medium rounded-lg text-xs px-3 py-1.5 text-center">
+                                編集
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 <!-- 詳細行 -->
                 <tr class="bg-gray-50 hidden" id="items-{{ transaction.id }}">
-                    <td colspan="7" class="px-6 py-4">
+                    <td colspan="6" class="px-4 py-4">
                         <div class="relative overflow-x-auto">
                             <table class="w-full text-sm text-left text-gray-500">
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-200">
                                     <tr>
-                                        <th scope="col" class="px-4 py-2">商品名</th>
-                                        <th scope="col" class="px-4 py-2">タイプ</th>
-                                        <th scope="col" class="px-4 py-2">数量</th>
-                                        <th scope="col" class="px-4 py-2">単価</th>
-                                        <th scope="col" class="px-4 py-2">小計</th>
+                                        <th scope="col" class="px-3 py-2">商品名</th>
+                                        <th scope="col" class="hidden md:table-cell px-3 py-2">タイプ</th>
+                                        <th scope="col" class="px-3 py-2">数量</th>
+                                        <th scope="col" class="hidden md:table-cell px-3 py-2">単価</th>
+                                        <th scope="col" class="px-3 py-2">小計</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for item in transaction.items.all %}
                                     <tr class="bg-white border-b">
-                                        <td class="px-4 py-2">
+                                        <td class="px-3 py-2 text-xs md:text-sm">
                                             {% if item.product %}
                                                 {{ item.product.name }}
                                             {% elif item.product_set %}
-                                                {{ item.product_set.name }}
+                                                <span class="text-blue-700">{{ item.product_set.name }}</span>
                                             {% else %}
                                                 (不明)
                                             {% endif %}
                                         </td>
-                                        <td class="px-4 py-2">
+                                        <td class="hidden md:table-cell px-3 py-2">
                                             {% if item.product %}
-                                                <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded">通常商品</span>
+                                                <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded">通常</span>
                                             {% elif item.product_set %}
-                                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">セット商品</span>
+                                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">セット</span>
                                             {% endif %}
                                         </td>
-                                        <td class="px-4 py-2">{{ item.quantity }}</td>
-                                        <td class="px-4 py-2">¥{{ item.price_at_sale|floatformat:0 }}</td>
-                                        <td class="px-4 py-2 font-semibold text-right">¥{{ item.subtotal|floatformat:0 }}</td>
+                                        <td class="px-3 py-2">{{ item.quantity }}</td>
+                                        <td class="hidden md:table-cell px-3 py-2">¥{{ item.price_at_sale|floatformat:0 }}</td>
+                                        <td class="px-3 py-2 font-semibold">¥{{ item.subtotal|floatformat:0 }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -128,10 +127,10 @@ function toggleItems(transactionId) {
 
     if (itemsRow.classList.contains('hidden')) {
         itemsRow.classList.remove('hidden');
-        toggleLink.textContent = '▲ 詳細を隠す';
+        toggleLink.textContent = '▲ 閉じる';
     } else {
         itemsRow.classList.add('hidden');
-        toggleLink.textContent = '▼ 詳細を見る';
+        toggleLink.textContent = '詳細';
     }
 }
 </script>

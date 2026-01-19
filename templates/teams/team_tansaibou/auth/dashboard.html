@@ -100,18 +100,18 @@
     </div>
 
     <!-- 商品別利益テーブル -->
-    <div class="bg-white border border-gray-200 rounded-lg shadow p-5 mb-6">
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-4 md:p-5 mb-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-green-500">商品別損益（本日）</h3>
         <div class="relative overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-500">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                     <tr>
-                        <th scope="col" class="px-4 py-3">商品名</th>
-                        <th scope="col" class="px-4 py-3 w-16">販売数</th>
-                        <th scope="col" class="px-4 py-3 w-24">売上高</th>
-                        <th scope="col" class="px-4 py-3 w-24">売上原価</th>
-                        <th scope="col" class="px-4 py-3 w-24">粗利益</th>
-                        <th scope="col" class="px-4 py-3 w-20">粗利率</th>
+                        <th scope="col" class="px-3 md:px-4 py-3">商品名</th>
+                        <th scope="col" class="hidden md:table-cell px-4 py-3 w-16">販売数</th>
+                        <th scope="col" class="px-3 md:px-4 py-3 w-20 md:w-24">売上</th>
+                        <th scope="col" class="hidden lg:table-cell px-4 py-3 w-24">原価</th>
+                        <th scope="col" class="px-3 md:px-4 py-3 w-20 md:w-24">利益</th>
+                        <th scope="col" class="px-3 md:px-4 py-3 w-16 md:w-20">利率</th>
                     </tr>
                 </thead>
                 <tbody id="profitTable">
@@ -167,18 +167,18 @@
     </div>
 
     <!-- 人気ランキング -->
-    <div class="bg-white border border-gray-200 rounded-lg shadow p-5 mb-6">
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-4 md:p-5 mb-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-500">売上ランキング（本日）</h3>
         <div class="relative overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-500">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                     <tr>
-                        <th scope="col" class="px-4 py-3 w-12">順位</th>
-                        <th scope="col" class="px-4 py-3">商品名</th>
-                        <th scope="col" class="px-4 py-3">タイプ</th>
-                        <th scope="col" class="px-4 py-3 w-20">販売数</th>
-                        <th scope="col" class="px-4 py-3 w-24">売上金額</th>
-                        <th scope="col" class="px-4 py-3 w-20">現在庫</th>
+                        <th scope="col" class="px-3 md:px-4 py-3 w-10 md:w-12">#</th>
+                        <th scope="col" class="px-3 md:px-4 py-3">商品名</th>
+                        <th scope="col" class="hidden md:table-cell px-4 py-3">タイプ</th>
+                        <th scope="col" class="px-3 md:px-4 py-3 w-14 md:w-20">数</th>
+                        <th scope="col" class="px-3 md:px-4 py-3 w-20 md:w-24">売上</th>
+                        <th scope="col" class="hidden md:table-cell px-4 py-3 w-20">在庫</th>
                     </tr>
                 </thead>
                 <tbody id="rankingTable">
@@ -193,17 +193,17 @@
 
     <!-- 予測テーブル -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div class="bg-white border border-gray-200 rounded-lg shadow p-5">
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-4 md:p-5">
             <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-500">売り切れ予測</h3>
             <div class="relative overflow-x-auto">
                 <table class="w-full text-sm text-left text-gray-500">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                         <tr>
-                            <th scope="col" class="px-4 py-3">商品名</th>
-                            <th scope="col" class="px-4 py-3">現在庫</th>
-                            <th scope="col" class="px-4 py-3">販売速度</th>
-                            <th scope="col" class="px-4 py-3">予測時間</th>
-                            <th scope="col" class="px-4 py-3">状態</th>
+                            <th scope="col" class="px-3 md:px-4 py-3">商品名</th>
+                            <th scope="col" class="px-3 md:px-4 py-3">在庫</th>
+                            <th scope="col" class="hidden md:table-cell px-4 py-3">速度</th>
+                            <th scope="col" class="px-3 md:px-4 py-3">予測</th>
+                            <th scope="col" class="px-3 md:px-4 py-3">状態</th>
                         </tr>
                     </thead>
                     <tbody id="selloutTable">
@@ -213,16 +213,16 @@
                 </table>
             </div>
         </div>
-        <div class="bg-white border border-gray-200 rounded-lg shadow p-5">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-500">ロス予測（営業終了時）</h3>
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-4 md:p-5">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-500">ロス予測</h3>
             <div class="relative overflow-x-auto">
                 <table class="w-full text-sm text-left text-gray-500">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                         <tr>
-                            <th scope="col" class="px-4 py-3">商品名</th>
-                            <th scope="col" class="px-4 py-3">現在庫</th>
-                            <th scope="col" class="px-4 py-3">予測残数</th>
-                            <th scope="col" class="px-4 py-3">ロス(原価)</th>
+                            <th scope="col" class="px-3 md:px-4 py-3">商品名</th>
+                            <th scope="col" class="hidden md:table-cell px-4 py-3">在庫</th>
+                            <th scope="col" class="px-3 md:px-4 py-3">残予測</th>
+                            <th scope="col" class="px-3 md:px-4 py-3">ロス</th>
                         </tr>
                     </thead>
                     <tbody id="lossTable">
@@ -481,12 +481,12 @@ async function fetchProfitAnalysis() {
 
             html += `
                 <tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="px-4 py-3 font-medium text-gray-900">${item.name}</td>
-                    <td class="px-4 py-3">${item.quantity}</td>
-                    <td class="px-4 py-3 font-bold text-blue-600">${formatCurrency(item.revenue)}</td>
-                    <td class="px-4 py-3 text-gray-600">${formatCurrency(item.cost)}</td>
-                    <td class="px-4 py-3 font-bold ${profitClass}">${formatCurrency(item.profit)}</td>
-                    <td class="px-4 py-3 font-medium ${marginClass}">${item.margin}%</td>
+                    <td class="px-3 md:px-4 py-3 font-medium text-gray-900 text-xs md:text-sm">${item.name}</td>
+                    <td class="hidden md:table-cell px-4 py-3">${item.quantity}</td>
+                    <td class="px-3 md:px-4 py-3 font-bold text-blue-700">${formatCurrency(item.revenue)}</td>
+                    <td class="hidden lg:table-cell px-4 py-3 text-gray-600">${formatCurrency(item.cost)}</td>
+                    <td class="px-3 md:px-4 py-3 font-bold ${profitClass}">${formatCurrency(item.profit)}</td>
+                    <td class="px-3 md:px-4 py-3 font-medium ${marginClass}">${item.margin}%</td>
                 </tr>
             `;
         });
@@ -521,12 +521,12 @@ async function fetchProductRanking() {
 
             html += `
                 <tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="px-4 py-3"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${rankClass}">${rank}</span></td>
-                    <td class="px-4 py-3 font-medium text-gray-900">${item.name}</td>
-                    <td class="px-4 py-3">${item.type}</td>
-                    <td class="px-4 py-3">${item.quantity}</td>
-                    <td class="px-4 py-3 font-bold text-blue-600">${formatCurrency(item.sales)}</td>
-                    <td class="px-4 py-3">${item.stock}</td>
+                    <td class="px-3 md:px-4 py-3"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${rankClass}">${rank}</span></td>
+                    <td class="px-3 md:px-4 py-3 font-medium text-gray-900 text-xs md:text-sm">${item.name}</td>
+                    <td class="hidden md:table-cell px-4 py-3">${item.type}</td>
+                    <td class="px-3 md:px-4 py-3">${item.quantity}</td>
+                    <td class="px-3 md:px-4 py-3 font-bold text-blue-700">${formatCurrency(item.sales)}</td>
+                    <td class="hidden md:table-cell px-4 py-3">${item.stock}</td>
                 </tr>
             `;
         });
@@ -567,11 +567,11 @@ async function fetchStockPrediction() {
 
                 html += `
                     <tr class="bg-white border-b hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900">${item.name}</td>
-                        <td class="px-4 py-3">${item.current_stock}</td>
-                        <td class="px-4 py-3">${item.sales_rate} 個/時</td>
-                        <td class="px-4 py-3">${item.time_to_sellout} 時間</td>
-                        <td class="px-4 py-3"><span class="text-xs font-medium px-2.5 py-0.5 rounded ${statusClass}">${statusText}</span></td>
+                        <td class="px-3 md:px-4 py-3 font-medium text-gray-900 text-xs md:text-sm">${item.name}</td>
+                        <td class="px-3 md:px-4 py-3">${item.current_stock}</td>
+                        <td class="hidden md:table-cell px-4 py-3">${item.sales_rate}/時</td>
+                        <td class="px-3 md:px-4 py-3">${item.time_to_sellout}h</td>
+                        <td class="px-3 md:px-4 py-3"><span class="text-xs font-medium px-2 py-0.5 rounded ${statusClass}">${statusText}</span></td>
                     </tr>
                 `;
             });
@@ -587,10 +587,10 @@ async function fetchStockPrediction() {
             data.loss_predictions.forEach(item => {
                 html += `
                     <tr class="bg-white border-b hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900">${item.name}</td>
-                        <td class="px-4 py-3">${item.current_stock}</td>
-                        <td class="px-4 py-3">${item.predicted_remaining}</td>
-                        <td class="px-4 py-3 font-bold text-red-600">${formatCurrency(item.loss_amount)}</td>
+                        <td class="px-3 md:px-4 py-3 font-medium text-gray-900 text-xs md:text-sm">${item.name}</td>
+                        <td class="hidden md:table-cell px-4 py-3">${item.current_stock}</td>
+                        <td class="px-3 md:px-4 py-3">${item.predicted_remaining}</td>
+                        <td class="px-3 md:px-4 py-3 font-bold text-red-600">${formatCurrency(item.loss_amount)}</td>
                     </tr>
                 `;
             });

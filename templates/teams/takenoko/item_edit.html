@@ -142,57 +142,59 @@
 
       /* ===== 画像アップロード ===== */
       .uploader {
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-        flex-wrap: wrap;
-      }
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
 
-      .thumbs {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-      .thumb {
-        width: 96px;
-        height: 96px;
-        border-radius: 16px;
-        border: 1.5px dashed rgba(100, 156, 228, 0.6);
-        background: #fbfef9;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        box-sizing: border-box;
-      }
-      .thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-      }
-      .thumb.marked {
-        opacity: 0.5;
-        filter: grayscale(80%);
-      }
-      .remove-btn {
+    .thumbs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .thumb {
+      width: 92px;
+      height: 92px;
+      border-radius: 16px;
+      border: 1.5px dashed rgba(100,156,228,0.6);
+      background: #FBFEF9;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .thumb .empty {
+      color: rgba(100,156,228,0.9);
+      font-size: 28px;
+    }
+      .thumb .remove-btn {
         position: absolute;
-        right: 6px;
         top: 6px;
-        border: none;
-        background: rgba(255,255,255,0.9);
-        color: #333;
+        right: 6px;
+        width: 26px;
+        height: 26px;
         border-radius: 999px;
-        padding: 4px 8px;
+        border: none;
+        background: rgba(0,0,0,0.6);
+        color: white;
         font-weight: 700;
         cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        line-height: 1;
       }
-      .remove-btn:focus { outline: none; }
-      .thumb .empty {
-        color: rgba(100, 156, 228, 0.9);
-        font-size: 28px;
-      }
+      .thumb .remove-btn:focus { outline: 2px solid rgba(100,156,228,0.6); }
 
       .upload-btn {
         display: inline-flex;
@@ -263,6 +265,11 @@
         cursor: pointer;
       }
 
+      /* 削除チェックボックスを非表示 */
+      input[name="delete_images"] {
+        display: none;
+      }
+
       @media (min-width: 768px) {
         .card {
           padding: 28px;
@@ -287,48 +294,88 @@
       // ===== 画像プレビュー（最大5枚） =====
       const MAX_IMAGES = 5;
       let selectedFiles = [];
+      const existingImages = [{% for img in item.images.all %}{url: '{{ img.image.url }}', id: {{ img.id }}},{% endfor %}];
+      const deletedImageIds = new Set();
 
       function $(id) {
         return document.getElementById(id);
       }
 
-      function renderThumbs() {
-        const thumbs = $("thumbs");
-        thumbs.innerHTML = "";
+      function syncInputFiles() {
+        const dt = new DataTransfer();
+        selectedFiles.forEach(f => dt.items.add(f));
+        $("images").files = dt.files;
+      }
 
+      function renderThumbs() {
+        const container = $("allImages");
+        container.innerHTML = "";
+
+        const visibleExistingImages = existingImages.filter(img => !deletedImageIds.has(img.id));
+
+        // 既存画像
+        visibleExistingImages.forEach((img, idx) => {
+          const box = document.createElement("div");
+          box.className = "thumb";
+          box.innerHTML = `<img src="${img.url}" alt="img${idx + 1}"><button type="button" class="remove-btn" aria-label="画像を削除" onclick="toggleDelete(${img.id})">×</button>`;
+          container.appendChild(box);
+        });
+
+        // 新規画像
         selectedFiles.forEach((file, idx) => {
           const url = URL.createObjectURL(file);
           const box = document.createElement("div");
           box.className = "thumb";
-          box.innerHTML = `<img src="${url}" alt="画像${idx + 1}"><button type="button" class="remove-btn" aria-label="画像を取り消す" onclick="removeImage(${idx})">×</button>`;
-          thumbs.appendChild(box);
+          box.innerHTML = `<img src="${url}" alt="画像${idx+1}"><button type="button" class="remove-btn" aria-label="画像を削除" onclick="removeImage(${idx})">×</button>`;
+          container.appendChild(box);
         });
 
-        for (let i = selectedFiles.length; i < MAX_IMAGES; i++) {
+        // 空のスロット
+        const totalImages = visibleExistingImages.length + selectedFiles.length;
+        for (let i = totalImages; i < MAX_IMAGES; i++) {
           const box = document.createElement("div");
           box.className = "thumb";
           box.innerHTML = `<div class="empty"><i class="fas fa-image"></i></div>`;
-          thumbs.appendChild(box);
+          container.appendChild(box);
         }
 
-        updatePickBtnState();
+        // ボタンのdisabled
+        const pickBtn = $("pickBtn");
+        if (pickBtn) pickBtn.disabled = totalImages >= MAX_IMAGES;
+      }
+
+      function removeImage(index) {
+        if (index < 0 || index >= selectedFiles.length) return;
+        selectedFiles.splice(index, 1);
+        syncInputFiles();
+        renderThumbs();
+      }
+
+      function toggleDelete(id) {
+        if (deletedImageIds.has(id)) {
+          deletedImageIds.delete(id);
+          let checkbox = document.querySelector(`input[name="delete_images"][value="${id}"]`);
+          if (checkbox) checkbox.remove();
+        } else {
+          deletedImageIds.add(id);
+          const newCheckbox = document.createElement("input");
+          newCheckbox.type = "checkbox";
+          newCheckbox.name = "delete_images";
+          newCheckbox.value = id;
+          newCheckbox.checked = true;
+          document.getElementById("sellForm").appendChild(newCheckbox);
+        }
+        renderThumbs();
       }
 
       function addImages(fileList) {
         const files = Array.from(fileList || []);
         if (files.length === 0) return;
 
-        const existing = document.querySelectorAll("#existingThumbs .thumb").length;
-        const toBeDeleted = document.querySelectorAll("#existingThumbs input[type='hidden']:not([disabled])").length;
-        const existingRemaining = Math.max(0, existing - toBeDeleted);
-
-        const canAdd = Math.max(0, MAX_IMAGES - existingRemaining - selectedFiles.length);
+        const canAdd = Math.max(0, MAX_IMAGES - existingImages.length - selectedFiles.length);
         selectedFiles = selectedFiles.concat(files.slice(0, canAdd));
 
-        const dt = new DataTransfer();
-        selectedFiles.forEach((f) => dt.items.add(f));
-        $("images").files = dt.files;
-
+        syncInputFiles();
         renderThumbs();
       }
 
@@ -408,38 +455,65 @@
         if (hidden) hidden.remove();
       }
 
+      // ===== カテゴリタグ select の色 =====
+      function updateTagSelectColor() {
+        const sel = $("tagSelect");
+        if (!sel) return;
+        sel.style.color = sel.value ? "#333" : "#888";
+      }
+
       // ===== カテゴリタグ（複数選択） =====
       function addCategoryTag() {
-      const sel = document.getElementById("tagSelect");
-      const val = sel.value;
-      if (!val) return;
+        const sel = $("tagSelect");
+        const val = sel.value;
+        const text = sel.options[sel.selectedIndex]?.text || "";
+        if (!val) return;
 
-      if (document.querySelector(`input[name="tags"][value="${val}"]`)) return;     
-      const hidden = document.createElement("input");
-      hidden.type = "hidden";
-      hidden.name = "tags";
-      hidden.value = val;
-      document.getElementById("tagHidden").appendChild(hidden);
+        const exists = document.querySelector(`input[name="tags"][value="${val}"]`);
+        if (exists) return;
 
-      const text = sel.options[sel.selectedIndex].text;
-      const chip = document.createElement("span");
-      chip.className = "chip";
-      chip.dataset.tag = val;
-      chip.innerHTML =
-        `${text}<button type="button" onclick="removeCategoryTag('${val}')">×</button>`;
-      document.getElementById("tagChips").appendChild(chip);  
-      sel.value = "";
-  }
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = "tags";
+        hidden.value = val;
+        $("tagHidden").appendChild(hidden);
 
-  function removeCategoryTag(val) {
-    const chip = document.querySelector(`.chip[data-tag="${val}"]`);
-    if (chip) chip.remove();
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.setAttribute("data-tag", val);
+        chip.innerHTML = `${text}<button type="button" aria-label="削除" onclick="removeCategoryTag('${val}')">×</button>`;
+        $("tagChips").appendChild(chip);
 
-    const hidden = document.querySelector(
-    `input[name="tags"][value="${val}"]`
-    );
-    if (hidden) hidden.remove();
-  }
+        sel.value = "";
+        updateTagSelectColor();
+      }
+
+      function removeCategoryTag(val) {
+        const chip = document.querySelector(`.chip[data-tag="${val}"]`);
+        if (chip) chip.remove();
+        const hidden = document.querySelector(`input[name="tags"][value="${val}"]`);
+        if (hidden) hidden.remove();
+      }
+
+      function getOptionText(selectId, val) {
+        const sel = $(selectId);
+        const opt = sel.querySelector(`option[value="${val}"]`);
+        return opt ? opt.text : "";
+      }
+
+      function addHiddenAndChip(name, val, text, chipsId, dataAttr) {
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = name;
+        hidden.value = val;
+        $(name + "Hidden").appendChild(hidden);
+
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.setAttribute("data-" + dataAttr, val);
+        chip.innerHTML = `${text}<button type="button" aria-label="削除" onclick="remove${name.charAt(0).toUpperCase() + name.slice(1)}Tag('${val}')">×</button>`;
+        $(chipsId).appendChild(chip);
+      }
 
       // ===== 価格入力（最大99999 / 数字のみ） =====
       function normalizePrice() {
@@ -463,8 +537,20 @@
         updateGradeSelectColor();
         $("gradeSelect").addEventListener("change", updateGradeSelectColor);
 
-        // 初期のピックボタン状態を計算
-        updatePickBtnState();
+        updateTagSelectColor();
+        $("tagSelect").addEventListener("change", updateTagSelectColor);
+
+        // エラー再表示時、選択を復元（必要なときだけ配列に値が入る）
+        const PRESELECTED_GRADES = {{ selected_grades|safe }};
+        const PRESELECTED_TAGS = {{ selected_tags|safe }};
+        PRESELECTED_GRADES.forEach(val => {
+          const text = getOptionText("gradeSelect", val);
+          addHiddenAndChip("grades", val, text, "gradeChips", "grade");
+        });
+        PRESELECTED_TAGS.forEach(val => {
+          const text = getOptionText("tagSelect", val);
+          addHiddenAndChip("tags", val, text, "tagChips", "tag");
+        });
       });
     </script>
   </head>
@@ -483,42 +569,26 @@
         <form action="" id="sellForm" method="post" enctype="multipart/form-data">
           {% csrf_token %}
 
-          <!-- 既存画像（クリックで削除/取り消し） -->
+          <!-- 画像 -->
           <div class="field">
-            <label class="label">登録済み画像（クリックで削除を切替）</label>
-            <div style="display:flex; gap:12px; flex-wrap:wrap;" id="existingThumbs">
-              {% for img in item.images.all %}
-                <div class="thumb{% if delete_images and img.id|stringformat:'s' in delete_images %} marked{% endif %}" id="existing_img_{{ img.id }}" data-img-id="{{ img.id }}" style="width:120px; height:120px;">
-                  <img src="{{ img.image.url }}" alt="img{{ forloop.counter }}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
-                  {% if delete_images and img.id|stringformat:'s' in delete_images %}
-                    <button type="button" class="remove-btn" aria-label="既存画像を削除" onclick="toggleExistingImageDelete('{{ img.id }}')">×</button>
-                    <input type="hidden" name="delete_images" value="{{ img.id }}" id="delete_img_{{ img.id }}">
-                  {% else %}
-                    <button type="button" class="remove-btn" aria-label="既存画像を削除" onclick="toggleExistingImageDelete('{{ img.id }}')">×</button>
-                    <input type="hidden" name="delete_images" value="{{ img.id }}" id="delete_img_{{ img.id }}" disabled>
-                  {% endif %}
-                </div>
-              {% empty %}
-                <p style="color:#888;">登録済み画像はありません。</p>
-              {% endfor %}
-            </div>
-            <p class="text-sm text-gray-500 mt-2">※ 最大5枚。削除後＋追加分が5枚以内になるようにしてください。</p>
+            <label class="label">画像</label>
+            <div id="allImages" style="display:flex; gap:12px; flex-wrap:wrap;"></div>
+            <p class="text-sm text-gray-500 mt-2">※ 最大5枚</p>
           </div>
 
           <!-- 新規画像追加 -->
           <div class="field">
-            <label class="label" for="images">画像を追加（複数可・5MB以下）</label>
-
-            <div class="uploader">
-              <div class="thumbs" id="thumbs"></div>
-
-              <div style="display:flex; flex-direction:column; gap:8px;">
-                <button type="button" class="upload-btn" id="pickBtn" onclick="document.getElementById('images').click()">
+            <label class="upload-btn" id="pickBtn" for="images">
                 <i class="fas fa-plus"></i> 画像を追加
-                </button>
-                <input id="images" name="images" class="file-input" type="file" accept="image/*" multiple hidden />
-              </div>
-            </div>
+              </label>
+              <input
+                id="images"
+                name="images"
+                class="file-input"
+                type="file"
+                accept="image/*"
+                multiple
+              />
           </div>
 
           <!-- 商品名 -->
@@ -636,8 +706,6 @@
               {% endfor %}
             </div>
           </div>
-
-
 
           <!-- 送信 -->
           <div class="actions">

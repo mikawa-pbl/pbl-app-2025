@@ -983,10 +983,10 @@
     
     // レア度判定
     function getRarity(pts) {
-        if (pts === 10) return { name: 'LEGEND', class: 'rarity-legend', message: '最高レア！伝説級の引き！' };
+        if (pts === 10) return { name: 'LEGEND', class: 'rarity-legend', message: 'レジェンドレア！伝説級の引き！' };
         if (pts === 9) return { name: 'ULTRA RARE', class: 'rarity-ultra-rare', message: 'ウルトラレア！超大当たり！' };
         if (pts >= 7) return { name: 'SUPER RARE', class: 'rarity-super-rare', message: 'スーパーレア！大当たり！' };
-        if (pts >= 5) return { name: 'RARE', class: 'rarity-rare', message: 'レア！良い引き！' };
+        if (pts >= 5) return { name: 'RARE', class: 'rarity-rare', message: 'レア！けっこういいね！' };
         return { name: 'NORMAL', class: 'rarity-normal', message: 'ノーマル！' };
     }
     

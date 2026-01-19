@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>部屋検索</title>
@@ -11,7 +12,7 @@
         body {
             margin: 0;
             font-family: system-ui, -apple-system, BlinkMacSystemFont,
-                         "Segoe UI", sans-serif;
+                "Segoe UI", sans-serif;
             background-color: #f5f5f5;
         }
 
@@ -83,6 +84,59 @@
             padding: 4px 12px 0;
         }
 
+        /* Container for Floor Map + Controls */
+        .floor-map-container {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        /* Floor Controls (Right Side) */
+        .floor-controls {
+            flex: 0 0 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .floor-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            /* Circle */
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.2s;
+        }
+
+        .floor-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .floor-btn.disabled {
+            background-color: #e0e0e0;
+            color: #aaa;
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+        .current-floor-label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
         /* マップ部分（下部） */
         .content {
             flex: 1;
@@ -90,12 +144,13 @@
             box-sizing: border-box;
         }
 
-        .map-card-all, .map-card-floor {
+        .map-card-all,
+        .map-card-floor {
             background-color: #ffffff;
             border-radius: 8px;
             padding: 10px;
             margin-bottom: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
         .map-title {
@@ -106,11 +161,11 @@
         .map-wrapper-all {
             position: relative;
             width: 100%;
-            height: 220px; 
+            height: 220px;
             background-color: #fafafa;
             border: 1px solid #ddd;
             border-radius: 4px;
-            overflow: hidden; 
+            overflow: hidden;
             touch-action: none;
         }
 
@@ -159,175 +214,182 @@
         }
     </style>
 </head>
+
 <body>
-<div class="page">
+    <div class="page">
 
-    <header class="search-header">
-        <h1 class="search-title">部屋検索</h1>
-        <form method="get" class="search-form">
-            <div class="search-field search-building">
-                <div class="search-label">棟</div>
-                <select id="building_id" name="building_id" class="search-input">
-                    <option value="init">選択</option>
-                    <option value="A" {% if building_id == "A" %}selected{% endif %}>A</option>
-                    <option value="A1" {% if building_id == "A1" %}selected{% endif %}>A1</option>
-                    <option value="A2" {% if building_id == "A2" %}selected{% endif %}>A2</option>
-                    <option value="B" {% if building_id == "B" %}selected{% endif %}>B</option>
-                    <option value="C" {% if building_id == "C" %}selected{% endif %}>C</option>
-                    <option value="D" {% if building_id == "D" %}selected{% endif %}>D</option>
-                    <option value="E" {% if building_id == "E" %}selected{% endif %}>E</option>
-                    <option value="F" {% if building_id == "F" %}selected{% endif %}>F</option>
-                    <option value="G" {% if building_id == "G" %}selected{% endif %}>G</option>
-                </select>
-            </div>
+        <header class="search-header">
+            <h1 class="search-title">部屋検索</h1>
+            <form method="get" class="search-form">
+                <div class="search-field search-building">
+                    <div class="search-label">棟</div>
+                    <select id="building_id" name="building_id" class="search-input">
+                        {% for opt in building_options %}
+                        <option value="{{ opt.value }}" {% if opt.selected %}selected{% endif %}>{{ opt.label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            <div class="search-field">
-                <div class="search-label">部屋番号</div>
-                <input type="text" pattern="^[0-9]+$" id="room_number" name="room_number" class="search-input" value="{{ room_number }}">
-            </div>
+                <div class="search-field">
+                    <div class="search-label">部屋番号</div>
+                    <input type="text" pattern="^[0-9]+$" id="room_number" name="room_number" class="search-input"
+                        value="{{ room_number }}">
+                </div>
 
-            <div class="search-button">
-                <button type="submit" aria-label="検索">🔍</button>
-            </div>
-        </form>
-        {% if error_message %}
+                <div class="search-button">
+                    <button type="submit" aria-label="検索">🔍</button>
+                </div>
+            </form>
+            {% if error_message %}
             <div class="error">{{ error_message }}</div>
-        {% endif %}
-    </header>
+            {% endif %}
+        </header>
 
-    <main class="content">
-        <section class="map-card-all">
-            <h2 class="map-title">全体マップ (拡大できます)</h2>
-            <div class="map-wrapper-all">
-                <div id="zoom-all" class="map-wrapper-inner">
-                    <img src="images/campus_all.png" alt="全体マップ">
+        <main class="content">
+            <section class="map-card-all">
+                <h2 class="map-title">全体マップ (拡大できます)</h2>
+                <div class="map-wrapper-all">
+                    <div id="zoom-all" class="map-wrapper-inner">
+                        <img src="images/campus_all.png" alt="全体マップ">
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section class="map-card-floor">
-            <h2 class="map-title">詳細マップ（フロアマップ）</h2>
-            <div class="map-wrapper-floor">
-                <div id="zoom-floor" class="map-wrapper-inner" 
-                     data-dot-x="{{ x|default:'none' }}" 
-                     data-dot-y="{{ y|default:'none' }}">
+            <section class="map-card-floor">
+                <h2 class="map-title">詳細マップ（フロアマップ）</h2>
 
-                     
-                    
-                    {% if floor_image_url %}
-                        <img src="{{ floor_image_url }}" alt="フロア画像">
-                        {% if x is not None and y is not None %}
-                        <div class="cursor-dot" style="left: {{ x }}%; top: {{ y }}%;"></div>
-                        {% endif %}
-                    {% else %}
-                        {% if building_id == "init" or building_id == "" %} <!--検索できていない場合-->
+                <div class="floor-map-container">
+                    <div class="map-wrapper-floor">
+                        <div id="zoom-floor" class="map-wrapper-inner" data-dot-x="{{ x|default:'none' }}"
+                            data-dot-y="{{ y|default:'none' }}">
+
+                            {% if floor_image_url %}
+                            <img src="{{ floor_image_url }}" alt="フロア画像">
+                            {% if x is not None and y is not None %}
+                            <div class="cursor-dot" style="left: {{ x }}%; top: {{ y }}%;"></div>
+                            {% endif %}
+                            {% else %}
+                            {% if building_id == "init" or building_id == "" %} <!--検索できていない場合-->
                             <img src="images/gikajika_input.png" alt="検索してね＾＾">
-                        {% else %}
+                            {% else %}
                             <img src="images/gikajika.png" alt="エラー＾＾"><!--作ってない-->
-                        {% endif %}
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Floor Switching Controls -->
+                    {% if current_floor is not None and min_floor is not None and max_floor is not None %}
+                    <div class="floor-controls">
+                        <!-- Up Button -->
+                        {% if current_floor < max_floor %} <a
+                            href="?building_id={{ building_id|default:'' }}&room_number={{ room_number|default:'' }}&floor={{ current_floor|add:1 }}"
+                            class="floor-btn" aria-label="上の階へ">▲</a>
+                            {% else %}
+                            <span class="floor-btn disabled">▲</span>
+                            {% endif %}
+
+                            <span class="current-floor-label">{{ current_floor }}F</span>
+
+                            <!-- Down Button -->
+                            {% if current_floor > min_floor %}
+                            <a href="?building_id={{ building_id|default:'' }}&room_number={{ room_number|default:'' }}&floor={{ current_floor|add:-1 }}"
+                                class="floor-btn" aria-label="下の階へ">▼</a>
+                            {% else %}
+                            <span class="floor-btn disabled">▼</span>
+                            {% endif %}
+                    </div>
                     {% endif %}
-
-
-                     <!--
-                    {% if floor_image_url %}
-                        <img src="{{ floor_image_url }}" alt="フロア画像">
-                        {% if x is not None and y is not None %}
-                        <div class="cursor-dot" style="left: {{ x }}%; top: {{ y }}%;"></div>
-                        {% endif %}
-                    {% else %}
-                        <img src="images/gikajika.png" alt="存在しないフロアです">
-                    {% endif %}
-
-                    -->
                 </div>
-            </div>
-        </section>
-    </main>
-</div>
+            </section>
+        </main>
+    </div>
 
-<script>
-    function applySmartZoom(id, xPct, yPct, scale) {
-        const elem = document.getElementById(id);
-        if (!elem) return;
-        
-        const img = elem.querySelector('img');
-        
-        // Panzoomの初期化
-        const panzoom = Panzoom(elem, {
-            maxScale: 8,
-            minScale: 1,
-            contain: 'outside'
+    <script>
+        function applySmartZoom(id, xPct, yPct, scale) {
+            const elem = document.getElementById(id);
+            if (!elem) return;
+
+            const img = elem.querySelector('img');
+
+            // Panzoomの初期化
+            const panzoom = Panzoom(elem, {
+                maxScale: 8,
+                minScale: 1,
+                contain: 'outside'
+            });
+
+            elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+
+            // 実際の移動処理
+            const doMove = () => {
+                // ブラウザがレイアウト計算を終えるのを僅かに待つ
+                setTimeout(() => {
+                    const w = elem.offsetWidth;
+                    const h = elem.offsetHeight;
+
+                    // 指定座標が枠の真ん中に来るように計算
+                    const targetX = (xPct / 100) * w;
+                    const targetY = (yPct / 100) * h;
+
+                    const panX = (w / 2) - targetX;
+                    const panY = (h / 2) - targetY;
+
+                    // ズームを先に適用
+                    panzoom.zoom(scale, { animate: false });
+
+                    // 次のフレームで移動を適用（contain: 'outside' の判定を確実にするため）
+                    requestAnimationFrame(() => {
+                        panzoom.pan(panX * scale, panY * scale, { animate: false });
+                    });
+                }, 100);
+            };
+
+            // 画像が読み込み済みかチェック
+            if (img.complete) {
+                doMove();
+            } else {
+                img.onload = doMove;
+            }
+
+            return panzoom;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const buildingSelect = document.getElementById('building_id');
+            const selectedBuilding = buildingSelect.value;
+
+            if (selectedBuilding === "A" || selectedBuilding === "A1" || selectedBuilding === "A2") {
+                // 全体マップ: (55%, 50%) を中心に 1.7倍
+                applySmartZoom('zoom-all', 57, 52, 3.6);
+            }
+            else {
+                // 全体マップ: (55%, 50%) を中心に 1.7倍
+                applySmartZoom('zoom-all', 55, 50, 1.7);
+            }
+
+
+            // 詳細マップ
+            const elemFloor = document.getElementById('zoom-floor');
+            const dotX = elemFloor.getAttribute('data-dot-x');
+            const dotY = elemFloor.getAttribute('data-dot-y');
+
+            /*
+            if (dotX && dotX !== 'none' && dotY && dotY !== 'none') {
+                applySmartZoom('zoom-floor', parseFloat(dotX), parseFloat(dotY), 3.0);
+            } else {
+                applySmartZoom('zoom-floor', 50, 50, 1);
+            }
+            */
+
+            //フロアマップの拡大機能は一旦設定しない
+            //applySmartZoom('zoom-floor', 50, 50, 1);
+
         });
-
-        elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
-
-        // 実際の移動処理
-        const doMove = () => {
-            // ブラウザがレイアウト計算を終えるのを僅かに待つ
-            setTimeout(() => {
-                const w = elem.offsetWidth;
-                const h = elem.offsetHeight;
-
-                // 指定座標が枠の真ん中に来るように計算
-                const targetX = (xPct / 100) * w;
-                const targetY = (yPct / 100) * h;
-                
-                const panX = (w / 2) - targetX;
-                const panY = (h / 2) - targetY;
-
-                // ズームを先に適用
-                panzoom.zoom(scale, { animate: false });
-                
-                // 次のフレームで移動を適用（contain: 'outside' の判定を確実にするため）
-                requestAnimationFrame(() => {
-                    panzoom.pan(panX * scale, panY * scale, { animate: false });
-                });
-            }, 100);
-        };
-
-        // 画像が読み込み済みかチェック
-        if (img.complete) {
-            doMove();
-        } else {
-            img.onload = doMove;
-        }
-
-        return panzoom;
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-
-        const buildingSelect = document.getElementById('building_id');
-        const selectedBuilding = buildingSelect.value;
-
-        if (selectedBuilding === "A" || selectedBuilding === "A1" || selectedBuilding === "A2") {
-            // 全体マップ: (55%, 50%) を中心に 1.7倍
-            applySmartZoom('zoom-all', 57, 52, 3.6);
-        }
-        else{
-            // 全体マップ: (55%, 50%) を中心に 1.7倍
-            applySmartZoom('zoom-all', 55, 50, 1.7);
-        }
-        
-
-        // 詳細マップ
-        const elemFloor = document.getElementById('zoom-floor');
-        const dotX = elemFloor.getAttribute('data-dot-x');
-        const dotY = elemFloor.getAttribute('data-dot-y');
-
-        /*
-        if (dotX && dotX !== 'none' && dotY && dotY !== 'none') {
-            applySmartZoom('zoom-floor', parseFloat(dotX), parseFloat(dotY), 3.0);
-        } else {
-            applySmartZoom('zoom-floor', 50, 50, 1);
-        }
-        */
-       
-        //フロアマップの拡大機能は一旦設定しない
-        //applySmartZoom('zoom-floor', 50, 50, 1);
-
-    });
-</script>
+    </script>
 
 </body>
+
 </html>

@@ -74,8 +74,20 @@ class MyPage(models.Model):
         return self.name # ページの名前がその人の名前になる
 
 class Community(models.Model):
+    CATEGORY_CHOICES = [
+        ('授業', '授業'),
+        ('サークル', 'サークル'),
+        ('その他', 'その他'),
+    ]
+
     name = models.CharField(max_length=100, verbose_name="コミュニティ名")
     description = models.TextField(verbose_name="説明", blank=True, null=True)
+    category = models.CharField(
+        max_length=50,
+        choices=CATEGORY_CHOICES,
+        default='その他',
+        verbose_name="カテゴリ"
+    )
     image = models.ImageField(upload_to='communities/', blank=True, null=True, verbose_name="画像")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
     members = models.ManyToManyField(MyPage, related_name='communities', verbose_name="参加メンバー")

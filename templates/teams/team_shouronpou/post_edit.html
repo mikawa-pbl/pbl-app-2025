@@ -9,6 +9,7 @@
 </head>
 <body class="form-page">
     <h2>募集の編集</h2>
+    
     <form method="post" id="postForm">
         {% csrf_token %}
         {{ form.non_field_errors }}
@@ -18,6 +19,7 @@
             <label>募集タイトル:</label>
             {{ form.title }}
         </div>
+        
         <div class="form-row">
             <div class="form-col">
                 <label>系・所属:</label>
@@ -28,6 +30,7 @@
                 {{ form.laboratory }}
             </div>
         </div>
+
         <div class="form-row">
             <div class="form-col">
                 <label>報酬の情報:</label>
@@ -38,19 +41,20 @@
                 {{ form.duration }}
             </div>
         </div>
+
         <div style="margin-bottom: 15px;">
             <label>募集内容の詳細:</label>
             {{ form.content }}
         </div>
+
         <div style="margin-bottom: 15px;">
-            <label>{{ form.recruitment_end_date.label }}:</label>
+            <label>募集終了日:</label>
             {{ form.recruitment_end_date }}
         </div>
 
         <hr>
-        <h3>実験受け入れ可能時間</h3>
-        <p><small>クリックまたはドラッグして時間を登録してください（8:00〜21:00 / 30分刻み）</small></p>
-
+        <h3>受け入れ可能時間（カレンダー）</h3>
+        <p>募集を行う時間帯をドラッグして選択してください。</p>
         <div class="schedule-container">
             <div class="schedule-grid" id="scheduleGrid"></div>
         </div>
@@ -68,35 +72,48 @@
         
         <hr>
         <h3>参加条件・詳細（任意）</h3>
+
         <div class="condition-group">
             <label><strong>国籍の条件</strong></label>
             {{ form.condition_nationality }}
         </div>
+
         <div class="condition-group">
             <label><strong>性別の条件</strong></label>
             {{ form.condition_gender }}
         </div>
+
         <div style="margin-bottom: 15px;">
             <label><strong>年齢制限・対象年齢</strong></label>
             {{ form.target_age }}
         </div>
+
         <div style="margin-bottom: 15px;">
             <label><strong>健康面で配慮すべき事項</strong></label>
             {{ form.health_notes }}
             <small style="color: #666;">※持病、通院、光過敏性発作のリスクなどがあれば記載してください。</small>
         </div>
+
         <div style="margin-bottom: 15px;">
             <label><strong>その他・自由記述</strong></label>
             {{ form.free_notes }}
         </div>
 
+        <div style="margin-bottom: 30px; background-color: #fff4e5; padding: 15px; border-radius: 8px; border: 1px solid #ffcc80;">
+            <label><strong>応募者へのメッセージ（応募確定時に表示）</strong></label>
+            {{ form.message_for_applicants }}
+            <small style="color: #666; display: block; margin-top: 5px;">
+                ※この内容は、応募ボタンを押したユーザーだけにポップアップで表示されます。連絡用メールアドレスや、応募後の流れを記載してください。
+            </small>
+        </div>
+
         <div style="margin-top: 30px; margin-bottom: 50px;">
             <button type="submit" class="btn-submit">変更を確定する</button>
-            <a href="{% url 'team_shouronpou:post_list' %}" class="btn-cancel">キャンセル</a>
+            <a href="{% url 'team_shouronpou:post_detail' post.pk %}" class="btn-cancel">キャンセル</a>
         </div>
     </form>
 
-    <script src="{% static 'team_shouronpou/js/main.js' %}"></script>
     <script src="{% static 'team_shouronpou/js/schedule_editor.js' %}"></script>
+    <script src="{% static 'team_shouronpou/js/main.js' %}"></script>
 </body>
 </html>

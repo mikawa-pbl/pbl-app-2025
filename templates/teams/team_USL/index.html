@@ -183,7 +183,7 @@
 
             <div class="search-field">
                 <div class="search-label">部屋番号</div>
-                <input type="text" id="room_number" name="room_number" class="search-input" value="{{ room_number }}">
+                <input type="text" pattern="^[0-9]+$" id="room_number" name="room_number" class="search-input" value="{{ room_number }}">
             </div>
 
             <div class="search-button">
@@ -215,7 +215,7 @@
                      
                     
                     {% if floor_image_url %}
-                        <img src="{{ floor_image_url }}" alt="フロア画像">  
+                        <img src="{{ floor_image_url }}" alt="フロア画像">
                         {% if x is not None and y is not None %}
                         <div class="cursor-dot" style="left: {{ x }}%; top: {{ y }}%;"></div>
                         {% endif %}

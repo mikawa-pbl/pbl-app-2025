@@ -44,3 +44,15 @@ class RoomTable(models.Model):
         indexes = [
             models.Index(fields=["building_id", "room_number", "is_deleted"]),
         ]
+
+class FloorRange(models.Model):
+    # building_floor_range テーブル
+    building_name = models.TextField(unique=True) # 棟の名前 (ex. A, A1, B)
+    min_floor = models.IntegerField()              # 最低階 (通常は 1)
+    max_floor = models.IntegerField()              # 最高階
+
+    def __str__(self):
+        return f"{self.building_name}: {self.min_floor}F - {self.max_floor}F"
+
+    class Meta:
+        db_table = "building_floor_range"

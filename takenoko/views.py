@@ -177,7 +177,28 @@ def start_trading(request):
     if item.seller == current_user:
         messages.error(request, "自分の商品は取引開始できません。")
         return redirect(f"/takenoko/product_details/?id={item_id}")
-    
+
+    # すでに別の人と交渉中の場合は弾く
+    if item.status == 'negotiation' and item.buyer and item.buyer != current_user:
+        messages.error(request, "この商品は現在ほかのユーザーと交渉中です。")
+        return redirect(f"/takenoko/product_details/?id={item_id}")
+
+    # 売り切れは開始できない
+    if item.status == 'sold':
+        messages.error(request, "この商品は売り切れです。")
+        return redirect(f"/takenoko/product_details/?id={item_id}")
+
+    # アクティブなら交渉中に切り替え、buyer 記録
+    if item.status == 'active':
+        item.status = 'negotiation'
+        item.buyer = current_user
+        item.save(update_fields=['status', 'buyer'])
+        messages.success(request, "取引開始しました。")
+    elif item.status == 'negotiation' and not item.buyer:
+        item.buyer = current_user
+        item.save(update_fields=['buyer'])
+
+    # 画面を表示（同じ購入者が再訪問した場合もここに来る）
     return render(request, 'teams/takenoko/start_trading.html', {
         "item": item,
         "seller": item.seller,
@@ -308,6 +329,56 @@ def item_edit(request):
 @takenoko_login_required
 def edit_complete(request):
     return render(request, 'teams/takenoko/edit_complete.html')
+
+@takenoko_login_required
+def toggle_item_status(request):
+    """
+    出品者がステータスを切り替え（'negotiation' → 'active' または 'sold'）
+    POST リクエスト必須
+    """
+    if request.method != 'POST':
+        return redirect("takenoko:main")
+    
+    item_id = request.POST.get('item_id')
+    new_status = request.POST.get('status')  # 'active' または 'sold'
+    
+    if not item_id or new_status not in ['active', 'sold']:
+        messages.error(request, "不正なリクエストです。")
+        return redirect("takenoko:listing_items")
+    
+    user = get_current_user(request)
+    item = Item.objects.filter(pk=item_id, seller=user).first()
+    
+    if not item:
+        messages.error(request, "この商品が見つからないか、操作権限がありません。")
+        return redirect("takenoko:listing_items")
+    
+    # 'negotiation' ステータスからのみ変更可能
+    if item.status != 'negotiation':
+        messages.error(request, "交渉中の商品のみステータスを変更できます。")
+        return redirect(f"/takenoko/item_delete/?id={item_id}")
+    
+    # ステータス変更
+    item.status = new_status
+    
+    # 'sold' にする場合、sold_at を記録
+    if new_status == 'sold':
+        from django.utils import timezone
+        item.sold_at = timezone.now()
+    
+    # 'active' に戻す場合、buyer を削除
+    if new_status == 'active':
+        item.buyer = None
+        item.sold_at = None
+    
+    item.save()
+    
+    if new_status == 'sold':
+        messages.success(request, "商品を売却確定しました。")
+    else:
+        messages.success(request, "商品を販売再開しました。")
+    
+    return redirect(f"/takenoko/item_delete/?id={item_id}")
 
 @takenoko_login_required
 def logout(request):

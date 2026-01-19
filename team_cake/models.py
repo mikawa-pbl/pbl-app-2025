@@ -9,6 +9,7 @@ class Good(models.Model):
     description = models.TextField(blank=True, null=True)
     price = models.IntegerField()
     original_price = models.IntegerField(blank=True, null=True)
+    expiration_time = models.DateTimeField(blank=True, null=True, verbose_name="賞味期限(廃棄予定時刻)")
 
     def __str__(self):
         return f"{self.name} {self.price}"

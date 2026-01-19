@@ -8,12 +8,16 @@ import mimetypes
 import uuid
 from django.http import FileResponse, Http404
 from django.conf import settings
+from django.utils import timezone
 
 # def index(request):
 #     return render(request, 'teams/team_cake/index.html')
 
 def _get_index_context():
     try:
+        # Auto-delete expired goods before fetching
+        Good.objects.using('team_cake').filter(expiration_time__lt=timezone.now()).delete()
+        
         # 通常はORMで取得（UUIDField の変換が走る）
         qs = Good.objects.using('team_cake').all()
         

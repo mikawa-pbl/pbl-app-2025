@@ -28,6 +28,16 @@
             <input type="text" name="professor_name" value="{{ professor_name|default_if_none:'' }}" placeholder="例: 鈴木" style="padding: 8px; width: 100%; max-width: 400px; border: 1px solid #ddd; border-radius: 4px;">
         </div>
 
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px;">サイズ</label>
+            <select name="size" style="padding: 8px; width: 100%; max-width: 400px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="">指定なし</option>
+                <option value="L" {% if size == "L" %}selected{% endif %}>大</option>
+                <option value="M" {% if size == "M" %}selected{% endif %}>中</option>
+                <option value="S" {% if size == "S" %}selected{% endif %}>小</option>
+            </select>
+        </div>
+
         <div style="margin-bottom: 20px;">
             <label style="display: block; font-weight: bold; margin-bottom: 5px;">特徴・属性 (AND検索)</label>
             <div class="tag-list" style="display: flex; flex-wrap: wrap; gap: 10px;">
@@ -72,6 +82,16 @@
                         <span style="display: inline-block; background-color: #e0f7ff; color: #007bff; padding: 3px 8px; margin-right: 10px; border-radius: 12px; font-size: 0.9em;">
                             {{ room.building.name }}
                         </span>
+                    </p>
+
+                    <p><strong>サイズ:</strong> 
+                        {% if room.size %}
+                            <span style="display: inline-block; background-color: #fff3cd; color: #856404; padding: 3px 8px; margin-right: 10px; border-radius: 12px; font-size: 0.9em;">
+                                {{ room.get_size_display }}
+                            </span>
+                        {% else %}
+                            <span style="color: #6c757d;">未登録</span>
+                        {% endif %}
                     </p>
                     
                     <p><strong>担当教授:</strong> 

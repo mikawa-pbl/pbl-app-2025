@@ -165,6 +165,11 @@ def search_complex(request):
             
         for attr_id in selected_ids_int:
             rooms = rooms.filter(attributes__id=attr_id)
+
+    # 5. サイズ
+    size_query = request.GET.get('size', '')
+    if size_query:
+        rooms = rooms.filter(size=size_query)
     
     # コンテキストの作成 (テンプレートへのデータの受け渡し)
     all_attributes = Attribute.objects.all()
@@ -177,6 +182,7 @@ def search_complex(request):
         'room_name': room_query,
         'professor_name': professor_query,
         'selected_ids': selected_ids, # テンプレート側で stringformat:"s" と比較するため、文字列リストのままでOK
+        'size': size_query,
     }
     
     return render(request, 'teams/agileca/search_complex.html', context)

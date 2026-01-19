@@ -28,6 +28,7 @@ def takenoko_login_required(view_func):
 def main(request):
     # GETパラメータからタグを取得
     selected_tag = request.GET.get('tag')
+    price_filter = request.GET.get('price')
     
     # アクティブな商品を取得（新着順）
     items = Item.objects.filter(status='active').order_by('-created_at')
@@ -35,6 +36,10 @@ def main(request):
     # タグでフィルタリング
     if selected_tag:
         items = items.filter(tags__name=selected_tag).distinct()
+    
+    # 価格でフィルタリング（無料アイテム）
+    if price_filter == 'free':
+        items = items.filter(price=0)
     
     items = items[:12]
     
@@ -44,7 +49,8 @@ def main(request):
     return render(request, 'teams/takenoko/main.html', {
         "items": items,
         "tags": tags,
-        "selected_tag": selected_tag
+        "selected_tag": selected_tag,
+        "price_filter": price_filter
     })
 
 def purchased_items(request):

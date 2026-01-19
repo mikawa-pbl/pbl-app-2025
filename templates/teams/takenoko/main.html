@@ -131,6 +131,11 @@
         color: white;
       }
 
+      .feature-box-active {
+        background-color: #B8E6D5;
+        border: 2px solid #649CE4 !important;
+      }
+
       /* 右端の円 */
       .feature-circle {
         position: absolute;
@@ -231,20 +236,28 @@
         {% for tag in tags %}
           {% if tag.name == selected_tag %}
             <a href="{% url 'takenoko:main' %}" style="text-decoration: none;">
-          {% else %}
-            <a href="{% url 'takenoko:main' %}?tag={{ tag.name }}" style="text-decoration: none;">
-          {% endif %}
-              <div class="feature-box" style="{% if tag.name == selected_tag %}background-color: #B8E6D5; border: 2px solid #649CE4;{% endif %}">
+              <div class="feature-box feature-box-active">
                 <i class="fas fa-{{ tag.icon }}"></i>
                 <p>{{ tag.display_name }}</p>
                 <div class="feature-circle"></div>
               </div>
             </a>
+          {% else %}
+            <a href="{% url 'takenoko:main' %}?tag={{ tag.name }}" style="text-decoration: none;">
+              <div class="feature-box">
+                <i class="fas fa-{{ tag.icon }}"></i>
+                <p>{{ tag.display_name }}</p>
+                <div class="feature-circle"></div>
+              </div>
+            </a>
+          {% endif %}
         {% empty %}
           <p style="padding: 16px; color: #999;">タグが登録されていません</p>
         {% endfor %}
       </div>
-      <button class="feature-circle">¥0</button>
+      <a href="{% url 'takenoko:main' %}?price=free" style="text-decoration: none;">
+        <button class="feature-circle">¥0</button>
+      </a>
     </div>
 
     <!-- 商品一覧 -->

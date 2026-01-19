@@ -149,6 +149,10 @@ def signup_view(request):
             "form": form,
             "next": redirect_to,
             "nav_active": None,
+            "labs_data": [
+                {"id": lab.id, "name": lab.name, "dept": lab.department}
+                for lab in LABORATORIES
+            ],
         },
     )
 

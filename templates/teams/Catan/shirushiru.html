@@ -19,6 +19,11 @@
         ゲスト
       </div>
     </div>
+    
+    <!-- テーブル色の凡例 -->
+    <div class="table-legend" >
+      <span class="legend-box" ></span>研究中
+    </div>
 
     <!-- M2テーブル -->
     <h3 class="grade-title">M2</h3>
@@ -142,7 +147,7 @@
         </select>
 
         <label for="commentInput">コメント:</label>
-        <input type="text" id="commentInput" placeholder="コメントを入力してください" />
+        <textarea id="commentInput" placeholder="コメントを入力してください" rows="3"></textarea>
 
         <label for="talkStatusSelect">話しかけステータス:</label>
         <select id="talkStatusSelect">
@@ -170,7 +175,9 @@
       </div>
       <div class="dialog-content">
         <div class="profile-place"><strong>場所:</strong> <span id="detail-location">-</span></div>
-        <div class="profile-comment"><strong>コメント:</strong> <span id="detail-comment">-</span></div>
+        <div class="profile-comment"><strong>コメント:</strong>
+          <div id="detail-comment" class="scroll-comment">-</div>
+        </div>
         <div class="profile-inlab"><strong>今日の在室時間:</strong> 計<span id="in-lab-time">600</span>分</div>
       </div>
       <div class="dialog-footer">

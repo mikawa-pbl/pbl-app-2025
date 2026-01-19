@@ -109,12 +109,20 @@ function openDetailDialogFromRow(tr) {
         }
     }
 
+    let fullName = '';
+    if (name == '小林(あ)'){
+        fullName = '小林 あおい';
+    } else if (name == '小林(わ)') {
+        fulltName = '小林 わたる';
+    }else {
+        fullName = name + ' 太郎';
+    }
     if (gradeElem) gradeElem.textContent = gradeHeading || '-';
-    if (nameElem) nameElem.textContent = name || '-';
+    if (nameElem) nameElem.textContent = fullName || '-';
     if (locElem) locElem.textContent = location || '-';
     if (comElem) comElem.textContent = comment || '-';
     if (updatedElem) updatedElem.textContent = updatedText || '-';
-    if (talkElem) talkElem.textContent = talk || '-';
+    if (talkElem) talkElem.textContent = talk || '🗣️';
 
 
     document.getElementById('detailDialog').classList.add('show');

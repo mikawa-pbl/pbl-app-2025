@@ -1,14 +1,11 @@
-# アプリ設計メモ
+# レポート等
+## 週次レポート
+https://docs.google.com/document/d/1qa2s-MyM3AuyF7oTpH7PQucByIJekuDb/edit#heading=h.mlf2bbhhfqmt
 
-## データベース設計
-*論文題目
-*論文著者
-*会議名／雑誌名
-*年度
-*DOI
-*URL （IEEE xplore/ACM DL）
+## Miro
+https://miro.com/app/board/uXjVJDYQgec=/
 
-
+## 管理コマンド等
 ### データベースを更新したとき
 (PBLプロジェクトのトップで)
 uv run python manage.py makemigration --database=teachers
@@ -24,6 +21,19 @@ uv run python manage.py runserver
 INSERT INTO teachers_paper(title, author, year, booktitle, url, doi) VALUES ("高度専門人材育成訓練演習の作り方", "Ohmura Ren", "2025", "TUT紀要", "http://usl.cs.tut.ac.jp", "doi://11.22.33.44");
 INSERT INTO teachers_paper(title, author, year, booktitle, url, doi) VALUES ("言語処理", "Akiba Tomoyoshi", "2022", "Computational Linguistics", "http://nlp.cs.tut.ac.jp", "doi://22.33.44.55");
 INSERT INTO teachers_paper(title, author, year, booktitle, url, doi) VALUES ("運動制御", "Fukumura Naohiro", "2023", "Motor Control", "http://bmcs.cs.tut.ac.jp", "doi://33.44.55.66");
+
+
+# アプリ設計メモ
+
+## データベース設計
+*論文題目
+*論文著者
+*会議名／雑誌名
+*年度
+*DOI
+*URL （IEEE xplore/ACM DL）
+
+
 
 ## 今後やろうと思うこと
 DBの設計(追加項目)
@@ -83,3 +93,4 @@ DBの設計(追加項目)
 
 ## 追加機能
 * ソートの順を切り替える機能
+

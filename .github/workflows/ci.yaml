@@ -32,8 +32,9 @@ jobs:
       - name: Migration Integrity Check
         run: scripts/check_migrations.sh
 
-      #- name: Make Migrations Check
-      #  run: uv run manage.py makemigrations --check --dry-run
+      - name: Make Migrations Check
+        if: "false"
+        run: uv run manage.py makemigrations --check --dry-run
         
       - name: Migrate
         run: uv run manage.py migrate --noinput
@@ -67,5 +68,6 @@ jobs:
           echo "Server health check passed."
           kill $PID
 
-      #- name: Run Tests
-      #  run: uv run manage.py test
+      - name: Run Tests
+        if: "false"
+        run: uv run manage.py test

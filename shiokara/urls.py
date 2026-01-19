@@ -16,7 +16,8 @@ urlpatterns = [
     path("feedback/", views.site_feedback, name="site_feedback"),
 
     # 既存
-    path("", views.department_list, name="department_list"),
+    path("", views.login_menu, name="index"),  # shiokaraのトップページをログイン・新規登録メニューに変更
+    path("departments/", views.department_list, name="department_list"),
     path("search/", views.company_search, name="company_search"),
     path("company/<int:pk>/", views.company_detail, name="company_detail"),
     path("company/<int:pk>/favorite/", views.toggle_favorite, name="company_favorite"),

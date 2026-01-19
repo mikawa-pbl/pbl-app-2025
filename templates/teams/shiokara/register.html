@@ -5,6 +5,19 @@
 
 {% block content %}
 <style>
+    /* サイドバーなしのレイアウト */
+    .tut-page-wrapper {
+        display: block !important;
+        margin: 0 auto;
+        max-width: 900px;
+        padding: 20px;
+    }
+
+    .tut-main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
     .tut-logo-box {
         flex: 0 0 auto;
         order: 2;
@@ -142,9 +155,6 @@
 </style>
 
 <div class="tut-page-wrapper">
-    <!-- 左側サイドバーナビゲーション -->
-    {% include "teams/shiokara/includes/sidebar.html" with active_page='register' %}
-
     <!-- メインコンテンツ -->
     <div class="tut-main-content">
         <header class="tut-page-header page-header">

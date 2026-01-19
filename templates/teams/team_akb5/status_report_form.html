@@ -3,25 +3,12 @@
 {% block title %}ネットワーク状況の投稿{% endblock %}
 
 {% block head %}
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <style>
     #map {
         height: 400px;
         width: 100%;
     }
-    .leaflet-marker-icon,
-    .leaflet-marker-shadow {
-        background: transparent;
-        border: none;
-        box-shadow: none;
-        outline: none;
-        padding: 0;
-    }
-    .leaflet-marker-icon img {
-        background: transparent;
-        display: block;
-    }
-
 </style>
 {% endblock %}
 
@@ -38,8 +25,9 @@
 </form>
 
 <hr>
-<a href="{% url 'team_akb5:user' %}">一覧に戻る</a>
+<a href="{% url 'team_akb5:admin' %}">一覧に戻る</a>
 
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
         const latitudeInput = document.getElementById('id_latitude');

@@ -40,7 +40,7 @@ class StatusReportCreateView(CreateView):
     model = StatusReport
     form_class = StatusReportForm
     template_name = "teams/team_akb5/status_report_form.html"
-    success_url = reverse_lazy("team_akb5:user")
+    success_url = reverse_lazy("team_akb5:admin")
 
 
 class UserView(ListView):

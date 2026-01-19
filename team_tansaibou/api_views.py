@@ -315,7 +315,7 @@ def stock_prediction(request):
                 'name': product.name,
                 'current_stock': product.stock,
                 'predicted_remaining': max(0, round(predicted_remaining)),
-                'loss_amount': max(0, round(predicted_remaining * float(product.current_price))),
+                'loss_amount': max(0, round(predicted_remaining * float(product.cost_price))),  # 原価ベースで計算
             })
 
     # 売り切れ予測をステータス（危険度）順にソート

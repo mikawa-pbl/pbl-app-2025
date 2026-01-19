@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン - TUT 参考書レビューシステム</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            background-color: var(--light-bg);
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #0f172a;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #334155;
+            font-weight: 600;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+        }
+        .messages {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        .error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border-left-color: #ef4444;
+        }
+        .success {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border-left-color: #10b981;
+        }
+        .warning {
+            background-color: #fffbeb;
+            color: #92400e;
+            border-left-color: #f59e0b;
+        }
+        .link-section {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        .link-section a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .link-section a:hover {
+            text-decoration: underline;
+        }
+        .help-text {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 5px;
+        }
+        .errorlist {
+            list-style: none;
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>TUT 参考書レビューシステム</h1>
+    </header>
+
+    <div class="container">
+        <h2>ログイン</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="messages {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.email_prefix.id_for_label }}">{{ form.email_prefix.label }}</label>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    {{ form.email_prefix }}
+                    <span style="color: #64748b; font-weight: 600;">@tut.jp</span>
+                </div>
+                <p class="help-text">{{ form.email_prefix.help_text }}</p>
+                {% if form.email_prefix.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.email_prefix.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.password.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn">ログイン</button>
+        </form>
+
+        <div class="link-section">
+            <p>アカウントをお持ちでない方は</p>
+            <a href="{% url 'graphics:signup' %}">サインアップ</a>
+            <br><br>
+            <a href="{% url 'graphics:index' %}">← ホームに戻る</a>
+        </div>
+    </div>
+</body>
+</html>

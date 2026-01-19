@@ -1,58 +1,80 @@
 {% extends 'teams/h34vvy_u53rzz/base.html' %}
 
 {% block content %}
-<header class="space-y-2">
-  <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">
-    For Helpers
-  </p>
-  <h1 class="text-3xl font-bold text-slate-900">今すぐ助けを必要とする人</h1>
-  <p class="text-sm text-slate-600">
-    学外に締め出された学生がドア開放をお願いしています。近くにいる場合は状況を確認し対応してください。
-  </p>
-</header>
+<div class="px-5 py-8 space-y-6">
+  <header class="space-y-1 pt-2">
+    <h1 class="text-2xl font-black text-slate-900">
+      Help Requests
+    </h1>
+    <p class="text-sm font-medium text-slate-500">
+      リアルタイムの救助リクエストフィード
+    </p>
+  </header>
 
-<section class="rounded-xl bg-white p-6 shadow">
-  {% if entries %}
-  <ul class="space-y-4">
-    {% for e in entries %}
-    <li class="border border-slate-100 p-4 rounded-lg">
-      <div class="flex flex-wrap items-center gap-2 text-sm text-slate-500">
-        <span class="font-semibold text-slate-900">
-          {{ e.created_at|date:"Y-m-d H:i" }}
-        </span>
-        <span class="text-slate-400">/</span>
-        <span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-          {{ e.door_label }}
-        </span>
-      </div>
-      <pre class="mt-2 whitespace-pre-wrap text-sm text-slate-800">{{ e.comment }}</pre>
-      <div class="mt-4 flex flex-wrap items-center gap-3 text-sm">
-        {% if e.helper_confirmed_at %}
-        <span class="inline-flex items-center gap-1 rounded bg-green-100 px-3 py-1 text-green-700">
-          <span class="h-2 w-2 rounded-full bg-green-500"></span>
-          対応中（{{ e.helper_confirmed_at|date:"H:i" }}受付）
-        </span>
-        {% else %}
-        <form method="post" class="inline-flex items-center gap-2">
-          {% csrf_token %}
-          <input type="hidden" name="entry_id" value="{{ e.id }}" />
-          <button type="submit"
-            class="inline-flex items-center gap-2 rounded bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
-            助けに行く
-          </button>
-          <span class="text-xs text-slate-500">
-            ドア付近に到着できる場合のみ押してください
-          </span>
-        </form>
-        {% endif %}
-      </div>
-    </li>
-    {% endfor %}
-  </ul>
-  {% else %}
-  <p class="text-sm text-slate-600">
-    いま助けを求めている人はいません。通信があればこの画面に届きます。
-  </p>
-  {% endif %}
-</section>
+  <section>
+    {% if entries %}
+    <ul class="space-y-5">
+      {% for e in entries %}
+      <li class="relative rounded-3xl bg-white p-5 shadow-lg shadow-slate-200/50 ring-1 ring-slate-100 transition duration-300 hover:scale-[1.01] hover:shadow-xl hover:shadow-indigo-100/40">
+        <div class="flex gap-4">
+          <!-- Avatar Placeholder -->
+          <div class="flex-shrink-0">
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-600 font-bold shadow-sm">
+                <!-- Simple random-like avatar from door name -->
+                {{ e.door_label|slice:":1" }}
+            </div>
+          </div>
+          
+          <div class="flex-1 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
+                {{ e.door_label }}
+              </span>
+              <span class="text-xs font-medium text-slate-400">
+                {{ e.created_at|date:"H:i" }}
+              </span>
+            </div>
+            
+            <p class="text-sm leading-relaxed text-slate-700 font-medium">
+              {{ e.comment }}
+            </p>
+            
+            <div class="pt-2">
+                {% if e.helper_confirmed_at %}
+                <div class="inline-flex items-center gap-1.5 rounded-xl bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700 ring-1 ring-green-100/50">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    対応中
+                </div>
+                {% else %}
+                <form method="post" class="block">
+                {% csrf_token %}
+                <input type="hidden" name="entry_id" value="{{ e.id }}" />
+                <button type="submit"
+                    class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 transition-all active:scale-95 hover:bg-indigo-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor">
+                        <path d="M480-120 200-400h560L480-120Zm0-80 168-168H312l168 168Zm0-280q-33 0-56.5-23.5T400-560q0-33 23.5-56.5T480-640q33 0 56.5 23.5T560-560q0 33-23.5 56.5T480-480Zm0 400Z"/>
+                    </svg>
+                    助けに行く
+                </button>
+                </form>
+                {% endif %}
+            </div>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="flex flex-col items-center justify-center rounded-3xl bg-white/50 border border-dashed border-slate-300 p-12 text-center">
+      <div class="text-4xl">😴</div>
+      <p class="mt-4 text-sm font-medium text-slate-500">
+        現在リクエストはありません。<br>平和な時間が流れています。
+      </p>
+    </div>
+    {% endif %}
+  </section>
+</div>
 {% endblock %}

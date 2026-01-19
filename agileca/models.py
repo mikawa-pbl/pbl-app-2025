@@ -55,6 +55,19 @@ class Classroom(models.Model):
         related_name="classrooms",
         blank=True,
     )
+    
+    SIZE_CHOICES = (
+        ("L", "大"),
+        ("M", "中"),
+        ("S", "小"),
+    )
+    size = models.CharField(
+        "サイズ",
+        max_length=1,
+        choices=SIZE_CHOICES,
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return f"{self.room_name} ({self.building.name})"

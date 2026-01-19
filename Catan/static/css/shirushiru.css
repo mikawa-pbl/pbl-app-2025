@@ -35,6 +35,19 @@
     font-size: 13px;
 }
 
+/* コメント表示を高さ制限付きのスクロール領域にする */
+.scroll-comment {
+    max-height: 6rem; /* 必要なら調整: 例 6rem (~96px) */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* iOS 滑らかスクロール */
+    padding: 6px 8px;
+    box-sizing: border-box;
+    background: #fff; /* 必要なら薄い背景色に */
+    white-space: pre-wrap; /* 改行を保持して折返す */
+    word-break: break-word;
+    border-radius: 4px;
+}
+
 .profile-inlab {
     text-align: center;
     margin-bottom: 8px;
@@ -49,7 +62,9 @@ body {
 .container {
     width: 360px;
     background: #fff;
+    padding-bottom: 160px; 
 }
+   
 
 .header {
     background: #e3e3e3;
@@ -120,6 +135,24 @@ body {
     transform: translateY(-2px);
 }
 
+.table-legend {
+    margin:8px 0 12px;
+    font-size:14px;
+    color:#333;
+}
+
+.legend-box {
+    display:inline-block;
+    width:16px;
+    height:16px;
+    background-color: #e3f2fd;
+    /* border:1px solid #d6e8ff;  */
+    border: 1px solid #aaa;
+    vertical-align:middle;
+    margin-right:8px;
+    border-radius:3px;
+}
+
 .grade-title {
     margin-top: 20px;
     margin-bottom: 10px;
@@ -139,6 +172,41 @@ table {
     border-collapse: collapse;
     margin-top: 10px;
     font-size: 12px;
+}
+
+/* 固定レイアウトにして列幅を明示的に固定する */
+table {
+    table-layout: fixed;
+}
+
+/* 列幅の割り当て（学年ごとのテーブルすべてに適用） */
+table th:nth-child(1),
+table td:nth-child(1) {
+    width: 15%; /* 名前 */
+}
+table th:nth-child(2),
+table td:nth-child(2) {
+    width: 33%; /* 場所 */
+}
+table th:nth-child(3),
+table td:nth-child(3) {
+    width: 40%; /* コメント */
+}
+table th:nth-child(4),
+table td:nth-child(4) {
+    width: 12%; /* 詳細ボタン等 */
+}
+/* 5列目は非表示列用（存在するテーブルのみ） */
+table th:nth-child(5),
+table td:nth-child(5) {
+    width: 0;
+}
+
+/* 長いテキストは省略表示 */
+table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 table,
@@ -227,12 +295,21 @@ td {
 }
 
 .dialog-content select,
-.dialog-content input {
+.dialog-content input,
+.dialog-content textarea {
     width: 100%;
     padding: 8px;
     border: 1px solid #aaa;
     border-radius: 4px;
     margin-bottom: 15px;
+    box-sizing: border-box; /* 幅をパディング・ボーダー込みで一致させる */
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.dialog-content textarea {
+    resize: vertical;
+    min-height: 3.2rem;
 }
 
 .dialog-buttons {
@@ -294,4 +371,10 @@ td {
     text-align: center;
     color: #666;
     margin-bottom: 6px;
+}
+
+/* lab options background in status dialog */
+#locationSelect option[key^="lab"],
+#locationSelect option.lab-option {
+    background-color: #e3f2fd;
 }

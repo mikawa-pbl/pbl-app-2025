@@ -1,98 +1,191 @@
 {% extends 'teams/team_TMR/base.html' %}
 
-{% block title %}ロードマップ (年間計画){% endblock %}
+{% block title %}ロードマップ ({{ target_user.username }}){% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.css">
+<script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
+
+<style>
+    /* Custom styles for Frappe Gantt to match the white aesthetics */
+    .gantt .bar-blue .bar {
+        fill: #3b82f6;
+        /* Tailwind blue-500 */
+    }
+
+    .gantt .bar-blue .bar-progress {
+        fill: #2563eb;
+        /* Tailwind blue-600 */
+    }
+
+    .gantt-container {
+        overflow-x: auto;
+    }
+
+    .popup-wrapper {
+        z-index: 50;
+        /* Ensure popup is above other elements */
+    }
+</style>
+
 <div class="container mx-auto px-4 py-6">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">ロードマップ (年間計画)</h2>
-        <a href="{% url 'roadmap_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition">
-            + 計画を追加
-        </a>
+    {% if not is_owner %}
+    <div class="mb-4">
+        <a href="{% url 'member_list' %}" class="text-blue-600 hover:underline">← 先輩一覧に戻る</a>
+    </div>
+    {% endif %}
+
+    <!-- ユーザー情報ヘッダー -->
+    <div
+        class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6 flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
+        <div
+            class="bg-blue-100 text-blue-600 rounded-full h-16 w-16 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+            {{ target_user.username|slice:":1"|upper }}
+        </div>
+        <div class="flex-grow text-center md:text-left">
+            <h1 class="text-2xl font-bold text-gray-900">
+                {% if target_user.profile.nickname %}
+                {{ target_user.profile.nickname }}
+                {% else %}
+                {{ target_user.username }}
+                {% endif %}
+                先輩 ({{ target_user.profile.graduation_year|default:"-" }}卒)
+            </h1>
+            <p class="text-gray-600 mt-1">
+                研究室: <span class="font-medium text-gray-800">{{ target_user.profile.lab|default:"未設定" }}</span>
+                <span class="mx-3 text-gray-300">|</span>
+                研究分野: <span class="font-medium text-gray-800">{{ target_user.profile.research_field|default:"-" }}</span>
+                <span class="mx-3 text-gray-300">|</span>
+                内定先: <span class="font-medium text-gray-800">{{ target_user.profile.decision|default:"-" }}</span>
+            </p>
+        </div>
+        {% if is_owner %}
+        <div class="flex-shrink-0">
+            <a href="{% url 'roadmap_create' %}"
+                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                計画を追加
+            </a>
+        </div>
+        {% endif %}
     </div>
 
-    <div id="gantt_chart_div" class="w-full bg-white shadow rounded-lg overflow-hidden" style="min-height: 400px;">
-        <div class="p-10 text-center text-gray-400">
-            読み込み中...
+    <!-- コントロールバー -->
+    <div
+        class="bg-white border-b border-gray-200 mb-6 pb-4 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+        <div class="flex items-center">
+            <h2 class="text-xl font-bold text-gray-800 mr-4" id="calendar-title">ロードマップ</h2>
+        </div>
+
+        <div class="flex space-x-2">
+            <div class="relative inline-block text-left">
+                <select id="view-mode-select"
+                    class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border">
+                    <option value="Day">日 (Day)</option>
+                    <option value="Week">週 (Week)</option>
+                    <option value="Month" selected>月 (Month)</option>
+                    <option value="Year">年 (Year)</option>
+                </select>
+            </div>
+            <button onclick="changeView('Today')"
+                class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-md shadow-sm text-sm">今日</button>
         </div>
     </div>
 
-    <div id="no_data_message" class="hidden mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
-        <p class="font-bold">⚠️ チャートに表示できるデータがありません</p>
-        <p class="text-sm mt-1">
-            「+ 計画を追加」から、必ず<span class="font-bold text-red-600">「開始日」と「終了日」を入力して</span>作成してください。<br>
-            日付が入っていないデータはグラフに表示されません。
-        </p>
+    <!-- Gantt Chart Container -->
+    <div class="bg-white shadow rounded-lg overflow-hidden min-h-[400px]">
+        <svg id="gantt"></svg>
     </div>
+
+    <div id="no-data-msg" class="hidden text-center py-10 text-gray-500">
+        データがありません。計画を追加してください。
+    </div>
+
 </div>
 
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script type="text/javascript">
-    google.charts.load('current', {'packages':['gantt']});
-    google.charts.setOnLoadCallback(drawChart);
+<script>
+    const tasksData = {{ tasks_json| safe }};
+    let gantt;
 
-    function drawChart() {
-        // DjangoのデータをJS用に変換
-        var chartData = [
-            {% for roadmap in object_list %}
-                {% if roadmap.start_date and roadmap.end_date %}
-                [
-                    "{{ roadmap.id }}",            // ID
-                    "{{ roadmap.title|escapejs }}", // タイトル
-                    "null",                        // リソース（分類）
-                    new Date("{{ roadmap.start_date|date:'Y-m-d' }}"), // 開始日
-                    new Date("{{ roadmap.end_date|date:'Y-m-d' }}"),   // 終了日
-                    null,  // 期間（自動計算）
-                    0,     // 進捗（0%）
-                    null   // 依存関係
-                ],
-                {% endif %}
-            {% endfor %}
-        ];
-
-        // データがない場合の処理
-        if (chartData.length === 0) {
-            document.getElementById('gantt_chart_div').style.display = 'none';
-            document.getElementById('no_data_message').classList.remove('hidden');
+    document.addEventListener('DOMContentLoaded', function () {
+        if (tasksData.length === 0) {
+            document.getElementById('gantt').style.display = 'none';
+            document.getElementById('no-data-msg').classList.remove('hidden');
             return;
         }
 
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Task ID');
-        data.addColumn('string', 'Task Name');
-        data.addColumn('string', 'Resource');
-        data.addColumn('date', 'Start Date');
-        data.addColumn('date', 'End Date');
-        data.addColumn('number', 'Duration');
-        data.addColumn('number', 'Percent Complete');
-        data.addColumn('string', 'Dependencies');
+        // Initialize Gantt
+        try {
+            gantt = new Gantt("#gantt", tasksData, {
+                header_height: 50,
+                column_width: 30,
+                step: 24,
+                view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month', 'Year'],
+                bar_height: 20,
+                bar_corner_radius: 3,
+                arrow_curve: 5,
+                padding: 18,
+                view_mode: 'Month',
+                date_format: 'YYYY-MM-DD',
+                // language: 'ja', // Removed to prevent potential lookup errors
+                custom_popup_html: function (task) {
+                    const start = new Date(task.start).toLocaleDateString();
+                    const end = new Date(task.end).toLocaleDateString();
 
-        data.addRows(chartData);
+                    let editMsg = "";
+                    {% if is_owner %}
+                    editMsg = `<div class="text-xs text-blue-500 mt-2">クリックして編集</div>`;
+                    {% endif %}
 
-        var options = {
-            height: (chartData.length * 45) + 50, // データの数に合わせて高さを自動調整
-            gantt: {
-                trackHeight: 40,
-                barCornerRadius: 4,
-                palette: [
-                    { "color": "#2563eb", "dark": "#1d4ed8", "light": "#60a5fa" }
-                ]
-            }
-        };
+                    return `
+                        <div class="p-3 w-64 text-sm shadow-lg rounded bg-white border border-gray-100">
+                            <div class="font-bold text-gray-800 mb-1">${task.name}</div>
+                            <div class="text-gray-500 text-xs mb-2">期間: ${start} - ${end}</div>
+                            ${task.description ? `<div class="text-gray-700 text-xs whitespace-pre-wrap mb-2">${task.description}</div>` : ''}
+                            ${editMsg}
+                        </div>
+                    `;
+                },
+                on_click: function (task) {
+                    {% if is_owner %}
+                    window.location.href = `/team_TMR/roadmaps/${task.id}/edit/`;
+                    {% endif %}
+                },
+                on_date_change: function (task, start, end) {
+                    console.log(task, start, end);
+                },
+                on_progress_change: function (task, progress) {
+                    console.log(task, progress);
+                },
+                on_view_change: function (mode) {
+                    console.log(mode);
+                }
+            });
 
-        var chart = new google.visualization.Gantt(document.getElementById('gantt_chart_div'));
-        
-        // クリックしたら編集画面へ遷移
-        google.visualization.events.addListener(chart, 'select', function() {
-            var selection = chart.getSelection();
-            if (selection.length > 0) {
-                var row = selection[0].row;
-                var id = data.getValue(row, 0); // IDを取得
-                window.location.href = "/team_TMR/roadmaps/" + id + "/edit/";
-            }
-        });
+            // View Mode Switcher
+            const viewModeSelect = document.getElementById('view-mode-select');
+            viewModeSelect.addEventListener('change', function () {
+                gantt.change_view_mode(this.value);
+            });
 
-        chart.draw(data, options);
+        } catch (error) {
+            console.error("Gantt Chart Error:", error);
+            document.getElementById('gantt').parentElement.innerHTML = `
+                <div class="text-red-500 p-4">
+                    グラフの描画に失敗しました。<br>
+                    エラー: ${error.message}
+                </div>
+            `;
+        }
+    });
+
+    function changeView(action) {
+        if (action === 'Today') {
+            gantt.change_view_mode(document.getElementById('view-mode-select').value);
+        }
     }
 </script>
 {% endblock %}

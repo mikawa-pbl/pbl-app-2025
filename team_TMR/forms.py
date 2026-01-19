@@ -19,7 +19,7 @@ class InvitationCodeForm(forms.Form):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['nickname', 'affiliation', 'contact']
+        fields = ['nickname', 'affiliation', 'lab', 'research_field', 'decision', 'graduation_year', 'contact']
 
 class RoadmapForm(forms.ModelForm):
     class Meta:
@@ -27,9 +27,13 @@ class RoadmapForm(forms.ModelForm):
         fields = ['title', 'start_date', 'end_date', 'content']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'required': 'required'}),
+            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control', 'required': 'required'}),
             'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+        }
+        labels = {
+            'start_date': '開始日 (必須)',
+            'end_date': '終了日 (必須)',
         }
 
 class ESForm(forms.ModelForm):

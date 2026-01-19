@@ -22,6 +22,7 @@ urlpatterns = [
     path('places/delete/', views.delete_place, name='delete_place'), 
     path('add_member/', views.add_member, name='add_member'),
     path('delete_member/', views.delete_member, name='delete_member'),
+    path('reset_to_home/', views.reset_to_home, name='reset_to_home'),
 ]
 
 if settings.DEBUG:

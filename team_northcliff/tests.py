@@ -68,8 +68,18 @@ class TeamNorthcliffApiEdgeCaseTests(TestCase):
 
         # 多くの DB で 32-bit 上限に相当する値（例: 2**31 - 1）を使う
         max_int32 = 2**31 - 1
-        user = User.objects.using('team_northcliff').create(name='maximal', points=max_int32)
-        facility = Facility.objects.using('team_northcliff').create(facility_id='libx', name='図書館X')
+        user = User.objects.using('team_northcliff').create(
+            name='maximal', 
+            points=max_int32,
+            latitude=34.701663, 
+            longitude=137.408313
+        )
+        facility = Facility.objects.using('team_northcliff').create(
+            facility_id='libx', 
+            name='図書館X',
+            latitude=34.701663, 
+            longitude=137.408313
+        )
 
         url = reverse('team_northcliff:api_create_post', args=['maximal'])
         payload = {'facility_id': facility.id, 'status': 'moderate', 'comment': 'edge overflow test'}

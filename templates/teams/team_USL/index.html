@@ -37,6 +37,7 @@
         .search-form {
             display: flex;
             gap: 4px;
+            align-items: flex-end;
         }
 
         .search-field {
@@ -51,6 +52,7 @@
 
         .search-input {
             width: 100%;
+            height: 36px;
             padding: 6px 8px;
             box-sizing: border-box;
             border-radius: 4px;
@@ -68,7 +70,7 @@
 
         .search-button button {
             width: 100%;
-            height: 100%;
+            height: 36px;
             padding: 0;
             border: none;
             border-radius: 4px;
@@ -212,6 +214,90 @@
                 margin: 0 auto;
             }
         }
+
+        /* Header Layout */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .search-title {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .help-btn {
+            background-color: transparent;
+            border: 1px solid #007bff;
+            color: #007bff;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .help-btn:hover {
+            background-color: #e7f1ff;
+        }
+
+        /* Modal Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .overlay-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        .overlay-title {
+            margin-top: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .overlay-body {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        .close-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
     </style>
 </head>
 
@@ -219,7 +305,10 @@
     <div class="page">
 
         <header class="search-header">
-            <h1 class="search-title">部屋検索</h1>
+            <div class="header-row">
+                <h1 class="search-title">部屋検索</h1>
+                <button type="button" class="help-btn" onclick="toggleHelp()">このページについて</button>
+            </div>
             <form method="get" class="search-form">
                 <div class="search-field search-building">
                     <div class="search-label">棟</div>
@@ -279,32 +368,51 @@
                         </div>
                     </div>
 
-                    <!-- Floor Switching Controls -->
+                    <!-- Floor Switching Controls (JS Implementation) -->
                     {% if current_floor is not None and min_floor is not None and max_floor is not None %}
                     <div class="floor-controls">
                         <!-- Up Button -->
-                        {% if current_floor < max_floor %} <a
-                            href="?building_id={{ building_id|default:'' }}&room_number={{ room_number|default:'' }}&floor={{ current_floor|add:1 }}"
-                            class="floor-btn" aria-label="上の階へ">▲</a>
-                            {% else %}
-                            <span class="floor-btn disabled">▲</span>
-                            {% endif %}
+                        <button id="btn-up" class="floor-btn" aria-label="上の階へ"
+                            onclick="switchFloor(currentFloor + 1)">▲</button>
 
-                            <span class="current-floor-label">{{ current_floor }}F</span>
+                        <span id="floor-label" class="current-floor-label">{{ current_floor }}F</span>
 
-                            <!-- Down Button -->
-                            {% if current_floor > min_floor %}
-                            <a href="?building_id={{ building_id|default:'' }}&room_number={{ room_number|default:'' }}&floor={{ current_floor|add:-1 }}"
-                                class="floor-btn" aria-label="下の階へ">▼</a>
-                            {% else %}
-                            <span class="floor-btn disabled">▼</span>
-                            {% endif %}
+                        <!-- Down Button -->
+                        <button id="btn-down" class="floor-btn" aria-label="下の階へ"
+                            onclick="switchFloor(currentFloor - 1)">▼</button>
                     </div>
                     {% endif %}
                 </div>
             </section>
         </main>
     </div>
+
+    <!-- Help Overlay -->
+    <div id="help-overlay" class="overlay" onclick="toggleHelp()">
+        <div class="overlay-content" onclick="event.stopPropagation()">
+            <h2 class="overlay-title">このページについて</h2>
+            <div class="overlay-body">
+                <p>校内の部屋を検索して、場所を確認できるシステムです。</p>
+                <p>
+                    1. <b>棟</b>を選択してください。<br>
+                    2. <b>部屋番号</b>を入力して検索ボタンを押してください。(例:101)<br>
+                    3. マップが表示されます。🔴が検索した部屋の位置です。
+                </p>
+                <p>※フロアの切り替えは右側のボタンで行えます。</p>
+                <p>※棟のみを選択して検索することも可能です。</p>
+            </div>
+            <button class="close-btn" onclick="toggleHelp()">閉じる</button>
+        </div>
+    </div>
+
+    <!-- Data passing for JavaScript -->
+    {{ floor_map_data|json_script:"floor-map-data" }}
+    {{ min_floor|json_script:"min-floor" }}
+    {{ max_floor|json_script:"max-floor" }}
+    {{ target_room_floor|json_script:"target-room-floor" }}
+    {{ current_floor|json_script:"current-floor" }}
+    {{ x|json_script:"dot-x" }}
+    {{ y|json_script:"dot-y" }}
 
     <script>
         function applySmartZoom(id, xPct, yPct, scale) {
@@ -356,37 +464,106 @@
             return panzoom;
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        // --- Client-Side Floor Switching Logic ---
 
+        // Data passed via json_script to avoid formatter issues
+        const floorMapData = JSON.parse(document.getElementById('floor-map-data').textContent);
+        const minFloor = JSON.parse(document.getElementById('min-floor').textContent);
+        const maxFloor = JSON.parse(document.getElementById('max-floor').textContent);
+        const targetRoomFloor = JSON.parse(document.getElementById('target-room-floor').textContent);
+
+        let currentFloor = JSON.parse(document.getElementById('current-floor').textContent);
+
+        // Pin Coordinates
+        const dotX = JSON.parse(document.getElementById('dot-x').textContent);
+        const dotY = JSON.parse(document.getElementById('dot-y').textContent);
+
+        function switchFloor(newFloor) {
+            if (minFloor === null || maxFloor === null) return;
+            if (newFloor < minFloor || newFloor > maxFloor) return;
+
+            // Update state
+            currentFloor = newFloor;
+
+            // 1. Update Image
+            const imgUrl = floorMapData[currentFloor];
+            const floorImg = document.querySelector("#zoom-floor img");
+            if (floorImg) {
+                if (imgUrl) {
+                    floorImg.src = imgUrl;
+                    floorImg.alt = currentFloor + "階マップ";
+                } else {
+                    // Fallback
+                }
+            }
+
+            // 2. Update Label
+            const label = document.getElementById("floor-label");
+            if (label) label.textContent = currentFloor + "F";
+
+            // 3. Update Button State
+            const btnUp = document.getElementById("btn-up");
+            const btnDown = document.getElementById("btn-down");
+
+            if (btnUp) {
+                if (currentFloor >= maxFloor) {
+                    btnUp.classList.add("disabled");
+                    btnUp.setAttribute("disabled", "true");
+                } else {
+                    btnUp.classList.remove("disabled");
+                    btnUp.removeAttribute("disabled");
+                }
+            }
+            if (btnDown) {
+                if (currentFloor <= minFloor) {
+                    btnDown.classList.add("disabled");
+                    btnDown.setAttribute("disabled", "true");
+                } else {
+                    btnDown.classList.remove("disabled");
+                    btnDown.removeAttribute("disabled");
+                }
+            }
+
+            // 4. Update Pin Visibility
+            const dot = document.querySelector("#zoom-floor .cursor-dot");
+            if (dot) {
+                if (targetRoomFloor !== null && currentFloor === targetRoomFloor) {
+                    dot.style.display = "block";
+                } else {
+                    dot.style.display = "none";
+                }
+            }
+
+            // 5. Update URL
+            const url = new URL(window.location);
+            url.searchParams.set('floor', currentFloor);
+            window.history.replaceState({}, '', url);
+        }
+
+        // Help Overlay Toggle
+        function toggleHelp() {
+            const overlay = document.getElementById('help-overlay');
+            overlay.classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Apply Zoom to Campus Map
             const buildingSelect = document.getElementById('building_id');
             const selectedBuilding = buildingSelect.value;
 
             if (selectedBuilding === "A" || selectedBuilding === "A1" || selectedBuilding === "A2") {
-                // 全体マップ: (55%, 50%) を中心に 1.7倍
                 applySmartZoom('zoom-all', 57, 52, 3.6);
-            }
-            else {
-                // 全体マップ: (55%, 50%) を中心に 1.7倍
+            } else {
                 applySmartZoom('zoom-all', 55, 50, 1.7);
             }
 
-
-            // 詳細マップ
-            const elemFloor = document.getElementById('zoom-floor');
-            const dotX = elemFloor.getAttribute('data-dot-x');
-            const dotY = elemFloor.getAttribute('data-dot-y');
-
-            /*
-            if (dotX && dotX !== 'none' && dotY && dotY !== 'none') {
-                applySmartZoom('zoom-floor', parseFloat(dotX), parseFloat(dotY), 3.0);
-            } else {
-                applySmartZoom('zoom-floor', 50, 50, 1);
+            // Initialize Code
+            if (currentFloor !== null) {
+                switchFloor(currentFloor);
             }
-            */
 
-            //フロアマップの拡大機能は一旦設定しない
-            //applySmartZoom('zoom-floor', 50, 50, 1);
-
+            // Note: Floor map zooming is currently disabled/manual default
+            // applySmartZoom('zoom-floor', 50, 50, 1);
         });
     </script>
 

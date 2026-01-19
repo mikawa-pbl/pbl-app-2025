@@ -44,6 +44,13 @@ def index(request):
             if first_char.isdigit():
                 current_floor = int(first_char)
 
+        # Priority 3: Default to min_floor if available, else 1
+        elif min_floor is not None:
+            current_floor = min_floor
+        else:
+             # Fallback if no min_floor info found yet
+             current_floor = 1
+
         # Apply Range Constraints
         if current_floor is not None:
             if min_floor is not None and current_floor < min_floor:
@@ -59,11 +66,14 @@ def index(request):
             .first()
         )
         if room_obj is None:
-            if not current_floor: # Only show error if we also failed to get a floor map
-                error_message = "該当する部屋が見つかりません"
+            error_message = "該当する部屋が見つかりません"
     
     # Check if we should show the floor map
-    if building_id and (current_floor is not None):
+    # Show map ONLY if:
+    # 1. Building is selected
+    # 2. Current floor is determined
+    # 3. AND (No room search OR Room was found)
+    if building_id and (current_floor is not None) and (not room_number or room_obj):
         floor_key = f"{building_id}-{current_floor}"
         
         floor_obj = (
@@ -88,11 +98,9 @@ def index(request):
             # error_message = f"フロア画像が見つかりません（{floor_key}）"
             pass
             
-    # Define validation list for buildings
+    # Fetch validation options (existing code)
     building_list = ["A", "A1", "A2", "B", "C", "D", "E", "F", "G"]
-    # Create options object for the template
     building_options = []
-    # Add 'init' option
     building_options.append({
         "value": "init",
         "label": "選択",
@@ -106,6 +114,32 @@ def index(request):
             "selected": (building_id == b)
         })
 
+    # NEW: Fetch ALL floors for client-side switching
+    floor_map_data = {}
+    target_room_floor = None
+
+    if building_id:
+        # Fetch all floors for this building (prefix search)
+        # Assuming format "{building_id}-{floor}"
+        prefix = f"{building_id}-"
+        all_floors = FloorTable.objects.using("team_USL").filter(floor__startswith=prefix)
+        
+        for f in all_floors:
+            # Parse "A-1" -> 1. Handle potential non-int suffixes safely
+            try:
+                suffix = f.floor[len(prefix):]
+                if suffix.isdigit():
+                    floor_num = int(suffix)
+                    floor_map_data[floor_num] = f.url
+            except ValueError:
+                pass
+    
+    # NEW: Determine target room floor for JS (independent of current_floor)
+    if room_obj:
+         first_char = room_number[0]
+         if first_char.isdigit():
+             target_room_floor = int(first_char)
+
     context = {
         "building_id": building_id,
         "room_number": room_number,
@@ -118,7 +152,11 @@ def index(request):
         "current_floor": current_floor,
         "min_floor": min_floor,
         "max_floor": max_floor,
-        "building_options": building_options, # Pass this to template
+        "building_options": building_options,
+        
+        # New data for JS
+        "floor_map_data": floor_map_data, 
+        "target_room_floor": target_room_floor, 
     }
     return render(request, "teams/team_USL/index.html", context)
 

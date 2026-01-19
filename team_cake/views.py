@@ -9,6 +9,7 @@ import uuid
 from django.http import FileResponse, Http404
 from django.conf import settings
 from django.utils import timezone
+from PIL import Image
 
 # def index(request):
 #     return render(request, 'teams/team_cake/index.html')
@@ -68,21 +69,16 @@ def registration_goods(request):
                 images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                 images_dir.mkdir(parents=True, exist_ok=True)
 
-                # generate unique filename preserving extension
-                orig_name = uploaded.name
-                ext = ''
-                if '.' in orig_name:
-                    ext = '.' + orig_name.split('.')[-1]
-                filename = f"{uuid.uuid4().hex}{ext}"
+                # generate unique filename with .webp extension
+                filename = f"{uuid.uuid4().hex}.webp"
                 dest_path = (images_dir / filename).resolve()
 
                 # prevent directory traversal
                 if not str(dest_path).startswith(str(images_dir)):
                     raise Http404("Invalid target path")
 
-                with open(dest_path, 'wb') as out:
-                    for chunk in uploaded.chunks():
-                        out.write(chunk)
+                image = Image.open(uploaded)
+                image.save(dest_path, format="WEBP")
 
                 good.image_filename = filename
 
@@ -111,19 +107,14 @@ def edit_good(request, pk):
                 images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                 images_dir.mkdir(parents=True, exist_ok=True)
 
-                orig_name = uploaded.name
-                ext = ''
-                if '.' in orig_name:
-                    ext = '.' + orig_name.split('.')[-1]
-                filename = f"{uuid.uuid4().hex}{ext}"
+                filename = f"{uuid.uuid4().hex}.webp"
                 dest_path = (images_dir / filename).resolve()
 
                 if not str(dest_path).startswith(str(images_dir)):
                     raise Http404("Invalid target path")
 
-                with open(dest_path, 'wb') as out:
-                    for chunk in uploaded.chunks():
-                        out.write(chunk)
+                image = Image.open(uploaded)
+                image.save(dest_path, format="WEBP")
 
                 # Delete old image
                 if good.image_filename:

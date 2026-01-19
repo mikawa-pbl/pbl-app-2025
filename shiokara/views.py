@@ -142,6 +142,27 @@ def update_person_in_fixture(person: Person) -> None:
     )
 
 
+def delete_person_from_fixture(person_id: int) -> None:
+    """指定した Person を JSON フィクスチャから削除する"""
+    
+    if not PERSON_FIXTURE_PATH.exists():
+        return
+    
+    try:
+        text = PERSON_FIXTURE_PATH.read_text(encoding="utf-8")
+        data = json.loads(text) if text.strip() else []
+    except json.JSONDecodeError:
+        return
+    
+    # 該当する pk を持つ Person を削除
+    data = [obj for obj in data if not (obj.get("pk") == person_id and obj.get("model") == "shiokara.person")]
+    
+    PERSON_FIXTURE_PATH.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
 # =========================
 # ログイン / 新規登録画面
 # =========================
@@ -307,6 +328,41 @@ def my_page(request):
         favorites = []
 
     return render_with_person(request, "teams/shiokara/my_page.html", {"person": refreshed, "favorites": favorites})
+
+
+def delete_account(request):
+    """
+    会員退会処理。
+    ログイン中の会員をDBとJSONフィクスチャから削除する。
+    """
+    person = get_current_person(request)
+    if not person:
+        return redirect("shiokara:login")
+    
+    if request.method == "POST":
+        # 確認用のパスワードをチェック
+        password = request.POST.get("password", "").strip()
+        
+        if password != person.password:
+            context = {"error": "パスワードが正しくありません。"}
+            return render_with_person(request, "teams/shiokara/delete_account.html", context)
+        
+        # 退会処理
+        person_id = person.id
+        
+        # DBから削除
+        Person.objects.using(DB_ALIAS).filter(pk=person_id).delete()
+        
+        # JSONフィクスチャから削除
+        delete_person_from_fixture(person_id)
+        
+        # セッションをクリア
+        request.session.flush()
+        
+        # ログインメニューにリダイレクト
+        return redirect("shiokara:login")
+    
+    return render_with_person(request, "teams/shiokara/delete_account.html")
 
 
 def site_feedback(request):

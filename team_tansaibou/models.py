@@ -11,12 +11,15 @@ class Store(models.Model):
     """模擬店モデル（独自認証対応）"""
     username = models.CharField('ログインID', max_length=50, unique=True)
     password = models.CharField('パスワード', max_length=128)
+    email = models.EmailField('メールアドレス', blank=True)
     name = models.CharField('店舗名', max_length=100)
     slug = models.SlugField('識別子', max_length=50, unique=True)
     description = models.TextField('説明', blank=True)
     is_active = models.BooleanField('有効', default=True)
     created_at = models.DateTimeField('作成日時', auto_now_add=True)
     updated_at = models.DateTimeField('更新日時', auto_now=True)
+    password_reset_token = models.CharField('パスワードリセットトークン', max_length=100, blank=True)
+    password_reset_expires = models.DateTimeField('トークン有効期限', null=True, blank=True)
 
     class Meta:
         verbose_name = '店舗'

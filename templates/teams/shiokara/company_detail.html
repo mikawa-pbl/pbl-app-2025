@@ -761,6 +761,217 @@
           });
         });
         </script>
+
+<!-- 口コミ投稿成功の演出 -->
+{% if points_awarded %}
+<style>
+    /* 成功モーダル */
+    .success-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s;
+    }
+
+    .success-modal {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        animation: bounceIn 0.6s;
+        max-width: 500px;
+        position: relative;
+    }
+
+    .success-modal h2 {
+        font-size: 2rem;
+        color: #cc0000;
+        margin: 0 0 16px;
+        animation: pulse 1s infinite;
+    }
+
+    .success-modal p {
+        font-size: 1.2rem;
+        color: #333;
+        margin: 12px 0;
+    }
+
+    .points-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        color: #856404;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 20px 0;
+        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+        animation: scaleUp 0.8s;
+    }
+
+    .close-success-btn {
+        background: #cc0000;
+        color: white;
+        border: none;
+        padding: 12px 32px;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background 0.2s;
+    }
+
+    .close-success-btn:hover {
+        background: #aa0000;
+    }
+
+    /* 紙吹雪アニメーション */
+    .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: #f0f;
+        position: absolute;
+        animation: confetti-fall 3s linear forwards;
+        z-index: 10001;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes bounceIn {
+        0% { transform: scale(0.3); opacity: 0; }
+        50% { transform: scale(1.05); }
+        70% { transform: scale(0.9); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    @keyframes scaleUp {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes confetti-fall {
+        to {
+            transform: translateY(100vh) rotate(720deg);
+            opacity: 0;
+        }
+    }
+</style>
+
+<div class="success-overlay" id="successOverlay">
+    <div class="success-modal">
+        <h2>🎉 投稿完了！🎉</h2>
+        <p>口コミの投稿ありがとうございます！</p>
+        <div class="points-badge">
+            +{{ points_awarded }} ポイント獲得！
+        </div>
+        <p style="font-size: 1rem; color: #666;">あなたの体験が他の学生の役に立ちます</p>
+        <button class="close-success-btn" onclick="closeSuccessModal()">閉じる</button>
+    </div>
+</div>
+
+<script>
+(function() {
+    // 効果音を生成（Web Audio API使用）
+    function playSuccessSound() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // 成功音のメロディーを作成
+            const notes = [
+                { freq: 523.25, start: 0, duration: 0.15 },    // C5
+                { freq: 659.25, start: 0.15, duration: 0.15 }, // E5
+                { freq: 783.99, start: 0.3, duration: 0.3 }    // G5
+            ];
+            
+            notes.forEach(note => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = note.freq;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime + note.start);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + note.start + note.duration);
+                
+                oscillator.start(audioContext.currentTime + note.start);
+                oscillator.stop(audioContext.currentTime + note.start + note.duration);
+            });
+        } catch (e) {
+            console.log('Audio playback not supported');
+        }
+    }
+
+    // 紙吹雪を生成
+    function createConfetti() {
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#ffd93d', '#6bcf7f', '#c44569'];
+        const confettiCount = 100;
+        
+        for (let i = 0; i < confettiCount; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-10px';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 4000);
+            }, i * 20);
+        }
+    }
+
+    // モーダルを閉じる
+    window.closeSuccessModal = function() {
+        const overlay = document.getElementById('successOverlay');
+        if (overlay) {
+            overlay.style.animation = 'fadeOut 0.3s';
+            setTimeout(() => overlay.remove(), 300);
+        }
+    };
+
+    // ページ読み込み時に実行
+    window.addEventListener('DOMContentLoaded', function() {
+        playSuccessSound();
+        createConfetti();
+        
+        // 5秒後に自動的に閉じる
+        setTimeout(closeSuccessModal, 5000);
+    });
+
+    // fadeOut アニメーション追加
+    const style = document.createElement('style');
+    style.textContent = '@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }';
+    document.head.appendChild(style);
+})();
+</script>
+{% endif %}
+
     </div>
 </div>
 

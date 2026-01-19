@@ -112,18 +112,6 @@ def members(request):
     return render(request, "teams/team_giryulink/members.html", {"members": qs})
 
 
-def product_detail(request, pk):
-    """Show product detail page."""
-    current_user = get_current_user(request)
-    product = get_object_or_404(Product, pk=pk)
-    return render(
-        request, "teams/team_giryulink/product_detail.html", {
-            "product": product,
-            "current_user": current_user,
-        }
-    )
-
-
 @login_required
 def add_product(request):
     if request.method == "POST":
@@ -302,7 +290,11 @@ def product_detail(request, product_id):
     current_user = get_current_user(request)
     
     # Handle comment submission
-    if request.method == "POST" and current_user:
+    if request.method == "POST":
+        if not current_user:
+            messages.warning(request, "コメントするにはログインが必要です。")
+            return redirect("team_giryulink:login")
+        
         comment_text = request.POST.get("comment", "").strip()
         if comment_text:
             ProductComment.objects.create(

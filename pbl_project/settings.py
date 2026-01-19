@@ -157,7 +157,7 @@ DATABASES = {
     'team_shouronpou': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_shouronpou' / 'db.sqlite3',
-                'TEST': {
+        'TEST': {
             'DEPENDENCIES': [],
         },
     },

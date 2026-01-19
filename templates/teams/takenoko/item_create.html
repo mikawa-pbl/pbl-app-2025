@@ -183,6 +183,28 @@
         line-height: 1;
       }
       .thumb .remove-btn:focus { outline: 2px solid rgba(100,156,228,0.6); }
+
+      .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      background: #649CE4;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .upload-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .file-input {
+      display: none;
+    }
     /* ===== 学年タグ（複数） ===== */
     .chips {
       display: flex;

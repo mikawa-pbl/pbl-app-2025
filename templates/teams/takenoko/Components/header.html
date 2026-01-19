@@ -156,7 +156,13 @@
     <nav class="header-nav">
       <button id="info-toggle"><i class="fas fa-info-circle"></i></button>
       <button id="bell-toggle"><i class="fas fa-bell"></i></button>
-      <button id="menu-toggle"><i class="fas fa-user-circle"></i></button>
+      <button id="menu-toggle">
+        {% if takenoko_user and takenoko_user.avatar %}
+          <img src="{{ takenoko_user.avatar.url }}" alt="ユーザーアイコン" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
+        {% else %}
+          <i class="fas fa-user-circle"></i>
+        {% endif %}
+      </button>
     </nav>
   </div>
 </header>

@@ -24,12 +24,11 @@ a:hover {
    ========================================= */
 
 /* 1. 認証ページ用 (login.html, signup.html) */
-/* 幅が狭く、中央寄せ */
 body.auth-page {
     max-width: 400px;
     margin: 0 auto;
-    background-color: #fff; /* 背景白 */
-    padding: 40px 20px;     /* 上下の余白を少し広めに */
+    background-color: #fff;
+    padding: 40px 20px;
 }
 body.auth-page h2 {
     text-align: center;
@@ -42,151 +41,108 @@ body.auth-page .links {
 }
 
 /* 2. アプリ閲覧ページ用 (post_detail.html, mypage.html) */
-/* 背景グレー、中央に白いカード */
 body.app-page {
-    background-color: #f5f5f5;
+    background-color: #f0f2f5;
 }
 .container {
     max-width: 800px;
     margin: 0 auto;
     background-color: #fff;
     padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-/* マイページは少し幅を狭くする */
-.container.narrow {
-    max-width: 600px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* 3. フォーム入力ページ用 (post_new.html, post_edit.html, profile_edit.html) */
-/* 幅広、背景白 */
+/* 3. フォーム入力ページ用 (post_new.html, profile_edit.html) */
 body.form-page {
-    max-width: 900px; /* PCで見やすいように最大幅を設定 */
+    max-width: 700px;
     margin: 0 auto;
     background-color: #fff;
-    padding: 20px;
+    padding: 30px;
 }
 
 /* =========================================
    共通コンポーネント (Components)
    ========================================= */
 
-/* --- 見出し --- */
-h1 {
-    margin: 0 0 20px 0;
-    color: #0056b3;
-    font-size: 1.8rem;
-}
-h2 {
-    margin-bottom: 20px;
-    color: #333;
-}
-h3 {
-    border-left: 5px solid #007bff;
-    padding-left: 10px;
-    margin-top: 40px;
-    margin-bottom: 20px;
-    background-color: #f9f9f9;
-    padding: 8px 10px;
-    font-size: 1.2rem;
-}
-
-/* --- フォーム要素 --- */
-.form-group { margin-bottom: 15px; }
-.form-row { display: flex; gap: 20px; margin-bottom: 15px; }
-.form-col { flex: 1; }
-
-label {
+/* ボタン */
+button, .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 6px;
     font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-    font-size: 0.95em;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s, transform 0.1s;
+    text-align: center;
+}
+button:active, .btn:active {
+    transform: translateY(1px);
 }
 
+.btn-primary { background-color: #007bff; color: #fff; }
+.btn-primary:hover { background-color: #0056b3; }
+
+.btn-success { background-color: #28a745; color: #fff; }
+.btn-success:hover { background-color: #218838; }
+
+.btn-danger { background-color: #dc3545; color: #fff; }
+.btn-danger:hover { background-color: #c82333; }
+
+.btn-secondary { background-color: #6c757d; color: #fff; }
+.btn-secondary:hover { background-color: #5a6268; }
+
+.btn-cancel { background-color: #eee; color: #333; margin-left: 10px; }
+
+/* アウトラインボタン */
+.btn-outline {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #007bff;
+    border: 1px solid #007bff;
+    background-color: transparent;
+    transition: all 0.2s;
+}
+.btn-outline:hover {
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* フォーム要素 */
 input[type="text"],
 input[type="number"],
 input[type="date"],
 input[type="password"],
-input[type="email"],
-textarea,
-select {
+select,
+textarea {
     width: 100%;
     padding: 10px;
-    box-sizing: border-box;
+    margin-top: 5px;
+    margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    box-sizing: border-box; 
     font-size: 1rem;
-    margin-bottom: 10px;
-}
-input:focus, textarea:focus, select:focus {
-    border-color: #007bff;
-    outline: none;
 }
 
-.helptext {
-    font-size: 0.8em;
-    color: #666;
-    display: block;
-    margin-bottom: 10px;
+/* フォームの横並び */
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.form-col {
+    flex: 1;
 }
 
-/* --- ボタン共通スタイル (Button Fix) --- */
-/* ★ここですべてのボタン形状を統一 */
-button,
-.btn,
-.btn-submit,
-.btn-link,
-.btn-edit,
-.btn-cancel,
-.btn-back,
-.btn-outline,
-.btn-primary,
-.btn-success,
-.btn-danger,
-.btn-secondary {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: 4px;
-    text-align: center;
-    cursor: pointer;
-    border: none;
-    font-size: 1rem;
-    color: white !important; /* 強制的に白文字 */
-    text-decoration: none !important; /* 強制的に下線なし */
-    transition: opacity 0.2s, background-color 0.2s;
-    margin: 5px;
-    line-height: 1.5; /* 高さ崩れ防止 */
-}
+/* =========================================
+   詳細・マイページ用パーツ
+   ========================================= */
 
-button:hover,
-.btn:hover,
-.btn-submit:hover,
-.btn-edit:hover,
-.btn-cancel:hover {
-    opacity: 0.9;
-}
-
-/* 色定義 */
-.btn-primary, button { background-color: #007bff; } /* 青 */
-.btn-success, .btn-submit, .btn-edit, .btn-mypage { background-color: #28a745; } /* 緑 */
-.btn-danger { background-color: #dc3545; } /* 赤 */
-.btn-secondary, .btn-cancel, .btn-logout, .btn-back { background-color: #6c757d; } /* グレー */
-
-/* 枠線ボタン（一覧に戻るなど） */
-.btn-outline {
-    background-color: transparent;
-    border: 1px solid #6c757d;
-    color: #6c757d !important; /* これだけグレー文字 */
-    padding: 5px 10px;
-    font-size: 0.9rem;
-}
-.btn-outline:hover {
-    background-color: #f0f0f0;
-    color: #333 !important;
-}
-
-/* --- テーブル (詳細画面用) --- */
+/* 情報テーブル (詳細画面用) */
 table.info-table {
     width: 100%;
     border-collapse: collapse;
@@ -205,7 +161,7 @@ table.info-table td {
     border-bottom: 1px solid #eee;
 }
 
-/* --- プロフィールカード (マイページ用) --- */
+/* プロフィールカード (マイページ用) */
 .profile-card {
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -230,38 +186,88 @@ table.info-table td {
     font-weight: bold;
 }
 .section-title {
-    margin-top: 0; /* カード内のタイトルは上詰め */
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+    display: inline-block;
+    margin-bottom: 20px;
 }
 
-/* --- ステータスセクション (詳細画面用) --- */
-.status-section {
-    background-color: #f0f8ff;
-    border: 1px solid #cce5ff;
-    padding: 20px;
-    border-radius: 8px;
+/* 詳細画面のバッジエリア */
+.footer-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.status-badge {
+    display: flex;
+    gap: 20px;
     text-align: center;
-    margin-top: 40px;
 }
 .status-number {
     font-size: 1.5rem;
     font-weight: bold;
-    margin: 10px 0;
 }
 
-/* --- その他 --- */
-.condition-group {
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    background-color: #fafafa;
-}
-ul {
-    list-style: none;
-    padding-left: 0;
-    margin: 5px 0;
-}
-li {
+/* 投稿一覧のボタンリンク用 */
+.btn-link { 
+    text-decoration: none; 
+    padding: 5px 12px; 
+    border-radius: 4px; 
+    font-size: 0.9em; 
     display: inline-block;
-    margin-right: 15px;
+}
+.btn-mypage { background-color: #007bff; color: white; }
+.btn-logout { background-color: #6c757d; color: white; margin-left: 5px; }
+
+/* =========================================
+   レスポンシブ調整
+   ========================================= */
+@media (max-width: 600px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    .container {
+        padding: 15px;
+    }
+    .profile-item {
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+
+.modal {
+    display: none;        /* 初期状態：非表示 */
+    position: fixed;      /* 画面に固定 */
+    z-index: 10000;       /* 最前面へ */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6); /* 背景を暗くする */
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.message-box {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+    font-size: 0.95rem;
 }

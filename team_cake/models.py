@@ -12,3 +12,12 @@ class Good(models.Model):
 
     def __str__(self):
         return f"{self.name} {self.price}"
+
+class SOSMessage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    message = models.TextField(verbose_name="助けてメッセージ")
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, verbose_name="表示中")
+
+    def __str__(self):
+        return self.message[:20]

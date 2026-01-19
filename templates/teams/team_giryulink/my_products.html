@@ -74,6 +74,15 @@
             color: #666;
         }
         
+        .nav-btn-danger {
+            background: #e53935;
+            color: white;
+        }
+        
+        .nav-btn-danger:hover {
+            background: #c62828;
+        }
+        
         .nav-btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
@@ -266,6 +275,10 @@
                 <span class="user-email">{{ current_user.name|default:current_user.email }}</span>
                 <div class="nav-links">
                     <a href="{% url 'team_giryulink:index' %}" class="nav-btn nav-btn-secondary">← トップページ</a>
+                    <form method="post" action="{% url 'team_giryulink:delete_account' %}" style="display: inline; margin: 0;" onsubmit="return confirm('本当にアカウントを削除しますか？\n\nこの操作は取り消せません。\nアカウントと出品した商品がすべて削除されます。');">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-btn nav-btn-danger">アカウント削除</button>
+                    </form>
                     <a href="{% url 'team_giryulink:logout' %}" class="nav-btn nav-btn-secondary">ログアウト</a>
                 </div>
             </div>

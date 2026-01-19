@@ -367,6 +367,40 @@ def my_page(request):
 
 
 @login_required
+@require_POST
+def delete_account(request):
+    """Delete user account and all associated products"""
+    current_user = get_current_user(request)
+    
+    if current_user:
+        # Delete all products associated with this user (including their images)
+        user_products = Product.objects.filter(user=current_user)
+        for product in user_products:
+            # Delete image file if exists
+            if product.image:
+                try:
+                    if os.path.isfile(product.image.path):
+                        os.remove(product.image.path)
+                except Exception:
+                    pass  # Continue even if image deletion fails
+            product.delete()
+        
+        # Delete the user account
+        user_email = current_user.email
+        current_user.delete()
+        
+        # Clear session
+        if 'giryulink_user_id' in request.session:
+            del request.session['giryulink_user_id']
+        
+        messages.success(request, f'{user_email}のアカウントを削除しました。')
+        return redirect('team_giryulink:index')
+    
+    messages.error(request, 'アカウントの削除に失敗しました。')
+    return redirect('team_giryulink:my_page')
+
+
+@login_required
 def edit_product(request, pk):
     """Edit a product"""
     from .forms import ProductEditForm

@@ -81,6 +81,28 @@
             display: inline-block;
         }
         
+        .delete-account-btn {
+            background: #e53935;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .delete-account-btn:hover {
+            background: #c62828;
+        }
+        
+        .profile-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
         .page-title {
             font-size: 1.2rem;
             font-weight: 600;
@@ -255,7 +277,13 @@
                 <div class="profile-name">{{ current_user.name|default:"匿名ユーザー" }}</div>
                 <div class="profile-email">{{ current_user.email }}</div>
             </div>
-            <a href="{% url 'team_giryulink:logout' %}" class="logout-btn">ログアウト</a>
+            <div class="profile-actions">
+                <form method="post" action="{% url 'team_giryulink:delete_account' %}" style="display: inline;" onsubmit="return confirm('本当にアカウントを削除しますか？\n\nこの操作は取り消せません。\nアカウントと出品した商品がすべて削除されます。');">
+                    {% csrf_token %}
+                    <button type="submit" class="delete-account-btn">アカウント削除</button>
+                </form>
+                <a href="{% url 'team_giryulink:logout' %}" class="logout-btn">ログアウト</a>
+            </div>
         </div>
         
         <div class="page-title">出品中の商品</div>

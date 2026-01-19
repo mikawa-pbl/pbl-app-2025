@@ -14,6 +14,8 @@ Team Tansaibou POS システムのビューモジュール
 - エラーハンドリング（ユーザーフレンドリーなメッセージ）
 """
 
+import json
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import transaction as db_transaction
@@ -266,7 +268,6 @@ def register_sale(request):
                 messages.error(request, '必須項目を全て入力してください')
                 raise ValueError('必須項目が不足しています')
 
-            import json
             cart_data = json.loads(cart_items)
 
             with db_transaction.atomic():

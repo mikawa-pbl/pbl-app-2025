@@ -44,18 +44,9 @@ function saveStatus() {
         }
     }
 
-    
-
     // ここでサーバーにデータを送信して永続化する処理を追加できます
     // 最終更新時刻を更新（ローカル表示用）
-    lastUpdated = new Date().toLocaleString(undefined, {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    });
+    lastUpdated = new Date();
 
     // 在室変更時の通知（サンプル）
     // alert('在室状況を更新しました');
@@ -77,14 +68,52 @@ function openDetailDialogFromRow(tr) {
     const locElem = document.getElementById('detail-location');
     const comElem = document.getElementById('detail-comment');
     const updatedElem = document.getElementById('detail-updated');
-     const talkElem = document.getElementById('detail-talk');
+    const talkElem = document.getElementById('detail-talk');
 
+    // const now = new Date().toLocaleString(undefined, {
+    //         year: 'numeric',
+    //         month: '2-digit',
+    //         day: '2-digit',
+    //         hour: '2-digit',
+    //         minute: '2-digit',
+    //         hour12: false
+    //     });
+
+    const now = new Date();
+    const diffMS = now - lastUpdated;
+
+    // lastUpdated が Date でない場合は表示を '-' にする
+    let updatedText = '-';
+    if (lastUpdated instanceof Date) {
+        const diffMin = Math.floor(diffMS / 60000);
+        const diffHour = Math.floor(diffMS / 3600000);
+        const diffDay = Math.floor(diffMS / 86400000);
+
+    if (diffMin < 60) {
+            updatedText = diffMin + '分前';  
+        } else if (diffHour < 24) {
+
+            updatedText = diffHour + '時間前';
+        } else if (diffDay <= 7) {
+            updatedText = diffDay + '日前';
+        } else {
+            // 7日より前は最終更新日時を表示（日本ロケール、24時間表示）
+            updatedText = lastUpdated.toLocaleString('ja-JP', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        }
+    }
 
     if (gradeElem) gradeElem.textContent = gradeHeading || '-';
     if (nameElem) nameElem.textContent = name || '-';
     if (locElem) locElem.textContent = location || '-';
     if (comElem) comElem.textContent = comment || '-';
-    if (updatedElem) updatedElem.textContent = lastUpdated || '-';
+    if (updatedElem) updatedElem.textContent = updatedText || '-';
     if (talkElem) talkElem.textContent = talk || '-';
 
 

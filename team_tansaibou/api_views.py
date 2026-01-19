@@ -389,7 +389,7 @@ def profit_analysis(request):
 
         # セット商品の原価を計算（セット内商品の原価合計）
         set_cost = Decimal('0')
-        for set_item in product_set.productsetitem_set.using(DB).select_related('product'):
+        for set_item in product_set.items.using(DB).select_related('product'):
             set_cost += set_item.product.cost_price * set_item.quantity
 
         cost = set_cost * item.quantity

@@ -23,7 +23,18 @@
                     {% for field in form %}
                     <div class="mb-3">
                         <label for="{{ field.id_for_label }}" class="form-label fw-bold">{{ field.label }}</label>
-                        {{ field }}
+                        
+                        {% if field.name == 'laboratory' %}
+                        <div class="input-group">
+                            {{ field }}
+                            <button type="button" class="btn btn-outline-secondary" onclick="addLaboratory()">
+                                <i class="bi bi-plus-circle"></i> 新規追加
+                            </button>
+                        </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+
                         {% if field.help_text %}
                         <div class="form-text">{{ field.help_text }}</div>
                         {% endif %}
@@ -72,6 +83,37 @@ PC画面に表示される図形を見て、キーボードを押す課題です
             
             const durationField = document.getElementById('id_duration');
             if(!durationField.value) durationField.value = "約60分";
+        }
+    }
+
+    // 研究室の新規追加 (Ver 5.0)
+    function addLaboratory() {
+        const name = prompt("新しい研究室名を入力してください:");
+        if (name) {
+            fetch("{% url 'api_add_laboratory' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({name: name})
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => { throw new Error(data.error || 'Network response was not ok'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                const select = document.getElementById('id_laboratory');
+                const option = new Option(data.name, data.id, true, true);
+                select.add(option);
+                alert('研究室「' + data.name + '」を追加し、選択しました。');
+            })
+            .catch(error => {
+                alert('エラーが発生しました: ' + error.message);
+                console.error('Error:', error);
+            });
         }
     }
 </script>

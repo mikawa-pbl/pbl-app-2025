@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,6 +16,7 @@
             display: grid;
             place-items: center;
         }
+
         .profile-card {
             width: 100%;
             max-width: 700px;
@@ -23,11 +25,13 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             overflow: hidden;
         }
+
         .profile-header {
             padding: 24px 30px;
             background-color: #f9f9f9;
             border-bottom: 1px solid #eee;
         }
+
         .profile-header h1 {
             font-size: 1.8rem;
             margin: 0;
@@ -38,15 +42,19 @@
         .form-container {
             padding: 20px 30px 30px 30px;
         }
-        .form-container p { /* .as_p で生成される <p> タグ用 */
+
+        .form-container p {
+            /* .as_p で生成される <p> タグ用 */
             margin-bottom: 20px;
         }
+
         .form-container label {
             display: block;
             font-weight: 600;
             color: #555;
             margin-bottom: 6px;
         }
+
         .form-container input[type="text"],
         .form-container input[type="number"],
         .form-container input[type="date"],
@@ -59,10 +67,12 @@
             font-size: 1rem;
             font-family: inherit;
         }
+
         .form-container textarea {
             height: 100px;
             resize: vertical;
         }
+
         .form-container input[type="file"] {
             font-size: 0.9rem;
         }
@@ -70,12 +80,15 @@
         /* === フッター (ボタン) === */
         .form-footer {
             display: flex;
-            justify-content: flex-end; /* ボタンを右寄せ */
-            gap: 10px; /* ボタン間の隙間 */
+            justify-content: flex-end;
+            /* ボタンを右寄せ */
+            gap: 10px;
+            /* ボタン間の隙間 */
             padding: 20px 30px;
             background-color: #f9f9f9;
             border-top: 1px solid #eee;
         }
+
         .btn {
             padding: 10px 20px;
             border: none;
@@ -86,40 +99,94 @@
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
+
         .btn-primary {
             background-color: #007bff;
             color: white;
         }
-        .btn-primary:hover { background-color: #0056b3; }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
         .btn-secondary {
             background-color: #6c757d;
             color: white;
         }
-        .btn-secondary:hover { background-color: #5a6268; }
 
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .required-badge {
+            background-color: #ff4d4f;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .help-text {
+            color: #6c757d;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="profile-card">
-        
+
         <header class="profile-header">
             <h1>{{ user.name }} のプロフィール編集</h1>
         </header>
 
         <form method="post" enctype="multipart/form-data">
-            
+
             {% csrf_token %}
 
             <div class="form-container">
-                {{ form.as_p }}
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                        <span class="required-badge">必須</span>
+                        {% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="error-message">
+                        {% for error in field.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if field.help_text %}
+                    <p class="help-text">{{ field.help_text }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
             </div>
 
             <footer class="form-footer">
                 <a href="{% url 'nanakorobiyaoki:user_profile' user.user_id %}" class="btn btn-secondary">
                     キャンセル
                 </a>
-                
+
                 <button type="submit" class="btn btn-primary">
                     更新する
                 </button>
@@ -129,4 +196,5 @@
     </div>
 
 </body>
+
 </html>

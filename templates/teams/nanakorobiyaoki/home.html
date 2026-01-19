@@ -76,6 +76,8 @@
         .nav-menu {
             list-style: none;
             flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .nav-item {
@@ -104,8 +106,34 @@
             color: var(--primary-color);
         }
 
+        .nav-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .nav-link .material-icons-round {
             font-size: 24px;
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background-color: #1d9bf0;
+            /* Twitter Blue */
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid #fff;
+            line-height: 1;
+            min-width: 18px;
+            text-align: center;
+            z-index: 10;
         }
 
         .sidebar-section-title {
@@ -117,6 +145,28 @@
 
         .mini-community-list {
             list-style: none;
+            overflow-y: auto;
+            max-height: calc(100vh - 400px);
+            /* 足りない場合は調整 */
+            margin-right: -10px;
+            padding-right: 10px;
+        }
+
+        .mini-community-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .mini-community-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .mini-community-list::-webkit-scrollbar-thumb {
+            background: #eee;
+            border-radius: 10px;
+        }
+
+        .mini-community-list::-webkit-scrollbar-thumb:hover {
+            background: #ddd;
         }
 
         .mini-community-item a {
@@ -381,7 +431,7 @@
     <nav class="sidebar">
         <div class="logo">
             <div class="logo-icon">T</div>
-            TUT Connect <span style="font-size: 0.7rem; color: #999; font-weight: 400; margin-top: 4px;">Beta</span>
+            TUT Connect <span style="font-size: 0.7rem; color: #999; font-weight: 400; margin-top: 4px;"></span>
         </div>
 
         <ul class="nav-menu">
@@ -396,11 +446,19 @@
                     <span class="material-icons-round">grid_view</span> コミュニティを探す
                 </a>
             </li>
+
             <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <span class="material-icons-round">mail</span> メッセージ
+                <a href="{% url 'nanakorobiyaoki:message_inbox' %}" class="nav-link">
+                    <div class="nav-icon-wrapper">
+                        <span class="material-icons-round">mail_outline</span>
+                        {% if unread_messages_count > 0 %}
+                        <span class="notification-badge">{{ unread_messages_count }}</span>
+                        {% endif %}
+                    </div>
+                    メッセージ
                 </a>
             </li>
+
             <li class="nav-item">
                 <a href="{% url 'nanakorobiyaoki:user_profile' request.session.user_id %}" class="nav-link">
                     <span class="material-icons-round">person</span> プロフィール
@@ -411,13 +469,21 @@
             <ul class="mini-community-list">
                 {% for community in joined_communities %}
                 <li class="mini-community-item">
-                    <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}">
-                        {% if community.image %}
-                        <img src="{{ community.image.url }}" class="mini-icon" alt="">
-                        {% else %}
-                        <span class="mini-icon" style="background: #e0e0e0;"></span>
+                    <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}"
+                        style="justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            {% if community.image %}
+                            <img src="{{ community.image.url }}" class="mini-icon" alt="">
+                            {% else %}
+                            <span class="mini-icon" style="background: #e0e0e0;"></span>
+                            {% endif %}
+                            {{ community.name }}
+                        </div>
+                        {% if community.unread_posts_count > 0 %}
+                        <span class="notification-badge"
+                            style="position: static; font-size: 0.65rem; padding: 1px 4px; min-width: 14px;">
+                            {{community.unread_posts_count }}</span>
                         {% endif %}
-                        {{ community.name }}
                     </a>
                 </li>
                 {% empty %}
@@ -431,11 +497,7 @@
     <main class="main-content">
         <!-- Header -->
         <header class="header">
-            <div class="search-bar">
-                <span class="material-icons-round">search</span>
-                <input type="text" placeholder="コミュニティや投稿を検索">
-            </div>
-
+            <div></div>
             <div class="header-actions">
                 <button class="icon-btn">
                     <span class="material-icons-round">notifications_none</span>
@@ -444,8 +506,6 @@
                     <!-- ログインユーザーのアイコンがあれば表示 -->
                     <img src="https://via.placeholder.com/32" alt="User">
                 </div>
-                <a href="{% url 'nanakorobiyaoki:logout' %}"
-                    style="font-size: 0.8rem; color: #666; text-decoration: none;">ログアウト</a>
             </div>
         </header>
 
@@ -456,7 +516,8 @@
 
             <div class="grid">
                 {% for community in joined_communities %}
-                <div class="card">
+                <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}" class="card"
+                    style="text-decoration: none; color: inherit; display: flex;">
                     <div class="card-header">
                         <div class="card-icon">
                             {% if community.image %}
@@ -466,7 +527,14 @@
                             {% endif %}
                         </div>
                         <div class="card-info">
-                            <div class="card-title">{{ community.name }}</div>
+                            <div class="card-title">
+                                {{ community.name }}
+                                {% if community.unread_posts_count > 0 %}
+                                <span class="notification-badge"
+                                    style="position: static; font-size: 0.7rem; padding: 2px 6px; margin-left: 5px; vertical-align: middle; min-width: 18px; display: inline-block;">
+                                    {{community.unread_posts_count }}</span>
+                                {% endif %}
+                            </div>
                             <div class="card-tag">コミュニティ</div>
                         </div>
                     </div>
@@ -488,11 +556,11 @@
 
                     <div class="card-footer">
                         <span class="member-count">{{ community.members.count }} メンバー</span>
-                        <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}" class="go-btn">
+                        <span class="go-btn">
                             移動する <span class="material-icons-round" style="font-size: 16px;">arrow_forward</span>
-                        </a>
+                        </span>
                     </div>
-                </div>
+                </a>
                 {% empty %}
                 <div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 40px;">
                     参加しているコミュニティはありません。<br>

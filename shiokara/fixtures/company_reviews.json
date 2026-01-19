@@ -922,5 +922,19 @@
       "rating": 2,
       "created_at": "2026-01-19T07:31:00.054267+00:00"
     }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 68,
+    "fields": {
+      "company": 48,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "ｗくぇｑ",
+      "rating": 4,
+      "created_at": "2026-01-19T07:34:36.363593+00:00"
+    }
   }
 ]

@@ -1,58 +1,60 @@
 {% extends 'teams/h34vvy_u53rzz/base.html' %}
 
 {% block content %}
-<header class="space-y-2">
-  <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">
-    アカウント
-  </p>
-  <h1 class="text-2xl font-bold text-slate-900">ログイン</h1>
-  <p class="text-sm text-slate-600">
-    ユーザー名とパスワードでサインインしてください。
-  </p>
-</header>
+<div class="mx-auto max-w-xl space-y-4 px-4 py-6">
+  <header class="space-y-2">
+    <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">
+      アカウント
+    </p>
+    <h1 class="text-2xl font-bold text-slate-900">ログイン</h1>
+    <p class="text-sm text-slate-600">
+      ユーザー名とパスワードでサインインしてください。
+    </p>
+  </header>
 
-<form method="post" class="rounded-xl bg-white p-6 shadow" novalidate>
-  {% csrf_token %}
-  <input type="hidden" name="next" value="{{ next }}" />
+  <form method="post" class="rounded-xl bg-white p-6 shadow" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}" />
 
-  {% if form.non_field_errors %}
-  <div class="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
-    {% for error in form.non_field_errors %}
-    <p>{{ error }}</p>
-    {% endfor %}
-  </div>
-  {% endif %}
-
-  <div class="space-y-3">
-    <div>
-      <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-slate-800">ユーザー名</label>
-      {{ form.username }}
-      {% if form.username.errors %}
-      <p class="mt-1 text-sm text-red-600">
-        {{ form.username.errors|join:", " }}
-      </p>
-      {% endif %}
+    {% if form.non_field_errors %}
+    <div class="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+      {% for error in form.non_field_errors %}
+      <p>{{ error }}</p>
+      {% endfor %}
     </div>
-    <div>
-      <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-slate-800">パスワード</label>
-      {{ form.password }}
-      {% if form.password.errors %}
-      <p class="mt-1 text-sm text-red-600">
-        {{ form.password.errors|join:", " }}
-      </p>
-      {% endif %}
-    </div>
-  </div>
+    {% endif %}
 
-  <div class="mt-6 flex items-center justify-between">
-    <div class="flex items-center gap-3 text-sm">
-      <a href="{% url 'h34vvy_u53rzz:signup' %}{% if next %}?next={{ next }}{% endif %}"
-        class="font-medium text-blue-700 underline decoration-blue-200 decoration-2 underline-offset-4 hover:text-blue-800 hover:decoration-blue-400">新規登録</a>
+    <div class="space-y-3">
+      <div>
+        <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-slate-800">ユーザー名</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+        <p class="mt-1 text-sm text-red-600">
+          {{ form.username.errors|join:", " }}
+        </p>
+        {% endif %}
+      </div>
+      <div>
+        <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-slate-800">パスワード</label>
+        {{ form.password }}
+        {% if form.password.errors %}
+        <p class="mt-1 text-sm text-red-600">
+          {{ form.password.errors|join:", " }}
+        </p>
+        {% endif %}
+      </div>
     </div>
-    <button type="submit"
-      class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">
-      ログイン
-    </button>
-  </div>
-</form>
+
+    <div class="mt-6 flex items-center justify-between">
+      <div class="flex items-center gap-3 text-sm">
+        <a href="{% url 'h34vvy_u53rzz:signup' %}{% if next %}?next={{ next }}{% endif %}"
+          class="font-medium text-blue-700 underline decoration-blue-200 decoration-2 underline-offset-4 hover:text-blue-800 hover:decoration-blue-400">新規登録</a>
+      </div>
+      <button type="submit"
+        class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">
+        ログイン
+      </button>
+    </div>
+  </form>
+</div>
 {% endblock %}

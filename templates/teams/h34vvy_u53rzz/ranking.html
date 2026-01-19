@@ -2,37 +2,18 @@
 {% load h34vvy_tags %}
 
 {% block content %}
-<nav class="mb-4 flex items-center justify-between rounded-md bg-slate-900 px-4 py-2 text-white">
-  <div class="text-sm font-semibold">ドア開けてや</div>
-  <div class="flex items-center gap-2 text-sm text-slate-100">
-    {% if user.is_authenticated %}
-    {% user_points user as nav_user_points %}
-    <span class="rounded bg-white/10 px-3 py-1">
-      {{ user.username }}
-      {% if nav_user_points is not None %}
-      / {{ nav_user_points }} pt
-      {% endif %}
-    </span>
-    <a href="{% url 'h34vvy_u53rzz:logout' %}"
-      class="rounded bg-white px-3 py-1 font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 hover:shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70">ログアウト</a>
-    {% else %}
-    <a href="{% url 'h34vvy_u53rzz:signup' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}"
-      class="rounded bg-white px-3 py-1 font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 hover:shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70">新規登録</a>
-    <a href="{% url 'h34vvy_u53rzz:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}"
-      class="rounded bg-white px-3 py-1 font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900 hover:shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70">ログイン</a>
-    {% endif %}
-  </div>
-</nav>
+<div class="px-4 py-6 space-y-6">
+  {% include "teams/h34vvy_u53rzz/_nav.html" %}
 
-<header class="space-y-2">
-  <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">
-    ポイント
-  </p>
-  <h1 class="text-3xl font-bold text-slate-900">ランキング</h1>
-  <p class="text-sm text-slate-600">
-    助けに行った回数に応じたポイントの順位です。
-  </p>
-</header>
+  <header class="space-y-2">
+    <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">
+      ポイント
+    </p>
+    <h1 class="text-3xl font-bold text-slate-900">ランキング</h1>
+    <p class="text-sm text-slate-600">
+      助けに行った回数に応じたポイントの順位です。
+    </p>
+  </header>
 
   <div class="overflow-hidden rounded-xl bg-white shadow">
     <!-- Tabs implementation using CSS Radio Hack -->
@@ -118,4 +99,5 @@
       </table>
     </div>
   </div>
+</div>
 {% endblock %}

@@ -15,24 +15,24 @@
                     名前 <span class="text-red-500">*</span>
                 </label>
                 <input type="text" id="name" name="name" value="{{ member.name }}" required
-                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5">
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             </div>
 
             <div>
                 <label for="student_id" class="block mb-2 text-sm font-medium text-gray-900">学籍番号</label>
                 <input type="text" id="student_id" name="student_id" value="{{ member.student_id }}"
-                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5">
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             </div>
 
             <div>
                 <label for="email" class="block mb-2 text-sm font-medium text-gray-900">メールアドレス</label>
                 <input type="email" id="email" name="email" value="{{ member.email }}"
-                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5">
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             </div>
 
             <div class="flex gap-3 pt-4">
                 <button type="submit"
-                        class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5">
+                        class="text-white bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5">
                     更新
                 </button>
                 <a href="{% url 'team_tansaibou:member_list' %}"

@@ -31,7 +31,7 @@
                 {% endfor %}
             </ul>
             <div class="mt-4 pt-4 border-t border-gray-200">
-                <span class="text-xl font-bold text-green-600">合計: ¥{{ transaction.total_amount|floatformat:0 }}</span>
+                <span class="text-xl font-bold text-blue-600">合計: ¥{{ transaction.total_amount|floatformat:0 }}</span>
             </div>
         </div>
 
@@ -46,7 +46,7 @@
                 <input type="datetime-local" id="transaction_date" name="transaction_date"
                        value="{{ transaction.transaction_date|date:'Y-m-d' }}T{{ transaction.transaction_date|time:'H:i' }}"
                        required
-                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5">
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             </div>
 
             <div>
@@ -54,7 +54,7 @@
                     担当者 <span class="text-red-500">*</span>
                 </label>
                 <select id="recorded_by" name="recorded_by" required
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5">
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                     <option value="">選択してください</option>
                     {% for member in members %}
                     <option value="{{ member.id }}" {% if member.id == transaction.recorded_by.id %}selected{% endif %}>
@@ -69,7 +69,7 @@
                     支払方法 <span class="text-red-500">*</span>
                 </label>
                 <select id="payment_method" name="payment_method" required
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5">
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                     {% for value, label in payment_methods %}
                     <option value="{{ value }}" {% if value == transaction.payment_method %}selected{% endif %}>
                         {{ label }}
@@ -82,12 +82,12 @@
                 <label for="notes" class="block mb-2 text-sm font-medium text-gray-900">備考</label>
                 <textarea id="notes" name="notes" rows="3"
                           placeholder="特記事項があれば入力してください"
-                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5">{{ transaction.notes }}</textarea>
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">{{ transaction.notes }}</textarea>
             </div>
 
             <div class="flex gap-3 pt-4">
                 <button type="submit"
-                        class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5">
+                        class="text-white bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5">
                     更新
                 </button>
                 <a href="{% url 'team_tansaibou:sale_list' %}"

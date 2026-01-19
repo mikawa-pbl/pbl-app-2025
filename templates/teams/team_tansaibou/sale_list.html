@@ -8,7 +8,7 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-900">販売履歴</h1>
         <a href="{% url 'team_tansaibou:index' %}"
-           class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5">
+           class="text-white bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5">
             レジへ戻る
         </a>
     </div>
@@ -23,7 +23,7 @@
     <!-- テーブル -->
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left text-gray-500">
-            <thead class="text-xs text-white uppercase bg-green-600">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                 <tr>
                     <th scope="col" class="px-6 py-3">取引日</th>
                     <th scope="col" class="px-6 py-3">担当者</th>
@@ -44,7 +44,7 @@
                             {{ transaction.get_payment_method_display }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 font-semibold text-gray-900 text-right">¥{{ transaction.total_amount|floatformat:0 }}</td>
+                    <td class="px-6 py-4 font-bold text-blue-600 text-right">¥{{ transaction.total_amount|floatformat:0 }}</td>
                     <td class="px-6 py-4">{{ transaction.notes|default:"-" }}</td>
                     <td class="px-6 py-4">
                         <button type="button"
@@ -65,7 +65,7 @@
                     <td colspan="7" class="px-6 py-4">
                         <div class="relative overflow-x-auto">
                             <table class="w-full text-sm text-left text-gray-500">
-                                <thead class="text-xs text-white uppercase bg-gray-600">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-200">
                                     <tr>
                                         <th scope="col" class="px-4 py-2">商品名</th>
                                         <th scope="col" class="px-4 py-2">タイプ</th>
@@ -112,7 +112,7 @@
     <div class="p-12 bg-white border border-gray-200 rounded-lg shadow text-center">
         <p class="text-gray-500 mb-4">まだ販売データがありません</p>
         <a href="{% url 'team_tansaibou:index' %}"
-           class="text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-5 py-2.5">
+           class="text-white bg-gray-800 hover:bg-gray-900 font-medium rounded-lg text-sm px-5 py-2.5">
             最初の販売を登録する →
         </a>
     </div>

@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Migration Integrity Check
+        run: scripts/check_migrations.sh
+
+      - name: Make Migrations Check
+        run: |
+          echo "Checking for missing migrations or model validity..."
+          uv run python manage.py makemigrations ${{ inputs.target_app }} --check --dry-run
+        
+      - name: Migrate
+        run: uv run python manage.py migrate --database ${{ inputs.target_app }} --noinput
+
+      - name: Start Server & Health Check
+        run: |
+          uv run python manage.py runserver 0.0.0.0:8000 --noreload &
+          PID=$!
+          echo "Server started with PID $PID. Waiting for it to be ready..."
+          
+          # Wait loop
+          for i in {1..10}; do
+            if curl -s http://127.0.0.1:8000 > /dev/null; then
+              echo "Server is up!"
+              break
+            fi
+            if ! kill -0 $PID 2>/dev/null; then
+              echo "Server process died."
+              exit 1
+            fi
+            sleep 3
+          done
+          
+          # Check again
+          if ! curl -s http://127.0.0.1:8000 > /dev/null; then
+             echo "Server failed to respond."
+             kill $PID 2>/dev/null || true
+             exit 1
+          fi
+          
+          echo "Server health check passed."
+          kill $PID
+
+      - name: Run Tests
+        run: uv run python manage.py test ${{ inputs.target_app }}

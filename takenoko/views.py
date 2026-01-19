@@ -26,9 +26,10 @@ def takenoko_login_required(view_func):
 
 
 def main(request):
-    # GETパラメータからタグと検索キーワードを取得
+    # GETパラメータからタグと検索キーワード、価格を取得
     selected_tag = request.GET.get('tag')
     query = request.GET.get('q')
+    price_filter = request.GET.get('price')
     
     # アクティブな商品を取得（新着順）
     items = Item.objects.filter(status='active').order_by('-created_at')
@@ -45,6 +46,10 @@ def main(request):
     # 検索キーワードでフィルタリング（商品名）
     if query:
         items = items.filter(name__icontains=query)
+    
+    # 価格でフィルタリング
+    if price_filter == 'free':
+        items = items.filter(price=0)
     
     items = items[:12]
     

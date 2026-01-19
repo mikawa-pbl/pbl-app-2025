@@ -32,28 +32,42 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'team_USL',
+    'team_kitajaki',
+    'shiokara',
+    'team_terrace',
+    'agileca',
+    'team_scim',
+    'team_empiricism',
+    'ssk',
+    'Catan',
+    'team_tansaibou',
+    'h34vvy_u53rzz',
+    'mori_doragon_yuhi_machi',
+    'team_northcliff',
     "team_TMR",
     "graphics",
-    "team_terrace",
     "team_UD",
     "nanakorobiyaoki",
     "team_akb5",
     "team_TeXTeX",
     "team_cake",
     "team_shouronpou",
-    "h34vvy_u53rzz",
+    'team_giryulink',
     'takenoko',
+    'teachers',
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "h34vvy_u53rzz.middleware.H34vvySessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -75,6 +89,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "nanakorobiyaoki.context_processors.nanakorobiyaoki_context",
+                "takenoko.context_processors.takenoko_user",
             ],
         },
     },
@@ -107,13 +122,12 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "team_cake" / "db.sqlite3",
     },
-    "team_shouronpou": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "team_shouronpou" / "db.sqlite3",
-    },
     "h34vvy_u53rzz": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "h34vvy_u53rzz" / "db.sqlite3",
+        "TEST": {
+            "DEPENDENCIES": [],
+        },
     },
     "team_TeXTeX": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -131,10 +145,84 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'takenoko' / 'db.sqlite3',
     },
+    'team_giryulink': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_giryulink' / 'db.sqlite3',
+    },
+    'team_northcliff': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_northcliff' / 'db.sqlite3',
+    },
+    'team_tansaibou': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_tansaibou' / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
+    },
+    'team_shouronpou': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_shouronpou' / 'db.sqlite3',
+        'TEST': {
+            'DEPENDENCIES': [],
+        },
+    },
+    'agileca': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'agileca' / 'db.sqlite3',
+    },
+    'shiokara': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'shiokara' / 'db.sqlite3',
+    },
+    'mori_doragon_yuhi_machi': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'mori_doragon_yuhi_machi' / 'db.sqlite3',
+    },
+    'team_kitajaki': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_kitajaki' / 'db.sqlite3',
+    },
+    'Catan': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'Catan' / 'db.sqlite3',
+    },
+    'team_empiricism': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_empiricism' / 'db.sqlite3',
+    },
+    'ssk': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'ssk' / 'db.sqlite3',
+    },
+    'team_USL': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_USL' / 'db.sqlite3',
+    },
+    'team_scim': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_scim' / 'db.sqlite3',
+    },
+    'team_terrace': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
+    },
+    'teachers': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'teachers' / 'db.sqlite3',
+    },
 }
+
 
 # app_labelごとにDBを振り分けるルーター
 DATABASE_ROUTERS = ["routers.TeamPerAppRouter"]
+
+# "django.contrib.auth.backends.ModelBackend" はチームgiryulinkのユーザー認証のものです。
+# グローバルの認証バックエンド
+AUTHENTICATION_BACKENDS = [
+    "h34vvy_u53rzz.backends.H34vvyUserBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -158,9 +246,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ja"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Tokyo"
 
 USE_I18N = True
 
@@ -171,6 +259,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+
+# Media files (uploaded images)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

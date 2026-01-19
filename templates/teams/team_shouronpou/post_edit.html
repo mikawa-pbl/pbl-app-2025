@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>募集の編集</title>
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/schedule.css' %}">
+</head>
+<body class="form-page">
+    <h2>募集の編集</h2>
+    <form method="post" id="postForm">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        <h3>基本情報（必須）</h3>
+        <div style="margin-bottom: 15px;">
+            <label>募集タイトル:</label>
+            {{ form.title }}
+        </div>
+        <div class="form-row">
+            <div class="form-col">
+                <label>系・所属:</label>
+                {{ form.department }}
+            </div>
+            <div class="form-col">
+                <label>研究室:</label>
+                {{ form.laboratory }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-col">
+                <label>報酬の情報:</label>
+                {{ form.reward }}
+            </div>
+            <div class="form-col">
+                <label>実験所要時間 (分):</label>
+                {{ form.duration }}
+            </div>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>募集内容の詳細:</label>
+            {{ form.content }}
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>{{ form.recruitment_end_date.label }}:</label>
+            {{ form.recruitment_end_date }}
+        </div>
+
+        <hr>
+        <h3>実験受け入れ可能時間</h3>
+        <p><small>クリックまたはドラッグして時間を登録してください（8:00〜21:00 / 30分刻み）</small></p>
+
+        <div class="schedule-container">
+            <div class="schedule-grid" id="scheduleGrid"></div>
+        </div>
+        {{ form.available_slots }}
+
+        <hr>
+        <h3>募集人数</h3>
+        <p>
+            <label>人数選択:</label>
+            {{ form.participants_selector }}
+        </p>
+        <p id="custom_input_container">
+            {{ form.custom_participants }}
+        </p>
+        
+        <hr>
+        <h3>参加条件・詳細（任意）</h3>
+        <div class="condition-group">
+            <label><strong>国籍の条件</strong></label>
+            {{ form.condition_nationality }}
+        </div>
+        <div class="condition-group">
+            <label><strong>性別の条件</strong></label>
+            {{ form.condition_gender }}
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label><strong>年齢制限・対象年齢</strong></label>
+            {{ form.target_age }}
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label><strong>健康面で配慮すべき事項</strong></label>
+            {{ form.health_notes }}
+            <small style="color: #666;">※持病、通院、光過敏性発作のリスクなどがあれば記載してください。</small>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label><strong>その他・自由記述</strong></label>
+            {{ form.free_notes }}
+        </div>
+
+        <div style="margin-top: 30px; margin-bottom: 50px;">
+            <button type="submit" class="btn-submit">変更を確定する</button>
+            <a href="{% url 'team_shouronpou:post_list' %}" class="btn-cancel">キャンセル</a>
+        </div>
+    </form>
+
+    <script src="{% static 'team_shouronpou/js/main.js' %}"></script>
+    <script src="{% static 'team_shouronpou/js/schedule_editor.js' %}"></script>
+</body>
+</html>

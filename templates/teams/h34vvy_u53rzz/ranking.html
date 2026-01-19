@@ -1,0 +1,192 @@
+{% extends 'teams/h34vvy_u53rzz/base.html' %}
+{% load h34vvy_tags %}
+
+{% block content %}
+<div class="px-5 py-8 space-y-6 pb-28">
+  <!-- My Status Hero Section -->
+  {% for item in user_rankings %}
+    {% if item.account.id == current_user_id %}
+    <div class="mb-2 flex justify-end px-2">
+      <a href="{% url 'h34vvy_u53rzz:logout' %}" 
+         class="inline-flex items-center gap-1.5 rounded-full bg-slate-200 pl-4 pr-5 py-2 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-300 hover:text-slate-800">
+        <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor">
+            <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/>
+        </svg>
+        ログアウト
+      </a>
+    </div>
+
+    <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-600 to-purple-700 p-6 text-white shadow-2xl shadow-indigo-200">
+        <!-- Decorative bg -->
+        <div class="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-white/10 blur-2xl"></div>
+        <div class="absolute -left-6 -bottom-6 h-32 w-32 rounded-full bg-indigo-500/30 blur-2xl"></div>
+        
+        <div class="relative z-10 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 text-2xl font-bold backdrop-blur-md ring-1 ring-white/30">
+                    {{ item.account.username|slice:":1" }}
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold tracking-tight">{{ item.account.username }}</h2>
+                    <div class="mt-1 flex items-center gap-2">
+                         {% if item.account.laboratory %}
+                         <span class="inline-flex items-center rounded-md bg-white/10 px-2 py-0.5 text-xs font-medium text-white ring-1 ring-white/20">
+                             {{ item.account.lab_label }}
+                         </span>
+                         {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="text-xs font-bold uppercase tracking-wider text-indigo-200">Rank</div>
+                <div class="text-3xl font-black leading-none tracking-tighter">
+                   <span class="text-4xl text-yellow-300">#</span>{{ item.rank }}
+                </div>
+                <div class="mt-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold backdrop-blur-sm">
+                    {{ item.account.points }} <span class="text-indigo-200 text-[10px] font-medium">pts</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+  {% empty %}
+     <!-- Fallback if no user rankings yet -->
+     <div class="rounded-3xl bg-slate-100 p-6 text-center text-slate-500">
+        <p>ランキングデータがありません</p>
+        <div class="mt-4">
+             <a href="{% url 'h34vvy_u53rzz:logout' %}" class="text-sm font-bold text-indigo-600 hover:underline">ログアウト</a>
+        </div>
+     </div>
+  {% endfor %}
+
+  <div class="space-y-4">
+    <!-- Modern Segmented Control (JS controlled) -->
+    <div class="flex p-1 bg-slate-200/50 rounded-2xl backdrop-blur-sm">
+      <button onclick="switchRankingTab('user')" id="tab-btn-user"
+        class="flex-1 py-2.5 text-center text-sm font-bold transition-all rounded-xl bg-white text-indigo-600 shadow-sm">
+        個人
+      </button>
+      <button onclick="switchRankingTab('lab')" id="tab-btn-lab"
+        class="flex-1 py-2.5 text-center text-sm font-bold text-slate-500 transition-all rounded-xl hover:text-indigo-500">
+        研究室
+      </button>
+    </div>
+
+    <!-- User Ranking Table -->
+    <div id="ranking-content-user" class="animate-fade-in-up">
+      <div class="overflow-hidden rounded-3xl bg-white shadow-xl shadow-slate-200/50 ring-1 ring-slate-100">
+        <table class="min-w-full divide-y divide-slate-100 text-sm">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400">#</th>
+              <th class="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400">User</th>
+              <th class="px-5 py-4 text-right text-xs font-bold uppercase tracking-wider text-slate-400">Pts</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            {% for item in user_rankings %}
+            {% with account=item.account rank=item.rank %}
+            <tr class="transition hover:bg-slate-50 {% if account.id == current_user_id %}bg-indigo-50/60{% endif %}">
+              <td class="px-5 py-4 font-bold {% if rank <= 3 %}text-2xl{% else %}text-slate-500{% endif %}">
+                {% if rank == 1 %}🥇{% elif rank == 2 %}🥈{% elif rank == 3 %}🥉{% else %}{{ rank }}{% endif %}
+              </td>
+              <td class="px-5 py-4">
+                <div class="font-bold text-slate-800">{{ account.username }}</div>
+                {% if account.laboratory %}
+                <div class="mt-0.5 inline-block rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+                  {{ account.lab_label }}
+                </div>
+                {% endif %}
+              </td>
+              <td class="px-5 py-4 text-right">
+                <span class="font-black text-slate-700">
+                  {{ account.points }}
+                </span>
+              </td>
+            </tr>
+            {% endwith %}
+            {% empty %}
+            <tr>
+              <td colspan="3" class="px-5 py-8 text-center text-slate-400 text-xs font-medium">
+                まだランキング対象がいません
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Laboratory Ranking Table -->
+    <div id="ranking-content-lab" class="hidden animate-fade-in-up">
+        <div class="overflow-hidden rounded-3xl bg-white shadow-xl shadow-slate-200/50 ring-1 ring-slate-100">
+            <table class="min-w-full divide-y divide-slate-100 text-sm">
+                <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400">#</th>
+                    <th class="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-400">Lab</th>
+                    <th class="px-5 py-4 text-right text-xs font-bold uppercase tracking-wider text-slate-400">Total</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                {% for item in lab_rankings %}
+                <tr class="transition hover:bg-slate-50">
+                    <td class="px-5 py-4 font-bold {% if item.rank <= 3 %}text-2xl{% else %}text-slate-500{% endif %}">
+                     {% if item.rank == 1 %}🥇{% elif item.rank == 2 %}🥈{% elif item.rank == 3 %}🥉{% else %}{{ item.rank }}{% endif %}
+                    </td>
+                    <td class="px-5 py-4 font-bold text-slate-800">
+                    {{ item.lab.name }}
+                    </td>
+                    <td class="px-5 py-4 text-right">
+                        <span class="font-black text-purple-700">
+                            {{ item.points }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="px-5 py-8 text-center text-slate-400 text-xs font-medium">
+                    まだランキング対象がいません
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchRankingTab(tab) {
+    const userBtn = document.getElementById('tab-btn-user');
+    const labBtn = document.getElementById('tab-btn-lab');
+    const userContent = document.getElementById('ranking-content-user');
+    const labContent = document.getElementById('ranking-content-lab');
+
+    // Define style classes for active/inactive states
+    const activeClasses = ['bg-white', 'text-indigo-600', 'shadow-sm'];
+    const inactiveClasses = ['text-slate-500', 'hover:text-indigo-500'];
+
+    if (tab === 'user') {
+        // Activate User
+        userBtn.classList.add(...activeClasses);
+        userBtn.classList.remove(...inactiveClasses);
+        labBtn.classList.remove(...activeClasses);
+        labBtn.classList.add(...inactiveClasses);
+        
+        userContent.classList.remove('hidden');
+        labContent.classList.add('hidden');
+    } else {
+        // Activate Lab
+        labBtn.classList.add(...activeClasses);
+        labBtn.classList.remove(...inactiveClasses);
+        userBtn.classList.remove(...activeClasses);
+        userBtn.classList.add(...inactiveClasses);
+
+        labContent.classList.remove('hidden');
+        userContent.classList.add('hidden');
+    }
+}
+</script>
+{% endblock %}

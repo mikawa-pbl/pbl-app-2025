@@ -1,13 +1,20 @@
 # routers.py （プロジェクト直下）
 class TeamPerAppRouter:
-    """
-    team_a アプリは team_a DB、team_b アプリは team_b DB へルーティングする。
+    """team_a アプリは team_a DB、team_b アプリは team_b DB へルーティングする。
     それ以外は default。
     """
 
     app_to_db = {
-        "team_a": "team_a",
-        "team_b": "team_b",
+        'team_USL': 'team_USL',
+        'team_kitajaki': 'team_kitajaki',
+        'agileca': 'agileca',
+        'team_scim': 'team_scim',
+        'team_empiricism': 'team_empiricism', # 追加
+        'ssk': 'ssk',
+        'team_tansaibou': 'team_tansaibou',
+        'shiokara': 'shiokara',
+        'mori_doragon_yuhi_machi': 'mori_doragon_yuhi_machi',
+        'team_northcliff': 'team_northcliff',
         "team_TMR": "team_TMR",  # ← 追加
         "graphics": "graphics",
         "team_terrace": "team_terrace",
@@ -17,9 +24,11 @@ class TeamPerAppRouter:
         "team_TeXTeX": "team_TeXTeX",
         "team_cake": "team_cake",
         "team_shouronpou": "team_shouronpou",
-        # 'team_b': 'team_b',
+        'Catan': 'Catan',
         'takenoko': 'takenoko',
         "h34vvy_u53rzz": "h34vvy_u53rzz",
+        'team_giryulink': 'team_giryulink',
+        'teachers': 'teachers',
     }
 
     def db_for_read(self, model, **hints):

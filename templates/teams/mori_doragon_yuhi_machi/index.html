@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>imadokoda!</title>
+    <style>
+        /* 全体のフォント設定 */
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        /* リンクのスタイル */
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* メンバーリスト全体のスタイル */
+        .member-list {
+            list-style-type: none; /* ・を消す */
+            padding: 0;
+            max-width: 600px; /* 幅制限 */
+        }
+
+        /* リストアイテム（1行ごとの枠） */
+        .member-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px; /* 角丸 */
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* うっすら影 */
+        }
+
+        /* 写真と名前をまとめるエリア */
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* 写真と名前の間隔 */
+            flex-grow: 1; /* 余白を埋める */
+        }
+
+        /* 顔写真のスタイル */
+        .member-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%; /* 丸くする */
+            object-fit: cover;  /* 枠に合わせてトリミング */
+            border: 1px solid #ccc;
+        }
+
+        /* 写真がない場合のデフォルトアイコン */
+        .default-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #eee;
+            display: flex;       /* 中身を中央揃え */
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #888;
+            border: 1px solid #ccc;
+        }
+
+        /* メンバー名のスタイル */
+        .member-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* プルダウンのスタイル */
+        select {
+            font-size: 1em;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+        select:hover {
+            background-color: #e9e9e9;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>♨いまどこだ！表 スーパーベジータ版</h1>
+    <p>現在のメンバーの居場所です。プルダウンを変更すると即時更新されます。</p>
+
+    <p>
+        <a href="{% url 'mori_doragon_yuhi_machi:add_place' %}">📍 場所を追加</a> | 
+        <a href="{% url 'mori_doragon_yuhi_machi:add_member' %}">👤 メンバーを追加</a>
+    </p>
+
+    <hr>
+
+    {% load static %}
+
+    <h2>現在の状況</h2>
+
+    <ul class="member-list">
+        
+        {% for member in all_members %}
+        
+        <li>
+            <form action="{% url 'mori_doragon_yuhi_machi:update_location' %}" method="POST" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                
+                {% csrf_token %}
+                
+                <input type="hidden" name="member_id" value="{{ member.id }}">
+
+                <div class="member-info">
+                    
+                    {% if member.photo %}
+                        <img src="{{ member.photo.url }}" alt="{{ member.name }}" class="member-photo">
+                    
+                    {% else %}
+                        <div class="default-icon">👤</div>
+                    {% endif %}
+
+                    <label for="place-select-{{ member.id }}" class="member-name">
+                        {{ member.name }}
+                    </label>
+                </div>
+                <select name="place_id" id="place-select-{{ member.id }}" onchange="this.form.submit()">
+                    
+                    <option value="" {% if member.current_place is None %}selected{% endif %}>
+                        （未設定）
+                    </option> 
+
+                    {% for place in all_places %}
+                        <option 
+                            value="{{ place.id }}" 
+                            {% if member.current_place == place %}selected{% endif %}
+                        >
+                            {{ place.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                </form>
+        </li>
+        
+        {% empty %}
+            <p>メンバーがまだ登録されていません。「メンバーを追加」から登録してください。</p>
+        {% endfor %}
+
+    </ul>
+
+</body>
+</html>

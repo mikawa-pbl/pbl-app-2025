@@ -1,0 +1,93 @@
+{% extends "teams/team_akb5/base.html" %}
+{% load tz %}
+
+{% block title %}ネットワーク状況一覧 - User{% endblock %}
+
+{% block content %}
+
+
+<h1>ネットワーク状況一覧</h1>
+<div id="map" style="height: 400px; margin-bottom: 20px;"></div>
+<p>
+    <a href="{% url 'team_akb5:status_report_form' %}" role="button">＋ 新規投稿する</a>
+</p>
+
+<hr>
+
+<table>
+    <thead>
+        <tr>
+            <th>発生時刻</th>
+            <th>階</th>
+            <th>症状</th>
+            <th>詳細</th>
+            <th>投稿日時</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for report in reports %}
+        <tr>
+            <td>{{ report.timestamp|timezone:"Asia/Tokyo"|date:"Y/m/d H:i" }}</td>
+            <td>{{ report.floor }}階</td>
+            <td>{{ report.get_symptom_display }}</td>
+            <td>{{ report.description|linebreaksbr }}</td>
+            <td>{{ report.created_at|timezone:"Asia/Tokyo"|date:"Y/m/d H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">現在、報告はありません。</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Map coordinates
+        const lat1 = 34.70315;
+        const lon1 = 137.40365;
+        const lat2 = 34.70047;
+        const lon2 = 137.41189;
+
+        // Initialize map and set bounds
+        const map = L.map('map').fitBounds([
+            [lat1, lon1],
+            [lat2, lon2]
+        ]);
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // GeoJSON data from Django context
+        const reportsData = {{ reports_geojson| safe}};
+
+    // Add markers to the map
+    L.geoJSON(reportsData, {
+        onEachFeature: function (feature, layer) {
+            if (feature.properties) {
+                let popupContent = ``;
+                if (feature.properties.symptom) {
+                    popupContent += `<strong>症状:</strong> ${feature.properties.symptom}<br>`;
+                }
+                if (feature.properties.floor) {
+                    popupContent += `<strong>階:</strong> ${feature.properties.floor}階<br>`;
+                }
+                if (feature.properties.description) {
+                    popupContent += `<strong>詳細:</strong> ${feature.properties.description}<br>`;
+                }
+                if (feature.properties.timestamp) {
+                    const date = new Date(feature.properties.timestamp);
+                    popupContent += `<strong>発生時刻:</strong> ${date.toLocaleString('ja-JP')}`;
+                }
+                layer.bindPopup(popupContent);
+            }
+        }
+    }).addTo(map);
+    });
+</script>
+{% endblock %}

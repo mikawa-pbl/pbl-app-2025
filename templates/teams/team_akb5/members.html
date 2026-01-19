@@ -1,21 +1,15 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% extends "teams/team_akb5/base.html" %}
 
-<head>
-  <meta charset="UTF-8">
-  <title>Team AKB5 Members</title>
-</head>
+{% block title %}Team AKB5 Members{% endblock %}
 
-<body>
-  <h1>Team AKB5 Members</h1>
-  <ul>
-    {% for member in members %}
-    <li>{{ member.last_name }} {{ member.first_name }}</li>
-    {% empty %}
-    <li>データがありません</li>
-    {% endfor %}
-  </ul>
-  <p><a href="/team_akb5/">Team AKB5 トップへ</a></p>
-</body>
+{% block content %}
+    <h1>Team AKB5 Members</h1>
+    <ul>
+      {% for member in members %}
+      <li>{{ member.last_name }} {{ member.first_name }}</li>
+      {% empty %}
+      <li>データがありません</li>
+      {% endfor %}
+    </ul>
+{% endblock %}
 
-</html>

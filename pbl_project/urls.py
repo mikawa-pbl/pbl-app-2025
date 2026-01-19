@@ -14,23 +14,45 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include,path
+from django.conf import settings
+from django.conf.urls.static import static
+from django.shortcuts import redirect
 from . import views
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("", views.index, name="index"),
+    path('admin/', admin.site.urls),
+    path('', views.index, name="index"),
+    path('team_USL/', include('team_USL.urls')),
+    path('team_terrace/', include('team_terrace.urls')),
+    path('team_kitajaki/', include('team_kitajaki.urls')),
+    path('agileca/', include('agileca.urls')),
+    path('team_scim/', include('team_scim.urls')),
+    path('team_empiricism/', include('team_empiricism.urls')), # 追加
+    path('ssk/', include('ssk.urls')),
+    path('Catan/', include('Catan.urls')),
+    path('team_tansaibou/', include('team_tansaibou.urls')),
+    path('shiokara/', include('shiokara.urls')),
+    path('mori_doragon_yuhi_machi/', include('mori_doragon_yuhi_machi.urls')),  # ← 追加
+    path('team_northcliff/', include('team_northcliff.urls')),
     path("nanakorobiyaoki/", include("nanakorobiyaoki.urls")),  # ← 追加
     path("team_TMR/", include("team_TMR.urls")),
     path("graphics/", include("graphics.urls")),
-    path("team_terrace/", include("team_terrace.urls")),
     path("team_UD/", include("team_UD.urls")),
     path("team_akb5/", include("team_akb5.urls")),
     path("team_TeXTeX/", include("team_TeXTeX.urls")),
     path("team_cake/", include("team_cake.urls")),
     path("team_shouronpou/", include("team_shouronpou.urls")),
     path("h34vvy_u53rzz/", include("h34vvy_u53rzz.urls")),
+    path('team_giryulink/', include('team_giryulink.urls')),
     path('takenoko/', include('takenoko.urls')), 
+    path('teachers/', include('teachers.urls')),
+    path("", lambda request: redirect("team_giryulink:index")),
+    path("admin/", admin.site.urls),
+    path("team_giryulink/", include("team_giryulink.urls")),
 ]
+
+# Serve media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

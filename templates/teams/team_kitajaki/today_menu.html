@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>今日の喫茶メニュー（team_kitajaki）</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 16px 80px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 24px;
+    }
+    .today-date {
+      font-size: 1.1rem;
+      color: #444;
+      margin-bottom: 24px;
+    }
+    .today-menu-card {
+      display: inline-block;
+      padding: 24px 40px;
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 48px;
+    }
+    .today-label {
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .today-menu-text {
+      font-size: 2rem;   /* ← 大きく */
+      font-weight: bold;
+    }
+
+    .week-block {
+      margin-top: 40px;
+    }
+    .week-title {
+      margin-bottom: 16px;
+    }
+    .week-table {
+      margin: 0 auto;
+      border-collapse: collapse;
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border-radius: 12px;
+      overflow: hidden;
+      min-width: 70%;
+    }
+    .week-table th,
+    .week-table td {
+      border-bottom: 1px solid #eee;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+    }
+    .week-table th {
+      background: #fafafa;
+    }
+    .week-table tr:last-child td {
+      border-bottom: none;
+    }
+    .back-link {
+      margin-top: 32px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <h1>今日の喫茶メニュー</h1>
+
+    {% if error_message %}
+      <p style="color:red;">{{ error_message }}</p>
+    {% endif %}
+
+    {% if today_date %}
+      <p class="today-date">
+        今日は {{ today_date|date:"n月j日" }}（{{ weekday_char }}）です。
+      </p>
+    {% endif %}
+
+    {% if menu_lines %}
+      <a href="{% url 'team_kitajaki:rate_menu' %}" style="text-decoration: none; color: inherit;">
+        <div class="today-menu-card">
+          <div class="today-label">本日のメニュー</div>
+          <div class="today-menu-text">
+            {% for line in menu_lines %}
+              {{ line }}{% if not forloop.last %}<br>{% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </a>
+      
+      {% if average_scores %}
+        <div class="score-block" style="margin-top: -30px; margin-bottom: 50px;">
+          <h2 style="font-size: 1.1rem; color: #444;">みんなの評価（{{ average_scores.count }}件）上をクリックで評価</h2>
+          <p style="font-size: 1.2rem; font-weight: bold; color: #333;">
+            味: <span style="color: #d9534f;">{{ average_scores.avg_taste }}</span>/5点
+            |
+            量: <span style="color: #5cb85c;">{{ average_scores.avg_volume }}</span>/5点
+          </p>
+        </div>
+      {% else %}
+        <p style="margin-top: -30px; margin-bottom: 50px; color: #888;">このメニューの評価はまだありません。クリックして最初の評価をしてみましょう！</p>
+      {% endif %}
+      {% else %}
+      <p>本日のメニューはPDFから取得できませんでした。</p>
+    {% endif %}
+
+    <div class="week-block">
+      <h2 class="week-title">今週のメニュー</h2>
+
+      {% if week_menus %}
+        <table class="week-table">
+          <thead>
+            <tr>
+              <th>日付</th>
+              <th>メニュー</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in week_menus %}
+              <tr>
+                <td>{{ item.date|date:"n月j日" }}（{{ item.weekday_char }}）</td>
+                <td>
+                  {% if item.menu %}
+                    {{ item.menu }}
+                  {% else %}
+                    メニューなし / 未掲載
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>今週のメニュー情報は取得できませんでした。</p>
+      {% endif %}
+    </div>
+
+    <p class="back-link">
+      <a href="{% url 'team_kitajaki:index' %}">トップに戻る</a>
+    </p>
+    <p style="text-align: center; margin: 20px 0;">
+      <a href="{% url 'team_kitajaki:menu_ranking' %}" style="display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">
+          🏆 人気メニューランキングを見る
+      </a>
+    </p>
+  </div>
+</body>
+</html>

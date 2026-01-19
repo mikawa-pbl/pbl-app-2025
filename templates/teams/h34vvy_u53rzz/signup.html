@@ -1,0 +1,34 @@
+{% extends 'teams/h34vvy_u53rzz/base.html' %}
+
+{% block content %}
+<div class="flex min-h-[80vh] flex-col justify-center px-4 py-6">
+  <div class="mx-auto w-full max-w-sm space-y-8">
+    <div class="text-center">
+      <p class="text-xs font-bold uppercase tracking-widest text-indigo-500">
+        Start Rescue
+      </p>
+      <h1 class="mt-2 text-3xl font-black text-slate-900 tracking-tight">
+        <span class="bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">Sign Up</span>
+      </h1>
+    </div>
+
+    <div class="rounded-3xl bg-white/80 p-8 shadow-2xl shadow-purple-100/50 backdrop-blur-xl ring-1 ring-white/60">
+      <form method="post" class="space-y-6">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}" />
+        {{ form.as_div }}
+        
+        <button type="submit"
+          class="flex w-full justify-center rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 px-3 py-3 text-sm font-bold text-white shadow-lg shadow-purple-200 transition-all hover:scale-[1.02] hover:shadow-purple-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600">
+          登録する
+        </button>
+      </form>
+    </div>
+    
+    <p class="text-center text-sm font-medium text-slate-500">
+        すでにアカウントをお持ちですか？
+        <a href="{% url 'h34vvy_u53rzz:login' %}" class="text-purple-600 hover:text-purple-500 hover:underline">ログイン</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

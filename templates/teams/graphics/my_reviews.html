@@ -1,0 +1,537 @@
+{% load tz %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マイレビュー - TUT 参考書レビューシステム</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --secondary-hover: #475569;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            background-color: var(--light-bg);
+        }
+        /* ヘッダー */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+        }
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        /* ハンバーガーメニュー */
+        .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            z-index: 1000;
+        }
+        .hamburger span {
+            width: 30px;
+            height: 3px;
+            background-color: white;
+            transition: all 0.3s;
+        }
+        /* メニュー */
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: white;
+            transition: right 0.3s ease;
+            z-index: 1002;
+            padding-top: 60px;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+        }
+        .nav-menu.active {
+            right: 0;
+        }
+        .nav-menu ul {
+            list-style: none;
+        }
+        .nav-menu li {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .nav-menu a {
+            display: block;
+            padding: 18px 30px;
+            color: #1e293b;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .nav-menu a:hover {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+            padding-left: 35px;
+        }
+        /* オーバーレイ */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+        .overlay.active {
+            display: block;
+        }
+        /* コンテナ */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            padding-top: 100px;
+        }
+        h2 {
+            color: #0f172a;
+            margin-bottom: 30px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .user-info {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(37, 99, 235, 0.2);
+        }
+        .user-info p {
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+        }
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        .review-card {
+            background: white;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        .review-card.book-review {
+            border-left-color: #10b981;
+            display: flex;
+            gap: 20px;
+        }
+        .book-cover-small {
+            flex-shrink: 0;
+        }
+        .book-cover-small img {
+            max-width: 80px;
+            max-height: 112px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .book-review-content {
+            flex-grow: 1;
+        }
+        .review-card:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+        .review-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        .review-card.book-review h3 {
+            color: #10b981;
+        }
+        .review-meta {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 15px;
+            {% comment %} display: grid;
+            gap: 8px; {% endcomment %}
+            line-height: 1.6;
+        }
+        .review-meta strong {
+            color: #334155;
+            font-weight: 600;
+        }
+        .review-text {
+            line-height: 1.8;
+            color: #475569;
+            font-size: 15px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            color: var(--primary-hover);
+            transform: translateX(-3px);
+        }
+        .no-reviews {
+            padding: 40px 20px;
+            text-align: center;
+            color: #64748b;
+            background: white;
+            border-radius: 8px;
+            border: 2px dashed var(--border-color);
+            font-size: 16px;
+        }
+        .messages {
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+            font-weight: 500;
+        }
+        .success {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border-left-color: #10b981;
+        }
+        .review-count {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .review-count p {
+            color: #334155;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+        .review-count span {
+            color: var(--primary-color);
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .edit-button {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .edit-button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+        /* 星評価スタイル */
+        .star-rating {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .star-filled {
+            color: #FFA500;
+        }
+        .star-half {
+            position: relative;
+            display: inline-block;
+            color: #cbd5e1;
+        }
+        .star-half::before {
+            content: '★';
+            position: absolute;
+            left: 0;
+            width: 50%;
+            overflow: hidden;
+            color: #FFA500;
+        }
+        .star-empty {
+            color: #cbd5e1;
+        }
+        /* ページネーション */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        .pagination a, .pagination span {
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #334155;
+            transition: all 0.2s;
+            min-width: 40px;
+            text-align: center;
+        }
+        .pagination a:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        .pagination .current {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        .pagination .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header>
+        <h1>TUT 参考書レビューシステム</h1>
+        <button class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <!-- ナビゲーションメニュー -->
+    <nav class="nav-menu" id="navMenu">
+        <ul>
+            <li><a href="{% url 'graphics:index' %}" onclick="toggleMenu()">ホーム</a></li>
+            <li><a href="{% url 'graphics:my_reviews' %}" onclick="toggleMenu()">マイレビュー</a></li>
+            <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
+            <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
+            <li><a href="{% url 'graphics:logout' %}" onclick="toggleMenu()">ログアウト</a></li>
+        </ul>
+    </nav>
+
+    <!-- オーバーレイ -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="container">
+        <h2>マイレビュー</h2>
+
+        <div class="user-info">
+            <p>{{ request.session.graphics_user_nickname }} さんの投稿レビュー</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="messages {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="review-count">
+            <p>合計投稿数: <span>{{ book_reviews_count|add:subject_reviews_count }}</span>件 (科目レビュー: {{ subject_reviews_count }}件、書籍レビュー: {{ book_reviews_count }}件)</p>
+        </div>
+
+        <!-- 科目レビューセクション -->
+        <h3 class="section-title">🎓 科目レビュー ({{ subject_reviews_count }}件)</h3>
+        {% timezone "Asia/Tokyo" %}
+        {% if subject_reviews %}
+            {% for review in subject_reviews %}
+                <div class="review-card">
+                    <h3>🎓 {{ review.course_offering.subject.name }}</h3>
+                    <div class="review-meta">
+                        <strong>年度:</strong> {{ review.course_offering.year }}年度<br>
+                        <strong>開講学期:</strong> {{ review.course_offering.semester }}<br>
+                        <strong>担当教員:</strong> {% for teacher in review.course_offering.teachers.all %}{{ teacher.name }}{% if not forloop.last %}, {% endif %}{% endfor %}<br>
+                        <strong>おすすめ度:</strong>
+                        <span class="star-rating">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}
+                                    <span class="star-filled">★</span>
+                                {% else %}
+                                    <span class="star-empty">☆</span>
+                                {% endif %}
+                            {% endfor %}
+                        </span>
+                        ({{ review.rating }}/5)<br>
+                        <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }} (JST)
+                    </div>
+                    <div class="review-text">
+                        {{ review.review|linebreaks }}
+                    </div>
+                    <a href="{% url 'graphics:edit_subject_review' review.id %}" class="edit-button">✏️ 編集</a>
+                </div>
+            {% endfor %}
+
+            {% if subject_reviews.has_other_pages %}
+            <div class="pagination">
+                {% if subject_reviews.has_previous %}
+                    <a href="?subject_page=1&book_page={{ request.GET.book_page|default:1 }}">≪ 最初</a>
+                    <a href="?subject_page={{ subject_reviews.previous_page_number }}&book_page={{ request.GET.book_page|default:1 }}">‹ 前へ</a>
+                {% else %}
+                    <span class="disabled">≪ 最初</span>
+                    <span class="disabled">‹ 前へ</span>
+                {% endif %}
+
+                {% for num in subject_reviews.paginator.page_range %}
+                    {% if num == subject_reviews.number %}
+                        <span class="current">{{ num }}</span>
+                    {% elif num > subject_reviews.number|add:'-3' and num < subject_reviews.number|add:'3' %}
+                        <a href="?subject_page={{ num }}&book_page={{ request.GET.book_page|default:1 }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if subject_reviews.has_next %}
+                    <a href="?subject_page={{ subject_reviews.next_page_number }}&book_page={{ request.GET.book_page|default:1 }}">次へ ›</a>
+                    <a href="?subject_page={{ subject_reviews.paginator.num_pages }}&book_page={{ request.GET.book_page|default:1 }}">最後 ≫</a>
+                {% else %}
+                    <span class="disabled">次へ ›</span>
+                    <span class="disabled">最後 ≫</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="no-reviews">
+                まだ科目レビューを投稿していません。
+            </div>
+        {% endif %}
+        {% endtimezone %}
+
+        <!-- 書籍レビューセクション -->
+        <h3 class="section-title">📚 書籍レビュー ({{ book_reviews_count }}件)</h3>
+        {% timezone "Asia/Tokyo" %}
+        {% if book_reviews %}
+            {% for review in book_reviews %}
+                <div class="review-card book-review">
+                    {% if review.book.cover_image_url %}
+                    <div class="book-cover-small">
+                        <img src="{{ review.book.cover_image_url }}" alt="{{ review.book.title }}">
+                    </div>
+                    {% endif %}
+                    <div class="book-review-content">
+                        <h3>📚 {{ review.subject }}</h3>
+                        <div class="review-meta">
+                            <strong>書籍タイトル:</strong> {{ review.book.title|default:"情報なし" }}<br>
+                            <strong>著者:</strong> {{ review.book.author|default:"情報なし" }}<br>
+                            <strong>発行日:</strong> {{ review.book.publication_date|default:"情報なし" }}<br>
+                            <strong>ISBN:</strong> {{ review.isbn|default:"なし" }}<br>
+                            <strong>おすすめ度:</strong>
+                            <span class="star-rating">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <span class="star-filled">★</span>
+                                    {% else %}
+                                        <span class="star-empty">☆</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </span> ({{ review.rating }}/5)<br>
+                            <strong>投稿日:</strong> {{ review.created_at|date:"Y年m月d日 H:i" }} (JST)
+                        </div>
+                        <div class="review-text">
+                            {{ review.review|linebreaks }}
+                        </div>
+                        <a href="{% url 'graphics:edit_book_review' review.id %}" class="edit-button">✏️ 編集</a>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% if book_reviews.has_other_pages %}
+            <div class="pagination">
+                {% if book_reviews.has_previous %}
+                    <a href="?book_page=1&subject_page={{ request.GET.subject_page|default:1 }}">≪ 最初</a>
+                    <a href="?book_page={{ book_reviews.previous_page_number }}&subject_page={{ request.GET.subject_page|default:1 }}">‹ 前へ</a>
+                {% else %}
+                    <span class="disabled">≪ 最初</span>
+                    <span class="disabled">‹ 前へ</span>
+                {% endif %}
+
+                {% for num in book_reviews.paginator.page_range %}
+                    {% if num == book_reviews.number %}
+                        <span class="current">{{ num }}</span>
+                    {% elif num > book_reviews.number|add:'-3' and num < book_reviews.number|add:'3' %}
+                        <a href="?book_page={{ num }}&subject_page={{ request.GET.subject_page|default:1 }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if book_reviews.has_next %}
+                    <a href="?book_page={{ book_reviews.next_page_number }}&subject_page={{ request.GET.subject_page|default:1 }}">次へ ›</a>
+                    <a href="?book_page={{ book_reviews.paginator.num_pages }}&subject_page={{ request.GET.subject_page|default:1 }}">最後 ≫</a>
+                {% else %}
+                    <span class="disabled">次へ ›</span>
+                    <span class="disabled">最後 ≫</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="no-reviews">
+                まだ書籍レビューを投稿していません。
+            </div>
+        {% endif %}
+        {% endtimezone %}
+
+        <a href="{% url 'graphics:index' %}">← ホームに戻る</a>
+        <br>
+        <a href="{% url 'graphics:add_book_review' %}" style="margin-top: 10px; display: inline-block;">レビューを投稿する →</a>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const overlay = document.getElementById('overlay');
+            navMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

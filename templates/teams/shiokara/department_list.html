@@ -1,0 +1,560 @@
+﻿{# templates/shiokara/department_list.html #}
+{% extends "teams/shiokara/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" with active_page='department_list' %}
+
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
+        <header class="tut-page-header">
+            <div class="tut-logo-box">
+                <img src="{% static 'image/mark_gikanavi.png' %}"
+                     alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
+            </div>
+            <div class="tut-page-title">
+                <h1>学科別 企業一覧</h1>
+                <p class="tut-page-lead">
+                    学科ごとに、インターン・見学・共同研究などを受け入れている企業を一覧できます。
+                </p>
+            </div>
+        </header>
+
+    <section class="tut-search-section">
+        <h2>企業をキーワードで探す</h2>
+        <form method="get" action="{% url 'shiokara:company_search' %}">
+            <div class="tut-search-group">
+                <span class="tut-search-icon">🔍</span>
+                <input type="text" name="q" placeholder="企業名・キーワード検索"
+                       aria-label="企業名・キーワード検索">
+                <button type="submit">検索</button>
+            </div>
+            <p class="tut-search-hint">
+                例：<span class="tut-chip">Web</span>
+                <span class="tut-chip">製造</span>
+                <span class="tut-chip">AI</span>
+            </p>
+            <p class="tut-search-link">
+                くわしい条件で探す場合は、
+                <a href="{% url 'shiokara:company_search' %}">
+                    企業検索ページ
+                </a>
+                へ
+            </p>
+        </form>
+    </section>
+
+        <section class="tut-dept-section">
+            <h2>学科から探す</h2>
+
+            {% if departments %}
+            <div class="tut-dept-grid">
+                {% for dept in departments %}
+                <a class="tut-dept-card" data-dept="{{ dept.short_name }}"
+                   href="{% url 'shiokara:company_search' %}?dept={{ dept.short_name }}">
+                    <div class="tut-dept-accent">
+                        <span class="bar-red"></span>
+                        <span class="bar-black"></span>
+                    </div>
+                    <div class="tut-dept-body">
+                        <div class="tut-dept-header">
+                            <span class="tut-dept-name">{{ dept.name }}</span>
+                            <span class="tut-dept-count">{{ dept.companies.count }} 社</span>
+                        </div>
+                        <p class="tut-dept-meta">
+                            学科コード: {{ dept.short_name }}
+                        </p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="tut-empty">学科が登録されていません。</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+
+{# --- 豊橋技科大ロゴの色に合わせた簡易スタイル --- #}
+<style>
+    :root {
+        /* ロゴの色に近い色 */
+        --tut-red:   #CC0000;
+        --tut-black: #000000;
+        --tut-gray:  #42413F;
+        --tut-light: #F5F5F5;
+        --white:     #FFFFFF;
+    }
+
+    .tut-page-header {
+        background-color: var(--white);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 16px;
+        padding-bottom: 16px;
+        border-bottom: 3px solid var(--tut-red);
+        margin-bottom: 20px;
+    }
+
+    .tut-logo-box {
+        flex: 0 0 auto;
+        /* ヘッダー内で右側に寄せる */
+        order: 2;
+        margin-left: auto;
+    }
+
+    /* タイトルは先に来るようにしておく */
+    .tut-page-title {
+        order: 1;
+    }
+
+    .tut-logo-img {
+        max-height: 56px;
+        width: auto;
+        display: block;
+    }
+
+    .tut-page-title h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--tut-black);
+    }
+
+    .tut-page-lead {
+        margin: 4px 0 0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .tut-search-section {
+        background-color: var(--tut-light);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+    }
+
+    .tut-search-section h2 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+        color: var(--tut-black);
+    }
+
+    .tut-search-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .tut-search-icon {
+        font-size: 1rem;
+    }
+
+    .tut-search-group input[type="text"] {
+        flex: 1;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid #cfd3d3;
+        font-size: 0.95rem;
+        outline: none;
+    }
+
+    .tut-search-group input[type="text"]:focus {
+        border-color: var(--tut-red);
+        box-shadow: 0 0 0 1px rgba(203, 0, 0, 0.2);
+    }
+
+    .tut-search-group button {
+        border: none;
+        border-radius: 999px;
+        padding: 8px 18px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        background-color: var(--tut-red);
+        color: #fff;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .tut-search-group button:hover {
+        background-color: #a50000;
+    }
+
+    .tut-search-hint {
+        margin: 8px 0 0;
+        font-size: 0.8rem;
+    }
+
+    .tut-chip {
+        display: inline-block;
+        padding: 2px 8px;
+        margin-right: 4px;
+        border-radius: 999px;
+        border: 1px solid #d3d6d6;
+        background-color: #fff;
+        font-size: 0.75rem;
+    }
+
+    .tut-search-link {
+        margin: 4px 0 0;
+        font-size: 0.8rem;
+    }
+
+    .tut-dept-section h2 {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+        color: var(--tut-black);
+    }
+
+    .tut-dept-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    .tut-dept-card {
+        position: relative;
+        display: flex;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 10px;
+        border: 1px solid #e3e5e5;
+        background-color: #fff;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        transition:
+            transform 0.15s ease,
+            box-shadow 0.15s ease,
+            border-color 0.15s ease;
+    }
+
+    .tut-dept-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        border-color: var(--tut-red);
+    }
+
+    /* ロゴの T っぽいアクセント */
+    .tut-dept-accent {
+        display: flex;
+        flex-direction: column;
+        width: 10px;
+        flex-shrink: 0;
+    }
+
+    .tut-dept-accent .bar-red {
+        flex: 1;
+        background-color: var(--tut-red);
+    }
+
+    .tut-dept-accent .bar-black {
+        flex: 1;
+        background-color: var(--tut-black);
+    }
+
+    .tut-dept-body {
+        padding: 12px 14px;
+        flex: 1;
+    }
+
+    .tut-dept-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+
+    .tut-dept-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .tut-dept-count {
+        font-size: 0.8rem;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background-color: #fbe9e9;
+        color: var(--tut-red);
+    }
+
+    .tut-dept-meta {
+        margin: 0;
+        margin-top: 4px;
+        font-size: 0.8rem;
+        color: #757b7b;
+    }
+
+    .tut-empty {
+        margin-top: 8px;
+        color: #777;
+    }
+
+    @media (max-width: 640px) {
+        .tut-page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .tut-logo-img {
+            max-height: 44px;
+        }
+        .tut-page-title h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+<!-- Tutorial overlay and controls -->
+<div id="tut-overlay" aria-hidden="true"></div>
+<div id="tut-tooltip" aria-hidden="true" role="dialog" aria-label="チュートリアル説明">
+    <div id="tut-tooltip-content"></div>
+    <div id="tut-tooltip-controls">
+        <button id="tut-prev" type="button">戻る</button>
+        <button id="tut-next" type="button">次へ</button>
+        <button id="tut-close" type="button">閉じる</button>
+    </div>
+</div>
+
+<button id="tut-start-btn" aria-label="チュートリアルを開始">チュートリアル</button>
+
+<style>
+    /* Overlay + controls */
+    #tut-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.55);
+        z-index: 9998;
+        display: none;
+    }
+
+    .tut-highlight {
+        position: relative;
+        z-index: 9999 !important;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 6px rgba(255,255,255,0.05) inset;
+        transform: translateZ(0) scale(1.02);
+        transition: box-shadow 180ms ease, transform 180ms ease;
+        outline: 3px solid rgba(203,0,0,0.95);
+        border-radius: 8px;
+    }
+
+    #tut-tooltip {
+        position: fixed;
+        z-index: 10000;
+        max-width: 320px;
+        background: #fff;
+        color: #222;
+        border-radius: 8px;
+        box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+        padding: 12px;
+        display: none;
+        font-size: 0.95rem;
+    }
+
+    #tut-tooltip #tut-tooltip-controls {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 8px;
+    }
+
+    #tut-tooltip button {
+        background: #f3f3f3;
+        border: 1px solid #ddd;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    #tut-start-btn {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 10001;
+        background: linear-gradient(180deg,var(--tut-red),#b00000);
+        color: #fff;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    @media (max-width:640px) {
+        #tut-tooltip { max-width: 260px; font-size: 0.9rem; }
+        #tut-start-btn { right: 12px; bottom: 12px; }
+    }
+</style>
+
+<script>
+    (function(){
+        const steps = [
+            {
+                sel: '.tut-search-group input[type="text"]',
+                title: '検索ボックス',
+                body: 'ここに企業名やキーワードを入力して、企業を検索できます。'
+            },
+            {
+                sel: '.tut-search-group button[type="submit"]',
+                title: '検索ボタン',
+                body: '検索ボタンを押すとキーワードで企業一覧を絞り込みます。'
+            },
+            {
+                sel: '.tut-dept-card:first-of-type',
+                title: '学科カード',
+                body: '学科カードをクリックすると、その学科に関連する企業一覧が見れます。'
+            },
+            {
+                sel: '.tut-page-title h1',
+                title: 'ページの説明',
+                body: 'このページは学科ごとに企業を一覧表示します。まずは検索を試してみましょう。'
+            }
+        ];
+
+        let idx = 0;
+        const overlay = document.getElementById('tut-overlay');
+        const tooltip = document.getElementById('tut-tooltip');
+        const tooltipContent = document.getElementById('tut-tooltip-content');
+        const btnPrev = document.getElementById('tut-prev');
+        const btnNext = document.getElementById('tut-next');
+        const btnClose = document.getElementById('tut-close');
+        const startBtn = document.getElementById('tut-start-btn');
+        const TUTORIAL_SEEN_URL = "{% url 'shiokara:tutorial_seen' %}?type=dept";
+        const AUTO_START = {{ auto_start_tutorial|yesno:"true,false" }};
+
+        function getCookie(name) {
+            const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+            return v ? v.pop() : '';
+        }
+
+        function markSeen(){
+            // send POST to server to mark tutorial seen; ignore failures
+            try{
+                fetch(TUTORIAL_SEEN_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({ seen: true }),
+                    credentials: 'same-origin',
+                }).catch(()=>{});
+            }catch(e){}
+        }
+
+        function showStep(i){
+            // clear previous
+            document.querySelectorAll('.tut-highlight').forEach(el=>el.classList.remove('tut-highlight'));
+            tooltip.style.display = 'none';
+            overlay.style.display = 'block';
+
+            const step = steps[i];
+            if(!step) { endTutorial(); return; }
+            const target = document.querySelector(step.sel);
+            tooltipContent.innerHTML = '<strong>'+step.title+'</strong><div style="margin-top:6px;">'+step.body+'</div>';
+
+            if(target){
+                // highlight target
+                target.classList.add('tut-highlight');
+
+                // position tooltip near target
+                const r = target.getBoundingClientRect();
+                const tt = tooltip;
+                // 赤枠の下に25pxずらして表示
+                const margin = 25;
+                let top = window.scrollY + r.bottom + margin;
+                let left = window.scrollX + r.left;
+                // keep inside viewport
+                left = Math.min(Math.max(left, 8 + window.scrollX), window.scrollX + document.documentElement.clientWidth - tt.offsetWidth - 8);
+
+                tt.style.top = top + 'px';
+                tt.style.left = left + 'px';
+                tt.style.display = 'block';
+
+                // focus first interactive element in tooltip for accessibility
+                btnNext.focus();
+            } else {
+                // if target missing, show centered tooltip
+                const tt = tooltip;
+                tt.style.top = (window.scrollY + window.innerHeight/2 - 80) + 'px';
+                tt.style.left = (window.scrollX + (window.innerWidth - tt.offsetWidth)/2) + 'px';
+                tt.style.display = 'block';
+            }
+
+            // update control visibility
+            btnPrev.disabled = (i===0);
+            btnNext.textContent = (i === steps.length -1) ? '完了' : '次へ';
+            idx = i;
+        }
+
+        function nextStep(){
+            if(idx < steps.length -1) showStep(idx+1);
+            else endTutorial();
+        }
+        function prevStep(){ if(idx>0) showStep(idx-1); }
+
+        function startTutorial(){
+            // small delay to allow layout to settle
+            showStep(0);
+            overlay.style.display = 'block';
+            document.body.classList.add('tut-in-progress');
+        }
+
+        function endTutorial(){
+            overlay.style.display = 'none';
+            tooltip.style.display = 'none';
+            document.querySelectorAll('.tut-highlight').forEach(el=>el.classList.remove('tut-highlight'));
+            document.body.classList.remove('tut-in-progress');
+            // mark seen for logged-in users (server will reject if not authenticated)
+            markSeen();
+        }
+
+        // wire events
+        btnNext.addEventListener('click', nextStep);
+        btnPrev.addEventListener('click', prevStep);
+        btnClose.addEventListener('click', endTutorial);
+        overlay.addEventListener('click', ()=>{ /* click overlay to close */ endTutorial(); });
+        startBtn.addEventListener('click', startTutorial);
+
+        // keyboard support
+        document.addEventListener('keydown', (ev)=>{
+            if(!document.body.classList.contains('tut-in-progress')) return;
+            if(ev.key === 'Escape') endTutorial();
+            if(ev.key === 'ArrowRight' || ev.key === 'Enter') nextStep();
+            if(ev.key === 'ArrowLeft') prevStep();
+        });
+
+        // auto-start for new users
+        if(AUTO_START){
+            // small timeout to allow layout and fonts to settle
+            setTimeout(()=>{ startTutorial(); }, 200);
+        }
+
+        // expose start for developers
+        window.__tut_start = startTutorial;
+    })();
+
+    // 学科カードクリック時に初回訪問フラグをセット
+    document.addEventListener('DOMContentLoaded', function(){
+        const deptCards = document.querySelectorAll('.tut-dept-card');
+        deptCards.forEach(card => {
+            card.addEventListener('click', function(e){
+                // セッションに first_visit_search フラグをセット後にリダイレクト
+                const dept = this.dataset.dept;
+                if(dept){
+                    // JavaScriptでセッション設定はできないので、リンク先に first_visit_search パラメータを付加
+                    const url = new URL(this.href, window.location.origin);
+                    url.searchParams.set('first_visit', '1');
+                    window.location.href = url.toString();
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

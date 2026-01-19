@@ -1,0 +1,207 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <!-- ✅ ここ修正：wght@500;700&display=swap -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      /** @type {import('tailwindcss').Config} */
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              accent: "var(--accent)",
+              "background-color": "var(--background-color)",
+              "m3syslighton-surface-variant":
+                "var(--m3syslighton-surface-variant)",
+              primary: "var(--primary)",
+              similar: "var(--similar)",
+            },
+            fontFamily: {
+              jp: ["Noto Sans JP", "sans-serif"],
+            },
+          },
+        },
+        plugins: [],
+      };
+    </script>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Noto Sans JP", sans-serif;
+        background-color: #fbfef9;
+      }
+
+      /* 戻るボタン */
+      .back-btn {
+        position: fixed;
+        top: 128px;
+        left: 32px;
+        font-size: 48px;
+        color: #649ce4;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        z-index: 9999;
+      }
+      .back-btn:focus {
+        outline: none;
+      }
+      .add-btn {
+        border: none;
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
+      }
+
+      /* 全体コンテナ */
+      .page {
+        width: min(1120px, calc(100% - 64px));
+        margin: 64px auto;
+        position: relative;
+      }
+
+      /* ✅ 出品した商品のタイトルラベル */
+      .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 24px 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .page-title::before {
+        content: "";
+        display: inline-block;
+        width: 10px;
+        height: 28px;
+        border-radius: 999px;
+        background: #649ce4;
+      }
+
+      /* グリッド */
+      .items-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 32px;
+      }
+
+      /* カードをリンクにしたときの見た目 */
+      .card-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 32px; /* item_card側に合わせてる想定 */
+      }
+      .card-link:focus-visible {
+        outline: 3px solid rgba(100, 156, 228, 0.5);
+        outline-offset: 4px;
+      }
+      .card-link:hover {
+        transform: translateY(-2px);
+        transition: transform 120ms ease;
+      }
+
+      /* ===========================
+         右下の追加ボタン
+      ============================*/
+      .fab {
+        position: fixed;
+        bottom: 64px;
+        right: 64px;
+      }
+
+      .fab i {
+        font-size: 96px;
+        color: #f96796;
+      }
+
+      /* レスポンシブ */
+      @media (max-width: 1200px) {
+        .items-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (max-width: 900px) {
+        .items-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 560px) {
+        .items-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+    <script>
+      function goBack() {
+        if (window.history.length > 1) {
+          history.back();
+        } else if (document.referrer) {
+          window.location.href = document.referrer;
+        } else {
+          window.location.href = "/"; // 仮
+        }
+      }
+    </script>
+  </head>
+
+  <body class="font-jp">
+    {% include "teams/takenoko/Components/header.html" %}
+
+    <!-- 戻る -->
+    <button type="button" class="back-btn" onclick="goBack()" aria-label="戻る">
+      <i class="fas fa-arrow-alt-circle-left"></i>
+    </button>
+
+    <main class="page">
+      <!-- ✅ 出品した商品のタイトルラベル -->
+      <h1 class="page-title">出品した商品</h1>
+
+      <!-- 商品一覧 -->
+      <div class="items-grid">
+        {% for item in items %}
+        <a
+          class="card-link"
+          href="{% url 'takenoko:item_delete' %}?id={{ item.pk }}"
+        >
+          {% include "teams/takenoko/Components/item_card.html" %}
+        </a>
+        {% empty %}
+        <p
+          style="
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 32px;
+            color: #999;
+          "
+        >
+          まだ商品を出品していません
+        </p>
+        {% endfor %}
+      </div>
+    </main>
+
+    <!-- 追加 -->
+    <div class="fab">
+      <a href="{% url 'takenoko:item_create' %}">
+        <i class="fas fa-plus-circle"></i>
+      </a>
+    </div>
+  </body>
+</html>

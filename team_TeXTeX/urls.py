@@ -5,4 +5,7 @@ app_name = "team_TeXTeX"
 urlpatterns = [
     path('', views.index, name='index'),
     path('members/', views.members, name='members'),
+    path('main/', views.main, name='main'),
+    path('temp/', views.temp, name='temp'),
+    path('main/<str:select>', views.main_select),
 ]

@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>PBL 就活サイト</title>
+  <style>
+    {% include "teams/shiokara/includes/sidebar_styles.css" %}
+  </style>
+</head>
+
+<body style="margin:0; padding-top:50px; background-image: url('{% static 'image/background_gikanavi.png' %}'); background-size: cover; background-repeat: no-repeat; background-position: center center; background-attachment: fixed;">
+  <!-- ▼ ヘッダー（左上に人アイコン） -->
+  <header
+    style="
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:5px 16px;
+      border-bottom:15px solid #cc0000;
+      background-color:#f5f7f7;
+      z-index:1000;
+    "
+  >
+    <!-- 左側：サービス名（クリックでホームへ） -->
+    <div>
+      <a href="{% url 'shiokara:department_list' %}" style="text-decoration:none;">
+        <img src="{% static 'image/mark_gikanavi_nocp.png' %}" alt="PBL 就活サイト" style="height:32px; object-fit:contain;" />
+      </a>
+    </div>
+
+    <!-- 右側：人アイコン＋ログイン系 -->
+    <div style="display:flex; align-items:center; gap:8px;">
+        {% if person %}
+        <!-- ログイン中：アイコン＋学籍番号（マイページへのリンク）＋ポイント -->
+        <a href="{% url 'shiokara:my_page' %}" style="display:flex; align-items:center; text-decoration:none; gap:6px;">
+          {% if person.icon_picture %}
+            <img
+              src="{% static person.icon_picture %}"
+              alt="マイページ"
+              style="width:32px; height:32px; object-fit:cover; border-radius:50%; border:2px solid #cc0000;"
+            />
+          {% else %}
+            <img
+              src="{% static 'image/person.png' %}"
+              alt="マイページ"
+              style="width:24px; height:24px; object-fit:cover;"
+            />
+          {% endif %}
+          <span>{% if person.nickname %}{{ person.nickname }}{% else %}{{ person.student_id }}{% endif %} さん</span>
+          <span style="background:#f0f4f8;padding:4px 8px;border-radius:12px;font-size:0.85rem;color:#333;border:1px solid #e0e6eb;">{{ person.points }} pt</span>
+        </a>
+        <a href="{% url 'shiokara:logout' %}" style="font-size:0.9rem; margin-left:8px;">
+          ログアウト
+        </a>
+      {% else %}
+        <!-- 未ログイン：アイコン＋「ログイン」リンク -->
+        <a href="{% url 'shiokara:login' %}" style="display:flex; align-items:center; text-decoration:none;">
+          <img
+            src="{% static 'image/person.png' %}"
+            alt="ログイン"
+            style="width:24px; height:24px; object-fit:cover; margin-right:4px;"
+          />
+          <span>ログイン</span>
+        </a>
+      {% endif %}
+    </div>
+    
+  </header>
+
+  <!-- ▼ 各ページごとの中身 -->
+  {% block content %}{% endblock %}
+
+  <!-- 体験談ポップアップ（共通） -->
+  <div id="experience-modal"
+       style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.3);">
+    <div style="background:#fff; max-width:500px; margin:80px auto; padding:16px; border:1px solid #ccc;">
+      <h2>体験談を投稿</h2>
+      <p>企業名：<span id="experience-modal-company-name"></span></p>
+      <p>※ 今は見た目だけで、保存処理はまだ実装していません。</p>
+      <p>
+        <textarea id="experience-modal-text" rows="5" style="width:100%;"></textarea>
+      </p>
+      <p style="text-align:right;">
+        <button type="button" id="experience-modal-close">閉じる</button>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var modal = document.getElementById('experience-modal');
+      var companyNameEl = document.getElementById('experience-modal-company-name');
+      var closeBtn = document.getElementById('experience-modal-close');
+
+      function openModal(companyId, companyName) {
+        companyNameEl.textContent = companyName;
+        // companyId は今は使っていないが、将来POSTするとき用に残しておいてOK
+        modal.style.display = 'block';
+      }
+
+      function closeModal() {
+        modal.style.display = 'none';
+      }
+
+      // 閉じるボタン
+      closeBtn.addEventListener('click', closeModal);
+
+      // 背景クリックでも閉じる
+      modal.addEventListener('click', function (event) {
+        if (event.target === modal) {
+          closeModal();
+        }
+      });
+
+      // Escキーで閉じる
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && modal.style.display === 'block') {
+          closeModal();
+        }
+      });
+
+      // 各ページ内の「体験談ポップアップ起動ボタン」にイベントを付ける
+      var buttons = document.querySelectorAll('[data-open-experience-modal]');
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var companyId = btn.getAttribute('data-company-id');
+          var companyName = btn.getAttribute('data-company-name');
+          openModal(companyId, companyName);
+        });
+      });
+    });
+  </script>
+
+  <script>
+    // ブラウザの戻る/進むキャッシュから復帰したときに古い表示が出る問題を防ぐ
+    // pageshow の persisted が true ならページが bfcache から復帰しているためリロードする
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    });
+  </script>
+
+  <!-- テトリス用の外部JSを読み込む -->
+  <script src="{% static 'js/tetris.js' %}"></script>
+
+</body>
+
+</html>

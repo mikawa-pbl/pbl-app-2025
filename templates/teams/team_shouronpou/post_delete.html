@@ -1,0 +1,17 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>削除</title>
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/style.css' %}">
+</head>
+<body class="auth-page"> <h2>投稿の削除</h2>
+    <p>「{{ post.title }}」を本当に削除しますか？</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn-danger">はい、削除します</button>
+      <a href="{% url 'team_shouronpou:post_detail' post.pk %}" class="btn-cancel">キャンセル</a>
+    </form>
+</body>
+</html>

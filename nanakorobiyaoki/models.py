@@ -101,3 +101,13 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.author.name}"
+
+class Message(models.Model):
+    sender = models.ForeignKey(MyPage, on_delete=models.CASCADE, related_name='sent_messages', verbose_name="送信者")
+    receiver = models.ForeignKey(MyPage, on_delete=models.CASCADE, related_name='received_messages', verbose_name="受信者")
+    content = models.TextField(verbose_name="内容")
+    timestamp = models.DateTimeField(auto_now_add=True, verbose_name="送信日時")
+    is_read = models.BooleanField(default=False, verbose_name="既読")
+
+    def __str__(self):
+        return f"Message from {self.sender.name} to {self.receiver.name}"

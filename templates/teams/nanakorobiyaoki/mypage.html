@@ -102,8 +102,34 @@
             color: var(--primary-color);
         }
 
+        .nav-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .nav-link .material-icons-round {
             font-size: 24px;
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background-color: #1d9bf0;
+            /* Twitter Blue */
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid #fff;
+            line-height: 1;
+            min-width: 18px;
+            text-align: center;
+            z-index: 10;
         }
 
         .main-content {
@@ -276,6 +302,42 @@
                 margin-left: 0;
             }
         }
+
+        /* Sidebar Extra Styles */
+        .sidebar-section-title {
+            font-size: 0.8rem;
+            color: #999;
+            margin: 20px 0 10px 10px;
+            font-weight: 700;
+        }
+
+        .mini-community-list {
+            list-style: none;
+        }
+
+        .mini-community-item a {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            gap: 10px;
+        }
+
+        .mini-community-item a:hover {
+            background: #f5f5f5;
+        }
+
+        .mini-icon {
+            width: 24px;
+            height: 24px;
+            background: #ddd;
+            border-radius: 50%;
+            display: block;
+            object-fit: cover;
+        }
     </style>
 </head>
 
@@ -297,11 +359,42 @@
                     <span class="material-icons-round">grid_view</span> コミュニティを探す
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:message_inbox' %}" class="nav-link">
+                    <div class="nav-icon-wrapper">
+                        <span class="material-icons-round">mail_outline</span>
+                        {% if unread_messages_count > 0 %}
+                        <span class="notification-badge">{{ unread_messages_count }}</span>
+                        {% endif %}
+                    </div>
+                    メッセージ
+                </a>
+            </li>
+
             <li class="nav-item">
                 <a href="{% url 'nanakorobiyaoki:user_profile' request.session.user_id %}" class="nav-link active">
                     <span class="material-icons-round">person</span> プロフィール
                 </a>
             </li>
+
+            <div class="sidebar-section-title">参加中のコミュニティ</div>
+            <ul class="mini-community-list">
+                {% for community in joined_communities %}
+                <li class="mini-community-item">
+                    <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}">
+                        {% if community.image %}
+                        <img src="{{ community.image.url }}" class="mini-icon" alt="">
+                        {% else %}
+                        <span class="mini-icon" style="background: #e0e0e0;"></span>
+                        {% endif %}
+                        {{ community.name }}
+                    </a>
+                </li>
+                {% empty %}
+                <li class="mini-community-item"><a href="#">なし</a></li>
+                {% endfor %}
+            </ul>
         </ul>
     </nav>
 
@@ -334,6 +427,13 @@
                         <!-- 自分のプロフィールの場合のみ編集ボタンを表示 -->
                         <a href="{% url 'nanakorobiyaoki:user_profile_edit' user.user_id %}"
                             class="edit-btn">プロフィールを編集</a>
+                        {% else %}
+                        <!-- 他人のプロフィールの場合はメッセージボタンを表示 -->
+                        <a href="{% url 'nanakorobiyaoki:chat_room' user.user_id %}" class="edit-btn"
+                            style="background: var(--primary-color); color: white; border: none; display: inline-flex; align-items: center; gap: 5px;">
+                            <span class="material-icons-round" style="font-size: 18px;">mail_outline</span>
+                            メッセージ
+                        </a>
                         {% endif %}
                     </div>
 

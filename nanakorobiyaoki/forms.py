@@ -1,5 +1,5 @@
 from django import forms
-from .models import MyPage
+from .models import MyPage, Community, Post, Comment, Message
 
 class UserRegisterForm(forms.ModelForm):
     class Meta:
@@ -44,8 +44,6 @@ class LoginForm(forms.Form):
     user_id = forms.CharField(label='学籍番号', max_length=100)
     password = forms.CharField(label='パスワード', widget=forms.PasswordInput)
 
-from .models import Community, Post, Comment
-
 class CommunityForm(forms.ModelForm):
     class Meta:
         model = Community
@@ -61,3 +59,10 @@ class CommentForm(forms.ModelForm):
         model = Comment
         fields = ['content']
 
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 3, 'placeholder': 'メッセージを入力...'})
+        }

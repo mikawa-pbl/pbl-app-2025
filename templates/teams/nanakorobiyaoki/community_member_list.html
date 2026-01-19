@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>コミュニティを探す - TUT Connect</title>
+    <title>{{ community.name }} のメンバー - TUT Connect</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -102,29 +102,8 @@
             color: var(--primary-color);
         }
 
-        .nav-icon-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -8px;
-            background-color: #1d9bf0;
-            /* Twitter Blue */
-            color: white;
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 10px;
-            border: 2px solid #fff;
-            line-height: 1;
-            min-width: 18px;
-            text-align: center;
-            z-index: 10;
+        .nav-link .material-icons-round {
+            font-size: 24px;
         }
 
         .main-content {
@@ -174,132 +153,99 @@
 
         .content-body {
             padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
         }
 
         .page-title {
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .page-subtitle {
             color: #666;
             font-size: 0.9rem;
-            margin-bottom: 30px;
         }
 
-        /* Grid & Cards */
-        .grid {
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #666;
+            text-decoration: none;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            color: var(--primary-color);
+        }
+
+        .member-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
 
-        .card {
+        .member-card {
             background: #fff;
             border-radius: var(--border-radius);
             box-shadow: var(--card-shadow);
-            padding: 24px;
+            padding: 20px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            gap: 15px;
             transition: transform 0.2s;
+            text-decoration: none;
+            color: inherit;
         }
 
-        .card:hover {
+        .member-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
-        .card-header {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            gap: 15px;
-        }
-
-        .card-icon {
-            width: 48px;
-            height: 48px;
-            background: #e3f2fd;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: #1565c0;
-            flex-shrink: 0;
+        .member-avatar {
+            width: 50px;
+            height: 50px;
+            background: #eee;
+            border-radius: 50%;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
-        .card-icon img {
+        .member-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        .card-info {
+        .member-info {
             flex: 1;
+            min-width: 0;
         }
 
-        .card-title {
-            font-size: 1.1rem;
+        .member-name {
             font-weight: 700;
-            margin-bottom: 4px;
-            color: #333;
-        }
-
-        .card-desc {
-            font-size: 0.85rem;
-            color: #666;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+            font-size: 1rem;
+            margin-bottom: 2px;
+            white-space: nowrap;
             overflow: hidden;
-            margin-top: 5px;
+            text-overflow: ellipsis;
         }
 
-        .card-footer {
-            margin-top: auto;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .member-count {
-            font-size: 0.85rem;
+        .member-id {
             color: #888;
-        }
-
-        .go-btn {
-            text-decoration: none;
-            color: var(--primary-color);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .create-btn-fixed {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--primary-color);
-            color: white;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);
-            text-decoration: none;
-            transition: transform 0.2s;
-            z-index: 200;
-        }
-
-        .create-btn-fixed:hover {
-            transform: scale(1.05);
+            font-size: 0.85rem;
         }
 
         @media (max-width: 768px) {
@@ -367,20 +313,16 @@
                 <a href="{% url 'nanakorobiyaoki:community_list' %}" class="nav-link active">
                     <span class="material-icons-round">grid_view</span> コミュニティを探す
                 </a>
+                <!-- Sub menu for current context -->
+                <ul style="padding-left: 40px; margin-top: 5px; list-style: none;">
+                    <li style="margin-bottom: 5px;">
+                        <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}"
+                            style="color: var(--primary-color); font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+                            {{ community.name }}
+                        </a>
+                    </li>
+                </ul>
             </li>
-
-            <li class="nav-item">
-                <a href="{% url 'nanakorobiyaoki:message_inbox' %}" class="nav-link">
-                    <div class="nav-icon-wrapper">
-                        <span class="material-icons-round">mail_outline</span>
-                        {% if unread_messages_count > 0 %}
-                        <span class="notification-badge">{{ unread_messages_count }}</span>
-                        {% endif %}
-                    </div>
-                    メッセージ
-                </a>
-            </li>
-
             <li class="nav-item">
                 <a href="{% url 'nanakorobiyaoki:user_profile' request.session.user_id %}" class="nav-link">
                     <span class="material-icons-round">person</span> プロフィール
@@ -407,56 +349,48 @@
         </ul>
     </nav>
 
-    <!-- Main -->
     <main class="main-content">
         <header class="header">
             <div class="search-bar">
                 <span class="material-icons-round">search</span>
-                <input type="text" placeholder="コミュニティを検索">
+                <input type="text" placeholder="メンバーを検索">
             </div>
             <div class="header-actions">
+                <a href="{% url 'nanakorobiyaoki:logout' %}"
+                    style="font-size: 0.8rem; color: #666; text-decoration: none;">ログアウト</a>
             </div>
         </header>
 
         <div class="content-body">
-            <h1 class="page-title">コミュニティを探す</h1>
-            <p class="page-subtitle">興味のあるコミュニティを見つけて参加しましょう</p>
+            <div class="page-header">
+                <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}" class="back-link">
+                    <span class="material-icons-round" style="font-size: 16px;">arrow_back</span> コミュニティに戻る
+                </a>
+                <h1 class="page-title">メンバー一覧</h1>
+                <p class="page-subtitle">{{ community.name }} に参加しているメンバー ({{ members.count }}名)</p>
+            </div>
 
-            <div class="grid">
-                {% for community in communities %}
-                <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}" class="card"
-                    style="text-decoration: none; color: inherit; display: flex;">
-                    <div class="card-header">
-                        <div class="card-icon">
-                            {% if community.image %}
-                            <img src="{{ community.image.url }}" alt="">
-                            {% else %}
-                            <span class="material-icons-round">groups</span>
-                            {% endif %}
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">{{ community.name }}</div>
-                            <div class="card-desc">{{ community.description|default:"説明はありません" }}</div>
-                        </div>
+            <div class="member-list">
+                {% for member in members %}
+                <a href="{% url 'nanakorobiyaoki:user_profile' member.user_id %}" class="member-card">
+                    <div class="member-avatar">
+                        {% if member.icon %}
+                        <img src="{{ member.icon.url }}" alt="">
+                        {% else %}
+                        <img src="https://via.placeholder.com/50" alt="">
+                        {% endif %}
                     </div>
-                    <div class="card-footer">
-                        <span class="member-count">{{ community.members.count }} メンバー</span>
-                        <span class="go-btn">詳細を見る</span>
+                    <div class="member-info">
+                        <div class="member-name">{{ member.name }}</div>
+                        <div class="member-id">@{{ member.user_id }}</div>
                     </div>
                 </a>
                 {% empty %}
-                <div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 40px;">
-                    コミュニティが見つかりませんでした。
-                </div>
+                <div style="color: #999;">メンバーはいません。</div>
                 {% endfor %}
             </div>
         </div>
     </main>
-
-    <!-- FAB for Creating Community -->
-    <a href="{% url 'nanakorobiyaoki:community_create' %}" class="create-btn-fixed" title="コミュニティを作成">
-        <span class="material-icons-round" style="font-size: 28px;">add</span>
-    </a>
 </body>
 
 </html>

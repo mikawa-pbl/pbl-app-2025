@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>コミュニティを探す - TUT Connect</title>
+    <title>{{ partner.name }} とのチャット - TUT Connect</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -36,7 +36,7 @@
             min-height: 100vh;
         }
 
-        /* Sidebar & Layout */
+        /* Sidebar */
         .sidebar {
             width: var(--sidebar-width);
             background-color: #fff;
@@ -109,6 +109,11 @@
             justify-content: center;
         }
 
+        .nav-link .material-icons-round {
+            font-size: 24px;
+            position: relative;
+        }
+
         .notification-badge {
             position: absolute;
             top: -5px;
@@ -127,192 +132,6 @@
             z-index: 10;
         }
 
-        .main-content {
-            margin-left: var(--sidebar-width);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            height: var(--header-height);
-            background: #fff;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 40px;
-            position: sticky;
-            top: 0;
-            z-index: 90;
-        }
-
-        .search-bar {
-            background: #f5f7fa;
-            border-radius: 20px;
-            padding: 8px 20px;
-            display: flex;
-            align-items: center;
-            width: 400px;
-            gap: 10px;
-            color: #999;
-        }
-
-        .search-bar input {
-            border: none;
-            background: transparent;
-            outline: none;
-            flex: 1;
-            font-size: 0.95rem;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .content-body {
-            padding: 40px;
-        }
-
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .page-subtitle {
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 30px;
-        }
-
-        /* Grid & Cards */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
-        }
-
-        .card {
-            background: #fff;
-            border-radius: var(--border-radius);
-            box-shadow: var(--card-shadow);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            gap: 15px;
-        }
-
-        .card-icon {
-            width: 48px;
-            height: 48px;
-            background: #e3f2fd;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: #1565c0;
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-
-        .card-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .card-info {
-            flex: 1;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-            color: #333;
-        }
-
-        .card-desc {
-            font-size: 0.85rem;
-            color: #666;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            margin-top: 5px;
-        }
-
-        .card-footer {
-            margin-top: auto;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .member-count {
-            font-size: 0.85rem;
-            color: #888;
-        }
-
-        .go-btn {
-            text-decoration: none;
-            color: var(--primary-color);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .create-btn-fixed {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--primary-color);
-            color: white;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);
-            text-decoration: none;
-            transition: transform 0.2s;
-            z-index: 200;
-        }
-
-        .create-btn-fixed:hover {
-            transform: scale(1.05);
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                display: none;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-        }
-
-        /* Sidebar Extra Styles */
         .sidebar-section-title {
             font-size: 0.8rem;
             color: #999;
@@ -347,16 +166,161 @@
             display: block;
             object-fit: cover;
         }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            height: var(--header-height);
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            gap: 15px;
+        }
+
+        .partner-avatar-small {
+            width: 32px;
+            height: 32px;
+            background: #ddd;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .partner-avatar-small img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Chat Area */
+        .chat-container {
+            flex: 1;
+            padding: 20px 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #fff;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .message-sent {
+            align-self: flex-end;
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-received {
+            align-self: flex-start;
+            background-color: #f0f2f5;
+            color: var(--text-main);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            margin-top: 4px;
+            opacity: 0.7;
+            display: block;
+        }
+
+        .message-sent .message-time {
+            text-align: right;
+            color: #eee;
+        }
+
+        /* Input Area */
+        .chat-input-area {
+            padding: 20px 40px;
+            background: #fff;
+            border-top: 1px solid #eee;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .chat-form textarea {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 12px 20px;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            font-size: 0.95rem;
+            background: #f8f9fa;
+        }
+
+        .chat-form textarea:focus {
+            border-color: var(--primary-color);
+            background: #fff;
+        }
+
+        .send-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+            margin-bottom: 2px;
+        }
+
+        .send-btn:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
 
 <body>
+
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="logo">
             <div class="logo-icon">T</div>
             TUT Connect
         </div>
+
         <ul class="nav-menu">
             <li class="nav-item">
                 <a href="{% url 'nanakorobiyaoki:home' %}" class="nav-link">
@@ -364,11 +328,10 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{% url 'nanakorobiyaoki:community_list' %}" class="nav-link active">
+                <a href="{% url 'nanakorobiyaoki:community_list' %}" class="nav-link">
                     <span class="material-icons-round">grid_view</span> コミュニティを探す
                 </a>
             </li>
-
             <li class="nav-item">
                 <a href="{% url 'nanakorobiyaoki:message_inbox' %}" class="nav-link">
                     <div class="nav-icon-wrapper">
@@ -380,7 +343,6 @@
                     メッセージ
                 </a>
             </li>
-
             <li class="nav-item">
                 <a href="{% url 'nanakorobiyaoki:user_profile' request.session.user_id %}" class="nav-link">
                     <span class="material-icons-round">person</span> プロフィール
@@ -407,56 +369,75 @@
         </ul>
     </nav>
 
-    <!-- Main -->
+    <!-- Main Content -->
     <main class="main-content">
         <header class="header">
-            <div class="search-bar">
-                <span class="material-icons-round">search</span>
-                <input type="text" placeholder="コミュニティを検索">
+            <a href="{% url 'nanakorobiyaoki:message_inbox' %}"
+                style="color: #666; text-decoration: none; display: flex; align-items: center;">
+                <span class="material-icons-round">arrow_back</span>
+            </a>
+            <div class="partner-avatar-small">
+                {% if partner.icon %}
+                <img src="{{ partner.icon.url }}" alt="">
+                {% else %}
+                <img src="https://via.placeholder.com/32" alt="">
+                {% endif %}
             </div>
-            <div class="header-actions">
-            </div>
+            <div style="font-weight: 700; flex: 1;">{{ partner.name }}</div>
+            <div style="font-size: 0.85rem; color: #888;">@{{ partner.user_id }}</div>
         </header>
 
-        <div class="content-body">
-            <h1 class="page-title">コミュニティを探す</h1>
-            <p class="page-subtitle">興味のあるコミュニティを見つけて参加しましょう</p>
-
-            <div class="grid">
-                {% for community in communities %}
-                <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}" class="card"
-                    style="text-decoration: none; color: inherit; display: flex;">
-                    <div class="card-header">
-                        <div class="card-icon">
-                            {% if community.image %}
-                            <img src="{{ community.image.url }}" alt="">
-                            {% else %}
-                            <span class="material-icons-round">groups</span>
-                            {% endif %}
-                        </div>
-                        <div class="card-info">
-                            <div class="card-title">{{ community.name }}</div>
-                            <div class="card-desc">{{ community.description|default:"説明はありません" }}</div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <span class="member-count">{{ community.members.count }} メンバー</span>
-                        <span class="go-btn">詳細を見る</span>
-                    </div>
-                </a>
-                {% empty %}
-                <div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 40px;">
-                    コミュニティが見つかりませんでした。
-                </div>
-                {% endfor %}
+        <div class="chat-container" id="chatContainer">
+            {% for message in messages %}
+            <div
+                class="message-bubble {% if message.sender.user_id == request.session.user_id %}message-sent{% else %}message-received{% endif %}">
+                {{ message.content|linebreaksbr }}
+                <span class="message-time">{{ message.timestamp|date:"H:i" }}</span>
             </div>
+            {% empty %}
+            <div style="text-align: center; color: #999; margin-top: 50px;">
+                まだメッセージはありません。挨拶してみましょう！
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="chat-input-area">
+            <form action="" method="post" class="chat-form">
+                {% csrf_token %}
+                <textarea name="content" rows="1" id="chatInput" placeholder="メッセージを入力..."></textarea>
+                <button type="submit" class="send-btn">
+                    <span class="material-icons-round">send</span>
+                </button>
+            </form>
         </div>
     </main>
 
-    <!-- FAB for Creating Community -->
-    <a href="{% url 'nanakorobiyaoki:community_create' %}" class="create-btn-fixed" title="コミュニティを作成">
-        <span class="material-icons-round" style="font-size: 28px;">add</span>
-    </a>
+    <script>
+        // Scroll to bottom of chat
+        const chatContainer = document.getElementById('chatContainer');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        // Auto-expand textarea
+        const textarea = document.getElementById('chatInput');
+        textarea.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if (this.scrollHeight > 200) {
+                this.style.overflowY = 'scroll';
+                this.style.height = '200px';
+            } else {
+                this.style.overflowY = 'hidden';
+            }
+        });
+
+        // Submit on Enter (Shift+Enter for newline)
+        textarea.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                this.form.submit();
+            }
+        });
+    </script>
 </body>
 
 </html>

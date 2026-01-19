@@ -417,6 +417,7 @@ def product_add(request):
         try:
             name = request.POST.get('name')
             current_price = request.POST.get('current_price')
+            cost_price = request.POST.get('cost_price', 0)
             stock = request.POST.get('stock', 0)
             description = request.POST.get('description', '')
             is_active = request.POST.get('is_active') == 'on'
@@ -424,6 +425,7 @@ def product_add(request):
             Product.objects.using(DB).create(
                 name=name,
                 current_price=current_price,
+                cost_price=cost_price,
                 stock=stock,
                 description=description,
                 is_active=is_active,
@@ -453,6 +455,7 @@ def product_edit(request, product_id):
         try:
             product.name = request.POST.get('name')
             product.current_price = request.POST.get('current_price')
+            product.cost_price = request.POST.get('cost_price', 0)
             product.stock = request.POST.get('stock')
             product.description = request.POST.get('description', '')
             product.is_active = request.POST.get('is_active') == 'on'

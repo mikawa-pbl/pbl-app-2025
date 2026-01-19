@@ -21,7 +21,7 @@
             <!-- ヘッダー -->
             <div class="flex justify-between items-start mb-4">
                 <h3 class="text-lg font-bold text-gray-900">{{ product_set.name }}</h3>
-                <span class="text-xl font-bold text-purple-600">¥{{ product_set.price|floatformat:0 }}</span>
+                <span class="text-xl font-bold text-blue-700">¥{{ product_set.price|floatformat:0 }}</span>
             </div>
 
             <!-- ステータスバッジ -->
@@ -44,7 +44,7 @@
             </div>
 
             {% if product_set.description %}
-            <p class="text-gray-500 text-sm mb-4">{{ product_set.description }}</p>
+            <p class="text-gray-600 text-sm mb-4">{{ product_set.description }}</p>
             {% endif %}
 
             <!-- セット内容 -->

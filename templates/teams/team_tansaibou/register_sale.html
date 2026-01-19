@@ -1,596 +1,406 @@
 {% extends 'teams/team_tansaibou/base.html' %}
 
-{% block title %}レジ - Team Tansaibou{% endblock %}
+{% block title %}POSレジ - Team Tansaibou{% endblock %}
 
 {% block extra_style %}
-.pos-container {
-    max-width: 1000px;
-    margin: 0 auto;
-}
-h1 {
-    text-align: center;
-    margin-bottom: 30px;
-    color: #333;
-}
-
-/* 商品選択エリア */
-.products-section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.section-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 15px;
-    color: #555;
-    border-bottom: 2px solid #4CAF50;
-    padding-bottom: 5px;
-}
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 10px;
-}
-.product-button {
-    background: #f9f9f9;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    padding: 15px 10px;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-align: center;
-}
-.product-button:hover {
-    background: #4CAF50;
-    color: white;
-    border-color: #4CAF50;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-.product-button:active {
-    transform: translateY(0);
-}
-.product-name {
-    font-weight: bold;
-    font-size: 14px;
-    margin-bottom: 5px;
-}
-.product-price {
-    font-size: 16px;
-    color: #4CAF50;
-    font-weight: bold;
-    margin: 5px 0;
-}
-.product-stock {
-    font-size: 12px;
-    color: #666;
-}
-.product-button:hover .product-price,
-.product-button:hover .product-stock {
-    color: white;
-}
-/* 売り切れ表示 */
-.product-button.sold-out {
-    background: #eee;
-    border-color: #ccc;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-.product-button.sold-out:hover {
-    background: #eee;
-    color: inherit;
-    border-color: #ccc;
-    transform: none;
-    box-shadow: none;
-}
-.product-button.sold-out .product-price {
-    color: #999;
-}
-.sold-out-badge {
-    display: inline-block;
-    background: #f44336;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: bold;
-}
-
-/* 選択数インジケーター（左下固定） */
-.cart-indicator {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: linear-gradient(135deg, #4CAF50, #45a049);
-    color: white;
-    padding: 15px 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    z-index: 1000;
-    display: none;
-    min-width: 180px;
-}
-.cart-indicator.active {
-    display: block;
-    animation: slideIn 0.3s ease;
-}
-@keyframes slideIn {
-    from {
-        transform: translateX(-100%);
-        opacity: 0;
+<style>
+    /* Custom tweaks for the "Cyber" feel */
+    .cyber-card {
+        background-color: white;
+        border: 1px solid #e5e7eb;
+        /* gray-200 */
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     }
-    to {
-        transform: translateX(0);
-        opacity: 1;
+
+    .cyber-input {
+        background-color: #f9fafb;
+        /* gray-50 */
+        border: 1px solid #d1d5db;
+        /* gray-300 */
+        color: #111827;
+        /* gray-900 */
+        border-radius: 0.5rem;
+        padding: 0.625rem;
+        width: 100%;
+        transition: all 0.2s;
     }
-}
-.cart-indicator-count {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-.cart-indicator-total {
-    font-size: 14px;
-    opacity: 0.9;
-}
 
-/* カートエリア */
-.cart-section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.cart-empty {
-    text-align: center;
-    padding: 40px;
-    color: #999;
-}
-.cart-items {
-    margin-bottom: 20px;
-}
-.cart-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-}
-.cart-item:last-child {
-    border-bottom: none;
-}
-.cart-item-info {
-    flex: 2;
-}
-.cart-item-name {
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-.cart-item-price {
-    color: #666;
-    font-size: 14px;
-}
-.cart-item-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.quantity-control {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.qty-btn {
-    width: 30px;
-    height: 30px;
-    background: #2196F3;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 18px;
-}
-.qty-btn:hover {
-    background: #0b7dda;
-}
-.qty-input {
-    width: 50px;
-    text-align: center;
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-.cart-item-subtotal {
-    font-weight: bold;
-    min-width: 100px;
-    text-align: right;
-}
-.btn-remove {
-    background: #f44336;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-.btn-remove:hover {
-    background: #da190b;
-}
-.cart-total {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 24px;
-    font-weight: bold;
-}
-.cart-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
-.btn-clear {
-    padding: 10px 20px;
-    background: #999;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-.btn-clear:hover {
-    background: #888;
-}
-
-/* 会計エリア */
-.checkout-section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 15px;
-}
-.form-group {
-    margin-bottom: 0;
-}
-.form-group label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #555;
-}
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-textarea {
-    resize: vertical;
-    min-height: 60px;
-}
-.checkout-button {
-    width: 100%;
-    padding: 18px;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 20px;
-}
-.checkout-button:hover {
-    background: #45a049;
-}
-.checkout-button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-.required {
-    color: red;
-}
+    .cyber-input:focus {
+        border-color: #3b82f6;
+        /* blue-500 */
+        ring: 2px solid #3b82f6;
+        outline: none;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- 選択数インジケーター -->
-<div class="cart-indicator" id="cartIndicator">
-    <div class="cart-indicator-count" id="indicatorCount">0点</div>
-    <div class="cart-indicator-total" id="indicatorTotal">¥0</div>
-</div>
+<div class="w-full max-w-full px-4 md:px-6 lg:px-8 py-4 h-[calc(100vh-5rem)]">
+    <div class="flex flex-col lg:flex-row gap-6 h-full">
 
-<div class="pos-container">
-    <h1>💰 POSレジ</h1>
+        <!-- Main Content (Left) -->
+        <div class="flex-1 flex flex-col gap-6 min-w-0 h-full overflow-hidden">
 
-    <!-- 商品選択 -->
-    <div class="products-section">
-        <div class="section-title">🛍️ 商品選択</div>
-        <div class="product-grid">
-            {% for product in products %}
-            <div class="product-button{% if product.stock == 0 %} sold-out{% endif %}" {% if product.stock > 0 %}onclick="addToCart('product', {{ product.id }}, '{{ product.name|escapejs }}', {{ product.current_price }}, {{ product.stock }})"{% endif %}>
-                <div class="product-name">{{ product.name }}</div>
-                <div class="product-price">¥{{ product.current_price|floatformat:0 }}</div>
-                {% if product.stock == 0 %}
-                <div class="product-stock"><span class="sold-out-badge">売り切れ</span></div>
-                {% else %}
-                <div class="product-stock">在庫: {{ product.stock }}</div>
-                {% endif %}
-            </div>
-            {% empty %}
-            <p style="grid-column: 1/-1; text-align: center; color: #999;">商品が登録されていません</p>
-            {% endfor %}
-        </div>
-
-        {% if product_sets %}
-        <div class="section-title" style="margin-top: 20px;">🎁 セット商品</div>
-        <div class="product-grid">
-            {% for ps in product_sets %}
-            <div class="product-button{% if ps.get_stock_status == 0 %} sold-out{% endif %}" {% if ps.get_stock_status > 0 %}onclick="addToCart('product_set', {{ ps.id }}, '{{ ps.name|escapejs }}', {{ ps.price }}, {{ ps.get_stock_status }})"{% endif %}>
-                <div class="product-name">{{ ps.name }}</div>
-                <div class="product-price">¥{{ ps.price|floatformat:0 }}</div>
-                {% if ps.get_stock_status == 0 %}
-                <div class="product-stock"><span class="sold-out-badge">売り切れ</span></div>
-                {% else %}
-                <div class="product-stock">セット在庫: {{ ps.get_stock_status }}</div>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- カート -->
-    <div class="cart-section">
-        <div class="section-title">🛒 カート</div>
-        <div id="cart-items" class="cart-items">
-            <div class="cart-empty">商品を選択してください</div>
-        </div>
-        <div class="cart-total">
-            <span>合計</span>
-            <span id="cart-total">¥0</span>
-        </div>
-        <div class="cart-actions">
-            <button type="button" class="btn-clear" onclick="clearCart()">カートを空にする</button>
-        </div>
-    </div>
-
-    <!-- 会計 -->
-    <div class="checkout-section">
-        <div class="section-title">💳 会計情報</div>
-        <form method="post" id="checkout-form">
-            {% csrf_token %}
-            <input type="hidden" name="cart_items" id="cart_items_input">
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="transaction_date">取引日時 <span class="required">*</span></label>
-                    <input type="datetime-local" id="transaction_date" name="transaction_date" required>
+            <!-- Product Selection Section -->
+            <div class="cyber-card rounded-xl p-5 flex flex-col flex-1 min-h-0">
+                <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-2">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                            width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 10V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v4m3-2 .917 11.923A1 1 0 0 1 17.92 21H6.08a1 1 0 0 1-.997-1.077L6 8h12Z" />
+                        </svg>
+                        商品選択
+                    </h2>
+                    <span
+                        class="bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-0.5 rounded border border-gray-200">Catalog</span>
                 </div>
 
-                <div class="form-group">
-                    <label for="recorded_by">担当者 <span class="required">*</span></label>
-                    <select id="recorded_by" name="recorded_by" required>
-                        <option value="">選択してください</option>
-                        {% for member in members %}
-                        <option value="{{ member.id }}">{{ member.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+                <div class="overflow-y-auto pr-2 custom-scrollbar flex-1">
+                    <!-- Products -->
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Products</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                            {% for product in products %}
+                            <button
+                                onclick="addToCart('product', {{ product.id }}, '{{ product.name|escapejs }}', {{ product.current_price }}, {{ product.stock }})"
+                                class="relative group bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all duration-200 text-left flex flex-col justify-between h-32 {% if product.stock == 0 %}opacity-60 cursor-not-allowed pointer-events-none bg-gray-50{% endif %}">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 line-clamp-2 leading-tight">{{ product.name }}
+                                    </h4>
+                                    <p class="text-lg font-extrabold text-blue-600 mt-1">¥{{
+                                        product.current_price|floatformat:0 }}</p>
+                                </div>
+                                <div class="mt-2">
+                                    {% if product.stock == 0 %}
+                                    <span
+                                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md ring-1 ring-inset ring-red-600/10">SOLD
+                                        OUT</span>
+                                    {% else %}
+                                    <span class="text-xs text-gray-500 font-medium">在庫: {{ product.stock }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if product.stock > 0 %}
+                                <div
+                                    class="absolute inset-0 border-2 border-transparent group-hover:border-blue-500 rounded-lg pointer-events-none">
+                                </div>
+                                {% endif %}
+                            </button>
+                            {% empty %}
+                            <p class="col-span-full text-center text-gray-400 py-8">商品が登録されていません</p>
+                            {% endfor %}
+                        </div>
+                    </div>
 
-                <div class="form-group">
-                    <label for="payment_method">支払方法 <span class="required">*</span></label>
-                    <select id="payment_method" name="payment_method" required>
-                        {% for value, label in payment_methods %}
-                        <option value="{{ value }}" {% if value == 'cash' %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
+                    <!-- Product Sets -->
+                    {% if product_sets %}
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Product Sets</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                            {% for ps in product_sets %}
+                            <button
+                                onclick="addToCart('product_set', {{ ps.id }}, '{{ ps.name|escapejs }}', {{ ps.price }}, {{ ps.get_stock_status }})"
+                                class="relative group bg-white border border-gray-200 rounded-lg p-4 hover:border-purple-500 hover:shadow-md transition-all duration-200 text-left flex flex-col justify-between h-32 {% if ps.get_stock_status == 0 %}opacity-60 cursor-not-allowed pointer-events-none bg-gray-50{% endif %}">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 line-clamp-2 leading-tight">{{ ps.name }}</h4>
+                                    <p class="text-lg font-extrabold text-purple-600 mt-1">¥{{ ps.price|floatformat:0 }}
+                                    </p>
+                                </div>
+                                <div class="mt-2 text-right">
+                                    {% if ps.get_stock_status == 0 %}
+                                    <span
+                                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md ring-1 ring-inset ring-red-600/10">SOLD
+                                        OUT</span>
+                                    {% else %}
+                                    <span
+                                        class="text-xs text-purple-600 font-medium bg-purple-50 px-2 py-0.5 rounded">Set</span>
+                                    {% endif %}
+                                </div>
+                                {% if ps.get_stock_status > 0 %}
+                                <div
+                                    class="absolute inset-0 border-2 border-transparent group-hover:border-purple-500 rounded-lg pointer-events-none">
+                                </div>
+                                {% endif %}
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="notes">備考</label>
-                <textarea id="notes" name="notes" placeholder="特記事項があれば入力してください"></textarea>
+            <!-- Transaction Info Section -->
+            <div class="cyber-card rounded-xl p-5 flex-shrink-0">
+                <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-2">
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                            width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
+                                d="M8 7V6a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1M3 18v-7a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Zm8-3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
+                        </svg>
+                        会計情報
+                    </h2>
+                </div>
+
+                <form id="checkout-form" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="cart_items" id="cart_items_input">
+
+                    <div>
+                        <label for="transaction_date" class="block mb-1 text-sm font-medium text-gray-700">取引日時 <span
+                                class="text-red-500">*</span></label>
+                        <input type="datetime-local" id="transaction_date" name="transaction_date" required
+                            class="cyber-input text-sm">
+                    </div>
+
+                    <div>
+                        <label for="recorded_by" class="block mb-1 text-sm font-medium text-gray-700">担当者 <span
+                                class="text-red-500">*</span></label>
+                        <select id="recorded_by" name="recorded_by" required class="cyber-input text-sm">
+                            <option value="">選択してください</option>
+                            {% for member in members %}
+                            <option value="{{ member.id }}">{{ member.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="payment_method" class="block mb-1 text-sm font-medium text-gray-700">支払方法 <span
+                                class="text-red-500">*</span></label>
+                        <select id="payment_method" name="payment_method" required class="cyber-input text-sm">
+                            {% for value, label in payment_methods %}
+                            <option value="{{ value }}" {% if value == 'cash' %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <label for="notes" class="block mb-1 text-sm font-medium text-gray-700">備考</label>
+                        <textarea id="notes" name="notes" rows="1" class="cyber-input text-sm"
+                            placeholder="特記事項があれば入力してください"></textarea>
+                    </div>
+                </form>
             </div>
 
-            <button type="submit" class="checkout-button" id="checkout-btn" disabled>会計する（¥0）</button>
-        </form>
+        </div>
+
+        <!-- Sidebar (Right) - Cart -->
+        <div class="w-full lg:w-96 flex-shrink-0 h-full">
+            <div class="cyber-card rounded-xl h-full flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                            width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312" />
+                        </svg>
+                        カート
+                    </h2>
+                    <button type="button" onclick="clearCart()"
+                        class="text-xs text-red-600 hover:text-red-800 hover:underline">すべて削除</button>
+                </div>
+
+                <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                    <div class="flex flex-col items-center justify-center h-full text-gray-400">
+                        <svg class="w-12 h-12 mb-2 text-gray-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                            width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 10V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v4m3-2 .917 11.923A1 1 0 0 1 17.92 21H6.08a1 1 0 0 1-.997-1.077L6 8h12Z" />
+                        </svg>
+                        <p class="text-sm">商品を選択してください</p>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-gray-50 border-t border-gray-200">
+                    <div class="flex justify-between items-end mb-4">
+                        <span class="text-gray-600 font-medium">合計</span>
+                        <span id="cart-total" class="text-3xl font-bold text-gray-900">¥0</span>
+                    </div>
+                    <button type="button" onclick="document.getElementById('checkout-form').submit()" id="checkout-btn"
+                        disabled
+                        class="w-full text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-lg px-5 py-3.5 text-center disabled:bg-gray-300 disabled:cursor-not-allowed transition-all shadow-lg shadow-gray-200">
+                        会計する
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 {% endblock %}
 
 {% block extra_script %}
 <script>
-let cart = [];
+    let cart = [];
 
-function addToCart(type, id, name, price, stock) {
-    // カート内に同じ商品があるか確認
-    const existingItem = cart.find(item => item.type === type && item.id === id);
+    function addToCart(type, id, name, price, stock) {
+        // カート内に同じ商品があるか確認
+        const existingItem = cart.find(item => item.type === type && item.id === id);
 
-    if (existingItem) {
-        // 在庫チェック
-        if (existingItem.quantity < stock) {
-            existingItem.quantity++;
+        if (existingItem) {
+            // 在庫チェック
+            if (existingItem.quantity < stock) {
+                existingItem.quantity++;
+            } else {
+                alert(`${name}の在庫が不足しています（在庫: ${stock}）`);
+                return;
+            }
         } else {
-            alert(`${name}の在庫が不足しています（在庫: ${stock}）`);
-            return;
+            // 新しい商品を追加
+            if (stock <= 0) {
+                alert(`${name}は在庫がありません`);
+                return;
+            }
+            cart.push({
+                type: type,
+                id: id,
+                name: name,
+                price: parseFloat(price),
+                quantity: 1,
+                stock: stock
+            });
         }
-    } else {
-        // 新しい商品を追加
-        if (stock <= 0) {
-            alert(`${name}は在庫がありません`);
-            return;
-        }
-        cart.push({
-            type: type,
-            id: id,
-            name: name,
-            price: parseFloat(price),
-            quantity: 1,
-            stock: stock
-        });
-    }
 
-    updateCart();
-}
-
-function removeFromCart(index) {
-    cart.splice(index, 1);
-    updateCart();
-}
-
-function updateQuantity(index, newQuantity) {
-    const item = cart[index];
-    const qty = parseInt(newQuantity);
-
-    // 数字以外または無効な値の場合は元に戻す
-    if (isNaN(qty) || newQuantity === '' || newQuantity === null) {
-        document.getElementById(`qty-${index}`).value = item.quantity;
-        return;
-    }
-
-    if (qty <= 0) {
-        removeFromCart(index);
-        return;
-    }
-
-    if (qty > item.stock) {
-        alert(`${item.name}の在庫が不足しています（在庫: ${item.stock}）`);
-        document.getElementById(`qty-${index}`).value = item.quantity;
-        return;
-    }
-
-    item.quantity = qty;
-    updateCart();
-}
-
-// 数量入力欄でキー入力を制限（数字のみ許可）
-function validateNumberInput(event) {
-    // 許可するキー: 数字、バックスペース、Delete、矢印キー、Tab
-    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
-    if (allowedKeys.includes(event.key)) {
-        return true;
-    }
-    // 数字以外は入力させない
-    if (!/^\d$/.test(event.key)) {
-        event.preventDefault();
-        return false;
-    }
-    return true;
-}
-
-function clearCart() {
-    if (cart.length > 0 && confirm('カートを空にしてもよろしいですか？')) {
-        cart = [];
         updateCart();
     }
-}
 
-function updateCart() {
-    const cartItemsDiv = document.getElementById('cart-items');
-    const cartTotalSpan = document.getElementById('cart-total');
-    const checkoutBtn = document.getElementById('checkout-btn');
-    const cartItemsInput = document.getElementById('cart_items_input');
-    const cartIndicator = document.getElementById('cartIndicator');
-    const indicatorCount = document.getElementById('indicatorCount');
-    const indicatorTotal = document.getElementById('indicatorTotal');
-
-    if (cart.length === 0) {
-        cartItemsDiv.innerHTML = '<div class="cart-empty">商品を選択してください</div>';
-        cartTotalSpan.textContent = '¥0';
-        checkoutBtn.disabled = true;
-        checkoutBtn.textContent = '会計する（¥0）';
-        cartItemsInput.value = '[]';
-        cartIndicator.classList.remove('active');
-        return;
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateCart();
     }
 
-    // カートアイテムを表示
-    let html = '';
-    let total = 0;
+    function updateQuantity(index, newQuantity) {
+        const item = cart[index];
+        const qty = parseInt(newQuantity);
 
-    cart.forEach((item, index) => {
-        const subtotal = item.price * item.quantity;
-        total += subtotal;
+        if (isNaN(qty) || newQuantity === '' || newQuantity === null) {
+            // Don't update UI immediately to allow typing, but logic handled on blur/change
+            return;
+        }
 
-        html += `
-            <div class="cart-item">
-                <div class="cart-item-info">
-                    <div class="cart-item-name">${item.name}</div>
-                    <div class="cart-item-price">¥${item.price.toLocaleString()} × ${item.quantity}</div>
-                </div>
-                <div class="cart-item-controls">
-                    <div class="quantity-control">
-                        <button type="button" class="qty-btn" onclick="updateQuantity(${index}, ${item.quantity - 1})">-</button>
-                        <input type="number" class="qty-input" id="qty-${index}" value="${item.quantity}"
-                               min="1" max="${item.stock}" onkeydown="validateNumberInput(event)" onchange="updateQuantity(${index}, this.value)" onpaste="return false">
-                        <button type="button" class="qty-btn" onclick="updateQuantity(${index}, ${item.quantity + 1})">+</button>
-                    </div>
-                    <div class="cart-item-subtotal">¥${subtotal.toLocaleString()}</div>
-                    <button type="button" class="btn-remove" onclick="removeFromCart(${index})">削除</button>
-                </div>
-            </div>
-        `;
-    });
+        if (qty <= 0) {
+            removeFromCart(index);
+            return;
+        }
 
-    cartItemsDiv.innerHTML = html;
-    cartTotalSpan.textContent = `¥${total.toLocaleString()}`;
-    checkoutBtn.disabled = false;
-    checkoutBtn.textContent = `会計する（¥${total.toLocaleString()}）`;
+        if (qty > item.stock) {
+            alert(`${item.name}の在庫が不足しています（在庫: ${item.stock}）`);
+            document.getElementById(`qty-${index}`).value = item.stock; // Reset to max
+            item.quantity = item.stock;
+        } else {
+            item.quantity = qty;
+        }
+        updateCart();
+    }
 
-    // カートデータをJSONとしてhidden inputに設定
-    cartItemsInput.value = JSON.stringify(cart);
+    function validateNumberInput(event) {
+        // 許可するキー: 数字、バックスペース、Delete、矢印キー、Tab
+        const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+        if (allowedKeys.includes(event.key)) {
+            return true;
+        }
+        if (!/^\d$/.test(event.key)) {
+            event.preventDefault();
+            return false;
+        }
+        return true;
+    }
 
-    // 選択数インジケーターを更新
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    indicatorCount.textContent = `${totalItems}点`;
-    indicatorTotal.textContent = `¥${total.toLocaleString()}`;
-    cartIndicator.classList.add('active');
-}
-
-// フォーム送信時にカートが空でないかチェック
-document.getElementById('checkout-form').addEventListener('submit', function(e) {
-    if (cart.length === 0) {
-        e.preventDefault();
-        alert('カートに商品を追加してください');
-    } else {
-        // 担当者をlocalStorageに保存
-        const recordedBy = document.getElementById('recorded_by').value;
-        if (recordedBy) {
-            localStorage.setItem('last_recorded_by', recordedBy);
+    function clearCart() {
+        if (cart.length > 0 && confirm('カートを空にしてもよろしいですか？')) {
+            cart = [];
+            updateCart();
         }
     }
-});
 
-// ページ読み込み時の初期化
-window.addEventListener('DOMContentLoaded', function() {
-    // 現在日時を設定
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const dateTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
-    document.getElementById('transaction_date').value = dateTimeString;
+    function updateCart() {
+        const cartItemsDiv = document.getElementById('cart-items');
+        const cartTotalSpan = document.getElementById('cart-total');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const cartItemsInput = document.getElementById('cart_items_input');
 
-    // 前回の担当者を復元
-    const lastRecordedBy = localStorage.getItem('last_recorded_by');
-    if (lastRecordedBy) {
-        document.getElementById('recorded_by').value = lastRecordedBy;
+        if (cart.length === 0) {
+            cartItemsDiv.innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-gray-400">
+                <svg class="w-12 h-12 mb-2 text-gray-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v4m3-2 .917 11.923A1 1 0 0 1 17.92 21H6.08a1 1 0 0 1-.997-1.077L6 8h12Z"/>
+                </svg>
+                <p class="text-sm">商品を選択してください</p>
+            </div>`;
+            cartTotalSpan.textContent = '¥0';
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = '会計する';
+            checkoutBtn.classList.add('bg-gray-300', 'cursor-not-allowed');
+            checkoutBtn.classList.remove('bg-gray-800', 'hover:bg-gray-900', 'shadow-lg');
+            cartItemsInput.value = '[]';
+            return;
+        }
+
+        let html = '';
+        let total = 0;
+
+        cart.forEach((item, index) => {
+            const subtotal = item.price * item.quantity;
+            total += subtotal;
+
+            html += `
+            <div class="bg-white border boundary-gray-200 rounded-lg p-3 shadow-sm flex justify-between items-center group relative">
+                <div class="flex-1 pr-4">
+                    <h4 class="font-bold text-gray-800 text-sm mb-1">${item.name}</h4>
+                    <div class="text-xs text-gray-500">¥${item.price.toLocaleString()}</div>
+                </div>
+                
+                <div class="flex flex-col items-end gap-2">
+                    <div class="font-bold text-gray-900">¥${subtotal.toLocaleString()}</div>
+                    <div class="flex items-center rounded-md border border-gray-300 bg-gray-50">
+                        <button type="button" class="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded-l-md transition-colors" onclick="updateQuantity(${index}, ${item.quantity - 1})">-</button>
+                        <input type="number" id="qty-${index}" value="${item.quantity}" min="1" max="${item.stock}" 
+                            class="w-10 h-7 text-center text-sm border-0 border-x border-gray-300 bg-transparent p-0 focus:ring-0"
+                            onkeydown="validateNumberInput(event)" onchange="updateQuantity(${index}, this.value)">
+                        <button type="button" class="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 rounded-r-md transition-colors" onclick="updateQuantity(${index}, ${item.quantity + 1})">+</button>
+                    </div>
+                </div>
+                
+                <button onclick="removeFromCart(${index})" class="absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-200 shadow-sm" title="削除">
+                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
+                    </svg>
+                </button>
+            </div>
+        `;
+        });
+
+        cartItemsDiv.innerHTML = html;
+        cartTotalSpan.textContent = `¥${total.toLocaleString()}`;
+        checkoutBtn.disabled = false;
+        checkoutBtn.textContent = `会計する (¥${total.toLocaleString()})`;
+        checkoutBtn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+        checkoutBtn.classList.add('bg-gray-800', 'hover:bg-gray-900', 'shadow-lg');
+
+        cartItemsInput.value = JSON.stringify(cart);
     }
-});
+
+    document.getElementById('checkout-form').addEventListener('submit', function (e) {
+        if (cart.length === 0) {
+            e.preventDefault();
+            alert('カートに商品を追加してください');
+        } else {
+            const recordedBy = document.getElementById('recorded_by').value;
+            if (recordedBy) {
+                localStorage.setItem('last_recorded_by', recordedBy);
+            }
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', function () {
+        const now = new Date();
+        const dateTimeString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+        document.getElementById('transaction_date').value = dateTimeString;
+
+        const lastRecordedBy = localStorage.getItem('last_recorded_by');
+        if (lastRecordedBy) {
+            document.getElementById('recorded_by').value = lastRecordedBy;
+        }
+    });
 </script>
 {% endblock %}

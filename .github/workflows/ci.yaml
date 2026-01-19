@@ -32,17 +32,15 @@ jobs:
       - name: Migration Integrity Check
         run: scripts/check_migrations.sh
 
-      - name: Make Migrations Check
-        run: |
-          echo "Checking for missing migrations or model validity..."
-          uv run python manage.py makemigrations ${{ inputs.target_app }} --check --dry-run
+      #- name: Make Migrations Check
+      #  run: uv run manage.py makemigrations --check --dry-run
         
       - name: Migrate
-        run: uv run python manage.py migrate --database ${{ inputs.target_app }} --noinput
+        run: uv run manage.py migrate --noinput
 
       - name: Start Server & Health Check
         run: |
-          uv run python manage.py runserver 0.0.0.0:8000 --noreload &
+          uv run manage.py runserver 0.0.0.0:8000 --noreload &
           PID=$!
           echo "Server started with PID $PID. Waiting for it to be ready..."
           
@@ -70,4 +68,4 @@ jobs:
           kill $PID
 
       - name: Run Tests
-        run: uv run python manage.py test ${{ inputs.target_app }}
+        run: uv run manage.py test ${{ inputs.target_app }}

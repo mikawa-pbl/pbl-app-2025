@@ -31,18 +31,26 @@
         ring: 2px solid #3b82f6;
         outline: none;
     }
+
+    /* モバイルタッチ対応 */
+    @media (max-width: 1023px) {
+        .product-btn {
+            min-height: 100px;
+            touch-action: manipulation;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="w-full max-w-full px-4 md:px-6 lg:px-8 py-4 h-[calc(100vh-5rem)]">
-    <div class="flex flex-col lg:flex-row gap-6 h-full">
+<div class="w-full max-w-full px-4 md:px-6 lg:px-8 py-4 lg:h-[calc(100vh-5rem)]">
+    <div class="flex flex-col lg:flex-row gap-6 lg:h-full">
 
         <!-- Main Content (Left) -->
-        <div class="flex-1 flex flex-col gap-6 min-w-0 h-full overflow-hidden">
+        <div class="flex-1 flex flex-col gap-6 min-w-0 lg:h-full lg:overflow-hidden">
 
             <!-- Product Selection Section -->
-            <div class="cyber-card rounded-xl p-5 flex flex-col flex-1 min-h-0">
+            <div class="cyber-card rounded-xl p-5 flex flex-col lg:flex-1 lg:min-h-0">
                 <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-2">
                     <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                         <svg class="w-6 h-6 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -56,15 +64,15 @@
                         class="bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-0.5 rounded border border-gray-200">Catalog</span>
                 </div>
 
-                <div class="overflow-y-auto pr-2 custom-scrollbar flex-1">
+                <div class="lg:overflow-y-auto pr-2 custom-scrollbar lg:flex-1">
                     <!-- Products -->
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Products</h3>
+                        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Products</h3>
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                             {% for product in products %}
                             <button
                                 onclick="addToCart('product', {{ product.id }}, '{{ product.name|escapejs }}', {{ product.current_price }}, {{ product.stock }})"
-                                class="relative group bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all duration-200 text-left flex flex-col justify-between h-32 {% if product.stock == 0 %}opacity-60 cursor-not-allowed pointer-events-none bg-gray-50{% endif %}">
+                                class="product-btn relative group bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all duration-200 text-left flex flex-col justify-between h-32 {% if product.stock == 0 %}opacity-60 cursor-not-allowed pointer-events-none bg-gray-50{% endif %}">
                                 <div>
                                     <h4 class="font-bold text-gray-900 line-clamp-2 leading-tight">{{ product.name }}
                                     </h4>
@@ -76,7 +84,7 @@
                                         class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-md ring-1 ring-inset ring-red-600/10">SOLD
                                         OUT</span>
                                     {% else %}
-                                    <span class="text-xs text-gray-500 font-medium">在庫: {{ product.stock }}</span>
+                                    <span class="text-xs text-gray-700 font-medium">在庫: {{ product.stock }}</span>
                                     {% endif %}
                                 </div>
                                 {% if product.stock > 0 %}
@@ -94,15 +102,15 @@
                     <!-- Product Sets -->
                     {% if product_sets %}
                     <div>
-                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Product Sets</h3>
+                        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Product Sets</h3>
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                             {% for ps in product_sets %}
                             <button
                                 onclick="addToCart('product_set', {{ ps.id }}, '{{ ps.name|escapejs }}', {{ ps.price }}, {{ ps.get_stock_status }})"
-                                class="relative group bg-white border border-gray-200 rounded-lg p-4 hover:border-purple-500 hover:shadow-md transition-all duration-200 text-left flex flex-col justify-between h-32 {% if ps.get_stock_status == 0 %}opacity-60 cursor-not-allowed pointer-events-none bg-gray-50{% endif %}">
+                                class="product-btn relative group bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-600 hover:shadow-md transition-all duration-200 text-left flex flex-col justify-between h-32 {% if ps.get_stock_status == 0 %}opacity-60 cursor-not-allowed pointer-events-none bg-gray-50{% endif %}">
                                 <div>
                                     <h4 class="font-bold text-gray-900 line-clamp-2 leading-tight">{{ ps.name }}</h4>
-                                    <p class="text-lg font-extrabold text-purple-600 mt-1">¥{{ ps.price|floatformat:0 }}
+                                    <p class="text-lg font-extrabold text-blue-700 mt-1">¥{{ ps.price|floatformat:0 }}
                                     </p>
                                 </div>
                                 <div class="mt-2 text-right">
@@ -112,12 +120,12 @@
                                         OUT</span>
                                     {% else %}
                                     <span
-                                        class="text-xs text-purple-600 font-medium bg-purple-50 px-2 py-0.5 rounded">Set</span>
+                                        class="text-xs text-blue-800 font-medium bg-blue-100 px-2 py-0.5 rounded">Set</span>
                                     {% endif %}
                                 </div>
                                 {% if ps.get_stock_status > 0 %}
                                 <div
-                                    class="absolute inset-0 border-2 border-transparent group-hover:border-purple-500 rounded-lg pointer-events-none">
+                                    class="absolute inset-0 border-2 border-transparent group-hover:border-blue-600 rounded-lg pointer-events-none">
                                 </div>
                                 {% endif %}
                             </button>
@@ -184,8 +192,8 @@
         </div>
 
         <!-- Sidebar (Right) - Cart -->
-        <div class="w-full lg:w-96 flex-shrink-0 h-full">
-            <div class="cyber-card rounded-xl h-full flex flex-col overflow-hidden">
+        <div class="w-full lg:w-96 flex-shrink-0 lg:h-full">
+            <div class="cyber-card rounded-xl lg:h-full flex flex-col lg:overflow-hidden">
                 <div class="p-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
                     <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                         <svg class="w-5 h-5 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -199,7 +207,7 @@
                         class="text-xs text-red-600 hover:text-red-800 hover:underline">すべて削除</button>
                 </div>
 
-                <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                <div id="cart-items" class="lg:flex-1 min-h-[200px] lg:min-h-0 overflow-y-auto p-4 space-y-3 custom-scrollbar">
                     <div class="flex flex-col items-center justify-center h-full text-gray-400">
                         <svg class="w-12 h-12 mb-2 text-gray-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                             width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -345,8 +353,8 @@
             html += `
             <div class="bg-white border boundary-gray-200 rounded-lg p-3 shadow-sm flex justify-between items-center group relative">
                 <div class="flex-1 pr-4">
-                    <h4 class="font-bold text-gray-800 text-sm mb-1">${item.name}</h4>
-                    <div class="text-xs text-gray-500">¥${item.price.toLocaleString()}</div>
+                    <h4 class="font-bold text-gray-900 text-base mb-1">${item.name}</h4>
+                    <div class="text-sm text-gray-700">¥${item.price.toLocaleString()}</div>
                 </div>
                 
                 <div class="flex flex-col items-end gap-2">

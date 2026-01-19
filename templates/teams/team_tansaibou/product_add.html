@@ -18,12 +18,21 @@
                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             </div>
 
-            <div>
-                <label for="current_price" class="block mb-2 text-sm font-medium text-gray-900">
-                    価格（円） <span class="text-red-500">*</span>
-                </label>
-                <input type="number" id="current_price" name="current_price" min="0" step="1" required
-                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="current_price" class="block mb-2 text-sm font-medium text-gray-900">
+                        販売価格（円） <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="current_price" name="current_price" min="0" step="1" required
+                           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+                <div>
+                    <label for="cost_price" class="block mb-2 text-sm font-medium text-gray-900">
+                        仕入れ価格（円） <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="cost_price" name="cost_price" min="0" step="1" value="0" required
+                           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
             </div>
 
             <div>

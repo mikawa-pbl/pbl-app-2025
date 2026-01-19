@@ -88,7 +88,14 @@ class Product(models.Model):
         max_digits=10,
         decimal_places=0,
         validators=[MinValueValidator(Decimal('0'))],
-        verbose_name='現在価格'
+        verbose_name='販売価格'
+    )
+    cost_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=0,
+        validators=[MinValueValidator(Decimal('0'))],
+        verbose_name='仕入れ価格',
+        default=0
     )
     stock = models.IntegerField(
         default=0,
@@ -117,6 +124,16 @@ class Product(models.Model):
     def check_stock(self, quantity):
         """在庫チェック"""
         return self.stock >= quantity
+
+    def get_profit(self):
+        """1個あたりの利益を計算"""
+        return self.current_price - self.cost_price
+
+    def get_profit_margin(self):
+        """利益率を計算（%）"""
+        if self.current_price == 0:
+            return 0
+        return round((self.get_profit() / self.current_price) * 100, 1)
 
 
 class ProductSet(models.Model):

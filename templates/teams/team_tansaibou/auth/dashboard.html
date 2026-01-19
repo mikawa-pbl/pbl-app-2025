@@ -40,20 +40,28 @@
     <!-- サマリーカード -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
-            <div class="text-sm text-gray-500 mb-1">本日の売上</div>
-            <div id="todaySales" class="text-2xl font-bold text-blue-600">-</div>
+            <div class="text-base text-gray-700 font-medium mb-1">本日の売上</div>
+            <div id="todaySales" class="text-2xl font-bold text-blue-600">
+                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-24 mx-auto"></div>
+            </div>
         </div>
         <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
-            <div class="text-sm text-gray-500 mb-1">本日の取引件数</div>
-            <div id="todayCount" class="text-2xl font-bold text-gray-900">-</div>
+            <div class="text-base text-gray-700 font-medium mb-1">本日の取引件数</div>
+            <div id="todayCount" class="text-2xl font-bold text-gray-900">
+                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-16 mx-auto"></div>
+            </div>
         </div>
         <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
-            <div class="text-sm text-gray-500 mb-1">経過時間</div>
-            <div id="elapsedTime" class="text-2xl font-bold text-gray-900">-</div>
+            <div class="text-base text-gray-700 font-medium mb-1">経過時間</div>
+            <div id="elapsedTime" class="text-2xl font-bold text-gray-900">
+                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-20 mx-auto"></div>
+            </div>
         </div>
         <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
-            <div class="text-sm text-gray-500 mb-1">残り営業時間</div>
-            <div id="remainingTime" class="text-2xl font-bold text-gray-900">-</div>
+            <div class="text-base text-gray-700 font-medium mb-1">残り営業時間</div>
+            <div id="remainingTime" class="text-2xl font-bold text-gray-900">
+                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-20 mx-auto"></div>
+            </div>
         </div>
     </div>
 
@@ -61,6 +69,17 @@
     <div class="bg-white border border-gray-200 rounded-lg shadow p-5 mb-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-500">時間帯別 売上・取引件数</h3>
         <div class="relative h-72">
+            <!-- Chart Skeleton -->
+            <div id="hourlyChartSkeleton" class="absolute inset-0 flex items-end justify-around p-4 animate-pulse">
+                <div class="w-8 bg-gray-200 rounded-t" style="height: 40%"></div>
+                <div class="w-8 bg-gray-200 rounded-t" style="height: 65%"></div>
+                <div class="w-8 bg-gray-200 rounded-t" style="height: 80%"></div>
+                <div class="w-8 bg-gray-200 rounded-t" style="height: 55%"></div>
+                <div class="w-8 bg-gray-200 rounded-t" style="height: 90%"></div>
+                <div class="w-8 bg-gray-200 rounded-t" style="height: 70%"></div>
+                <div class="w-8 bg-gray-200 rounded-t" style="height: 45%"></div>
+                <div class="w-8 bg-gray-200 rounded-t" style="height: 60%"></div>
+            </div>
             <canvas id="hourlyChart"></canvas>
         </div>
     </div>
@@ -70,12 +89,20 @@
         <div class="bg-white border border-gray-200 rounded-lg shadow p-5">
             <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-500">年度比較</h3>
             <div class="relative h-72">
+                <div id="yearlyChartSkeleton" class="absolute inset-0 flex items-end justify-around p-4 animate-pulse">
+                    <div class="w-16 bg-gray-200 rounded-t" style="height: 60%"></div>
+                    <div class="w-16 bg-gray-200 rounded-t" style="height: 80%"></div>
+                </div>
                 <canvas id="yearlyChart"></canvas>
             </div>
         </div>
         <div class="bg-white border border-gray-200 rounded-lg shadow p-5">
             <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-blue-500">日別比較</h3>
             <div class="relative h-72">
+                <div id="dailyChartSkeleton" class="absolute inset-0 flex items-end justify-around p-4 animate-pulse">
+                    <div class="w-16 bg-gray-200 rounded-t" style="height: 70%"></div>
+                    <div class="w-16 bg-gray-200 rounded-t" style="height: 55%"></div>
+                </div>
                 <canvas id="dailyChart"></canvas>
             </div>
         </div>
@@ -97,7 +124,10 @@
                     </tr>
                 </thead>
                 <tbody id="rankingTable">
-                    <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">読み込み中...</td></tr>
+                    <!-- Skeleton Loading -->
+                    <tr class="animate-pulse"><td class="px-4 py-3"><div class="h-6 w-6 bg-gray-200 rounded-full"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-32"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td></tr>
+                    <tr class="animate-pulse"><td class="px-4 py-3"><div class="h-6 w-6 bg-gray-200 rounded-full"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-28"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td></tr>
+                    <tr class="animate-pulse"><td class="px-4 py-3"><div class="h-6 w-6 bg-gray-200 rounded-full"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-24"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td></tr>
                 </tbody>
             </table>
         </div>
@@ -119,7 +149,8 @@
                         </tr>
                     </thead>
                     <tbody id="selloutTable">
-                        <tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">読み込み中...</td></tr>
+                        <tr class="animate-pulse"><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-24"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-12"></div></td><td class="px-4 py-3"><div class="h-5 bg-gray-200 rounded w-12"></div></td></tr>
+                        <tr class="animate-pulse"><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-20"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-12"></div></td><td class="px-4 py-3"><div class="h-5 bg-gray-200 rounded w-12"></div></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -137,7 +168,8 @@
                         </tr>
                     </thead>
                     <tbody id="lossTable">
-                        <tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">読み込み中...</td></tr>
+                        <tr class="animate-pulse"><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-24"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td></tr>
+                        <tr class="animate-pulse"><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-20"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-8"></div></td><td class="px-4 py-3"><div class="h-4 bg-gray-200 rounded w-16"></div></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -172,6 +204,12 @@ function formatCurrency(value) {
     return '¥' + value.toLocaleString();
 }
 
+// Skeleton非表示ヘルパー
+function hideSkeleton(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+}
+
 // 本日の売上を取得
 async function fetchTodaySales() {
     try {
@@ -190,6 +228,7 @@ async function fetchHourlyStats() {
         const response = await fetch('{% url "team_tansaibou:api_hourly_stats" %}');
         const data = await response.json();
 
+        hideSkeleton('hourlyChartSkeleton');
         const ctx = document.getElementById('hourlyChart').getContext('2d');
 
         if (hourlyChart) {
@@ -252,6 +291,7 @@ async function fetchYearlyComparison() {
         const response = await fetch('{% url "team_tansaibou:api_yearly_comparison" %}');
         const data = await response.json();
 
+        hideSkeleton('yearlyChartSkeleton');
         const ctx = document.getElementById('yearlyChart').getContext('2d');
 
         if (yearlyChart) {
@@ -301,6 +341,7 @@ async function fetchDailyComparison() {
         const response = await fetch('{% url "team_tansaibou:api_daily_comparison" %}');
         const data = await response.json();
 
+        hideSkeleton('dailyChartSkeleton');
         const ctx = document.getElementById('dailyChart').getContext('2d');
 
         if (dailyChart) {

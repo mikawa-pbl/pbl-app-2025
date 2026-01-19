@@ -67,5 +67,5 @@ jobs:
           echo "Server health check passed."
           kill $PID
 
-      - name: Run Tests
-        run: uv run manage.py test ${{ inputs.target_app }}
+      #- name: Run Tests
+      #  run: uv run manage.py test

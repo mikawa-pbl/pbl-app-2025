@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from .models import Good, SOSMessage
 from .forms import GoodsForm, SOSMessageForm
 from types import SimpleNamespace
@@ -84,6 +85,7 @@ def registration_goods(request):
 
             # Save to the team_cake db explicitly (router may handle but be explicit)
             good.save(using='team_cake')
+            messages.success(request, '商品登録が完了しました！')
             return redirect('team_cake:registration_goods')
     else:
         form = GoodsForm()

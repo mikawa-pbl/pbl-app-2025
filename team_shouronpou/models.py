@@ -24,14 +24,15 @@ class Account(models.Model):
     
     # 選択肢の定義
     GENDER_CHOICES = [('male', '男性'), ('female', '女性'), ('other', 'その他')]
-    gender = models.CharField("性別", max_length=10, choices=GENDER_CHOICES, blank=True, null=True)
+    gender = models.CharField("性別", max_length=10, choices=GENDER_CHOICES, blank=False, null=False)
 
-    NATIONALITY_CHOICES = [('japan', '日本'), ('other', 'その他')]
-    nationality = models.CharField("国籍", max_length=10, choices=NATIONALITY_CHOICES, blank=True, null=True)
+    #NATIONALITY_CHOICES = [('japan', '日本'), ('other', 'その他')]
+    #nationality = models.CharField("国籍", max_length=10, choices=NATIONALITY_CHOICES, blank=True, null=True)
+    nationality = models.CharField("国籍", max_length=100, blank=True, null=True)
 
     # --- ★追加: 参加したい実験の希望条件 ---
     # 報酬情報（自由記述：例「時給1000円以上」「Amazonギフト券希望」など）
-    desired_reward = models.CharField("希望する報酬", max_length=200, blank=True, null=True)
+    #desired_reward = models.CharField("希望する報酬", max_length=200, blank=True, null=True)
     
     # 実験所要時間（分単位で入力：例 60 = 60分以内）
     desired_max_time = models.IntegerField("希望する最大所要時間(分)", blank=True, null=True)
@@ -73,12 +74,26 @@ class Post(models.Model):
 
     # --- ★追加・変更: 任意項目 ---
     # 国籍・性別は既存のまま残します
-    NATIONALITY_CHOICES = [('japan', '日本'), ('other', 'その他')]
-    condition_nationality = models.CharField("国籍条件", max_length=10, choices=NATIONALITY_CHOICES, blank=True, null=True)
+    condition_nationality = models.CharField(
+        "国籍条件", 
+        max_length=100, # 自由記述用に文字数を拡張
+        blank=True, null=True,
+        help_text="例: 日本国籍の方のみ、日本語が流暢な方、など"
+    )
 
-    GENDER_CHOICES = [('male', '男性'), ('female', '女性'), ('other', 'その他')]
-    condition_gender = models.CharField("性別条件", max_length=10, choices=GENDER_CHOICES, blank=True, null=True)
-
+    GENDER_CHOICES = [
+        ('unspecified', '指定なし'), # 追加
+        ('male', '男性'), 
+        ('female', '女性')
+        
+    ]
+    condition_gender = models.CharField(
+        "性別条件", 
+        max_length=15, 
+        choices=GENDER_CHOICES, 
+        default='unspecified', # デフォルトを指定なしに
+        blank=False, null=False
+    )
     # 年齢（任意）
     target_age = models.CharField("対象年齢", max_length=100, blank=True, null=True, help_text="例: 20代, 18歳以上 など")
     

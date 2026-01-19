@@ -77,3 +77,39 @@ class LoginForm(forms.Form):
             'class': 'form-control'
         })
     )
+
+
+class ProductEditForm(forms.Form):
+    title = forms.CharField(
+        label='商品名',
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'placeholder': '商品名を入力',
+            'class': 'form-control'
+        })
+    )
+    price = forms.IntegerField(
+        label='価格',
+        min_value=0,
+        widget=forms.NumberInput(attrs={
+            'placeholder': '価格を入力',
+            'class': 'form-control'
+        })
+    )
+    description = forms.CharField(
+        label='説明',
+        required=False,
+        widget=forms.Textarea(attrs={
+            'placeholder': '商品の説明を入力',
+            'class': 'form-control',
+            'rows': 4
+        })
+    )
+    image = forms.ImageField(
+        label='商品画像',
+        required=False,
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': 'image/*'
+        })
+    )

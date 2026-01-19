@@ -1,27 +1,13 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>プロフィール編集</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; } /* 幅を少し広げました */
-        .form-group { margin-bottom: 15px; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; }
-        input, select { padding: 8px; width: 100%; box-sizing: border-box; }
-        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; }
-        a { margin-left: 10px; color: #666; }
-
-        /* 時間割グリッドのスタイル (post_new.htmlと同じ) */
-        .schedule-grid { display: grid; grid-template-columns: 80px repeat(5, 1fr); gap: 5px; margin-bottom: 20px; overflow-x: auto; }
-        .grid-header { font-weight: bold; text-align: center; background-color: #f0f0f0; padding: 10px; }
-        .time-label { font-size: 0.8em; text-align: center; display: flex; flex-direction: column; justify-content: center; background-color: #f9f9f9; border: 1px solid #ddd; }
-        .slot-btn { height: 50px; border: 1px solid #ccc; background-color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s; }
-        .slot-btn:hover { background-color: #e6f7ff; }
-        .slot-btn.active { background-color: #4CAF50; color: white; border-color: #4CAF50; font-weight: bold; }
-        .slot-btn.active::after { content: "〇"; }
-    </style>
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/schedule.css' %}">
 </head>
-<body>
+<body class="form-page">
     <h2>プロフィールの編集</h2>
     <form method="post">
         {% csrf_token %}
@@ -42,123 +28,27 @@
             <label>{{ form.nationality.label }}</label>
             {{ form.nationality }}
         </div>
-        <div class="form-group">
-            <label>{{ form.desired_reward.label }}</label>
-            {{ form.desired_reward }}
-        </div>
+
         <div class="form-group">
             <label>{{ form.desired_max_time.label }}</label>
             {{ form.desired_max_time }}
         </div>
 
         <div class="form-group">
-            <label>参加可能時間帯 (クリックして選択)</label>
-            <div class="schedule-grid">
-                <div class="grid-header"></div>
-                <div class="grid-header">月</div>
-                <div class="grid-header">火</div>
-                <div class="grid-header">水</div>
-                <div class="grid-header">木</div>
-                <div class="grid-header">金</div>
-        
-                <div class="time-label"><strong>1限</strong><span>8:50-10:20</span></div>
-                <div class="slot-btn" data-value="mon_1"></div>
-                <div class="slot-btn" data-value="tue_1"></div>
-                <div class="slot-btn" data-value="wed_1"></div>
-                <div class="slot-btn" data-value="thu_1"></div>
-                <div class="slot-btn" data-value="fri_1"></div>
-
-                <div class="time-label"><strong>2限</strong><span>10:30-12:00</span></div>
-                <div class="slot-btn" data-value="mon_2"></div>
-                <div class="slot-btn" data-value="tue_2"></div>
-                <div class="slot-btn" data-value="wed_2"></div>
-                <div class="slot-btn" data-value="thu_2"></div>
-                <div class="slot-btn" data-value="fri_2"></div>
-
-                <div class="time-label"><strong>昼休み</strong><span>12:00-13:00</span></div>
-                <div class="slot-btn" data-value="mon_lunch"></div>
-                <div class="slot-btn" data-value="tue_lunch"></div>
-                <div class="slot-btn" data-value="wed_lunch"></div>
-                <div class="slot-btn" data-value="thu_lunch"></div>
-                <div class="slot-btn" data-value="fri_lunch"></div>
-
-                <div class="time-label"><strong>3限</strong><span>13:00-14:30</span></div>
-                <div class="slot-btn" data-value="mon_3"></div>
-                <div class="slot-btn" data-value="tue_3"></div>
-                <div class="slot-btn" data-value="wed_3"></div>
-                <div class="slot-btn" data-value="thu_3"></div>
-                <div class="slot-btn" data-value="fri_3"></div>
-
-                <div class="time-label"><strong>4限</strong><span>14:40-16:10</span></div>
-                <div class="slot-btn" data-value="mon_4"></div>
-                <div class="slot-btn" data-value="tue_4"></div>
-                <div class="slot-btn" data-value="wed_4"></div>
-                <div class="slot-btn" data-value="thu_4"></div>
-                <div class="slot-btn" data-value="fri_4"></div>
-
-                <div class="time-label"><strong>5限</strong><span>16:20-17:50</span></div>
-                <div class="slot-btn" data-value="mon_5"></div>
-                <div class="slot-btn" data-value="tue_5"></div>
-                <div class="slot-btn" data-value="wed_5"></div>
-                <div class="slot-btn" data-value="thu_5"></div>
-                <div class="slot-btn" data-value="fri_5"></div>
-
-                <div class="time-label"><strong>6限</strong><span>18:00-19:30</span></div>
-                <div class="slot-btn" data-value="mon_6"></div>
-                <div class="slot-btn" data-value="tue_6"></div>
-                <div class="slot-btn" data-value="wed_6"></div>
-                <div class="slot-btn" data-value="thu_6"></div>
-                <div class="slot-btn" data-value="fri_6"></div>
-
-                <div class="time-label"><strong>放課後</strong><span>19:30~</span></div>
-                <div class="slot-btn" data-value="mon_after"></div>
-                <div class="slot-btn" data-value="tue_after"></div>
-                <div class="slot-btn" data-value="wed_after"></div>
-                <div class="slot-btn" data-value="thu_after"></div>
-                <div class="slot-btn" data-value="fri_after"></div>
+            <label>参加可能時間帯 (ドラッグで選択可能: 8:00〜21:00 / 30分刻み)</label>
+            <div class="schedule-container">
+                <div class="schedule-grid" id="scheduleGrid"></div>
             </div>
             {{ form.available_slots }}
         </div>
 
         <div style="margin-top: 20px;">
             <button type="submit">保存する</button>
-            <a href="{% url 'team_shouronpou:mypage' %}">キャンセル</a>
+            <a href="{% url 'team_shouronpou:mypage' %}" class="btn-cancel">キャンセル</a>
         </div>
     </form>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const slotsInput = document.getElementById('id_available_slots');
-        const slotBtns = document.querySelectorAll('.slot-btn');
-        let selectedSlots = [];
-        
-        try {
-            if (slotsInput.value) {
-                // Pythonのリスト文字列表現対策
-                const validJson = slotsInput.value.replace(/'/g, '"');
-                selectedSlots = JSON.parse(validJson);
-            }
-        } catch(e) { selectedSlots = []; }
-
-        slotBtns.forEach(btn => {
-            const val = btn.dataset.value;
-            // 初期表示
-            if (selectedSlots.includes(val)) {
-                btn.classList.add('active');
-            }
-            // クリック時
-            btn.addEventListener('click', function() {
-                this.classList.toggle('active');
-                const value = this.dataset.value;
-                if (this.classList.contains('active')) {
-                    if (!selectedSlots.includes(value)) selectedSlots.push(value);
-                } else {
-                    selectedSlots = selectedSlots.filter(item => item !== value);
-                }
-                slotsInput.value = JSON.stringify(selectedSlots);
-            });
-        });
-    });
-    </script>
+    <script src="{% static 'team_shouronpou/js/main.js' %}"></script>
+    <script src="{% static 'team_shouronpou/js/schedule_editor.js' %}"></script>
 </body>
 </html>

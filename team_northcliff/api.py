@@ -53,11 +53,18 @@ def user_data_view(request, username):
     except User.DoesNotExist:
         return JsonResponse({'error': 'ユーザーが見つかりません'}, status=404)
     
+    five_minutes_ago = timezone.now() - timedelta(minutes=5)
+    accessible_facilities = FacilityAccess.objects.using("team_northcliff").filter(
+        user=user,
+        accessed_at__gte=five_minutes_ago
+    ).values_list('facility_id', flat=True)
+
     return JsonResponse({
         'user_id': user.id,
         'points': user.points,
         'latitude': user.latitude,
         'longitude': user.longitude,
+        'accessible_facility_ids': list(accessible_facilities),
     })
 
 @require_http_methods(["GET"])
@@ -117,16 +124,30 @@ def access_facility_view(request, username):
     
     facility = Facility.objects.using("team_northcliff").get(id=facility_id)
     
-    # ポイント確認
-    if user.points < 1:
-        return JsonResponse({'error': 'ポイントが不足しています'}, status=400)
-    
-    # ポイント消費
-    user.points -= 1
-    user.save(using="team_northcliff")
-    
-    # FacilityAccess レコード作成（既存なら更新）
-    FacilityAccess.objects.using("team_northcliff").get_or_create(user=user, facility=facility)
+    # 5分以内にアクセス済みかチェック
+    five_minutes_ago = timezone.now() - timedelta(minutes=5)
+    existing_access = FacilityAccess.objects.using("team_northcliff").filter(
+        user=user, 
+        facility=facility, 
+        accessed_at__gte=five_minutes_ago
+    ).first()
+
+    if existing_access:
+        # 既にアクセス権がある場合はポイント消費なしで日時のみ更新
+        existing_access.save(using="team_northcliff") # auto_now=True なので save() で更新される
+    else:
+        # ポイント確認
+        if user.points < 1:
+            return JsonResponse({'error': 'ポイントが不足しています'}, status=400)
+        
+        # ポイント消費
+        user.points -= 1
+        user.save(using="team_northcliff")
+        
+        # FacilityAccess レコード作成（既存なら更新して日時を現在にする）
+        access_obj, created = FacilityAccess.objects.using("team_northcliff").get_or_create(user=user, facility=facility)
+        if not created:
+            access_obj.save(using="team_northcliff")
     
     return JsonResponse({
         'success': True,
@@ -170,7 +191,7 @@ def create_post_view(request, username):
         )
 
     # --- クールタイム: 同一ユーザーが同一施設に10分以内に投稿していないかチェック ---
-    ten_minutes_ago = timezone.now() - timedelta(minutes=10)
+    ten_minutes_ago = timezone.now() - timedelta(minutes=5)
     recent_same_posts = Post.objects.using("team_northcliff").filter(
         user=user,
         facility=facility,
@@ -178,7 +199,7 @@ def create_post_view(request, username):
     ).order_by('-created_at')
     if recent_same_posts.exists():
         return JsonResponse(
-            {'error': '１０分以内に同一の施設情報を投稿することはできません'},
+            {'error': '5分以内に同一の施設情報を投稿することはできません'},
             status=400
         )
     

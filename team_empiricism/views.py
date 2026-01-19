@@ -20,6 +20,9 @@ class ExperimentListView(ListView):
     paginate_by = 10  # ページネーション
 
     def get_queryset(self):
+        # 一覧表示時に自動処理を実行（要件3.6）
+        ExperimentPost.process_automatic_updates()
+        
         queryset = ExperimentPost.objects.all()
         
         # --- フィルタリング (検索) 機能 ---
@@ -53,8 +56,8 @@ class ExperimentListView(ListView):
             queryset = queryset.order_by('created_at')
         elif sort_by == 'schedule_near':
             # 実験実施日順 (近い順、ただし過去のものは除外または後ろにするなどの調整が可能)
-            # ここでは単純に実施日時昇順
-            queryset = queryset.order_by('schedule')
+            # ここでは単純に募集開始日昇順
+            queryset = queryset.order_by('start_date')
 
         return queryset
 

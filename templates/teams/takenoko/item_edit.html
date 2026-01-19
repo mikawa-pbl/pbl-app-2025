@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="ja">
@@ -376,6 +377,38 @@
 
         syncInputFiles();
         renderThumbs();
+      }
+
+      function removeImage(index) {
+        selectedFiles.splice(index, 1);
+        const dt = new DataTransfer();
+        selectedFiles.forEach((f) => dt.items.add(f));
+        $("images").files = dt.files;
+        renderThumbs();
+      }
+
+      function toggleExistingImageDelete(imgId) {
+        const el = $("existing_img_" + imgId);
+        const hidden = $("delete_img_" + imgId);
+        if (!el || !hidden) return;
+        const marked = el.classList.toggle("marked");
+        const btn = el.querySelector(".remove-btn");
+        if (marked) {
+          if (btn) btn.textContent = "×";
+          hidden.disabled = false;
+        } else {
+          if (btn) btn.textContent = "×";
+          hidden.disabled = true;
+        }
+        updatePickBtnState();
+      }
+
+      function updatePickBtnState() {
+        const existing = document.querySelectorAll("#existingThumbs .thumb").length;
+        const toBeDeleted = document.querySelectorAll("#existingThumbs input[type='hidden']:not([disabled])").length;
+        const existingRemaining = Math.max(0, existing - toBeDeleted);
+        const total = existingRemaining + selectedFiles.length;
+        $("pickBtn").disabled = total >= MAX_IMAGES || selectedFiles.length >= MAX_IMAGES;
       }
 
       // ===== 対象学年タグ select の色（required無しでも薄色placeholder化） =====

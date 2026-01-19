@@ -21,9 +21,9 @@
                 <tr>
                     <th scope="col" class="px-6 py-3">ID</th>
                     <th scope="col" class="px-6 py-3">商品名</th>
-                    <th scope="col" class="px-6 py-3">価格</th>
+                    <th scope="col" class="px-6 py-3">販売価格</th>
+                    <th scope="col" class="px-6 py-3">原価</th>
                     <th scope="col" class="px-6 py-3">在庫</th>
-                    <th scope="col" class="px-6 py-3">説明</th>
                     <th scope="col" class="px-6 py-3">状態</th>
                     <th scope="col" class="px-6 py-3">操作</th>
                 </tr>
@@ -34,8 +34,8 @@
                     <td class="px-6 py-4 text-gray-500">{{ product.id }}</td>
                     <td class="px-6 py-4 font-medium text-gray-900">{{ product.name }}</td>
                     <td class="px-6 py-4 font-bold text-blue-600">¥{{ product.current_price|floatformat:0 }}</td>
+                    <td class="px-6 py-4 text-gray-600">¥{{ product.cost_price|floatformat:0 }}</td>
                     <td class="px-6 py-4">{{ product.stock }}個</td>
-                    <td class="px-6 py-4 text-gray-500">{{ product.description|default:"-"|truncatewords:10 }}</td>
                     <td class="px-6 py-4">
                         {% if product.is_active %}
                         <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">販売中</span>

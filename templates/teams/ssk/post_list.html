@@ -31,7 +31,8 @@
     .timeline-window{max-height:60vh; overflow-y:auto; padding-right:8px;}
     .day{margin-bottom:12px}
 
-    .months{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;}
+    /* previous multi-column grid replaced with single-column stack */
+    .months{display:flex;flex-direction:column;gap:12px;}
     .card{background:var(--card);padding:12px;border-radius:8px;border:1px solid rgba(15,23,42,0.03);}
     .card a.title{font-weight:600;color:#0f172a;text-decoration:none;}
     .meta{font-size:0.9rem;color:var(--muted);margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
@@ -145,7 +146,7 @@
               <div style="display:flex;flex-direction:column;gap:8px;">
                 {% for entry in day.list %}
                   {# entry.post, entry.display_date, entry.is_range, entry.color_index #}
-                  <article class="card {% if entry.is_range %}range color-{{ entry.color_index }}{% endif %}">
+                  <article class="card {% if entry.is_range %}range color-{{ entry.color_index }}{% endif %}" data-href="{% url 'ssk:post_detail' entry.post.pk %}" tabindex="0" role="link" style="cursor:pointer;">
                     <a class="title" href="{% url 'ssk:post_detail' entry.post.pk %}">{{ entry.post.title }}</a>
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;">
                       <div class="meta" style="flex:1">
@@ -175,7 +176,7 @@
           <h3 style="margin:0 0 8px 0;">日付未設定</h3>
           <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
             {% for post in undated_posts %}
-              <li class="card" style="padding:10px;">
+              <li class="card" style="padding:10px;" data-href="{% url 'ssk:post_detail' post.pk %}" tabindex="0" role="link" aria-label="{{ post.title }}">
                 <a class="title" href="{% url 'ssk:post_detail' post.pk %}">{{ post.title }}</a>
                 <div class="meta">
                   {% for tag in post.tags.all %}
@@ -265,6 +266,28 @@
 
       // center after a short delay to allow layout
       window.addEventListener('load', function(){ setTimeout(centerTimeline, 120); });
+
+      // make event cards clickable: anywhere on card navigates to detail
+      function attachCardClickHandlers(){
+        const cards = Array.from(document.querySelectorAll('.card[data-href]'));
+        cards.forEach(card => {
+          card.addEventListener('click', function(e){
+            // ignore if user clicked an actual link or form control inside
+            if(e.target && (e.target.closest('a') || e.target.closest('button') || e.target.closest('input'))) return;
+            const href = card.dataset.href;
+            if(href) window.location.href = href;
+          });
+          card.addEventListener('keydown', function(e){
+            if(e.key === 'Enter' || e.key === ' '){
+              e.preventDefault();
+              const href = card.dataset.href;
+              if(href) window.location.href = href;
+            }
+          });
+        });
+      }
+      // attach after load/layout
+      window.addEventListener('load', function(){ setTimeout(attachCardClickHandlers, 150); });
 
     })();
   </script>

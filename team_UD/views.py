@@ -122,10 +122,10 @@ def get_companies(request):
             
             if search_query:
                 # 検索クエリがある場合は部分一致で検索
-                companies = Company.objects.using("team_UD").filter(name__icontains=search_query)[:50]
+                companies = Company.objects.using("team_UD").filter(name__icontains=search_query)
             else:
-                # 検索クエリがない場合は全件取得（最大100件）
-                companies = Company.objects.using("team_UD").all()[:100]
+                # 検索クエリがない場合は全件取得
+                companies = Company.objects.using("team_UD").all()
             
             company_list = [
                 {
@@ -161,7 +161,6 @@ def get_memo_by_date(request, year, month, day):
                     "company_name": memo.company.name if memo.company else "",
                     "interview_stage": memo.interview_stage,
                     "interview_date": memo.interview_date.strftime("%Y-%m-%d") if memo.interview_date else None,
-                    "status": memo.status,
                     "content": memo.content,
                     "interview_questions": memo.interview_questions,
                     "created_at": memo.created_at.strftime("%Y-%m-%d %H:%M:%S"),
@@ -191,7 +190,6 @@ def save_memo(request):
             company_id = data.get("company_id")
             interview_stage = data.get("interview_stage", "")
             interview_date_str = data.get("interview_date")
-            status = data.get("status", "")
             interview_questions = data.get("interview_questions", "")
             memo_id = data.get("id")
 
@@ -222,7 +220,6 @@ def save_memo(request):
                 memo.company = company
                 memo.interview_stage = interview_stage
                 memo.interview_date = interview_date
-                memo.status = status
                 memo.interview_questions = interview_questions
                 memo.save(using="team_UD")
             else:
@@ -236,7 +233,6 @@ def save_memo(request):
                     company=company,
                     interview_stage=interview_stage,
                     interview_date=interview_date,
-                    status=status,
                     interview_questions=interview_questions,
                 )
                 memo.save(using="team_UD")
@@ -250,7 +246,6 @@ def save_memo(request):
                     "company_name": memo.company.name if memo.company else "",
                     "interview_stage": memo.interview_stage,
                     "interview_date": memo.interview_date.strftime("%Y-%m-%d") if memo.interview_date else None,
-                    "status": memo.status,
                     "interview_questions": memo.interview_questions,
                     "date": memo.date.strftime("%Y-%m-%d"),
                     "created_at": memo.created_at.strftime("%Y-%m-%d %H:%M:%S"),
@@ -414,6 +409,162 @@ def get_statistics(request):
                     result.append(company_data)
             
             return JsonResponse({"statistics": result}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
+# 質問対策ページ
+def questions_view(request):
+    """質問対策ページ"""
+    if "user_id" not in request.session:
+        return redirect("team_UD:login")
+    
+    return render(request, "teams/team_UD/questions.html")
+
+
+@csrf_exempt
+def get_upcoming_companies(request):
+    """今後予定がある会社のリストを取得"""
+    if request.method == "GET":
+        try:
+            if "user_id" not in request.session:
+                return JsonResponse({"error": "ログインが必要です"}, status=401)
+            
+            user_id = request.session["user_id"]
+            today = datetime.now().date()
+            
+            # 今日以降の予定がある会社を取得
+            upcoming_memos = Memo.objects.using("team_UD").filter(
+                account_id=user_id,
+                date__gte=today,
+                company__isnull=False
+            ).select_related('company').order_by('date')
+            
+            # 会社ごとに最も近い予定日を取得
+            companies = {}
+            for memo in upcoming_memos:
+                company_id = memo.company.id
+                if company_id not in companies:
+                    companies[company_id] = {
+                        "id": company_id,
+                        "name": memo.company.name,
+                        "next_date": memo.date.strftime("%Y-%m-%d"),
+                        "stage": memo.interview_stage
+                    }
+            
+            return JsonResponse({"companies": list(companies.values())}, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
+@csrf_exempt
+def get_company_questions(request, company_id):
+    """特定の会社の質問リストを取得（過去の質問 + 回答状況）"""
+    if request.method == "GET":
+        try:
+            if "user_id" not in request.session:
+                return JsonResponse({"error": "ログインが必要です"}, status=401)
+            
+            user_id = request.session["user_id"]
+            
+            # 会社情報を取得
+            try:
+                company = Company.objects.using("team_UD").get(id=company_id)
+            except Company.DoesNotExist:
+                return JsonResponse({"error": "会社が見つかりません"}, status=404)
+            
+            # 過去のメモから質問を抽出
+            interview_stages = ['一次面接', '二次面接', '三次面接', '最終面接', 'グループディスカッション']
+            memos = Memo.objects.using("team_UD").filter(
+                company_id=company_id,
+                interview_stage__in=interview_stages,
+                interview_questions__isnull=False
+            ).exclude(interview_questions='')
+            
+            # 質問を収集
+            questions_from_memos = []
+            for memo in memos:
+                questions = memo.interview_questions.split('\n')
+                for question in questions:
+                    question = question.strip()
+                    if question:
+                        questions_from_memos.append({
+                            "question": question,
+                            "stage": memo.interview_stage,
+                            "date": memo.interview_date.strftime("%Y-%m-%d") if memo.interview_date else None,
+                            "memo_id": memo.id
+                        })
+            
+            # ユーザーの回答を取得
+            from .models import QuestionAnswer
+            answers = QuestionAnswer.objects.using("team_UD").filter(
+                account_id=user_id,
+                company_id=company_id
+            )
+            
+            answer_dict = {ans.question: ans for ans in answers}
+            
+            # 質問と回答をマージ
+            result = []
+            for q in questions_from_memos:
+                question_text = q["question"]
+                answer = answer_dict.get(question_text)
+                result.append({
+                    "question": question_text,
+                    "stage": q["stage"],
+                    "date": q["date"],
+                    "memo_id": q["memo_id"],
+                    "answer": answer.answer if answer else "",
+                    "answer_id": answer.id if answer else None,
+                    "has_answer": bool(answer and answer.answer)
+                })
+            
+            return JsonResponse({
+                "company_name": company.name,
+                "questions": result
+            }, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
+@csrf_exempt
+def save_question_answer(request):
+    """質問への回答を保存"""
+    if request.method == "POST":
+        try:
+            if "user_id" not in request.session:
+                return JsonResponse({"error": "ログインが必要です"}, status=401)
+            
+            user_id = request.session["user_id"]
+            data = json.loads(request.body)
+            
+            company_id = data.get("company_id")
+            question = data.get("question")
+            answer = data.get("answer", "")
+            
+            if not company_id or not question:
+                return JsonResponse({"error": "会社と質問は必須です"}, status=400)
+            
+            account = Account.objects.using("team_UD").get(id=user_id)
+            company = Company.objects.using("team_UD").get(id=company_id)
+            
+            from .models import QuestionAnswer
+            # 既存の回答があれば更新、なければ作成
+            answer_obj, created = QuestionAnswer.objects.using("team_UD").get_or_create(
+                account=account,
+                company=company,
+                question=question,
+                defaults={"answer": answer}
+            )
+            
+            if not created:
+                answer_obj.answer = answer
+                answer_obj.save(using="team_UD")
+            
+            return JsonResponse({
+                "message": "保存しました",
+                "answer_id": answer_obj.id
+            }, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 

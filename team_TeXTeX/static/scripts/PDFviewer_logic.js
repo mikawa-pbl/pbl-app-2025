@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
   // PDF.js worker setting
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  // CMap setting for Japanese support
+  const CMAP_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/bcmaps/';
+  const CMAP_PACKED = true;
 
   const pdfCanvas = document.getElementById('the-canvas');
   if (!pdfCanvas) return; // Canvasがない場合は何もしない
@@ -30,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
     pageRendering = true;
 
     // Fetch page
-    pdfDoc.getPage(num).then(function (page) {
+    return pdfDoc.getPage(num).then(function (page) {
       const viewport = page.getViewport({ scale: scale });
 
       // Support HiDPI-screens.
@@ -57,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const renderTask = page.render(renderContext);
 
       // Wait for render to finish
-      renderTask.promise.then(function () {
+      return renderTask.promise.then(function () {
         pageRendering = false;
         if (pageNumPending !== null) {
           // New page rendering is pending
@@ -88,17 +91,102 @@ document.addEventListener('DOMContentLoaded', function () {
     currentPdfUrl = url;
     console.log("Loading PDF from:", url);
 
-    const loadingTask = pdfjsLib.getDocument(url);
-    loadingTask.promise.then(function (pdfDoc_) {
-      pdfDoc = pdfDoc_;
-      // console.log('PDF loaded. Pages:', pdfDoc.numPages);
+    // エラー表示用コンテナを取得または作成
+    let errorContainer = document.getElementById('pdf-error-container');
+    if (!errorContainer) {
+      errorContainer = document.createElement('div');
+      errorContainer.id = 'pdf-error-container';
+      errorContainer.style.padding = '20px';
+      errorContainer.style.color = '#721c24';
+      errorContainer.style.backgroundColor = '#f8d7da';
+      errorContainer.style.border = '1px solid #f5c6cb';
+      errorContainer.style.borderRadius = '5px';
+      errorContainer.style.margin = '10px';
+      errorContainer.style.whiteSpace = 'pre-wrap';
+      errorContainer.style.fontFamily = 'monospace';
+      errorContainer.style.overflow = 'auto';
+      errorContainer.style.maxHeight = '100%';
+      errorContainer.style.display = 'none';
 
-      // Initial render
-      renderPage(pageNum);
+      // canvasContainerの親要素に追加するが、canvasContainer自体を隠す必要があるかもしれない
+      canvasContainer.appendChild(errorContainer);
+    }
 
-    }, function (reason) {
-      console.error('Error loading PDF:', reason);
-    });
+    // まずエラーを非表示、Canvasを表示
+    errorContainer.style.display = 'none';
+    errorContainer.innerHTML = '';
+    pdfCanvas.style.display = 'block';
+
+    // FetchでPDFを取得することでステータスコードを確認
+    fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          // エラーの場合 (500 Internal Server Errorなど)
+          return response.text().then(text => {
+            throw new Error("Compilation Error:\n" + text);
+          });
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        const objectUrl = URL.createObjectURL(blob);
+        const loadingTask = pdfjsLib.getDocument({
+          url: objectUrl,
+          cMapUrl: CMAP_URL,
+          cMapPacked: CMAP_PACKED
+        });
+        return loadingTask.promise;
+      })
+      .then(function (pdf) {
+        pdfDoc = pdf;
+        // console.log("PDF Loaded. Pages:", pdf.numPages);
+        // console.log("PDF Loaded. Pages:", pdf.numPages);
+        return renderPage(pageNum);
+      })
+      .then(function () {
+        // ローディング非表示
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.style.display = 'none';
+
+        // コンパイル完了フラグ OFF & ボタン復帰
+        window.isCompiling = false;
+        const compileButton = document.getElementById('compile-button');
+        if (compileButton) {
+          compileButton.disabled = false;
+          compileButton.innerHTML = '<span class="material-symbols-rounded">play_arrow</span>';
+        }
+
+      }, function (reason) {
+        // PDF loading error
+        console.error('Error loading PDF:', reason);
+
+        // ローディング非表示 (エラー時も)
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.style.display = 'none';
+
+        // コンパイル完了フラグ OFF & ボタン復帰
+        window.isCompiling = false;
+        const compileButton = document.getElementById('compile-button');
+        if (compileButton) {
+          compileButton.disabled = false;
+          compileButton.innerHTML = '<span class="material-symbols-rounded">play_arrow</span>';
+        }
+
+        // エラーを画面に表示
+        // pdfCanvas.style.display = 'none'; // This is already handled below
+        // errorContainer.style.display = 'block'; // This is already handled below
+        // ... error display logic can remain or be improved here
+        pdfCanvas.style.display = 'none';
+        errorContainer.style.display = 'block';
+        // HTMLタグが含まれている場合があるのでinnerHTMLを使うが、XSSに注意
+        // views.pyからは <br><pre>...</pre> で返ってくる想定
+        // エラーメッセージの prefix "Compilation Error:\n" を除去して表示
+        let msg = reason.message || reason;
+        if (typeof msg === 'string' && msg.startsWith("Compilation Error:\n")) {
+          msg = msg.substring("Compilation Error:\n".length);
+        }
+        errorContainer.innerHTML = msg;
+      });
   };
 
   // --------------------------------------------------------

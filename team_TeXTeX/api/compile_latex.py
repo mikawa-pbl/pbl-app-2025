@@ -17,6 +17,7 @@ def compile_latex(request):
 
     # 一時ファイルのディレクトリ設定
     TEMP_DIR = os.path.join(settings.BASE_DIR, 'temp_latex')
+    print(f"TEMP_DIR = {TEMP_DIR}")
     os.makedirs(TEMP_DIR, exist_ok=True)
 
     TEX_FILENAME = 'document.tex'

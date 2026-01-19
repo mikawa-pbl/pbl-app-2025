@@ -62,16 +62,21 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(data => {
         console.log("Saved successfully:", data);
         // 保存完了表示 -> ボタンをアイコンに戻す
-        compileButton.innerHTML = '<span class="material-symbols-rounded">play_arrow</span>';
+        // compileButton.innerHTML = '<span class="material-symbols-rounded">play_arrow</span>';
         return data;
       })
       .catch(error => {
         console.error("Save error:", error);
         alert("保存に失敗しました。");
         // エラー時もアイコンに戻す
-        compileButton.innerHTML = '<span class="material-symbols-rounded">play_arrow</span>';
+        // compileButton.innerHTML = '<span class="material-symbols-rounded">play_arrow</span>';
       })
       .finally(() => {
+        // コンパイル中の場合はボタン状態をリセットしない
+        if (window.isCompiling) {
+          return;
+        }
+
         compileButton.disabled = false;
         // finallyでも念のためチェックして戻す
         if (compileButton.querySelector('.spinner')) {

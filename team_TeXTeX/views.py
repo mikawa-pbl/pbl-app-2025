@@ -40,13 +40,24 @@ def compile_project(request, project_id):
                 if dirname and not os.path.exists(dirname):
                     os.makedirs(dirname, exist_ok=True)
                 
-                with open(file_path, 'w', encoding='utf-8') as dst:
-                    dst.write(f.content or "")
+                if f.content and f.content.startswith("[BASE64]"):
+                    # Base64デコードしてバイナリ書き込み
+                    import base64
+                    binary_data = base64.b64decode(f.content[8:])
+                    with open(file_path, 'wb') as dst:
+                        dst.write(binary_data)
+                else:
+                    # 通常のテキスト書き込み
+                    with open(file_path, 'w', encoding='utf-8') as dst:
+                        dst.write(f.content or "")
             
             # latexmk実行
             # -interaction=nonstopmode: エラーで止まらないようにする
-            # -pdf: PDFを出力
-            cmd = ['latexmk', '-pdf', '-interaction=nonstopmode', main_file_obj.filename]
+            # -pdf: PDFを出力 (pdflatex) -> jsarticle等の場合エラーになる
+            # -pdfdvi: DVI経由でPDFを作成 (uplatex + dvipdfmx) -> .latexmkrcの設定に従うはず
+            # -pdfdvi: DVI経由でPDFを作成 (uplatex + dvipdfmx) -> .latexmkrcの設定に従うはず
+            # 明示的に .latexmkrc を読み込ませる (-r .latexmkrc) -> 自動読み込みと重複して警告が出るため削除
+            cmd = ['latexmk', '-interaction=nonstopmode', main_file_obj.filename]
             
             try:
                 # Capture output for debugging
@@ -286,8 +297,8 @@ def delete_file(request):
              return JsonResponse({'error': 'File ID required'}, status=400)
 
         project_file = get_object_or_404(ProjectFile, id=file_id)
-        if project_file.is_main:
-             return JsonResponse({'error': 'Cannot delete main file'}, status=400)
+        if project_file.is_main or project_file.filename == '.latexmkrc':
+             return JsonResponse({'error': 'Cannot delete main file or configuration file (.latexmkrc)'}, status=400)
              
         project_file.delete()
         return JsonResponse({'status': 'deleted'})
@@ -351,15 +362,16 @@ def upload_file(request):
         else:
              final_filename = filename
 
-        # コンテンツの読み込み (テキストファイル前提)
+        # コンテンツの読み込み
         try:
-             # read and decode. If binary, need generic handling but this app seems text-focused for now (tex/pbl?)
-             # User requested "local file upload". If images, we need binary storage.
-             # Current ProjectFile model has 'content' as TextField?
-             # Let's check model.
+             # まずテキストとして試みる
              content = uploaded_file.read().decode('utf-8')
         except UnicodeDecodeError:
-             return JsonResponse({'error': 'Only text files (UTF-8) are supported currently.'}, status=400)
+             # 失敗した場合はバイナリとみなし、Base64エンコードして保存
+             import base64
+             uploaded_file.seek(0)
+             binary_data = uploaded_file.read()
+             content = "[BASE64]" + base64.b64encode(binary_data).decode('utf-8')
 
         # 保存 (上書き or エラー?) -> 上書き許可にするか、別名にするか。
         # 今回は上書き許可とする (単純化)
@@ -391,9 +403,14 @@ def download_project(request, project_id):
     with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
         for f in files:
             # フォルダ構造は filename に含まれている (e.g. "subdir/test.tex")
-            # コンテンツがNoneの場合は空文字扱い
             content = f.content if f.content else ""
-            zip_file.writestr(f.filename, content)
+            
+            if content.startswith("[BASE64]"):
+                 import base64
+                 binary_data = base64.b64decode(content[8:])
+                 zip_file.writestr(f.filename, binary_data)
+            else:
+                 zip_file.writestr(f.filename, content)
 
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/zip')

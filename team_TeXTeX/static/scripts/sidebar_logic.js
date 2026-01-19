@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const sidebarContent = document.getElementById('sidebar-content');
     const popup = document.getElementById('tex-preview-popup');
     const previewImage = document.getElementById('tex-preview-image');
-    let currentCheckedItem = null;
+    // let currentCheckedItem = null; // Refactored to global query
 
     // リサイズ関連の要素
     const editorInterface = document.getElementById('editor-interface');
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 2. イベントリスナー (Event Delegation)
     // -----------------------------------------------------------------
 
-    // クリックイベント (クリップボードコピー)
+    // クリックイベント (クリップボードコピー & 自動ペースト)
     sidebarContent.addEventListener('click', function (e) {
         const link = e.target.closest('a.tex-item');
         if (!link) return;
@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!texCode) return;
 
         const inlineToggle = document.getElementById('inline-mode-toggle');
+        const autoPasteToggle = document.getElementById('auto-paste-toggle');
         let textToCopy = texCode;
 
         // インラインモードがON、かつ、環境定義(begin/display)でない場合に$で囲む
@@ -56,16 +57,29 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         navigator.clipboard.writeText(textToCopy).then(() => {
-            // 常駐チェックマークの更新
-            if (currentCheckedItem) {
-                const oldCheckMark = currentCheckedItem.parentElement.querySelector('.copy-checkmark');
-                if (oldCheckMark) { oldCheckMark.remove(); }
+            // 1. 既存のすべてのチェックマークを削除 (重複防止)
+            document.querySelectorAll('.copy-checkmark').forEach(el => el.remove());
+
+            // 2. 同じTeXコードを持つすべてのアイテムにチェックマークを付与 (同期)
+            // data-tex-code属性で検索 (CSS.escapeでエスケープ処理)
+            const selector = `a.tex-item[data-tex-code="${CSS.escape(texCode)}"]`;
+            const sameItems = document.querySelectorAll(selector);
+
+            sameItems.forEach(item => {
+                const checkMark = document.createElement('span');
+                checkMark.textContent = '✓';
+                checkMark.className = 'copy-checkmark';
+                item.parentElement.appendChild(checkMark);
+            });
+
+            // 3. 自動ペースト機能
+            if (autoPasteToggle && autoPasteToggle.checked) {
+                const texInput = document.getElementById('tex-input');
+                if (texInput && !texInput.disabled) {
+                    insertAtCursor(texInput, textToCopy);
+                }
             }
-            const checkMark = document.createElement('span');
-            checkMark.textContent = '✓';
-            checkMark.className = 'copy-checkmark';
-            link.parentElement.appendChild(checkMark);
-            currentCheckedItem = link;
+
         }).catch(err => {
             console.error('クリップボードへのコピーに失敗しました:', err);
             const message = link.parentElement.querySelector('.copy-error-msg');
@@ -79,6 +93,51 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => errorMsg.remove(), 2000);
         });
     });
+
+    // ドラッグ開始イベント (Drag & Drop)
+    sidebarContent.addEventListener('dragstart', function (e) {
+        const link = e.target.closest('a.tex-item');
+        if (!link) return;
+
+        const texCode = link.getAttribute('data-tex-code');
+        if (!texCode) return;
+
+        const inlineToggle = document.getElementById('inline-mode-toggle');
+        let textToDrag = texCode;
+
+        // インラインモードの考慮 (クリック時と同じロジック)
+        if (inlineToggle && inlineToggle.checked) {
+            if (!texCode.includes('\\begin') && !texCode.includes('\\[') && !texCode.includes('$$') && !texCode.startsWith('$')) {
+                textToDrag = `$${texCode}$`;
+            }
+        }
+
+        e.dataTransfer.setData('text/plain', textToDrag);
+        // ドロップ時の副作用を許可
+        e.dataTransfer.effectAllowed = 'copy';
+    });
+
+    // カーソル位置へ挿入するヘルパー関数
+    function insertAtCursor(input, text) {
+        input.focus();
+        // execCommand('insertText') はUndo履歴に残るため推奨
+        // ただし非推奨になりつつあるため、fallbackも考慮
+        const success = document.execCommand('insertText', false, text);
+
+        if (!success) {
+            // Fallback for newer browsers checking explicit supported commands or if execCommand fails
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const originalText = input.value;
+            const newText = originalText.substring(0, start) + text + originalText.substring(end);
+            input.value = newText;
+            input.selectionStart = input.selectionEnd = start + text.length;
+
+            // inputイベントを発火させて変更を通知
+            const event = new Event('input', { bubbles: true });
+            input.dispatchEvent(event);
+        }
+    }
 
     // ホバープレビュー (mouseover/mouseout delegation)
     // mouseover/mouseout はバブリングする
@@ -220,8 +279,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // リアルタイム検索（オプション: 入力時に即時反映させる場合）
-        // searchBox.addEventListener('input', executeSearch);
+        // リアルタイム検索
+        searchBox.addEventListener('input', executeSearch);
     }
 
     // -----------------------------------------------------------------

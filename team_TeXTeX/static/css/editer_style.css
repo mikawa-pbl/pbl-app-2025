@@ -134,19 +134,21 @@ input:checked+.slider:before {
 #inline-mode-container {
     display: flex;
     justify-content: flex-start;
-    /* 左寄せ */
+    align-items: center;
+    padding-left: 2px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+#auto-paste-mode-container {
+    display: flex;
+    justify-content: flex-start;
     align-items: center;
     padding-bottom: 10px;
-    /* 下のパディングのみ */
     margin-bottom: 10px;
-    /* 下のマージンを追加 */
     padding-left: 2px;
-    /* タブ（ボタン）の左端に合わせる */
-    /* 背景色と枠線を削除してサイドバーに馴染ませる */
     border-bottom: 1px solid #ddd;
-    /* 横線を復活 */
     flex-shrink: 0;
-    /* 縮小しない */
 }
 
 /* ... toggle styles ... */
@@ -376,15 +378,19 @@ input:checked+.slider:before {
 
 /* テキストエリア */
 #tex-input {
-    flex-grow: 1;
     width: 100%;
-    min-height: 0;
+    height: calc(100% - 40px);
+    /* ヘッダー分を引く */
     padding: 10px;
-    border: 1px solid #ddd;
-    box-sizing: border-box;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 14px;
+    padding-bottom: 50px;
+    /* Added extra space at bottom */
     resize: none;
+    border: none;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    outline: none;
+    box-sizing: border-box;
 }
 
 
@@ -397,6 +403,12 @@ input:checked+.slider:before {
     overflow-y: auto;
     background-color: #f8f8f8;
     margin-top: 0;
+}
+
+#pdf-render-container {
+    /* inline style in HTML overwrites some, but let's reinforce here for padding */
+    padding-bottom: 50px !important;
+    /* Added extra space at bottom */
 }
 
 
@@ -468,8 +480,11 @@ input:checked+.slider:before {
     border: 3px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     border-top: 3px solid #fff;
-    width: 14px;
-    height: 14px;
+    width: 20px;
+    /* Was 14px content + 3px*2 border = 20px total. keeping 20px total */
+    height: 20px;
+    box-sizing: border-box;
+    /* Pivot point fix */
     -webkit-animation: spin 1s linear infinite;
     /* Safari */
     animation: spin 1s linear infinite;
@@ -543,6 +558,29 @@ input:checked+.slider:before {
     margin: 0;
     font-size: 14px;
     color: #333;
+}
+
+/* Loading Overlay */
+#loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(50, 50, 50, 0.8);
+    /* Darker background for PDF area */
+    z-index: 10;
+    /* Higher than canvas */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    /* Text color */
+}
+
+#loading-overlay .spinner {
+    box-sizing: border-box;
 }
 
 .modal-body {

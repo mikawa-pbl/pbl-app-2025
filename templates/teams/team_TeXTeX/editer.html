@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   {% load static %}
   <!-- styles.cssとediter_style.cssを参照 -->
-  <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}?v=17" />
-  <link rel="stylesheet" href="{% static 'css/editer_style.css' %}?v=41">
-  <link rel="stylesheet" href="{% static 'css/favorites_style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/editer_style.css' %}?v=16">
+  <link rel="stylesheet" href="{% static 'css/favorites_style.css' %}?v=2">
   <link rel="stylesheet" type="text/css" href="{% static 'css/search_style.css' %}" />
   <!-- Google Fonts: Material Symbols Rounded -->
   <link rel="stylesheet"
@@ -71,6 +71,15 @@
         <span class="toggle-label mathjax_ignore">インライン数式($...$)</span>
       </div>
 
+      <!-- 自動ペーストモードトグル -->
+      <div id="auto-paste-mode-container">
+        <label class="toggle-switch">
+          <input type="checkbox" id="auto-paste-toggle">
+          <span class="slider round"></span>
+        </label>
+        <span class="toggle-label mathjax_ignore">クリックで自動ペースト</span>
+      </div>
+
       <!-- Djangoテンプレートタグでコンテンツを生成 -->
       <div id="sidebar-content">
         <!-- お気に入りタブ -->
@@ -82,7 +91,7 @@
               <span class="material-symbols-rounded star-icon active"
                 data-slug="{{ item.slug.function_slug }}">star</span>
               <a href="{% url 'team_TeXTeX:function_template' function_slug=item.slug.function_slug %}" class="tex-item"
-                data-tex-code="{{ item.tex_code }}">{{ item.name }}</a>
+                data-tex-code="{{ item.tex_code }}" draggable="true">{{ item.name }}</a>
             </li>
             {% endfor %}
           </ul>
@@ -123,6 +132,8 @@
                 class="material-symbols-rounded">play_arrow</span></button>
           </div>
           <textarea id="tex-input" placeholder="LaTeXコードを入力...">{{ file_content }}</textarea>
+          <img id="image-preview"
+            style="display:none; max-width: 100%; height: auto; object-fit: contain; margin: auto;" alt="Image Preview">
         </div>
 
         <!-- リサイズ用スプリッター -->
@@ -139,8 +150,14 @@
             </div>
           </div>
           <div id="pdf-render-container"
-            style="flex: 1; height: 100%; overflow: auto; background-color: #525659; display: flex; justify-content: center; padding: 10px;">
+            style="flex: 1; height: 100%; overflow: auto; background-color: #525659; display: flex; justify-content: center; padding: 10px; position: relative;">
             <canvas id="the-canvas" style="box-shadow: 0 0 10px rgba(0,0,0,0.5);"></canvas>
+
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" style="display: none;">
+              <div class="spinner"></div>
+              <span>Processing...</span>
+            </div>
           </div>
         </div>
       </div>
@@ -156,20 +173,20 @@
   <!-- JavaScriptファイルを読み込み -->
   <!-- PDF.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="{% static 'scripts/sidebar_logic.js' %}?v=19"></script>
+  <script src="{% static 'scripts/sidebar_logic.js' %}?v=22"></script>
   <script src="{% static 'scripts/preview_logic.js' %}"></script>
   <script>
     window.favoriteToggleUrl = "{% url 'team_TeXTeX:toggle_favorite' %}";
   </script>
   <script src="{% static 'scripts/favorites_logic.js' %}?v=4"></script>
-  <script src="{% static 'scripts/PDFviewer_logic.js' %}?v=2"></script>
+  <script src="{% static 'scripts/PDFviewer_logic.js' %}?v=6"></script>
   <script>
     window.saveFileUrl = "{% url 'team_TeXTeX:save_file' %}";
     window.projectId = "{{ project.id }}";
     window.csrfToken = "{{ csrf_token }}"; // 追加
   </script>
-  <script src="{% static 'scripts/editor_logic.js' %}?v=2"></script>
-  <script src="{% static 'scripts/file_manager.js' %}?v=19"></script>
+  <script src="{% static 'scripts/editor_logic.js' %}?v=3"></script>
+  <script src="{% static 'scripts/file_manager.js' %}?v=21"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -185,6 +202,17 @@
 
       if (compileButton && projectId) {
         compileButton.addEventListener('click', function () {
+          // コンパイル開始フラグ ON
+          window.isCompiling = true;
+
+          // ローディングオーバーレイを表示
+          const overlay = document.getElementById('loading-overlay');
+          if (overlay) overlay.style.display = 'flex';
+
+          // ボタンもスピナー中にする（editor_logic.jsでsave中に設定されるが、ここでも念のため）
+          compileButton.innerHTML = '<div class="spinner"></div>';
+          compileButton.disabled = true;
+
           // 保存してからコンパイル
           if (window.saveAndCompile) {
             window.saveAndCompile(() => {
@@ -197,12 +225,16 @@
               }
             });
           } else {
-            // フォールバック
-            const timestamp = new Date().getTime();
-            const pdfUrl = `{% url 'team_TeXTeX:compile_project' project_id=project.id %}?t=${timestamp}`;
-            if (window.loadPDF) window.loadPDF(pdfUrl);
+            // ... fallback logic (should also show spinner but keeping simple for now)
+            alert("Save logic missing");
+            if (overlay) overlay.style.display = 'none';
           }
         });
+      } else {
+        // フォールバック
+        const timestamp = new Date().getTime();
+        const pdfUrl = `{% url 'team_TeXTeX:compile_project' project_id=project.id %}?t=${timestamp}`;
+        if (window.loadPDF) window.loadPDF(pdfUrl);
       }
     });
   </script>

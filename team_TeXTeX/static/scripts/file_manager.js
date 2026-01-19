@@ -507,7 +507,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const controls = document.createElement('div');
     controls.className = 'file-controls';
 
-    if (!file.is_main) {
+    if (!file.is_main && file.filename !== '.latexmkrc') {
       const deleteBtn = document.createElement('span');
       deleteBtn.className = 'material-symbols-rounded action-icon';
       deleteBtn.textContent = 'delete';
@@ -614,8 +614,35 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(res => res.json())
       .then(data => {
         if (data.error) throw new Error(data.error);
-        texInput.value = data.content;
-        texInput.disabled = false;
+
+        const imgPreview = document.getElementById('image-preview');
+
+        if (data.content.startsWith('[BASE64]')) {
+          // バイナリファイル(画像)の場合
+          texInput.style.display = 'none';
+          imgPreview.style.display = 'block';
+
+          // 拡張子からMIMEタイプを推測
+          const ext = data.filename.split('.').pop().toLowerCase();
+          let mime = 'image/png'; // default
+          if (ext === 'jpg' || ext === 'jpeg') mime = 'image/jpeg';
+          else if (ext === 'gif') mime = 'image/gif';
+          else if (ext === 'svg') mime = 'image/svg+xml';
+          else if (ext === 'webp') mime = 'image/webp';
+
+          const base64Data = data.content.substring(8); // '[BASE64]'の8文字を除去
+          imgPreview.src = `data:${mime};base64,${base64Data}`;
+
+          texInput.value = "[Image File]"; // 裏で入れておく（保存時はどうする？今回は閲覧のみ想定）
+          texInput.disabled = true;
+        } else {
+          // テキストファイルの場合
+          texInput.style.display = 'block';
+          imgPreview.style.display = 'none';
+          imgPreview.src = '';
+          texInput.value = data.content;
+          texInput.disabled = false;
+        }
 
         const displayPath = formatPath(data.filename);
 

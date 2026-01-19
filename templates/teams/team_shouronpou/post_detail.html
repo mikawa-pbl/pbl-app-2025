@@ -1,108 +1,136 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ post.title }} - 募集詳細</title>
-</head>
-<body>
-    <h2>{{ post.title }}</h2>
-    <p><strong>投稿日時:</strong> {{ post.created_at }}</p>
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/schedule.css' %}">
+<body class="app-page">
 
-    <hr>
-    <h3>募集状況</h3>
-    <div style="border: 2px solid #ddd; padding: 15px; margin: 10px 0; background-color: #f9f9f9;">
-        <p>
-            <strong>募集人数:</strong> 
-            {% if post.max_participants %}
-                {{ post.max_participants }} 名
-            {% else %}
-                無制限
-            {% endif %}
-        </p>
-        <p>
-            <strong>現在の参加者:</strong> {{ post.current_participants }} 名
-        </p>
-
-        {% if post.max_participants %}
-            <p>
-                <strong>残り枠:</strong> 
-                <span style="font-size: 1.5em; font-weight: bold; color: {% if post.remaining_spots == 0 %}red{% else %}blue{% endif %};">
-                    {{ post.remaining_spots }}
-                </span> 名
-            </p>
-
-            {% if post.remaining_spots > 0 %}
-                <form action="{% url 'team_shouronpou:post_apply' post.pk %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" style="font-size: 1.2em; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 5px;">
-                        応募する
-                    </button>
-                </form>
-            {% else %}
-                <p style="color: red; font-weight: bold; font-size: 1.2em;">募集は終了しました（満員）</p>
-            {% endif %}
-
-        {% else %}
-            <form action="{% url 'team_shouronpou:post_apply' post.pk %}" method="post">
-                {% csrf_token %}
-                <button type="submit" style="font-size: 1.2em; padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 5px;">
-                    応募する
-                </button>
-            </form>
-        {% endif %}
+<div class="container">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'team_shouronpou:post_list' %}" class="btn-outline">&larr; 一覧に戻る</a>
     </div>
 
-    <hr>
-    <h3>募集要項</h3>
-    <p>
-        <strong>募集期間:</strong> 
-        {% if post.recruitment_start_date or post.recruitment_end_date %}
-            {{ post.recruitment_start_date|date:"Y年n月j日"|default:"指定なし" }}
-            〜 
-            {{ post.recruitment_end_date|date:"Y年n月j日"|default:"指定なし" }}
-        {% else %}
-            特に指定なし
-        {% endif %}
-    </p>
+    <div class="header">
+        <h1>{{ post.title }}</h1>
+        <div class="meta-info">
+            投稿日: {{ post.created_at|date:"Y/m/d H:i" }} | 
+            投稿者: {{ post.created_by.username|default:"ゲスト" }}
+        </div>
+    </div>
 
-    <hr>
-    <h3>参加条件</h3>
-    <table style="width: 100%; border-collapse: collapse;">
+    <h3>実験概要</h3>
+    <table class="info-table">
         <tr>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd; width: 30%;"><strong>国籍</strong></td>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;">
-                {{ post.condition_nationality | default:"特に指定なし" }}
-            </td>
+            <th>実施場所 (研究室)</th>
+            <td>{{ post.department }} / {{ post.laboratory }}</td>
         </tr>
         <tr>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>性別</strong></td>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;">
-                {{ post.condition_gender | default:"特に指定なし" }}
-            </td>
+            <th>報酬</th>
+            <td>{{ post.reward }}</td>
         </tr>
         <tr>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>持病の有無</strong></td>
-            <td style="padding: 8px; border-bottom: 1px solid #ddd;">
-                {{ post.condition_has_disease | default:"特に指定なし" }}
-            </td>
+            <th>所要時間</th>
+            <td>{{ post.duration }} 分</td>
         </tr>
     </table>
 
-    <hr>
     <h3>募集内容</h3>
-    <div style="margin-bottom: 20px;">
-      {{ post.content|urlize|linebreaksbr }}
-    </div>
-    <hr>
+    <div style="line-height: 1.8; white-space: pre-wrap;">{{ post.content|urlize }}</div>
 
-    <div style="margin-top: 20px;">
-        <a href="{% url 'team_shouronpou:post_edit' post.pk %}">編集する</a>
-        <span style="margin: 0 10px;">|</span>
-        <a href="{% url 'team_shouronpou:post_delete' post.pk %}" style="color: red;">削除する</a>
-    </div>
+    <h3>参加条件・配慮事項</h3>
+    <table class="info-table">
+        <tr>
+            <th>国籍条件</th>
+            <td>{{ post.condition_nationality|default:"指定なし" }}</td>
+        </tr>
+        <tr>
+            <th>性別条件</th>
+            <td>{{ post.get_condition_gender_display|default:"指定なし" }}</td>
+        </tr>
+        <tr>
+            <th>対象年齢</th>
+            <td>{{ post.target_age|default:"指定なし" }}</td>
+        </tr>
+        <tr>
+            <th>健康面の配慮</th>
+            <td>{{ post.health_notes|default:"特になし"|linebreaksbr }}</td>
+        </tr>
+        {% if post.free_notes %}
+        <tr>
+            <th>その他</th>
+            <td>{{ post.free_notes|linebreaksbr }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    <h3>実験受け入れ可能時間</h3>
+    <p><small>緑色：募集者の提示時間　<span style="color:#007bff; font-weight:bold;">青色：あなたとマッチした時間</span></small></p>
     
-    <p style="margin-top: 30px;">
-        <a href="{% url 'team_shouronpou:post_list' %}">掲示板一覧に戻る</a>
-    </p>
+    <input type="hidden" id="view_slots_data" value="{{ post.available_slots }}">
+    {% if login_user %}
+        <input type="hidden" id="login_user_slots" value="{{ login_user.available_slots }}">
+    {% endif %}
+
+    <div class="schedule-container-view">
+        <div class="schedule-grid-view" id="viewGrid"></div>
+    </div>
+
+    <div class="status-section">
+        <p>募集期間: 
+            {% if post.recruitment_start_date or post.recruitment_end_date %}
+                {{ post.recruitment_start_date|date:"Y/m/d"|default:"-" }} 〜 {{ post.recruitment_end_date|date:"Y/m/d"|default:"-" }}
+            {% else %}
+                常時募集中
+            {% endif %}
+        </p>
+
+        <div style="display: flex; justify-content: space-around; margin: 20px 0;">
+            <div>
+                <small>募集人数</small>
+                <div class="status-number">
+                    {% if post.max_participants %}{{ post.max_participants }}名{% else %}無制限{% endif %}
+                </div>
+            </div>
+            <div>
+                <small>現在の参加者</small>
+                <div class="status-number">{{ post.current_participants }}名</div>
+            </div>
+            {% if post.max_participants %}
+            <div>
+                <small>残り枠</small>
+                <div class="status-number" style="color: {% if post.remaining_spots == 0 %}#dc3545{% else %}#28a745{% endif %};">
+                    {{ post.remaining_spots }}名
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-top: 20px;">
+            {% if post.max_participants and post.remaining_spots == 0 %}
+                <button class="btn btn-secondary" disabled>満員のため応募できません</button>
+            {% else %}
+                <form action="{% url 'team_shouronpou:post_apply' post.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">この募集に応募する</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div style="margin-top: 40px; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
+        {% if not post.created_by_id or login_user and post.created_by_id == login_user.id %}
+            <a href="{% url 'team_shouronpou:post_edit' post.pk %}" class="btn btn-primary" style="font-size: 0.9rem;">編集する</a>
+            <a href="{% url 'team_shouronpou:post_delete' post.pk %}" class="btn btn-danger" style="font-size: 0.9rem;">削除する</a>
+        {% endif %}
+    </div>
+
+</div>
+
+<script src="{% static 'team_shouronpou/js/schedule_viewer.js' %}"></script>
+
 </body>
 </html>

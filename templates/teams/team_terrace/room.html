@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{{ room.title }} - Anony Chat</title>
+    <link rel="stylesheet" href="{% static 'team_terrace/css/room.css' %}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="gradient-bg"></div>
+    <div class="floating-shapes"></div>
+
+    <!-- Header -->
+    <header class="app-header">
+        <a href="{% url 'team_terrace:index' %}" class="app-logo">
+            <span class="back-icon">←</span>
+            <span>Anony Chat</span>
+        </a>
+        <span class="room-title">{{ room.title }}</span>
+    </header>
+
+    <!-- Chat Messages -->
+    <div id="chat-container">
+        <!-- Empty state shown when no messages -->
+        <div class="empty-state" id="empty-state">
+            <div class="empty-state-icon">💭</div>
+            <div class="empty-state-text">まだメッセージがありません<br>最初のメッセージを送ってみましょう</div>
+        </div>
+    </div>
+
+    <!-- Reaction Animation Canvas -->
+    <div id="reaction-canvas"></div>
+
+    <!-- Reaction Bar -->
+    <div class="reaction-bar">
+        <button class="reaction-btn" onclick="sendReaction('like')" type="button">
+            <span class="reaction-icon">👍</span>
+            <span class="reaction-label">いいね</span>
+        </button>
+        <button class="reaction-btn" onclick="sendReaction('heh')" type="button">
+            <span class="reaction-icon">😮</span>
+            <span class="reaction-label">へぇ〜</span>
+        </button>
+        <button class="reaction-btn" onclick="sendReaction('question')" type="button">
+            <span class="reaction-icon">❓</span>
+            <span class="reaction-label">？？？</span>
+        </button>
+        <button class="reaction-btn" onclick="sendReaction('clap')" type="button">
+            <span class="reaction-icon">👏</span>
+            <span class="reaction-label">ぱちぱち</span>
+        </button>
+    </div>
+
+    <!-- Input Area -->
+    <div id="input-area">
+        {% csrf_token %}
+        <label class="question-toggle">
+            <input type="checkbox" id="is-question">
+            <span class="toggle-icon">❓</span>
+            <span class="toggle-text">質問</span>
+        </label>
+        <input type="text" id="message-input" placeholder="メッセージを入力..." autocomplete="off">
+        <button id="send-button" type="button" aria-label="送信">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 2L11 13"></path>
+                <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Thread Modal -->
+    <div id="thread-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>スレッド</h2>
+            <div id="thread-messages"></div>
+            <div class="thread-input-area">
+                <input type="text" id="reply-input" placeholder="返信を入力..." autocomplete="off">
+                <button onclick="sendReply()" type="button">返信</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const roomId = "{{ room.uuid }}";
+    </script>
+    <script src="{% static 'team_terrace/js/room.js' %}"></script>
+</body>
+</html>

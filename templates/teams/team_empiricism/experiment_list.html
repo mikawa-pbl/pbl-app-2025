@@ -1,0 +1,102 @@
+<!-- templates/teams/team_empiricism/experiment_list.html -->
+<!-- V3 -->
+{% extends 'teams/team_empiricism/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- 検索・フィルタリングフォーム -->
+    <div class="col-md-12">
+        <div class="card border-warning">
+            <div class="card-header card-header-theme">
+                検索・フィルタ
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" name="q" class="form-control" placeholder="キーワード (タイトル・主催者・詳細)" value="{{ current_q }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="category" class="form-select">
+                            <option value="">全ての研究室</option>
+                            <option value="hukumura" {% if current_category == 'hukumura' %}selected{% endif %}>生体運動制御システム研究室（福村研）</option>
+                            <option value="kitazaki" {% if current_category == 'kitazaki' %}selected{% endif %}>視覚心理物理学研究室（北崎研）</option>
+                            <option value="nakauti" {% if current_category == 'nakauti' %}selected{% endif %}>視覚認知情報学研究室（中内研）</option>
+                            <option value="other" {% if current_category == 'other' %}selected{% endif %}>その他</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="sort" class="form-select">
+                            <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>新しい順</option>
+                            <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>古い順</option>
+                            <option value="schedule_near" {% if current_sort == 'schedule_near' %}selected{% endif %}>実施日が近い順</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-theme w-100">検索</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 記事一覧表示 -->
+<div class="row">
+    {% for post in posts %}
+    <div class="col-md-12 mb-3">
+        <div class="card position-relative shadow-sm h-100 {% if post.status == 'closed' %}bg-light text-muted border-0{% else %}border-warning{% endif %}">
+            <div class="card-body">
+                <div class="mb-2">
+                    <span class="badge bg-dark text-warning border border-warning">{{ post.get_category_display }}</span>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0">
+                        <a href="{% url 'experiment_detail' post.pk %}" class="stretched-link text-decoration-none {% if post.status == 'closed' %}text-secondary{% else %}text-dark fw-bold{% endif %}">
+                            {{ post.title }}
+                        </a>
+                    </h5>
+                    <!-- ステータス表示 -->
+                    {% if post.status == 'open' %}
+                        <span class="badge bg-warning text-dark">募集中</span>
+                    {% else %}
+                        <span class="badge bg-secondary">募集終了</span>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <span class="badge bg-light text-dark border border-warning me-1 mb-1">謝礼: {{ post.reward }}</span>
+                    <span class="badge bg-light text-dark border border-warning me-1 mb-1">所要時間: {{ post.duration }}</span>
+                    <span class="badge bg-light text-dark border border-warning me-1 mb-1">募集期間: {{ post.start_date|date:"Y/m/d" }} ～ {{ post.end_date|date:"Y/m/d" }}</span>
+                    <span class="badge bg-light text-dark border border-warning me-1 mb-1">実施場所: {{ post.location }}</span>
+                </div>
+                <div class="text-end small text-muted border-top pt-2">
+                    更新: {{ post.updated_at|date:"Y/m/d" }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-light text-center border" role="alert">
+            条件に一致する投稿はありません。
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ページネーション -->
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ current_q }}&category={{ current_category }}&sort={{ current_sort }}">前へ</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">ページ {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ current_q }}&category={{ current_category }}&sort={{ current_sort }}">次へ</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

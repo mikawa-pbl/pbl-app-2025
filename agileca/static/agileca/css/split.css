@@ -1,0 +1,30 @@
+html, body {
+    height: 100%;
+    margin: 0;
+  }
+  
+  .split-layout {
+    display: flex;
+    height: 100vh;          /* 画面高いっぱい */
+  }
+  
+  .left {
+    flex: 3;                /* 左3 */
+    border-right: 1px solid #ddd;
+    overflow: auto;
+    padding: 16px;
+    min-width: 220px;       /* 好みで調整 */
+  }
+  
+  .right {
+    flex: 7;                /* 右7 */
+    overflow: auto;
+    padding: 16px;
+  }
+  
+  /* スマホ等で縦積みにしたい場合（任意） */
+  @media (max-width: 768px) {
+    .split-layout { flex-direction: column; }
+    .left { border-right: none; border-bottom: 1px solid #ddd; }
+  }
+  

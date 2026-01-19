@@ -376,6 +376,7 @@
             <div class="form-group">
                 <label for="{{ book_form.isbn.id_for_label }}">{{ book_form.isbn.label }}</label>
                 {{ book_form.isbn }}
+                <div id="isbn-char-count" style="margin-top: 5px; font-size: 14px; color: #64748b;">文字数: 0 / 13</div>
                 {% if book_form.isbn.errors %}
                     <div class="error">{{ book_form.isbn.errors }}</div>
                 {% endif %}
@@ -425,9 +426,9 @@
         </form>
     </div>
 
-    <a href="{% url 'graphics:book_reviews' %}" class="back-link">← レビュー一覧に戻る</a>
+    <a href="{% url 'graphics:my_reviews' %}" class="back-link">← マイレビューに戻る</a>
     <br>
-    <a href="{% url 'graphics:index' %}" class="back-link">← トップページに戻る</a>
+    <a href="{% url 'graphics:index' %}" class="back-link">← ホームに戻る</a>
     </div>
 
     <script>
@@ -470,6 +471,22 @@
 
                     const isbn = e.target.value.trim();
 
+                    // 文字数表示を更新
+                    const charCountDisplay = document.getElementById('isbn-char-count');
+                    if (charCountDisplay) {
+                        const count = isbn.length;
+                        charCountDisplay.textContent = `文字数: ${count} / 13`;
+
+                        // 文字数に応じて色を変える
+                        if (count === 13) {
+                            charCountDisplay.style.color = '#10b981'; // 緑色
+                        } else if (count > 13) {
+                            charCountDisplay.style.color = '#ef4444'; // 赤色
+                        } else {
+                            charCountDisplay.style.color = '#64748b'; // グレー
+                        }
+                    }
+
                     // デバウンス処理
                     clearTimeout(isbnDebounceTimer);
 
@@ -494,6 +511,19 @@
             // 科目名オートコンプリート
             setupSubjectReviewAutocomplete();  // 科目レビュー用
             setupBookReviewAutocomplete();      // 参考書レビュー用
+
+            // review_typeパラメータに応じて初期タブを設定
+            {% if review_type == 'subject' %}
+            const subjectTab = document.querySelector('.tab-button:nth-child(1)');
+            if (subjectTab) {
+                subjectTab.click();
+            }
+            {% elif review_type == 'book' %}
+            const bookTab = document.querySelector('.tab-button:nth-child(2)');
+            if (bookTab) {
+                bookTab.click();
+            }
+            {% endif %}
         });
 
         // 書籍情報を取得する関数

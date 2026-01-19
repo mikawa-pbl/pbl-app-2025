@@ -347,6 +347,31 @@
             font-weight: 400;
             opacity: 0.8;
         }
+        /* 星評価スタイル */
+        .star-rating {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .star-filled {
+            color: #FFA500;
+        }
+        .star-half {
+            position: relative;
+            display: inline-block;
+            color: #cbd5e1;
+        }
+        .star-half::before {
+            content: '★';
+            position: absolute;
+            left: 0;
+            width: 50%;
+            overflow: hidden;
+            color: #FFA500;
+        }
+        .star-empty {
+            color: #cbd5e1;
+        }
     </style>
 </head>
 <body>
@@ -370,6 +395,7 @@
                 <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
                 <li><a href="{% url 'graphics:logout' %}" onclick="toggleMenu()">ログアウト</a></li>
             {% else %}
+                <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
                 <li><a href="{% url 'graphics:login' %}" onclick="toggleMenu()">ログイン</a></li>
                 <li><a href="{% url 'graphics:signup' %}" onclick="toggleMenu()">サインアップ</a></li>
             {% endif %}
@@ -446,7 +472,38 @@
                     </ul>
                 </div>
             </div>
+        </section>
 
+        <!-- 最近のレビュー -->
+        {% if recent_subject_reviews %}
+        <section class="recent-reviews" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin: 40px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="color: #0f172a; font-size: 24px; margin: 0;">📋 最近の科目レビュー</h3>
+            </div>
+            {% for review in recent_subject_reviews %}
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #2563eb;">
+                <h4 style="color: #0f172a; margin-bottom: 10px;">{{ review.course_offering.subject.name }}</h4>
+                <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">{{ review.course_offering.year }}年度 {{ review.course_offering.semester }}</p>
+                <div style="font-size: 16px; margin: 8px 0;">
+                    <span class="star-rating">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <span class="star-filled">★</span>
+                            {% else %}
+                                <span class="star-empty">☆</span>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                    ({{ review.rating }}/5)
+                </div>
+                <p style="color: #334155; line-height: 1.6;">{{ review.review|truncatewords:30 }}</p>
+                <p style="color: #94a3b8; font-size: 13px; margin-top: 10px;">{{ review.created_at|date:"Y年m月d日" }}</p>
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+
+        <section style="margin-top: 40px;">
             <div class="features">
                 <a href="{% url 'graphics:search_courses' %}" class="feature-card">
                     <h4>📚 科目別レビュー</h4>

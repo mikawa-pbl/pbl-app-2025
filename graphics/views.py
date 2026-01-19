@@ -2,8 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Member, BookReview, SubjectReview, CourseOffering, Teacher, GraphicsUser, Book
-from .forms import BookReviewForm, SubjectReviewForm, SignupForm, LoginForm, PasswordResetRequestForm, PasswordResetForm
+from .forms import BookReviewForm, SubjectReviewForm, SignupForm, LoginForm, PasswordResetRequestForm, PasswordResetForm, BookReviewEditForm, SubjectReviewEditForm
 from .utils import (
     fetch_book_info_from_openbd,
     get_year_choices,
@@ -27,7 +28,14 @@ def login_required(view_func):
 
 
 def index(request):
-    return render(request, 'teams/graphics/index.html')
+    # 最近の5件の科目レビューを取得
+    recent_subject_reviews = SubjectReview.objects.using('graphics').all().order_by('-created_at')[:5]
+
+    context = {
+        'recent_subject_reviews': recent_subject_reviews,
+    }
+
+    return render(request, 'teams/graphics/index.html', context)
 
 
 def members(request):
@@ -39,8 +47,14 @@ def members(request):
 def add_book_review(request):
     """
     レビュー追加ビュー（科目レビュー・参考書レビュー）
+    URLパラメータから科目情報を取得して初期値に設定可能
     """
-    book_form = BookReviewForm()
+    # URLパラメータから科目名やcourse_idを取得
+    subject_name_param = request.GET.get('subject', '')
+    course_id_param = request.GET.get('course_id', '')
+    review_type_param = request.GET.get('review_type', 'book')  # デフォルトは書籍レビュー
+
+    book_form = BookReviewForm(initial={'subject': subject_name_param} if subject_name_param else None)
 
     # 年度と学期の選択肢を取得
     year_choices = get_year_choices()
@@ -51,6 +65,16 @@ def add_book_review(request):
     subject_form.fields['semester'].choices = semester_choices
     if year_choices:
         subject_form.fields['year'].initial = year_choices[0][0]  # 最新年度をデフォルト
+
+    # course_idが指定されている場合、科目名と年度・学期を初期値に設定
+    if course_id_param:
+        try:
+            course = CourseOffering.objects.using('graphics').get(id=course_id_param)
+            subject_form.fields['subject_name'].initial = course.subject.name
+            subject_form.fields['year'].initial = course.year
+            subject_form.fields['semester'].initial = course.semester
+        except CourseOffering.DoesNotExist:
+            pass
 
     if request.method == 'POST':
         book_form = BookReviewForm(request.POST)
@@ -91,11 +115,12 @@ def add_book_review(request):
 
             review.save(using='graphics')
             messages.success(request, '参考書レビューを登録しました。')
-            return redirect('graphics:book_reviews')
+            return redirect('graphics:my_reviews')
 
     context = {
         'book_form': book_form,
         'subject_form': subject_form,
+        'review_type': review_type_param,  # レビュータイプをテンプレートに渡す
     }
     return render(request, 'teams/graphics/add_book_review.html', context)
 
@@ -164,30 +189,19 @@ def add_subject_review(request):
 
             review.save(using='graphics')
             messages.success(request, '科目レビューを登録しました。')
-            return redirect('graphics:book_reviews')
+            return redirect('graphics:my_reviews')
 
     # POSTでない場合やバリデーションエラーの場合は、add_book_reviewにリダイレクト
     return redirect('graphics:add_book_review')
 
 
-def book_reviews(request):
-    """
-    レビュー一覧ビュー（参考書レビュー・科目レビュー）
-    """
-    # 参考書レビューと科目レビューを取得
-    book_reviews_qs = BookReview.objects.using('graphics').all()
-    subject_reviews_qs = SubjectReview.objects.using('graphics').all()
-
-    # ヘルパー関数でレビューを整形・結合・ソート
-    all_reviews = get_all_reviews(book_reviews_qs, subject_reviews_qs)
-
-    return render(request, 'teams/graphics/book_reviews.html', {'reviews': all_reviews})
 
 
 @login_required
 def search_courses(request):
     """
     科目検索ビュー
+    同じ科目名・開講学科・開講学期の科目は統合して表示
     """
     # 検索が実行されたかどうか（GETリクエストが送信されたかどうか）
     # request.GET.keys()をチェックして、フォームが送信されたかを判定
@@ -252,11 +266,81 @@ def search_courses(request):
         # 重複を除去
         courses = courses.distinct()
 
-        # 各コースに学科数を追加
+        # 科目を統合: 科目名・開講学科・開講学期が同じものを1つにまとめる
+        unified_courses = {}
         for course in courses:
+            # 学科名のリストを取得してソート（一意なキーを作るため）
+            dept_names = sorted([dept.name for dept in course.departments.all()])
+            dept_key = ','.join(dept_names)
+
+            # 一意なキー: 科目名 + 学科 + 学期
+            unique_key = f"{course.subject.name}|{dept_key}|{course.semester}"
+
+            if unique_key not in unified_courses:
+                # 最新年度の情報を代表として使用
+                unified_courses[unique_key] = course
+            else:
+                # より新しい年度があれば更新
+                if course.year > unified_courses[unique_key].year:
+                    unified_courses[unique_key] = course
+
+        # 各コースに学科数、平均評価、レビュー数を追加
+        courses_with_ratings = []
+        for unique_key, course in unified_courses.items():
             course.dept_count = course.departments.count()
 
-        total_count = courses.count()
+            # この科目の全年度のレビューを集計
+            # 科目名・学科・学期が同じすべてのCourseOfferingのレビューを取得
+            dept_names = sorted([dept.name for dept in course.departments.all()])
+            same_courses = CourseOffering.objects.using('graphics').filter(
+                subject__name=course.subject.name,
+                semester=course.semester
+            )
+            # 学科も一致するものだけ
+            for sc in same_courses:
+                sc_dept_names = sorted([dept.name for dept in sc.departments.all()])
+                if sc_dept_names != dept_names:
+                    same_courses = same_courses.exclude(id=sc.id)
+
+            # 科目レビューの平均評価とレビュー数を計算（全年度分）
+            subject_reviews = SubjectReview.objects.using('graphics').filter(
+                course_offering__in=same_courses
+            )
+            review_count = subject_reviews.count()
+            course.review_count = review_count
+
+            if review_count > 0:
+                # 平均評価を計算
+                total_rating = sum(review.rating for review in subject_reviews)
+                course.avg_rating = total_rating / review_count
+            else:
+                course.avg_rating = 0
+
+            # 評価があるもののみを表示フィルタ
+            if has_review:
+                if review_count > 0:
+                    courses_with_ratings.append(course)
+            else:
+                courses_with_ratings.append(course)
+
+        # フィルタ適用後のコースリストを使用
+        courses = courses_with_ratings
+        total_count = len(courses_with_ratings)
+
+        # ページネーション (1ページあたり10件)
+        paginator = Paginator(courses, 10)
+        page = request.GET.get('page', 1)
+
+        try:
+            courses = paginator.page(page)
+        except PageNotAnInteger:
+            # ページ番号が整数でない場合、最初のページを表示
+            courses = paginator.page(1)
+        except EmptyPage:
+            # ページ番号が範囲外の場合、最後のページを表示
+            courses = paginator.page(paginator.num_pages)
+    else:
+        total_count = 0
 
     context = {
         'courses': courses,
@@ -389,18 +473,284 @@ def logout(request):
     return redirect('graphics:index')
 
 
+def course_detail_legacy(request, course_id):
+    """
+    旧URL用の科目詳細ビュー（後方互換性）
+    course_idから新URLへリダイレクト
+    """
+    from urllib.parse import quote
+    try:
+        course = CourseOffering.objects.using('graphics').get(id=course_id)
+        # 新URLへリダイレクト
+        return redirect('graphics:course_detail',
+                       subject_name=quote(course.subject.name),
+                       semester=quote(course.semester))
+    except CourseOffering.DoesNotExist:
+        messages.error(request, '科目が見つかりませんでした。')
+        return redirect('graphics:search_courses')
+
+
+def course_detail(request, subject_name, semester):
+    """
+    科目詳細ページ
+    科目名と開講学期から科目を特定し、最新年度の情報を表示
+    過去年度の担当教員情報も表示
+    """
+    from urllib.parse import unquote
+
+    # URLエンコードされた科目名をデコード
+    subject_name = unquote(subject_name)
+    semester = unquote(semester)
+
+    # 科目名と学期から該当する全年度の開講情報を取得
+    courses = CourseOffering.objects.using('graphics').filter(
+        subject__name=subject_name,
+        semester=semester
+    ).order_by('-year')  # 新しい年度順
+
+    if not courses.exists():
+        messages.error(request, '科目が見つかりませんでした。')
+        return redirect('graphics:search_courses')
+
+    # 最新年度の情報を代表として使用
+    latest_course = courses.first()
+
+    # 過去年度の担当教員情報を収集
+    past_teachers_by_year = []
+    for course in courses:
+        if course.id != latest_course.id:
+            teachers = course.teachers.all()
+            teacher_names = ', '.join([teacher.name for teacher in teachers])
+            past_teachers_by_year.append({
+                'year': course.year,
+                'teachers': teacher_names
+            })
+
+    # この科目の全年度のレビューを取得
+    subject_reviews_qs = SubjectReview.objects.using('graphics').filter(
+        course_offering__in=courses
+    ).order_by('-created_at')
+
+    # ページネーション（科目レビュー）
+    subject_paginator = Paginator(subject_reviews_qs, 5)
+    subject_page = request.GET.get('subject_page', 1)
+    try:
+        subject_reviews = subject_paginator.page(subject_page)
+    except PageNotAnInteger:
+        subject_reviews = subject_paginator.page(1)
+    except EmptyPage:
+        subject_reviews = subject_paginator.page(subject_paginator.num_pages)
+
+    # この科目に関連する参考書レビューを取得
+    book_reviews = BookReview.objects.using('graphics').filter(
+        subject=latest_course.subject.name
+    ).order_by('-created_at')
+
+    # 書籍ごとにグループ化
+    books_dict = {}
+    for review in book_reviews:
+        if review.book:
+            isbn = review.book.isbn
+            if isbn not in books_dict:
+                books_dict[isbn] = {
+                    'book': review.book,
+                    'review_count': 0,
+                    'avg_rating': 0,
+                    'total_rating': 0,
+                }
+            books_dict[isbn]['review_count'] += 1
+            # rating が 0 以上の場合のみ集計（スター未選択を除外）
+            if review.rating > 0:
+                books_dict[isbn]['total_rating'] += review.rating
+
+    # 平均評価を計算
+    books_with_reviews = []
+    for isbn, data in books_dict.items():
+        data['avg_rating'] = data['total_rating'] / data['review_count'] if data['review_count'] > 0 else 0
+        books_with_reviews.append(data)
+
+    # ページネーション（参考書）
+    books_paginator = Paginator(books_with_reviews, 5)
+    books_page = request.GET.get('books_page', 1)
+    try:
+        books_with_reviews_paginated = books_paginator.page(books_page)
+    except PageNotAnInteger:
+        books_with_reviews_paginated = books_paginator.page(1)
+    except EmptyPage:
+        books_with_reviews_paginated = books_paginator.page(books_paginator.num_pages)
+
+    # 担当教員のリストを取得（最新年度）
+    teachers = latest_course.teachers.all()
+    teacher_names = ', '.join([teacher.name for teacher in teachers])
+
+    # 学科のリストを取得
+    departments = latest_course.departments.all()
+    department_names = ', '.join([dept.name for dept in departments])
+
+    context = {
+        'course': latest_course,
+        'teacher_names': teacher_names,
+        'department_names': department_names,
+        'past_teachers_by_year': past_teachers_by_year,  # 過去年度の担当教員
+        'subject_reviews': subject_reviews,
+        'books_with_reviews': books_with_reviews_paginated,
+        'subject_reviews_count': subject_reviews_qs.count(),
+        'books_count': len(books_with_reviews),
+    }
+
+    return render(request, 'teams/graphics/course_detail.html', context)
+
+
+
+
+
+
+def book_detail(request, isbn):
+    """
+    書籍詳細ページ
+    特定の書籍に対する全レビューを表示
+    """
+    # 遷移元のcourse_idを取得
+    course_id = request.GET.get('course_id', None)
+
+    try:
+        book = Book.objects.using('graphics').get(isbn=isbn)
+    except Book.DoesNotExist:
+        messages.error(request, '書籍が見つかりませんでした。')
+        return redirect('graphics:book_review_list')
+
+    # この書籍に対するレビューを取得
+    reviews_qs = BookReview.objects.using('graphics').filter(book=book).order_by('-created_at')
+
+    # 平均評価を計算（rating > 0 のレビューのみ）
+    total_rating = 0
+    rating_count = 0
+    for review in reviews_qs:
+        if review.rating > 0:
+            total_rating += review.rating
+            rating_count += 1
+    avg_rating = total_rating / rating_count if rating_count > 0 else 0
+
+    # ページネーション（参考書レビュー）
+    paginator = Paginator(reviews_qs, 5)
+    page = request.GET.get('page', 1)
+    try:
+        reviews = paginator.page(page)
+    except PageNotAnInteger:
+        reviews = paginator.page(1)
+    except EmptyPage:
+        reviews = paginator.page(paginator.num_pages)
+
+    context = {
+        'book': book,
+        'reviews': reviews,
+        'reviews_count': reviews_qs.count(),
+        'avg_rating': avg_rating,
+        'course_id': course_id,  # 遷移元のcourse_idをテンプレートに渡す
+    }
+
+    return render(request, 'teams/graphics/book_detail.html', context)
+
+
 @login_required
 def my_reviews(request):
     """
     自分の投稿したレビュー一覧
+    書籍レビューと科目レビューを分けて表示し、それぞれページネーション
     """
     user_id = request.session.get('graphics_user_id')
 
     # ユーザーが投稿したレビューを取得
-    book_reviews_qs = BookReview.objects.using('graphics').filter(user_id=user_id)
-    subject_reviews_qs = SubjectReview.objects.using('graphics').filter(user_id=user_id)
+    book_reviews_qs = BookReview.objects.using('graphics').filter(user_id=user_id).order_by('-created_at')
+    subject_reviews_qs = SubjectReview.objects.using('graphics').filter(user_id=user_id).order_by('-created_at')
 
-    # ヘルパー関数でレビューを整形・結合・ソート
-    all_reviews = get_all_reviews(book_reviews_qs, subject_reviews_qs)
+    # 書籍レビューのページネーション
+    book_paginator = Paginator(book_reviews_qs, 5)
+    book_page = request.GET.get('book_page', 1)
+    try:
+        book_reviews = book_paginator.page(book_page)
+    except PageNotAnInteger:
+        book_reviews = book_paginator.page(1)
+    except EmptyPage:
+        book_reviews = book_paginator.page(book_paginator.num_pages)
 
-    return render(request, 'teams/graphics/my_reviews.html', {'reviews': all_reviews})
+    # 科目レビューのページネーション
+    subject_paginator = Paginator(subject_reviews_qs, 5)
+    subject_page = request.GET.get('subject_page', 1)
+    try:
+        subject_reviews = subject_paginator.page(subject_page)
+    except PageNotAnInteger:
+        subject_reviews = subject_paginator.page(1)
+    except EmptyPage:
+        subject_reviews = subject_paginator.page(subject_paginator.num_pages)
+
+    context = {
+        'book_reviews': book_reviews,
+        'subject_reviews': subject_reviews,
+        'book_reviews_count': book_reviews_qs.count(),
+        'subject_reviews_count': subject_reviews_qs.count(),
+    }
+
+    return render(request, 'teams/graphics/my_reviews.html', context)
+
+
+@login_required
+def edit_book_review(request, review_id):
+    """
+    参考書レビュー編集ビュー
+    """
+    user_id = request.session.get('graphics_user_id')
+
+    try:
+        review = BookReview.objects.using('graphics').get(id=review_id, user_id=user_id)
+    except BookReview.DoesNotExist:
+        messages.error(request, 'レビューが見つからないか、編集権限がありません。')
+        return redirect('graphics:my_reviews')
+
+    if request.method == 'POST':
+        form = BookReviewEditForm(request.POST, instance=review)
+        if form.is_valid():
+            updated_review = form.save(commit=False)
+            updated_review.save(using='graphics')
+            messages.success(request, '参考書レビューを更新しました。')
+            return redirect('graphics:my_reviews')
+    else:
+        form = BookReviewEditForm(instance=review)
+
+    context = {
+        'form': form,
+        'review': review,
+        'review_type': 'book'
+    }
+    return render(request, 'teams/graphics/edit_review.html', context)
+
+
+@login_required
+def edit_subject_review(request, review_id):
+    """
+    科目レビュー編集ビュー
+    """
+    user_id = request.session.get('graphics_user_id')
+
+    try:
+        review = SubjectReview.objects.using('graphics').get(id=review_id, user_id=user_id)
+    except SubjectReview.DoesNotExist:
+        messages.error(request, 'レビューが見つからないか、編集権限がありません。')
+        return redirect('graphics:my_reviews')
+
+    if request.method == 'POST':
+        form = SubjectReviewEditForm(request.POST, instance=review)
+        if form.is_valid():
+            updated_review = form.save(commit=False)
+            updated_review.save(using='graphics')
+            messages.success(request, '科目レビューを更新しました。')
+            return redirect('graphics:my_reviews')
+    else:
+        form = SubjectReviewEditForm(instance=review)
+
+    context = {
+        'form': form,
+        'review': review,
+        'review_type': 'subject'
+    }
+    return render(request, 'teams/graphics/edit_review.html', context)

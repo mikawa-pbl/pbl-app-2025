@@ -348,6 +348,7 @@
 
         .course-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
         }
 
         .course-header {
@@ -471,6 +472,74 @@
 
         .autocomplete-item:hover {
             background: #f5f5f5;
+        }
+
+        /* ページネーション */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 40px;
+            padding: 20px 0;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            transition: all 0.2s;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .pagination a:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination .current {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .pagination .disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* 星評価スタイル */
+        .star-rating {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .star-filled {
+            color: #FFA500;
+        }
+        .star-half {
+            position: relative;
+            display: inline-block;
+            color: #cbd5e1;
+        }
+        .star-half::before {
+            content: '★';
+            position: absolute;
+            left: 0;
+            width: 50%;
+            overflow: hidden;
+            color: #FFA500;
+        }
+        .star-empty {
+            color: #cbd5e1;
         }
 
         @media (max-width: 1024px) {
@@ -619,13 +688,37 @@
                 {% if courses %}
                     <div class="course-grid">
                         {% for course in courses %}
-                            <div class="course-card">
+                            <a href="{% url 'graphics:course_detail' course.subject.name course.semester %}" class="course-card" style="text-decoration: none; color: inherit; display: block; transition: transform 0.2s;">
                                 <div class="course-header">
                                     <span class="course-grade">{{ course.grade }}</span>
                                     <span class="course-semester">{{ course.semester }}</span>
                                 </div>
                                 <div class="course-title">{{ course.subject.name }}</div>
-                                <div class="course-rating">☆☆☆☆☆ 0.0(0)</div>
+                                <div class="course-rating">
+                                    <span class="star-rating" id="courseRating{{ forloop.counter }}"></span>
+                                    <span style="margin-left: 5px;">{{ course.avg_rating|floatformat:1 }}({{ course.review_count }})</span>
+                                </div>
+                                <script>
+                                    (function() {
+                                        const avgRating = {{ course.avg_rating }};
+                                        const fullStars = Math.floor(avgRating);
+                                        const hasHalfStar = (avgRating - fullStars) >= 0.5;
+                                        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+                                        let starsHtml = '';
+                                        for (let i = 0; i < fullStars; i++) {
+                                            starsHtml += '<span class="star-filled">★</span>';
+                                        }
+                                        if (hasHalfStar) {
+                                            starsHtml += '<span class="star-half">☆</span>';
+                                        }
+                                        for (let i = 0; i < emptyStars; i++) {
+                                            starsHtml += '<span class="star-empty">☆</span>';
+                                        }
+
+                                        document.getElementById('courseRating{{ forloop.counter }}').innerHTML = starsHtml;
+                                    })();
+                                </script>
                                 <div class="course-tags">
                                     {% if course.dept_count == 5 %}
                                         <span class="course-tag tag-common">共通科目</span>
@@ -635,9 +728,38 @@
                                         {% endfor %}
                                     {% endif %}
                                 </div>
-                            </div>
+                            </a>
                         {% endfor %}
                     </div>
+
+                    <!-- ページネーション -->
+                    {% if courses.has_other_pages %}
+                    <div class="pagination">
+                        {% if courses.has_previous %}
+                            <a href="?{% for key, value in search_params.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">&laquo; 最初</a>
+                            <a href="?{% for key, value in search_params.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ courses.previous_page_number }}">&lsaquo; 前へ</a>
+                        {% else %}
+                            <span class="disabled">&laquo; 最初</span>
+                            <span class="disabled">&lsaquo; 前へ</span>
+                        {% endif %}
+
+                        {% for num in courses.paginator.page_range %}
+                            {% if courses.number == num %}
+                                <span class="current">{{ num }}</span>
+                            {% elif num > courses.number|add:'-3' and num < courses.number|add:'3' %}
+                                <a href="?{% for key, value in search_params.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if courses.has_next %}
+                            <a href="?{% for key, value in search_params.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ courses.next_page_number }}">次へ &rsaquo;</a>
+                            <a href="?{% for key, value in search_params.items %}{% if value %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ courses.paginator.num_pages }}">最後 &raquo;</a>
+                        {% else %}
+                            <span class="disabled">次へ &rsaquo;</span>
+                            <span class="disabled">最後 &raquo;</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 {% else %}
                     <div class="no-results">
                         <div class="no-results-icon">🔍</div>

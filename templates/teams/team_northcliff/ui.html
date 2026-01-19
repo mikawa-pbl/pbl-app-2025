@@ -109,6 +109,13 @@
         </div>
     </div>
 
+    <div id="view-toggle" class="fixed bottom-6 right-6 z-[2000] bg-white rounded-full shadow-lg p-1 flex border border-gray-200">
+        <div class="flex items-center">
+            <a href="/team_northcliff/map_ui/{{ username }}/" class="px-6 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 rounded-full transition-all">地図</a>
+            <span class="px-6 py-2 text-sm font-bold text-white bg-blue-600 rounded-full cursor-default shadow-sm transition-all">リスト</span>
+        </div>
+    </div>
+
     <script>
         const username = '{{ username|escapejs }}';
 

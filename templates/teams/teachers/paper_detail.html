@@ -76,7 +76,8 @@
       <div class="filebox section" style="border-top:none; padding-top:0;">
         {% if paper.paper_file %}
           <div><span class="k muted">論文PDF</span><br>
-            <a class="btn" href="{{ paper.paper_file.url }}" target="_blank">開く</a>
+            <a class="btn" href="{% url 'teachers:media_proxy' paper.paper_file.name %}"
+            target="_blank">開く</a>
           </div>
         {% else %}
           <div class="muted">論文PDF：なし</div>
@@ -86,7 +87,7 @@
       <div class="filebox section">
         {% if paper.rc_slide %}
           <div><span class="k muted">輪講スライド</span><br>
-            <a class="btn" href="{{ paper.rc_slide.url }}" target="_blank">開く</a>
+            <a class="btn" href="{% url 'teachers:media_proxy' paper.rc_slide.name %}" target="_blank">開く</a>
           </div>
         {% else %}
           <div class="muted">輪講スライド：なし</div>
@@ -94,9 +95,9 @@
       </div>
 
       <div class="filebox section">
-        {% if paper.paper_figure %}
-          <div><span class="k muted">画像ファイル</span><br>
-            <a class="btn" href="{% url 'teachers:media_proxy' paper.paper_figure.name %}" target="_blank">ファイルを開く</a>
+
+       {% if paper.paper_figure %}
+           <a class="btn" href="{% url 'teachers:media_proxy' paper.paper_figure.name %}" target="_blank">ファイルを開く</a>
           </div>
 
           {# 画像拡張子のときだけ img 表示 #}
@@ -112,7 +113,7 @@
         {% else %}
           <div class="muted">画像ファイル：なし</div>
         {% endif %}
-
+          
       </div>
     </div>
   </div>

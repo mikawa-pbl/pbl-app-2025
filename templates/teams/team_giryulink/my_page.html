@@ -145,10 +145,9 @@
             color: #e53935;
         }
         
-        .delete-btn {
+        .action-btn {
             position: absolute;
             top: 8px;
-            right: 8px;
             background: #e53935;
             color: #fff;
             border: none;
@@ -158,6 +157,21 @@
             font-weight: 600;
             cursor: pointer;
             z-index: 10;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .delete-btn {
+            right: 8px;
+        }
+        
+        .edit-btn {
+            right: 70px;
+            background: #2196f3;
+        }
+        
+        .action-btn:hover {
+            opacity: 0.85;
         }
         
         .sold-badge {
@@ -264,12 +278,18 @@
                     <div class="product-info">
                         <div class="product-title">{{ product.title }}</div>
                         <div class="product-price">¥{{ product.price|floatformat:0 }}</div>
+                        {% if product.is_sold %}
+                        <div style="color: #999; font-size: 0.75rem; margin-top: 4px;">✓ 購入済み</div>
+                        {% endif %}
                     </div>
                 </a>
                 
-                <form method="post" action="{% url 'team_giryulink:delete' product.id %}" style="display: inline;">
+                {% if not product.is_sold %}
+                <a href="{% url 'team_giryulink:edit_product' product.id %}" class="action-btn edit-btn">編集</a>
+                {% endif %}
+                <form method="post" action="{% url 'team_giryulink:delete_product' product.id %}" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" class="delete-btn" onclick="return confirm('本当に削除しますか？')">削除</button>
+                    <button type="submit" class="action-btn delete-btn" onclick="return confirm('本当に削除しますか？')">削除</button>
                 </form>
             </div>
             {% endfor %}

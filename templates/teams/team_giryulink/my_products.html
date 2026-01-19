@@ -147,10 +147,9 @@
             transform: scale(0.98);
         }
         
-        .delete-btn { 
+        .action-btn { 
             position: absolute; 
             top: 6px; 
-            right: 6px; 
             background: rgba(229,57,53,0.9); 
             color: #fff; 
             border: none; 
@@ -161,6 +160,21 @@
             z-index: 20; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .delete-btn { 
+            right: 6px;
+        }
+        
+        .edit-btn {
+            right: 60px;
+            background: rgba(33, 150, 243, 0.9);
+        }
+        
+        .action-btn:hover {
+            opacity: 0.8;
         }
         
         .card-link { 
@@ -274,9 +288,14 @@
         <div class="products">
             {% for product in products %}
             <div class="card">
+                <!-- 編集ボタン（購入済みでない場合のみ表示） -->
+                {% if not product.is_sold %}
+                <a href="{% url 'team_giryulink:edit_product' product.id %}" class="action-btn edit-btn">✏️ 編集</a>
+                {% endif %}
+                
                 <form method="post" action="{% url 'team_giryulink:delete_product' product.id %}" style="display: inline;" onsubmit="return confirm('この商品を削除しますか？');">
                     {% csrf_token %}
-                    <button type="submit" class="delete-btn">✕ 削除</button>
+                    <button type="submit" class="action-btn delete-btn">✕ 削除</button>
                 </form>
                 
                 <a href="{% url 'team_giryulink:product_detail' product.id %}" class="card-link">
@@ -288,6 +307,9 @@
                     <div class="info">
                         <h2>{{ product.title }}</h2>
                         <div class="price">{{ product.formatted_price }}</div>
+                        {% if product.is_sold %}
+                        <div style="color: #999; font-size: 0.8rem; margin-top: 4px;">✓ 購入済み</div>
+                        {% endif %}
                     </div>
                 </a>
             </div>

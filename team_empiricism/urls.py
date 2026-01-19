@@ -42,4 +42,7 @@ urlpatterns = [
     
     # 削除
     path('post/<int:pk>/delete/', views.ExperimentDeleteView.as_view(), name='experiment_delete'),
+
+    # API: 研究室の新規追加
+    path('api/laboratories/add/', views.add_laboratory, name='api_add_laboratory'),
 ]

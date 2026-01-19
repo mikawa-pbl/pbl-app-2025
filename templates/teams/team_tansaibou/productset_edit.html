@@ -2,185 +2,89 @@
 
 {% block title %}セット商品編集 - Team Tansaibou{% endblock %}
 
-{% block extra_style %}
-form {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    max-width: 700px;
-    margin: 0 auto;
-}
-h1 {
-    color: #333;
-    margin-bottom: 30px;
-    text-align: center;
-}
-.form-group {
-    margin-bottom: 20px;
-}
-label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #555;
-}
-input[type="text"],
-input[type="number"],
-textarea,
-select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-}
-textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-.checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.checkbox-group input[type="checkbox"] {
-    width: auto;
-}
-.components-section {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-}
-.components-title {
-    font-weight: bold;
-    margin-bottom: 15px;
-    color: #333;
-}
-.component-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-    align-items: end;
-}
-.component-row select {
-    flex: 2;
-}
-.component-row input[type="number"] {
-    flex: 1;
-}
-.btn-remove {
-    padding: 10px 15px;
-    background-color: #f44336;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-.btn-remove:hover {
-    background-color: #da190b;
-}
-.btn-add-component {
-    padding: 10px 20px;
-    background-color: #2196F3;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-}
-.btn-add-component:hover {
-    background-color: #0b7dda;
-}
-.button-group {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-}
-button[type="submit"], .btn-secondary {
-    flex: 1;
-    padding: 14px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-}
-button[type="submit"] {
-    background-color: #FF9800;
-    color: white;
-}
-button[type="submit"]:hover {
-    background-color: #e68900;
-}
-.btn-secondary {
-    background-color: #999;
-    color: white;
-}
-.btn-secondary:hover {
-    background-color: #888;
-}
-.required {
-    color: red;
-}
-{% endblock %}
-
 {% block content %}
-<h1>✏️ セット商品編集</h1>
+<div class="max-w-2xl mx-auto px-4">
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">セット商品編集</h1>
 
-<form method="post">
-    {% csrf_token %}
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
 
-    <div class="form-group">
-        <label for="name">セット商品名 <span class="required">*</span></label>
-        <input type="text" id="name" name="name" value="{{ product_set.name }}" required>
-    </div>
-
-    <div class="form-group">
-        <label for="price">セット価格（円） <span class="required">*</span></label>
-        <input type="number" id="price" name="price" value="{{ product_set.price }}" min="0" step="1" required>
-    </div>
-
-    <div class="form-group">
-        <label for="description">説明</label>
-        <textarea id="description" name="description">{{ product_set.description }}</textarea>
-    </div>
-
-    <div class="components-section">
-        <div class="components-title">📦 セット内容</div>
-        <div id="components-container">
-            {% for item in product_set.items.all %}
-            <div class="component-row">
-                <select name="product_id[]" required>
-                    <option value="">商品を選択</option>
-                    {% for product in products %}
-                    <option value="{{ product.id }}" {% if product.id == item.product.id %}selected{% endif %}>{{ product.name }} (¥{{ product.current_price|floatformat:0 }})</option>
-                    {% endfor %}
-                </select>
-                <input type="number" name="quantity[]" placeholder="数量" min="1" value="{{ item.quantity }}" required>
-                <button type="button" class="btn-remove" onclick="removeComponent(this)">削除</button>
+            <div>
+                <label for="name" class="block mb-2 text-sm font-medium text-gray-900">
+                    セット商品名 <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="name" name="name" value="{{ product_set.name }}" required
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
             </div>
-            {% endfor %}
-        </div>
-        <button type="button" class="btn-add-component" onclick="addComponent()">+ 商品を追加</button>
-    </div>
 
-    <div class="form-group">
-        <div class="checkbox-group">
-            <input type="checkbox" id="is_active" name="is_active" {% if product_set.is_active %}checked{% endif %}>
-            <label for="is_active" style="margin:0;">販売中にする</label>
-        </div>
-    </div>
+            <div>
+                <label for="price" class="block mb-2 text-sm font-medium text-gray-900">
+                    セット価格（円） <span class="text-red-500">*</span>
+                </label>
+                <input type="number" id="price" name="price" value="{{ product_set.price }}" min="0" step="1" required
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            </div>
 
-    <div class="button-group">
-        <a href="{% url 'team_tansaibou:productset_list' %}" class="btn-secondary">キャンセル</a>
-        <button type="submit">更新する</button>
+            <div>
+                <label for="description" class="block mb-2 text-sm font-medium text-gray-900">説明</label>
+                <textarea id="description" name="description" rows="3"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">{{ product_set.description }}</textarea>
+            </div>
+
+            <!-- セット内容 -->
+            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="text-base font-semibold text-gray-900 mb-4">セット内容</h3>
+                <div id="components-container" class="space-y-3">
+                    {% for item in product_set.items.all %}
+                    <div class="component-row flex gap-3 items-end">
+                        <div class="flex-1">
+                            <label class="block mb-1 text-sm font-medium text-gray-700">商品</label>
+                            <select name="product_id[]" required
+                                    class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                <option value="">商品を選択</option>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" {% if product.id == item.product.id %}selected{% endif %}>{{ product.name }} (¥{{ product.current_price|floatformat:0 }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="w-24">
+                            <label class="block mb-1 text-sm font-medium text-gray-700">数量</label>
+                            <input type="number" name="quantity[]" placeholder="数量" min="1" value="{{ item.quantity }}" required
+                                   class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        </div>
+                        <button type="button" onclick="removeComponent(this)"
+                                class="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-xs px-3 py-2.5">
+                            削除
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" onclick="addComponent()"
+                        class="mt-4 w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">
+                    + 商品を追加
+                </button>
+            </div>
+
+            <div class="flex items-center">
+                <input type="checkbox" id="is_active" name="is_active" {% if product_set.is_active %}checked{% endif %}
+                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                <label for="is_active" class="ml-2 text-sm font-medium text-gray-900">販売中にする</label>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="submit"
+                        class="text-white bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5">
+                    更新する
+                </button>
+                <a href="{% url 'team_tansaibou:productset_list' %}"
+                   class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5">
+                    キャンセル
+                </a>
+            </div>
+        </form>
     </div>
-</form>
+</div>
 {% endblock %}
 
 {% block extra_script %}
@@ -195,13 +99,24 @@ const productOptions = `
 function addComponent() {
     const container = document.getElementById('components-container');
     const newRow = document.createElement('div');
-    newRow.className = 'component-row';
+    newRow.className = 'component-row flex gap-3 items-end';
     newRow.innerHTML = `
-        <select name="product_id[]" required>
-            ${productOptions}
-        </select>
-        <input type="number" name="quantity[]" placeholder="数量" min="1" value="1" required>
-        <button type="button" class="btn-remove" onclick="removeComponent(this)">削除</button>
+        <div class="flex-1">
+            <label class="block mb-1 text-sm font-medium text-gray-700">商品</label>
+            <select name="product_id[]" required
+                    class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                ${productOptions}
+            </select>
+        </div>
+        <div class="w-24">
+            <label class="block mb-1 text-sm font-medium text-gray-700">数量</label>
+            <input type="number" name="quantity[]" placeholder="数量" min="1" value="1" required
+                   class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+        </div>
+        <button type="button" onclick="removeComponent(this)"
+                class="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-xs px-3 py-2.5">
+            削除
+        </button>
     `;
     container.appendChild(newRow);
 }

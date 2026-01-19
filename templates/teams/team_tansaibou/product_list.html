@@ -2,157 +2,73 @@
 
 {% block title %}商品一覧 - Team Tansaibou{% endblock %}
 
-{% block extra_style %}
-<style>
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-    }
-
-    h1 {
-        margin: 0;
-    }
-
-    .btn {
-        padding: 10px 20px;
-        background-color: #4CAF50;
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        display: inline-block;
-    }
-
-    .btn:hover {
-        background-color: #45a049;
-    }
-
-    table {
-        width: 100%;
-        background: white;
-        border-collapse: collapse;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    th,
-    td {
-        padding: 15px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-    }
-
-    th {
-        background-color: #4CAF50;
-        color: white;
-        font-weight: bold;
-    }
-
-    tr:hover {
-        background-color: #f5f5f5;
-    }
-
-    .status-active {
-        color: green;
-        font-weight: bold;
-    }
-
-    .status-inactive {
-        color: #999;
-        font-weight: bold;
-    }
-
-    .actions {
-        display: flex;
-        gap: 10px;
-    }
-
-    .actions a {
-        padding: 6px 12px;
-        background-color: #2196F3;
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        font-size: 13px;
-    }
-
-    .actions a:hover {
-        background-color: #0b7dda;
-    }
-
-    .actions a.edit {
-        background-color: #FF9800;
-    }
-
-    .actions a.edit:hover {
-        background-color: #e68900;
-    }
-
-    .actions a.restock {
-        background-color: #9C27B0;
-    }
-
-    .actions a.restock:hover {
-        background-color: #7b1fa2;
-    }
-
-    .no-data {
-        text-align: center;
-        padding: 60px 20px;
-        background: white;
-        border-radius: 8px;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="header">
-    <h1>📦 商品一覧</h1>
-    <a href="{% url 'team_tansaibou:product_add' %}" class="btn">+ 商品登録</a>
-</div>
+<div class="max-w-screen-xl mx-auto px-4">
+    <!-- ヘッダー -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">商品一覧</h1>
+        <a href="{% url 'team_tansaibou:product_add' %}"
+           class="text-white bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5">
+            + 商品登録
+        </a>
+    </div>
 
-{% if products %}
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>商品名</th>
-            <th>価格</th>
-            <th>在庫</th>
-            <th>説明</th>
-            <th>状態</th>
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for product in products %}
-        <tr>
-            <td>{{ product.id }}</td>
-            <td>{{ product.name }}</td>
-            <td>¥{{ product.current_price|floatformat:0 }}</td>
-            <td>{{ product.stock }}個</td>
-            <td>{{ product.description|default:"-"|truncatewords:10 }}</td>
-            <td>
-                {% if product.is_active %}
-                <span class="status-active">販売中</span>
-                {% else %}
-                <span class="status-inactive">停止中</span>
-                {% endif %}
-            </td>
-            <td>
-                <div class="actions">
-                    <a href="{% url 'team_tansaibou:product_edit' product.id %}" class="edit">編集</a>
-                    <a href="{% url 'team_tansaibou:product_restock' product.id %}" class="restock">在庫補充</a>
-                </div>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<div class="no-data">
-    <p>商品が登録されていません</p>
-    <p><a href="{% url 'team_tansaibou:product_add' %}" class="btn">最初の商品を登録する →</a></p>
+    {% if products %}
+    <!-- テーブル -->
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                <tr>
+                    <th scope="col" class="px-6 py-3">ID</th>
+                    <th scope="col" class="px-6 py-3">商品名</th>
+                    <th scope="col" class="px-6 py-3">価格</th>
+                    <th scope="col" class="px-6 py-3">在庫</th>
+                    <th scope="col" class="px-6 py-3">説明</th>
+                    <th scope="col" class="px-6 py-3">状態</th>
+                    <th scope="col" class="px-6 py-3">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="px-6 py-4 text-gray-500">{{ product.id }}</td>
+                    <td class="px-6 py-4 font-medium text-gray-900">{{ product.name }}</td>
+                    <td class="px-6 py-4 font-bold text-blue-600">¥{{ product.current_price|floatformat:0 }}</td>
+                    <td class="px-6 py-4">{{ product.stock }}個</td>
+                    <td class="px-6 py-4 text-gray-500">{{ product.description|default:"-"|truncatewords:10 }}</td>
+                    <td class="px-6 py-4">
+                        {% if product.is_active %}
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">販売中</span>
+                        {% else %}
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">停止中</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'team_tansaibou:product_edit' product.id %}"
+                               class="text-white bg-gray-500 hover:bg-gray-600 font-medium rounded-lg text-xs px-3 py-1.5">
+                                編集
+                            </a>
+                            <a href="{% url 'team_tansaibou:product_restock' product.id %}"
+                               class="text-white bg-purple-600 hover:bg-purple-700 font-medium rounded-lg text-xs px-3 py-1.5">
+                                在庫補充
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <!-- データなし -->
+    <div class="p-12 bg-white border border-gray-200 rounded-lg shadow text-center">
+        <p class="text-gray-500 mb-4">商品が登録されていません</p>
+        <a href="{% url 'team_tansaibou:product_add' %}"
+           class="text-white bg-gray-800 hover:bg-gray-900 font-medium rounded-lg text-sm px-5 py-2.5">
+            最初の商品を登録する →
+        </a>
+    </div>
+    {% endif %}
 </div>
-{% endif %}
 {% endblock %}

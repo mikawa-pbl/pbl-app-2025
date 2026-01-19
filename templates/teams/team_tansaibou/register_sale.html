@@ -68,8 +68,7 @@
                                 <div>
                                     <h4 class="font-bold text-gray-900 line-clamp-2 leading-tight">{{ product.name }}
                                     </h4>
-                                    <p class="text-lg font-extrabold text-blue-600 mt-1">¥{{
-                                        product.current_price|floatformat:0 }}</p>
+                                    <p class="text-lg font-extrabold text-blue-600 mt-1">¥{{ product.current_price|floatformat:0 }}</p>
                                 </div>
                                 <div class="mt-2">
                                     {% if product.stock == 0 %}

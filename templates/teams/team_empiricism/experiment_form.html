@@ -1,0 +1,120 @@
+<!-- templates/teams/team_empiricism/experiment_form.html -->
+<!-- V3 -->
+{% extends 'teams/team_empiricism/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-warning shadow-sm">
+            <div class="card-header card-header-theme">
+                {% if form.instance.pk %}実験情報の編集{% else %}新規実験の投稿{% endif %}
+            </div>
+            <div class="card-body">
+                <!-- テンプレート機能ボタン -->
+                <div class="mb-3 text-end">
+                    <button type="button" class="btn btn-outline-warning text-dark btn-sm" onclick="applyTemplate()">
+                        <i class="bi bi-magic"></i> 定型文を入力（テンプレート）
+                    </button>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label fw-bold">{{ field.label }}</label>
+                        
+                        {% if field.name == 'laboratory' %}
+                        <div class="input-group">
+                            {{ field }}
+                            <button type="button" class="btn btn-outline-secondary" onclick="addLaboratory()">
+                                <i class="bi bi-plus-circle"></i> 新規追加
+                            </button>
+                        </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-warning fw-bold">
+                            {% if form.instance.pk %}更新する{% else %}投稿する{% endif %}
+                        </button>
+                        <a href="{% url 'experiment_list' %}" class="btn btn-secondary">キャンセル</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function applyTemplate() {
+        if(confirm('入力欄に定型文をセットしますか？（現在の入力内容は上書きされます）')) {
+            const descTemplate = 
+`【目的】
+〇〇に関する認知実験を行います。
+
+【実験内容】
+PC画面に表示される図形を見て、キーボードを押す課題です。
+
+【注意点】
+視力（矯正含む）に問題がない方が対象です。`;
+
+            const reqTemplate = 
+`・〇〇大学の学生であること
+・過去に類似の実験に参加していないこと`;
+            
+            document.getElementById('id_description').value = descTemplate;
+            document.getElementById('id_requirements').value = reqTemplate;
+            
+            const rewardField = document.getElementById('id_reward');
+            if(!rewardField.value) rewardField.value = "時給1160円";
+            
+            const durationField = document.getElementById('id_duration');
+            if(!durationField.value) durationField.value = "約60分";
+        }
+    }
+
+    // 研究室の新規追加 (Ver 5.0)
+    function addLaboratory() {
+        const name = prompt("新しい研究室名を入力してください:");
+        if (name) {
+            fetch("{% url 'api_add_laboratory' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({name: name})
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => { throw new Error(data.error || 'Network response was not ok'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                const select = document.getElementById('id_laboratory');
+                const option = new Option(data.name, data.id, true, true);
+                select.add(option);
+                alert('研究室「' + data.name + '」を追加し、選択しました。');
+            })
+            .catch(error => {
+                alert('エラーが発生しました: ' + error.message);
+                console.error('Error:', error);
+            });
+        }
+    }
+</script>
+{% endblock %}

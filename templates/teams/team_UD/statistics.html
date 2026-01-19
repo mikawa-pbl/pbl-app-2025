@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面接質問統計 - TeamUD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding-left: 60px;
+            transition: padding-left 0.3s;
+        }
+        body.menu-open {
+            padding-left: 250px;
+        }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 60px;
+            background: #2c3e50;
+            z-index: 1000;
+            transition: width 0.3s;
+            overflow: hidden;
+        }
+        .sidebar.open {
+            width: 250px;
+        }
+        .hamburger {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 60px;
+            padding: 20px;
+            cursor: pointer;
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            background: #2c3e50;
+            z-index: 10;
+        }
+        .menu-items {
+            margin-top: 80px;
+        }
+        .menu-item {
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .menu-item:hover {
+            background: #34495e;
+        }
+        .menu-item.logout {
+            background: #dc3545;
+            margin-top: 20px;
+        }
+        .menu-item.logout:hover {
+            background: #c82333;
+        }
+        .menu-icon {
+            font-size: 20px;
+            min-width: 20px;
+            flex-shrink: 0;
+        }
+        .menu-text {
+            max-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: max-width 0.3s ease;
+        }
+        .sidebar.open .menu-text {
+            max-width: 200px;
+        }
+        
+        /* 初期画面（Google風） */
+        .search-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .search-screen.hidden {
+            display: none;
+        }
+        .logo {
+            font-size: 4em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 40px;
+            text-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+        }
+        .search-container {
+            width: 100%;
+            max-width: 600px;
+        }
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 18px 50px 18px 20px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+        .search-box input:focus {
+            outline: none;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+        }
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+            z-index: 1000;
+            display: none;
+        }
+        .autocomplete-list.active {
+            display: block;
+        }
+        .autocomplete-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        .autocomplete-item:hover {
+            background: #f8f9ff;
+        }
+        .autocomplete-item mark {
+            background: #fff3cd;
+            font-weight: bold;
+        }
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            color: #667eea;
+            cursor: pointer;
+        }
+        .quick-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .quick-link {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+        }
+        .quick-link:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 結果画面 */
+        .results-screen {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .results-screen.active {
+            display: block;
+        }
+        .header {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .header-logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            cursor: pointer;
+        }
+        .header-search {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+        .header-search input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1em;
+        }
+        .header-search input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .header-search .search-icon {
+            right: 15px;
+        }
+        .header-search .autocomplete-list {
+            margin-top: 5px;
+        }
+        .header-nav {
+            display: flex;
+            gap: 15px;
+        }
+        .nav-link {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .nav-link:hover {
+            background: #764ba2;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* フィルター */
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+        }
+        .filter-group select {
+            padding: 8px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+        
+        /* 統計情報 */
+        .stats-info {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        /* 質問リスト */
+        .company-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.2);
+        }
+        .company-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+        .company-name {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+        }
+        .company-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .stage-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #764ba2;
+        }
+        .stage-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .question-count {
+            font-size: 0.8em;
+            background: #764ba2;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+        .question-list {
+            list-style: none;
+        }
+        .question-item {
+            padding: 12px 15px;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        .question-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .question-text {
+            flex: 1;
+            color: #333;
+            line-height: 1.6;
+        }
+        .question-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .action-btn {
+            padding: 6px 12px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+        .action-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        .copy-btn:hover {
+            background: #4caf50;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #667eea;
+            font-size: 1.3em;
+        }
+        .no-results-box {
+            background: white;
+            padding: 60px 20px;
+            border-radius: 15px;
+            color: #666;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        /* トーストメッセージ */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+        .toast.show {
+            display: block;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* 人気の会社 */
+        .popular-companies {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .popular-title {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .popular-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .popular-item {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: #667eea;
+        }
+        .popular-item:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="hamburger" onclick="toggleMenu()">☰</div>
+        <div class="menu-items">
+            <a href="{% url 'team_UD:calendar' %}" class="menu-item">
+                <span class="menu-icon">📅</span>
+                <span class="menu-text">カレンダー</span>
+            </a>
+            <a href="{% url 'team_UD:questions' %}" class="menu-item">
+                <span class="menu-icon">📝</span>
+                <span class="menu-text">質問対策</span>
+            </a>
+            <a href="{% url 'team_UD:statistics' %}" class="menu-item">
+                <span class="menu-icon">📊</span>
+                <span class="menu-text">面接質問統計</span>
+            </a>
+            <a href="{% url 'team_UD:logout' %}" class="menu-item logout">
+                <span class="menu-icon">🚪</span>
+                <span class="menu-text">ログアウト</span>
+            </a>
+        </div>
+    </div>
+    <!-- 初期検索画面 -->
+    <div id="searchScreen" class="search-screen">
+        <div class="logo">📊 面接質問統計</div>
+        <div class="search-container">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="mainSearch" 
+                    placeholder="会社名を検索..." 
+                    onkeypress="if(event.key==='Enter') performSearch()"
+                    oninput="showAutocomplete(this)"
+                    onfocus="showAutocomplete(this)"
+                    autocomplete="off"
+                >
+                <span class="search-icon" onclick="performSearch()">🔍</span>
+                <div id="mainAutocomplete" class="autocomplete-list"></div>
+            </div>
+        </div>
+        
+        <div class="popular-companies">
+            <div class="popular-title">💡 よく検索されている会社</div>
+            <div id="popularList" class="popular-list"></div>
+        </div>
+    </div>
+    
+    <!-- 結果画面 -->
+    <div id="resultsScreen" class="results-screen">
+        <div class="header">
+            <div class="header-logo" onclick="backToSearch()">📊 統計</div>
+            <div class="header-search">
+                <input 
+                    type="text" 
+                    id="headerSearch" 
+                    placeholder="会社名を検索..." 
+                    onkeypress="if(event.key==='Enter') performSearch()"
+                    oninput="showAutocomplete(this)"
+                    onfocus="showAutocomplete(this)"
+                    autocomplete="off"
+                >
+                <span class="search-icon" onclick="performSearch()">🔍</span>
+                <div id="headerAutocomplete" class="autocomplete-list"></div>
+            </div>
+        </div>
+        
+        <div class="container">
+            <!-- フィルター -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label>面接段階:</label>
+                    <select id="stageFilter" onchange="applyFilters()">
+                        <option value="">すべて</option>
+                        <option value="一次面接">一次面接</option>
+                        <option value="二次面接">二次面接</option>
+                        <option value="三次面接">三次面接</option>
+                        <option value="最終面接">最終面接</option>
+                        <option value="グループディスカッション">グループディスカッション</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 統計情報 -->
+            <div id="statsInfo" class="stats-info" style="display: none;">
+                <div class="stat-item">
+                    <div class="stat-number" id="companyCount">0</div>
+                    <div class="stat-label">会社数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="questionCount">0</div>
+                    <div class="stat-label">質問数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="stageCount">0</div>
+                    <div class="stat-label">面接段階</div>
+                </div>
+            </div>
+            
+            <!-- 結果表示 -->
+            <div id="resultsContainer"></div>
+        </div>
+    </div>
+    
+    <!-- トーストメッセージ -->
+    <div id="toast" class="toast"></div>
+    
+    <script>
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            sidebar.classList.toggle('open');
+            body.classList.toggle('menu-open');
+        }
+
+        let allData = [];
+        let filteredData = [];
+        let allCompanies = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPopularCompanies();
+            loadAllCompanies();
+            
+            // オートコンプリートの外側クリックで閉じる
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.search-box') && !e.target.closest('.header-search')) {
+                    hideAllAutocomplete();
+                }
+            });
+        });
+        
+        function loadAllCompanies() {
+            fetch('/team_UD/api/companies/')
+                .then(response => response.json())
+                .then(data => {
+                    allCompanies = data.companies || [];
+                })
+                .catch(error => {
+                    console.error('Error loading companies:', error);
+                });
+        }
+        
+        function showAutocomplete(input) {
+            const query = input.value.trim().toLowerCase();
+            const isMainSearch = input.id === 'mainSearch';
+            const autocompleteId = isMainSearch ? 'mainAutocomplete' : 'headerAutocomplete';
+            const autocompleteList = document.getElementById(autocompleteId);
+            
+            if (!query) {
+                autocompleteList.classList.remove('active');
+                return;
+            }
+            
+            // 会社名をフィルタリング
+            const matches = allCompanies.filter(company => 
+                company.name.toLowerCase().includes(query)
+            ).slice(0, 20);
+            
+            if (matches.length === 0) {
+                autocompleteList.classList.remove('active');
+                return;
+            }
+            
+            // オートコンプリートリストを表示
+            autocompleteList.innerHTML = '';
+            matches.forEach(company => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                
+                // マッチした部分をハイライト
+                const regex = new RegExp(`(${query})`, 'gi');
+                const highlightedName = company.name.replace(regex, '<mark>$1</mark>');
+                item.innerHTML = highlightedName;
+                
+                item.onclick = function() {
+                    selectCompany(company.name);
+                };
+                
+                autocompleteList.appendChild(item);
+            });
+            
+            autocompleteList.classList.add('active');
+        }
+        
+        function hideAllAutocomplete() {
+            document.getElementById('mainAutocomplete').classList.remove('active');
+            document.getElementById('headerAutocomplete').classList.remove('active');
+        }
+        
+        function selectCompany(companyName) {
+            document.getElementById('mainSearch').value = companyName;
+            document.getElementById('headerSearch').value = companyName;
+            hideAllAutocomplete();
+            performSearch();
+        }
+        
+        function loadPopularCompanies() {
+            const list = document.getElementById('popularList');
+            list.innerHTML = '<div style="color: #999;">読み込み中...</div>';
+            
+            // データベースから会社リストを取得
+            fetch('/team_UD/api/companies/')
+                .then(response => response.json())
+                .then(data => {
+                    list.innerHTML = '';
+                    const companies = data.companies || [];
+                    
+                    // 最大10社まで表示
+                    companies.slice(0, 10).forEach(company => {
+                        const item = document.createElement('div');
+                        item.className = 'popular-item';
+                        item.textContent = company.name;
+                        item.onclick = () => searchCompany(company.name);
+                        list.appendChild(item);
+                    });
+                    
+                    if (companies.length === 0) {
+                        list.innerHTML = '<div style="color: #999;">登録されている会社がありません</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    list.innerHTML = '<div style="color: #999;">会社リストの読み込みに失敗しました</div>';
+                });
+        }
+        
+        function searchCompany(companyName) {
+            document.getElementById('mainSearch').value = companyName;
+            document.getElementById('headerSearch').value = companyName;
+            performSearch();
+        }
+        
+        function performSearch() {
+            const mainSearch = document.getElementById('mainSearch').value.trim();
+            const headerSearch = document.getElementById('headerSearch').value.trim();
+            const query = mainSearch || headerSearch;
+            
+            if (!query) {
+                return;
+            }
+            
+            // 両方の検索バーを同期
+            document.getElementById('mainSearch').value = query;
+            document.getElementById('headerSearch').value = query;
+            
+            // オートコンプリートを閉じる
+            hideAllAutocomplete();
+            
+            // 検索画面から結果画面に切り替え
+            document.getElementById('searchScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.add('active');
+            
+            // 検索実行
+            loadStatistics(query);
+        }
+        
+        function backToSearch() {
+            document.getElementById('searchScreen').classList.remove('hidden');
+            document.getElementById('resultsScreen').classList.remove('active');
+            document.getElementById('mainSearch').value = '';
+            document.getElementById('headerSearch').value = '';
+        }
+        
+        function loadStatistics(searchQuery = '') {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = '<div class="loading">検索中...</div>';
+            
+            let url = '/team_UD/api/statistics/';
+            if (searchQuery) {
+                url += `?search=${encodeURIComponent(searchQuery)}`;
+            }
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    allData = data.statistics || [];
+                    if (allData.length === 0) {
+                        // 検索結果が0件の場合
+                        container.innerHTML = `
+                            <div class="no-results-box">
+                                <h2 style="color: #667eea; margin-bottom: 15px;">🔍 検索結果</h2>
+                                <p style="font-size: 1.2em; margin-bottom: 10px;">「${escapeHtml(searchQuery)}」の統計情報が見つかりませんでした。</p>
+                                <p style="color: #999;">この会社の面接質問データがまだ登録されていません。</p>
+                            </div>
+                        `;
+                        document.getElementById('statsInfo').style.display = 'none';
+                    } else {
+                        applyFilters();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    container.innerHTML = '<div class="no-results-box">データの読み込みに失敗しました</div>';
+                });
+        }
+        
+        function applyFilters() {
+            const stageFilter = document.getElementById('stageFilter').value;
+            
+            // フィルタリング
+            filteredData = allData.map(company => {
+                if (!stageFilter) {
+                    return company;
+                }
+                
+                const filteredStages = company.stages.filter(stage => stage.stage === stageFilter);
+                if (filteredStages.length === 0) {
+                    return null;
+                }
+                
+                return {
+                    ...company,
+                    stages: filteredStages
+                };
+            }).filter(c => c !== null);
+            
+            displayResults();
+        }
+        
+        function displayResults() {
+            const container = document.getElementById('resultsContainer');
+            
+            if (filteredData.length === 0) {
+                // フィルター適用後に結果が0件の場合
+                const searchQuery = document.getElementById('headerSearch').value.trim();
+                if (allData.length === 0) {
+                    // 元のデータが0件（既にメッセージ表示済み）
+                    return;
+                } else {
+                    // フィルターで絞り込んだ結果0件
+                    container.innerHTML = `
+                        <div class="no-results-box">
+                            <h2 style="color: #667eea; margin-bottom: 15px;">🔍 フィルター結果</h2>
+                            <p style="font-size: 1.2em; margin-bottom: 10px;">選択した条件に一致する質問が見つかりませんでした。</p>
+                            <p style="color: #999;">フィルター条件を変更してみてください。</p>
+                        </div>
+                    `;
+                    document.getElementById('statsInfo').style.display = 'none';
+                }
+                return;
+            }
+            
+            // 統計情報を更新
+            updateStats();
+            
+            // 結果を表示
+            container.innerHTML = '';
+            filteredData.forEach(company => {
+                const section = document.createElement('div');
+                section.className = 'company-section';
+                
+                const totalQuestions = company.stages.reduce((sum, stage) => sum + stage.questions.length, 0);
+                
+                section.innerHTML = `
+                    <div class="company-header">
+                        <div class="company-name">${escapeHtml(company.company_name)}</div>
+                        <div class="company-stats">
+                            <span>📝 ${totalQuestions} 件の質問</span>
+                            <span>📊 ${company.stages.length} つの面接段階</span>
+                        </div>
+                    </div>
+                `;
+                
+                company.stages.forEach(stage => {
+                    const stageDiv = document.createElement('div');
+                    stageDiv.className = 'stage-section';
+                    
+                    stageDiv.innerHTML = `
+                        <div class="stage-name">
+                            ${escapeHtml(stage.stage)}
+                            <span class="question-count">${stage.questions.length}件</span>
+                        </div>
+                        <ul class="question-list">
+                            ${stage.questions.map(q => `
+                                <li class="question-item">
+                                    <span class="question-text">${escapeHtml(q)}</span>
+                                    <div class="question-actions">
+                                        <button class="action-btn copy-btn" onclick="copyQuestion('${escapeHtml(q).replace(/'/g, "\\'")}')">📋 コピー</button>
+                                    </div>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                    
+                    section.appendChild(stageDiv);
+                });
+                
+                container.appendChild(section);
+            });
+        }
+        
+        function updateStats() {
+            const companyCount = filteredData.length;
+            const questionCount = filteredData.reduce((sum, company) => {
+                return sum + company.stages.reduce((stageSum, stage) => stageSum + stage.questions.length, 0);
+            }, 0);
+            const stageCount = filteredData.reduce((sum, company) => sum + company.stages.length, 0);
+            
+            document.getElementById('companyCount').textContent = companyCount;
+            document.getElementById('questionCount').textContent = questionCount;
+            document.getElementById('stageCount').textContent = stageCount;
+            document.getElementById('statsInfo').style.display = 'flex';
+        }
+        
+        function copyQuestion(question) {
+            navigator.clipboard.writeText(question).then(() => {
+                showToast('質問をコピーしました！');
+            }).catch(err => {
+                console.error('コピーに失敗:', err);
+                showToast('コピーに失敗しました', 'error');
+            });
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = type === 'success' ? '#4caf50' : '#f44336';
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

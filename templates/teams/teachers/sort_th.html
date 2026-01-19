@@ -1,0 +1,9 @@
+{% if sort == key %}
+  {% if dir == 'asc' %}
+    <a href="?q={{ query }}&sort={{ key }}&dir=desc">{{ label }} ▲</a>
+  {% else %}
+    <a href="?q={{ query }}&sort={{ key }}&dir=asc">{{ label }} ▼</a>
+  {% endif %}
+{% else %}
+  <a href="?q={{ query }}&sort={{ key }}&dir=asc">{{ label }}</a>
+{% endif %}

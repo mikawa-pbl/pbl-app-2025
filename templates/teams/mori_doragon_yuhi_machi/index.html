@@ -1,10 +1,355 @@
 <!DOCTYPE html>
 <html lang="ja">
+{% load static %}
+
 <head>
     <meta charset="UTF-8">
-    <title>mori_doragon_yuhi_machi</title></head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>imadokoda!</title>
+    <style>
+        /* 全体のフォント設定 */
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+
+        /* レスポンシブ対応のためのメディアクエリ */
+        /* レスポンシブ対応のためのメディアクエリ */
+        @media (max-width: 768px) {
+            body {
+                margin: 10px; /* スマホでは余白を減らす */
+            }
+
+            /* ヘッダーの調整 */
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start !important; /* 左寄せ */
+                gap: 10px;
+                /* padding: 15px !important; <- 削除 */
+            }
+            
+            
+            h1 {
+                font-size: 1.4em !important; /* タイトルを少し小さく */
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: flex-end; /* ボタン等は右寄せのまま */
+            }
+
+            /* カラムの調整 */
+            .dashboard-columns {
+                flex-direction: column; /* 縦並び */
+                align-items: stretch; /* 幅いっぱいに */
+            }
+
+            .dashboard-column {
+                min-width: 100%; /* 幅100% */
+                max-width: none;
+            }
+            
+            /* ボタンやリンクの押しやすさ調整 */
+            a[title="場所を追加"], a[title="メンバーを追加"] {
+                font-size: 1.8em !important; /* 少し大きく */
+                padding: 0 5px;
+            }
+            
+            button[type="submit"] {
+                padding: 10px 15px !important; /* ボタンを押しやすく */
+            }
+        }
+
+        /* Header Styling (Clean) */
+        .header-container {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin: 0;
+            color: #333;
+        }
+
+        /* リンクのスタイル */
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* メンバーリスト全体のスタイル */
+        .member-list {
+            list-style-type: none; /* ・を消す */
+            padding: 0;
+            max-width: 600px; /* 幅制限 */
+        }
+
+        /* リストアイテム（1行ごとの枠） */
+        .member-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px; /* 角丸 */
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* うっすら影 */
+        }
+
+        /* 写真と名前をまとめるエリア */
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* 写真と名前の間隔 */
+            flex-grow: 1; /* 余白を埋める */
+        }
+
+        /* 顔写真のスタイル */
+        .member-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%; /* 丸くする */
+            object-fit: cover;  /* 枠に合わせてトリミング */
+            border: 1px solid #ccc;
+        }
+
+        /* 写真がない場合のデフォルトアイコン */
+        .default-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #eee;
+            display: flex;       /* 中身を中央揃え */
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #888;
+            border: 1px solid #ccc;
+        }
+
+        /* メンバー名のスタイル */
+        .member-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* プルダウンのスタイル */
+        select {
+            font-size: 1em;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+        select:hover {
+            background-color: #e9e9e9;
+        }
+    </style>
+</head>
+
 <body>
-<h1>mori_doragon_yuhi_machi</h1>
-<p><a href="/mori_doragon_yuhi_machi/members/">メンバー一覧</a></p>
+    <script>
+        function activateEasterEgg() {
+            const bezitaUrl = "{% static 'images/bezita.jpg' %}";
+            
+            // 1. Existing photos
+            const photos = document.querySelectorAll('.member-photo');
+            photos.forEach(img => {
+                img.src = bezitaUrl;
+            });
+
+            // 2. Default icons (replace div with img)
+            const defaultIcons = document.querySelectorAll('.default-icon');
+            defaultIcons.forEach(div => {
+                const newImg = document.createElement('img');
+                newImg.src = bezitaUrl;
+                newImg.className = 'member-photo';
+                newImg.alt = 'Bezita';
+                div.parentNode.replaceChild(newImg, div);
+            });
+        }
+
+        // --- Auto Home Reset Logic ---
+        function checkAutoHome() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            
+            // 00:00 Check (24:00)
+            if (hours === 0 && minutes === 0) {
+                const todayStr = now.toDateString();
+                const lastRun = localStorage.getItem('last_auto_home');
+                
+                if (lastRun !== todayStr) {
+                    console.log("Auto triggering Home Reset...");
+                    localStorage.setItem('last_auto_home', todayStr);
+                    
+                    // Submit the form
+                    const form = document.getElementById('reset-form');
+                    if (form) {
+                        form.submit();
+                    }
+                }
+            }
+        }
+
+        // Check every 10 seconds
+        setInterval(checkAutoHome, 10000);
+        
+        // Run immediately on load just in case
+        window.onload = checkAutoHome;
+    </script>
+</head>
+
+<body>
+    <div class="header-container">
+        <h1 style="margin: 0; display: flex; align-items: center;">
+            <span onclick="activateEasterEgg()" style="cursor: pointer; margin-right: 10px; font-size: 1.5em;">♨</span>
+            <img src="{% static 'images/logo.png' %}" alt="いまどこだ！表" style="height: 60px; width: auto;">
+        </h1>
+
+        <div class="header-actions" style="display: flex; align-items: center; gap: 10px;">
+            <a href="{% url 'mori_doragon_yuhi_machi:add_place' %}" title="場所を追加" style="text-decoration: none;">
+                <img src="{% static 'images/location.png' %}" alt="場所を追加" style="height: 50px; width: auto;">
+            </a>
+            <a href="{% url 'mori_doragon_yuhi_machi:add_member' %}" title="メンバーを追加" style="text-decoration: none;">
+                <img src="{% static 'images/hito.png' %}" alt="メンバーを追加" style="height: 50px; width: auto;">
+            </a>
+            
+            <!-- 全員帰宅ボタンは削除されましたが、自動リセット機能のためにフォームは非表示で残します -->
+            <form id="reset-form" action="{% url 'mori_doragon_yuhi_machi:reset_to_home' %}" method="POST" style="display: none;">
+                {% csrf_token %}
+            </form>
+        </div>
+    </div>
+    
+    <style>
+        /* Row category colors - Specificity increased to override .member-list li */
+        .member-list li.row-cat-Laboratory { background-color: #ffcccc; border-left: 5px solid red; }
+        .member-list li.row-cat-LectureRoom { background-color: #e0ffff; border-left: 5px solid cyan; }
+        .member-list li.row-cat-Outdoor { background-color: #f3e6ff; border-left: 5px solid purple; }
+        .member-list li.row-cat-Home { background-color: #ffffff; border-left: 5px solid #ccc; }
+        .member-list li.row-cat-Other { 
+            background: linear-gradient(to right, #ffafbd, #ffc3a0, #ffdfc4, #ffffc4, #e4ffc4, #c4ffdd, #c4f3ff, #c4d9ff, #dcc4ff, #ffc4fa);
+            border-left: 5px solid gold;
+        }
+
+        /* 場所カテゴリーのドロップダウンオプション（文字色は黒、太字のみ残す） */
+        .cat-Laboratory { font-weight: bold; color: black; }
+        .cat-LectureRoom { font-weight: bold; color: black; } 
+        .cat-Outdoor { font-weight: bold; color: black; }
+        .cat-Home { font-weight: bold; color: black; }
+        .cat-Other { font-weight: bold; color: black; }
+        
+        /* 3カラムレイアウト用コンテナ */
+        .dashboard-columns {
+            display: flex;
+            gap: 15px; /* カラム間の隙間 */
+            align-items: flex-start; /* 上揃え */
+            justify-content: center; /* 中央寄せ */
+            flex-wrap: wrap; /* 画面が狭いときは折り返し */
+        }
+        
+        /* 各カラム */
+        .dashboard-column {
+            flex: 1;
+            min-width: 280px; /* ある程度の幅を確保 */
+            max-width: 400px;
+        }
+
+        /* リストのスタイル調整（コンパクト化） */
+        .member-list {
+            padding: 0;
+            width: 100%;
+        }
+        
+        .member-list li {
+            padding: 5px 8px; /* パディング縮小 */
+            margin-bottom: 6px; /* マージン縮小 */
+        }
+
+        .member-info {
+            gap: 8px; /* 画像とテキストの間隔縮小 */
+        }
+
+        .member-photo, .default-icon {
+            width: 40px; /* 写真サイズ少し縮小 */
+            height: 40px;
+        }
+        
+        .member-name {
+            font-size: 1.1em; /* フォントサイズ微調整 */
+        }
+    </style>
+
+    <div class="dashboard-columns">
+            {% for column in columns %}
+            <div class="dashboard-column">
+                {% for grade, members in column %}
+                    <h3 style="margin-top: 15px; border-bottom: 2px solid #eee; padding-bottom: 3px; font-size: 1.2em;">{{ grade }}</h3>
+                    <ul class="member-list">
+                        {% for member in members %}
+                        <li class="row-cat-{{ member.current_place.category|default:'Other' }}">
+                            <form action="{% url 'mori_doragon_yuhi_machi:update_location' %}" method="POST" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                                
+                                {% csrf_token %}
+                                
+                                <input type="hidden" name="member_id" value="{{ member.id }}">
+
+                                <div class="member-info">
+                                    
+                                    {% if member.photo %}
+                                        <img src="{{ member.photo.url }}" alt="{{ member.name }}" class="member-photo">
+                                    
+                                    {% else %}
+                                        <div class="default-icon">👤</div>
+                                    {% endif %}
+
+                                    <div class="member-details">
+                                        <label for="place-select-{{ member.id }}" class="member-name" style="display: block;">
+                                            {{ member.name }}
+                                        </label>
+                                        {% if member.updated_at %}
+                                            <span style="font-size: 0.75em; color: #888;">
+                                                最終更新: {{ member.updated_at|date:"m/d H:i" }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <select name="place_id" id="place-select-{{ member.id }}" onchange="this.form.submit()" style="padding: 4px; font-size: 0.95em;">
+                                    
+                                    <option value="" {% if member.current_place is None %}selected{% endif %}>
+                                        未設定
+                                    </option> 
+
+                                    {% for place in all_places %}
+                                        <option 
+                                            value="{{ place.id }}" 
+                                            class="cat-{{ place.category }}"
+                                            {% if member.current_place == place %}selected{% endif %}
+                                        >
+                                            {{ place.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div style="margin-bottom: 50px;"></div>
 </body>
 </html>

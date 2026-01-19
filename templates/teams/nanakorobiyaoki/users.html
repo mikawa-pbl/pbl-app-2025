@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メンバー一覧 | nanakorobiyaoki</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        /* === メンバーリストのグリッド === */
+        .member-list {
+            display: grid;
+            /* 画面幅に応じてカードの列数を自動調整 */
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        /* === メンバーカード === */
+        .member-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .member-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* カード全体をリンクにする */
+        .member-card a {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .member-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .member-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* 名前の折り返しのため */
+        }
+
+        .member-info .name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* 長い名前は ... で省略 */
+        }
+
+        .member-info .department {
+            font-size: 0.85rem;
+            color: #777;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* デフォルトアイコンの代わりのイニシャル表示用スタイル */
+        .member-initial-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #007bff; /* 好きな背景色を設定 */
+            color: #ffffff; /* 文字色 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem; /* 文字サイズ */
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>ユーザ一覧</h1>
+
+        <ul class="member-list">
+            {% for user in users %}
+                <li class="member-card">
+                    <a href="{% url 'nanakorobiyaoki:user_profile' user.user_id %}">
+                        
+                        {% if user.icon %}
+                            {# ユーザーがアイコン画像を設定している場合 #}
+                            <img src="{{ user.icon.url }}" alt="{{ user.name }} のアイコン" class="member-icon">
+                        {% else %}
+                            {# ユーザーがアイコン画像を設定していない場合、名前の最初の1文字を表示 #}
+                            <span class="member-initial-icon">
+                                {{ user.name.0|upper }} {# 名前の最初の文字を大文字で表示 #}
+                            </span>
+                        {% endif %}
+                        
+                        <div class="member-info">
+                            <span class="name">{{ user.name }}</span>
+                            <span class="grade">{{ user.grade }}</span>
+                            <span class="department">{{ user.department }}</span>
+                        </div>
+                    </a>
+                </li>
+            {% empty %}
+                <li>まだメンバーが登録されていません。</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

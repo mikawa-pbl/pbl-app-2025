@@ -61,11 +61,13 @@ INSTALLED_APPS = [
     "team_shouronpou",
     'team_giryulink',
     'takenoko',
+    'teachers',
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "h34vvy_u53rzz.middleware.H34vvySessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -86,6 +88,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "nanakorobiyaoki.context_processors.nanakorobiyaoki_context",
+                "takenoko.context_processors.takenoko_user",
             ],
         },
     },
@@ -121,6 +125,9 @@ DATABASES = {
     "h34vvy_u53rzz": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "h34vvy_u53rzz" / "db.sqlite3",
+        "TEST": {
+            "DEPENDENCIES": [],
+        },
     },
     "team_TeXTeX": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -200,11 +207,22 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'team_terrace' / 'db.sqlite3',
     },
+    'teachers': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'teachers' / 'db.sqlite3',
+    },
 }
 
 
 # app_labelごとにDBを振り分けるルーター
 DATABASE_ROUTERS = ["routers.TeamPerAppRouter"]
+
+# "django.contrib.auth.backends.ModelBackend" はチームgiryulinkのユーザー認証のものです。
+# グローバルの認証バックエンド
+AUTHENTICATION_BACKENDS = [
+    "h34vvy_u53rzz.backends.H34vvyUserBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -228,9 +246,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ja"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Tokyo"
 
 USE_I18N = True
 
@@ -241,6 +259,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+
+# Media files (uploaded images)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

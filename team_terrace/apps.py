@@ -2,5 +2,7 @@ from django.apps import AppConfig
 
 
 class TeamTerraceConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'team_terrace'
+    """team_terraceアプリの設定."""
+
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "team_terrace"

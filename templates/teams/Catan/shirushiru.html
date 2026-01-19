@@ -2,227 +2,133 @@
 <html lang="ja">
 
 <head>
+  {% load static %}
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在室状況アプリ</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-    }
-
-    .container {
-      width: 360px;
-      background: #fff;
-    }
-
-    .header {
-      background: #e3e3e3;
-      padding: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 18px;
-      border: 1px solid #aaa;
-      border-radius: 4px;
-      margin-bottom: 20px;
-    }
-
-    .title {
-      font-weight: bold;
-    }
-
-    .user-name {
-      font-size: 14px;
-      color: #333;
-    }
-
-    .status-button {
-      float: right;
-      margin-bottom: 20px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    table,
-    th,
-    td {
-      border: 1px solid #aaa;
-    }
-
-    th,
-    td {
-      padding: 8px;
-      text-align: center;
-      vertical-align: middle;
-    }
-
-    .footer {
-      text-align: center;
-      margin-top: 20px;
-      color: #777;
-      font-size: 14px;
-    }
-
-    /* ダイアログのスタイル */
-    .dialog-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .dialog-overlay.show {
-      display: flex;
-    }
-
-    .dialog-box {
-      background: #fff;
-      border: 2px solid #000;
-      border-radius: 8px;
-      padding: 20px;
-      width: 320px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    }
-
-    .dialog-header {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    .dialog-content {
-      margin-bottom: 20px;
-    }
-
-    .dialog-content label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-
-    .dialog-content select,
-    .dialog-content input {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #aaa;
-      border-radius: 4px;
-      margin-bottom: 15px;
-    }
-
-    .dialog-buttons {
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .dialog-buttons button {
-      padding: 10px 20px;
-      border: 1px solid #aaa;
-      border-radius: 4px;
-      cursor: pointer;
-      background: #f0f0f0;
-    }
-
-    .dialog-buttons button:hover {
-      background: #e0e0e0;
-    }
-  </style>
-  <script>
-    const isAuthenticated = {% if user.is_authenticated %}true{% else %} false{% endif %};
-    function openDialog() {
-      document.getElementById('statusDialog').classList.add('show');
-    }
-
-    function closeDialog() {
-      document.getElementById('statusDialog').classList.remove('show');
-    }
-
-    function saveStatus() {
-      // if (!isAuthenticated) {
-      //   alert('ログインが必要です。ログインしてください。');
-      //   closeDialog();
-      //   return;
-      // }
-
-      const location = document.getElementById('locationSelect').value;
-      const comment = document.getElementById('commentInput').value;
-
-      // クライアント側でテーブルの該当行を更新する（簡易版）
-      const locCell = document.getElementById('user-location-cell');
-      const comCell = document.getElementById('user-comment-cell');
-      if (locCell) locCell.textContent = location;
-      if (comCell) comCell.textContent = comment;
-
-      // ここでサーバーにデータを送信して永続化する処理を追加できます
-
-      alert('在室状況を更新しました');
-      closeDialog();
-    }
-
-    // ダイアログ外をクリックしたら閉じる
-    window.onclick = function (event) {
-      const dialog = document.getElementById('statusDialog');
-      if (event.target === dialog) {
-        closeDialog();
-      }
-    }
-  </script>
+  <link rel="stylesheet" href="{% static 'css/shirushiru.css' %}">
+  <script src="{% static 'js/shirushiru.js' %}"></script>
 </head>
 
 <body>
   <div class="container">
     <div class="header">
       <div class="title">在室状況アプリ</div>
+      <a href="slack://open?team=T022EFBCLNA" class="slack-text-btn" title="Slackへ遷移">Slack</a>
       <div class="user-name">
-        {% if user.is_authenticated %}
-        {{ user.get_full_name|default:user.username }}
-        {% else %}
         ゲスト
-        {% endif %}
       </div>
     </div>
+    
+    <!-- テーブル色の凡例 -->
+    <div class="table-legend" >
+      <span class="legend-box" ></span>研究中
+    </div>
 
-    <button class="status-button" onclick="openDialog()">② 在室状況変更ボタン</button>
-
+    <!-- M2テーブル -->
+    <h3 class="grade-title">M2</h3>
     <table>
       <tr>
         <th>名前</th>
         <th>場所</th>
         <th>コメント</th>
+        <th></th>
+      </tr>
+      <tr class="in-lab">
+        <td>佐藤</td>
+        <td>研究室（M2）C3-503</td>
+        <td>論文執筆中</td>
+        <td><span class="detail">詳細</span></td>
       </tr>
       <tr>
-        <td>勝田</td>
-        <td>学内</td>
-        <td>A1です</td>
-      </tr>
-      <tr>
-        <td>よよよ</td>
+        <td>鈴木</td>
         <td>自宅</td>
-        <td>明日は行きます</td>
+        <td>リモート作業</td>
+        <td><span class="detail">詳細</span></td>
       </tr>
-      <tr id="user-row">
-        <!-- <td id="user-name-cell">{% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% else
-          %}ゲスト{% endif %}</td> -->
-        <td id="user-name-cell">ゲスト</td>
-        <td id="user-location-cell">-</td>
-        <td id="user-comment-cell">-</td>
+      <tr>
+        <td>高橋</td>
+        <td>学内</td>
+        <td>図書館にいます</td>
+        <td><span class="detail">詳細</span></td>
       </tr>
     </table>
 
-    <div class="footer">画面イメージ図</div>
+    <!-- M1テーブル -->
+    <h3 class="grade-title">M1</h3>
+    <table>
+      <tr>
+        <th>名前</th>
+        <th>場所</th>
+        <th>コメント</th>
+        <th></th>
+        <th class="displaynone"></th>
+  
+      </tr>
+      <tr class="in-lab">
+        <td>小濱</td>
+        <td>研究室（B4,M1）C3-502</td>
+        <td>実験中</td>
+        <td><span class="detail">詳細</span></td>
+        <td class="displaynone"></td>
+      </tr>
+      <tr>
+        <td>伊藤</td>
+        <td>授業</td>
+        <td>15時まで授業</td>
+        <td><span class="detail">詳細</span></td>
+        <td class="displaynone"></td>
+      </tr>
+      <tr class="in-lab">
+        <td>石川</td>
+        <td>3Dプリンタの部屋 C3-511</td>
+        <td>造形中</td>
+        <td><span class="detail">詳細</span></td>
+        <td class="displaynone"></td> 
+      </tr>
+      <tr id="user-row">
+        <td id="user-name-cell">ゲスト</td>
+        <td id="user-location-cell">-</td>
+        <td id="user-comment-cell">-</td>
+        <td><span class="detail">詳細</span></td>
+        <td class="displaynone" id="user-status-cell"></td>
+      </tr>
+    </table>
+
+    <!-- B4テーブル -->
+    <h3 class="grade-title">B4</h3>
+    <table>
+      <tr>
+        <th>名前</th>
+        <th>場所</th>
+        <th>コメント</th>
+        <th></th>
+      </tr>
+      <tr class="in-lab">
+        <td>小林(あ)</td>
+        <td>研究室（B4,M1）C3-502</td>
+        <td>プログラミング中</td>
+        <td><span class="detail">詳細</span></td>
+      </tr>
+      <tr>
+        <td>小林(わ)</td>
+        <td>自宅</td>
+        <td>体調不良</td>
+        <td><span class="detail">詳細</span></td>
+      </tr>
+      <tr class="in-lab">
+        <td>加藤</td>
+        <td>ゼミ室 C3-513</td>
+        <td>ミーティング</td>
+        <td><span class="detail">詳細</span></td>
+      </tr>
+    </table>
+
+    <div class="footer"></div>
   </div>
+
+  <!-- 在室状況変更ボタン（固定表示） -->
+  <button class="status-button" onclick="openDialog()">✏️ 在室状況変更</button>
 
   <!-- 在室状況変更ダイアログ -->
   <div id="statusDialog" class="dialog-overlay">
@@ -231,18 +137,51 @@
       <div class="dialog-content">
         <label for="locationSelect">場所:</label>
         <select id="locationSelect">
-          <option value="学内">学内</option>
-          <option value="自宅">自宅</option>
-          <option value="外出">外出</option>
-          <option value="不在">不在</option>
+          <option key="lab1" class="lab-option" value="研究室（B4,M1）C3-502">研究室（B4,M1）C3-502</option>
+          <option key="lab2" class="lab-option" value="研究室（M2）C3-503">研究室（M2）C3-503</option>
+          <option key="lab3" class="lab-option" value="3Dプリンタの部屋 C3-511">3Dプリンタの部屋 C3-511</option>
+          <option key="lab4" class="lab-option" value="ゼミ室 C3-513">ゼミ室 C3-513</option>
+          <option key="class" value="授業">授業</option>
+          <option key="oncampus" value="学内">学内</option>
+          <option key="absent" value="不在">不在</option>
         </select>
 
         <label for="commentInput">コメント:</label>
-        <input type="text" id="commentInput" placeholder="コメントを入力してください" />
+        <textarea id="commentInput" placeholder="コメントを入力してください" rows="3"></textarea>
+
+        <label for="talkStatusSelect">話しかけステータス:</label>
+        <select id="talkStatusSelect">
+          <option value="ok">🗣️ OK（話しかけていいよ）</option>
+          <option value="ng">🤫 NG（集中してるよ）</option>
+        </select>
       </div>
       <div class="dialog-buttons">
         <button onclick="closeDialog()">キャンセル</button>
         <button onclick="saveStatus()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ユーザ詳細ダイアログ -->
+  <div id="detailDialog" class="dialog-overlay">
+    <div class="dialog-box">
+      <button class="dialog-close" onclick="closeDetailDialog()" aria-label="閉じる">✖</button>
+      <!-- 一番上に最終更新時刻（小さめ・中央表示） -->
+      <div class="dialog-updated">最終更新: <span id="detail-updated">-</span></div>
+      <div class="dialog-profile-row">
+        <div class="profile-grade"><span id="detail-grade">-</span></div>
+        <div class="profile-name"><span id="detail-name">-</span></div>
+        <div><span id="detail-talk"></span></div>
+      </div>
+      <div class="dialog-content">
+        <div class="profile-place"><strong>場所:</strong> <span id="detail-location">-</span></div>
+        <div class="profile-comment"><strong>コメント:</strong>
+          <div id="detail-comment" class="scroll-comment">-</div>
+        </div>
+        <div class="profile-inlab"><strong>今日の在室時間:</strong> 計<span id="in-lab-time">600</span>分</div>
+      </div>
+      <div class="dialog-footer">
+        <button id="detail-action-btn" class="slack-dm-btn" onclick="window.open('https://iimlabofficial.slack.com/archives/D06T65ZTJRW','_blank')">Slack（DM）へ移動</button>
       </div>
     </div>
   </div>

@@ -1,0 +1,16 @@
+{% extends "teams/team_akb5/base.html" %}
+
+{% block title %}管理者ログイン{% endblock %}
+
+{% block content %}
+<h1>管理者ログイン</h1>
+{% if error %}
+<p style="color: #d32f2f;">{{ error }}</p>
+{% endif %}
+<form method="post" action="{% url 'team_akb5:admin' %}">
+    {% csrf_token %}
+    <label for="admin-password">管理者パスワード</label>
+    <input type="password" id="admin-password" name="admin_password" required>
+    <button type="submit">ログイン</button>
+</form>
+{% endblock %}

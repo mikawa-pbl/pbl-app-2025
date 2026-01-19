@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{% block title %}就活サポートアプリ{% endblock %}</title>
+</head>
+
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+
+    <!-- ナビゲーションバー -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-6 py-3 md:flex md:justify-between md:items-center">
+            <div class="flex justify-between items-center">
+                <div>
+                    <a class="text-gray-800 text-xl font-bold md:text-2xl hover:text-gray-700"
+                        href="{% url 'home' %}">就活サポート</a>
+                </div>
+            </div>
+
+            <!-- メニュー -->
+            <div class="md:flex items-center">
+                <div class="flex flex-col md:flex-row md:mx-6">
+                    {% if user.is_authenticated %}
+                    <!-- ログイン時 -->
+                    <a class="my-1 text-gray-700 hover:text-blue-500 md:mx-4 md:my-0"
+                        href="{% url 'member_list' %}">先輩一覧</a>
+                    <a class="my-1 text-gray-700 hover:text-blue-500 md:mx-4 md:my-0"
+                        href="{% url 'roadmap_list' %}">ロードマップ</a>
+                    <a class="my-1 text-gray-700 hover:text-blue-500 md:mx-4 md:my-0" href="{% url 'es_list' %}">ES</a>
+                    <a class="my-1 text-gray-700 hover:text-blue-500 md:mx-4 md:my-0"
+                        href="{% url 'profile' %}">プロフィール</a>
+                    <form action="{% url 'logout' %}" method="post" class="inline">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="my-1 text-gray-700 hover:text-blue-500 md:mx-4 md:my-0">ログアウト</button>
+                    </form>
+                    {% else %}
+                    <!-- ログアウト時 -->
+                    <a class="my-1 text-gray-700 hover:text-blue-500 md:mx-4 md:my-0" href="{% url 'login' %}">ログイン</a>
+                    <a class="my-1 text-gray-700 hover:text-blue-500 md:mx-4 md:my-0" href="{% url 'signup' %}">新規登録</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- メインコンテンツ -->
+    <div class="container mx-auto px-6 py-8">
+        <div class="bg-white rounded-lg shadow-xl p-6 md:p-10">
+            {% block content %}
+            <!-- 各ページのコンテンツがここに挿入されます -->
+            {% endblock %}
+        </div>
+    </div>
+
+</body>
+
+</html>

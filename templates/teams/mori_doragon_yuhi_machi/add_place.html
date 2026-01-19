@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>場所追加 - imadokoda!</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .error { color: red; font-weight: bold; }
+        input[type="text"] { padding: 5px; font-size: 1.1em; }
+        button { padding: 5px 10px; font-size: 1.1em; }
+        a { text-decoration: none; color: #007bff; }
+        
+        /* リスト管理用のスタイル (add_member.htmlと統一) */
+        .manage-list {
+            list-style: none;
+            padding: 0;
+            max-width: 400px;
+        }
+        .manage-list li {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-between; /* 名前とボタンを左右に配置 */
+            align-items: center;
+        }
+        .delete-btn {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+
+<h1>新しい場所を追加</h1>
+
+{% if error_message %}
+    <p class="error">{{ error_message }}</p>
+{% endif %}
+
+<form action="{% url 'mori_doragon_yuhi_machi:add_place' %}" method="POST">
+    {% csrf_token %}
+    <label for="place_name">場所名：</label>
+    <input type="text" name="place_name" id="place_name" placeholder="例：会議室A" required>
+    
+    <br><br>
+    <label>
+        種類:
+        <select name="place_category">
+            <option value="Laboratory">研究室</option>
+            <option value="LectureRoom">講義室</option>
+            <option value="Outdoor">屋外</option>
+            <option value="Home">自宅</option>
+            <option value="Other" selected>その他</option>
+        </select>
+    </label>
+    <br><br>
+    
+    <button type="submit">追加する</button>
+</form>
+
+<hr>
+<p>
+    <a href="{% url 'mori_doragon_yuhi_machi:index' %}">← トップページに戻る</a>
+</p>
+
+<h3>現在の場所一覧</h3>
+
+<ul class="manage-list">
+    {% for place in all_places %}
+        <li>
+            <span>{{ place.name }}</span>
+
+            <form action="{% url 'mori_doragon_yuhi_machi:delete_place' %}" method="POST" onsubmit="return confirm('「{{ place.name }}」を削除しますか？\n※ここにいるメンバーは「未設定」になります。');">
+                {% csrf_token %}
+                <input type="hidden" name="place_id" value="{{ place.id }}">
+                <button type="submit" class="delete-btn">削除</button>
+            </form>
+        </li>
+    {% empty %}
+        <li>まだ場所が登録されていません。</li>
+    {% endfor %}
+</ul>
+
+</body>
+</html>

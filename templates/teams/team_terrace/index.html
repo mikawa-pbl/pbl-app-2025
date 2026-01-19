@@ -1,10 +1,64 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Team Terrace</title></head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anony Chat - Create Room</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'team_terrace/css/index.css' %}">
+
+</head>
 <body>
-<h1>Team Terrace</h1>
-<p><a href="/team_terrace/members/">メンバー一覧</a></p>
+    <!-- Background -->
+    <div class="gradient-bg"></div>
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card">
+        <div class="logo">
+            <span class="logo-icon">💬</span>
+            <div class="logo-text">Anony Chat</div>
+            <div class="logo-tagline">匿名で気軽にチャットしよう</div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="text" name="title" placeholder="ルーム名を入力..." required autocomplete="off">
+            </div>
+            <button type="submit" class="submit-btn">
+                <span>ルームを作成</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                </svg>
+            </button>
+        </form>
+
+        <div class="features">
+            <div class="feature">
+                <span class="feature-icon">🔒</span>
+                <span>完全匿名</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">⚡</span>
+                <span>リアルタイム</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">❓</span>
+                <span>質問機能</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">Team Terrace</div>
 </body>
 </html>

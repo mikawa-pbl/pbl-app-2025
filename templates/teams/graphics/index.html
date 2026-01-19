@@ -2,9 +2,528 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Graphics</title></head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TUT 参考書レビューシステム - Graphics</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --secondary-hover: #475569;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            background-color: #f8fafc;
+        }
+        /* ヘッダー */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+        }
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        /* ハンバーガーメニュー */
+        .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            z-index: 1000;
+        }
+        .hamburger span {
+            width: 30px;
+            height: 3px;
+            background-color: white;
+            transition: all 0.3s;
+        }
+        /* メニュー */
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: white;
+            transition: right 0.3s ease;
+            z-index: 1002;
+            padding-top: 60px;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+        }
+        .nav-menu.active {
+            right: 0;
+        }
+        .nav-menu ul {
+            list-style: none;
+        }
+        .nav-menu li {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .nav-menu a {
+            display: block;
+            padding: 18px 30px;
+            color: #1e293b;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .nav-menu a:hover {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+            padding-left: 35px;
+        }
+        /* オーバーレイ */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+        .overlay.active {
+            display: block;
+        }
+        /* メインコンテンツ */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 50px 20px;
+            padding-top: 100px;
+        }
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .welcome-section h2 {
+            font-size: 40px;
+            color: #0f172a;
+            margin-bottom: 15px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        .description {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--primary-color);
+        }
+        .description h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 26px;
+            font-weight: 700;
+        }
+        .description p {
+            color: #475569;
+            font-size: 16px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        .feature-card {
+            background-color: white;
+            padding: 35px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+        }
+        /* プライマリカード（レビュー投稿） */
+        .feature-card:nth-child(2) {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+            color: white;
+            border: 2px solid var(--primary-color);
+            padding: 45px 25px;
+        }
+        .feature-card:nth-child(2):hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 16px 40px rgba(37, 99, 235, 0.3);
+            background: linear-gradient(135deg, var(--primary-hover) 0%, #1540c0 100%);
+        }
+        .feature-card:nth-child(2) h4 {
+            color: white;
+        }
+        .feature-card:nth-child(2) p {
+            color: rgba(255,255,255,0.95);
+        }
+        /* セカンダリカード */
+        .feature-card:nth-child(1):hover {
+            border-color: var(--primary-color);
+            background-color: var(--light-bg);
+        }
+        .feature-card h4 {
+            color: #0f172a;
+            margin-bottom: 15px;
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .feature-card h4::before {
+            font-size: 40px;
+        }
+        .feature-card p {
+            color: #64748b;
+            font-size: 15px;
+            line-height: 1.7;
+            font-weight: 500;
+        }
+        .feature-card:nth-child(2) p {
+            color: rgba(255,255,255,0.95);
+        }
+        /* 説明セクションの最適化 */
+        .description-intro {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 768px) {
+            .description-intro {
+                grid-template-columns: 1fr;
+            }
+        }
+        .intro-text h3 {
+            margin-bottom: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .intro-text p {
+            margin-bottom: 0;
+        }
+        .benefits-list {
+            background: rgba(37, 99, 235, 0.05);
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+        .benefits-list h4 {
+            color: var(--primary-color);
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .benefits-list ul {
+            list-style: none;
+        }
+        .benefits-list li {
+            padding: 12px 0;
+            color: #475569;
+            font-size: 15px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(37, 99, 235, 0.1);
+        }
+        .benefits-list li:last-child {
+            border-bottom: none;
+        }
+        .benefits-list li::before {
+            content: "✓";
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        /* クイックアクションバー */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 40px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(37, 99, 235, 0.02) 100%);
+            border-radius: 12px;
+            border: 2px solid rgba(37, 99, 235, 0.1);
+        }
+        @media (max-width: 640px) {
+            .quick-actions {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                padding: 20px;
+            }
+        }
+        .quick-action-btn {
+            padding: 16px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+        }
+        .quick-action-btn.primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+        }
+        .quick-action-btn.primary:hover {
+            box-shadow: 0 8px 28px rgba(37, 99, 235, 0.4);
+            background: linear-gradient(135deg, var(--primary-hover) 0%, #1540c0 100%);
+        }
+        .quick-action-btn.secondary {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex-direction: column;
+            gap: 6px;
+        }
+        .quick-action-btn.secondary:hover {
+            background: var(--light-bg);
+            border-color: var(--primary-hover);
+            color: var(--primary-hover);
+        }
+        .quick-action-btn-text {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+        }
+        .quick-action-btn-label {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .quick-action-btn-desc {
+            font-size: 12px;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+        /* 星評価スタイル */
+        .star-rating {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .star-filled {
+            color: #FFA500;
+        }
+        .star-half {
+            position: relative;
+            display: inline-block;
+            color: #cbd5e1;
+        }
+        .star-half::before {
+            content: '★';
+            position: absolute;
+            left: 0;
+            width: 50%;
+            overflow: hidden;
+            color: #FFA500;
+        }
+        .star-empty {
+            color: #cbd5e1;
+        }
+    </style>
+</head>
 <body>
-<h1>Graphics</h1>
-<p><a href="/graphics/members/">メンバー一覧</a></p>
+    <!-- ヘッダー -->
+    <header>
+        <h1>TUT 参考書レビューシステム</h1>
+        <button class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <!-- ナビゲーションメニュー -->
+    <nav class="nav-menu" id="navMenu">
+        <ul>
+            <li><a href="{% url 'graphics:index' %}" onclick="toggleMenu()">ホーム</a></li>
+            {% if request.session.graphics_user_id %}
+                <li><a href="{% url 'graphics:my_reviews' %}" onclick="toggleMenu()">マイレビュー</a></li>
+                <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
+                <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
+                <li><a href="{% url 'graphics:logout' %}" onclick="toggleMenu()">ログアウト</a></li>
+            {% else %}
+                <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
+                <li><a href="{% url 'graphics:login' %}" onclick="toggleMenu()">ログイン</a></li>
+                <li><a href="{% url 'graphics:signup' %}" onclick="toggleMenu()">サインアップ</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- オーバーレイ -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <!-- メインコンテンツ -->
+    <div class="container">
+        <section class="welcome-section">
+            <h2>TUT 参考書レビューシステムへようこそ</h2>
+        </section>
+
+        <!-- ログイン状態表示 -->
+        {% if request.session.graphics_user_id %}
+            <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%); padding: 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; border: 2px solid rgba(37, 99, 235, 0.2);">
+                <p style="color: var(--primary-color); font-size: 18px; font-weight: 700; margin: 0;">
+                    ログイン中: {{ request.session.graphics_user_nickname }} さん
+                </p>
+            </div>
+        {% endif %}
+
+        <!-- クイックアクションバー -->
+        <div class="quick-actions">
+            {% if request.session.graphics_user_id %}
+                <a href="{% url 'graphics:my_reviews' %}" class="quick-action-btn secondary">
+                    <div class="quick-action-btn-text">
+                        <span>📝</span>
+                        <span class="quick-action-btn-label">マイレビュー</span>
+                    </div>
+                </a>
+                <a href="{% url 'graphics:search_courses' %}" class="quick-action-btn secondary">
+                    <div class="quick-action-btn-text">
+                        <span>📚</span>
+                        <span class="quick-action-btn-label">レビューを検索</span>
+                    </div>
+                </a>
+                <a href="{% url 'graphics:add_book_review' %}" class="quick-action-btn primary">
+                    <span>✍️</span> レビューを投稿
+                </a>
+            {% else %}
+                <a href="{% url 'graphics:login' %}" class="quick-action-btn primary">
+                    <span>🔐</span> ログイン
+                </a>
+                <a href="{% url 'graphics:signup' %}" class="quick-action-btn secondary">
+                    <div class="quick-action-btn-text">
+                        <span>📝</span>
+                        <span class="quick-action-btn-label">サインアップ</span>
+                    </div>
+                </a>
+            {% endif %}
+        </div>
+
+        <section class="description">
+            <div class="description-intro">
+                <div class="intro-text">
+                    <h3>TUT 参考書レビューシステムとは？</h3>
+                    <p>
+                        学生による学生のための、参考書レビュー共有プラットフォームです。豊橋技術科学大学の学生が「本当に役立つ参考書」を発見・共有できます。
+                    </p>
+                    <p style="margin-top: 15px; font-size: 15px;">
+                        大学の授業では、科目ごとに異なる参考書を使って学習します。しかし、どの参考書が自分の学習に最適なのか、実際に使ってみるまでわかりません。このシステムでは、先輩や同級生が実際に使った参考書の「リアルなレビュー」を読むことで、より効果的な参考書選びをサポートします。
+                    </p>
+                </div>
+                <div class="benefits-list">
+                    <h4>こんなことができます</h4>
+                    <ul>
+                        <li>科目ごとにおすすめ参考書を検索</li>
+                        <li>他の学生のリアルなレビューを読む</li>
+                        <li>あなたの参考書情報を投稿・共有</li>
+                        <li>ISBNで書籍情報を自動取得</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 最近のレビュー -->
+        {% if recent_subject_reviews %}
+        <section class="recent-reviews" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin: 40px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="color: #0f172a; font-size: 24px; margin: 0;">📋 最近の科目レビュー</h3>
+            </div>
+            {% for review in recent_subject_reviews %}
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #2563eb;">
+                <h4 style="color: #0f172a; margin-bottom: 10px;">{{ review.course_offering.subject.name }}</h4>
+                <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">{{ review.course_offering.year }}年度 {{ review.course_offering.semester }}</p>
+                <div style="font-size: 16px; margin: 8px 0;">
+                    <span class="star-rating">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <span class="star-filled">★</span>
+                            {% else %}
+                                <span class="star-empty">☆</span>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                    ({{ review.rating }}/5)
+                </div>
+                <p style="color: #334155; line-height: 1.6;">{{ review.review|truncatewords:30 }}</p>
+                <p style="color: #94a3b8; font-size: 13px; margin-top: 10px;">{{ review.created_at|date:"Y年m月d日" }}</p>
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+
+        <section style="margin-top: 40px;">
+            <div class="features">
+                <a href="{% url 'graphics:search_courses' %}" class="feature-card">
+                    <h4>📚 科目別レビュー</h4>
+                    <p>おすすめ参考書を科目から検索・閲覧</p>
+                </a>
+                <a href="{% url 'graphics:add_book_review' %}" class="feature-card">
+                    <h4>✍️ レビュー投稿</h4>
+                    <p>参考書のレビューを投稿・共有</p>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const overlay = document.getElementById('overlay');
+            navMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+    </script>
 </body>
 </html>

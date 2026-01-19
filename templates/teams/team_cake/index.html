@@ -1,15 +1,13 @@
-<!DOCTYPE html>
-<html lang="ja">
+{% include 'teams/team_cake/header.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Team Cake</title>
-</head>
+<main class="container mx-auto px-4 py-8">
+    {% include 'teams/team_cake/sos_alert.html' %}
+    {% include 'teams/team_cake/slider.html' %}
+    {% include 'teams/team_cake/description.html' %}
+    {% include 'teams/team_cake/bread-scedule.html' %}
+    {% include 'teams/team_cake/opening-hours.html' %}
+    {% include 'teams/team_cake/goods_list.html' %}
+    {% include 'teams/team_cake/goods_detail_modal.html' %}
+</main>
 
-<body>
-    <h1>Team Cake</h1>
-    <p><a href="/team_cake/goods/">商品一覧</a></p>
-    <p><a href="/team_cake/registration_goods/">商品登録</a></p>
-</body>
-
-</html>
+{% include 'teams/team_cake/footer.html' %}

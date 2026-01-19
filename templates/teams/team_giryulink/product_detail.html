@@ -1,41 +1,496 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>{{ product.title }} — Team Giryulink</title>
-  <style>
-    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#f6f7fb;margin:0;padding:24px;color:#222}
-    .wrap{max-width:920px;margin:24px auto}
-    .card{background:#fff;padding:18px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-    .media{display:flex;gap:20px;flex-wrap:wrap}
-    .media img{width:100%;max-width:420px;height:auto;object-fit:contain;background:#f3f4f6;border-radius:6px}
-    .meta{flex:1;min-width:220px}
-    h1{margin:0 0 8px 0;font-size:1.4rem}
-    .price{color:#e53935;font-weight:700;font-size:1.3rem;margin:8px 0}
-    .section{margin-top:14px}
-    a.back{color:#1e88e5;text-decoration:none;display:inline-block;margin-bottom:12px}
-  </style>
+    <meta charset="UTF-8">
+    <title>{{ product.title }} - Furu-Trade</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding-bottom: 140px;
+        }
+        
+        .header {
+            background: #fff;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .back-btn {
+            font-size: 1.5rem;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+        }
+        
+        .product-image {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+        
+        .product-info {
+            padding: 20px;
+        }
+        
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e53935;
+            margin-bottom: 16px;
+        }
+        
+        .product-description {
+            line-height: 1.7;
+            color: #555;
+            white-space: pre-wrap;
+        }
+        
+        .edit-section {
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            margin: 20px 0;
+        }
+        
+        .edit-btn {
+            background: #2196f3;
+            color: #fff;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+            transition: all 0.2s ease;
+        }
+        
+        .edit-btn:hover {
+            background: #1976d2;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+        
+        .seller-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: #f9f9f9;
+            margin: 20px 0;
+        }
+        
+        .seller-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .seller-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #2196f3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.3rem;
+        }
+        
+        .seller-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .seller-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .seller-label {
+            font-size: 0.75rem;
+            color: #666;
+        }
+        
+        .chat-btn {
+            background: #2196f3;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        
+        .comments-section {
+            padding: 20px;
+            border-top: 8px solid #f5f5f5;
+        }
+        
+        .comments-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .comment-count {
+            color: #666;
+        }
+        
+        .comment {
+            margin-bottom: 20px;
+        }
+        
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .comment-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        
+        .comment-info {
+            flex: 1;
+        }
+        
+        .comment-author {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .comment-badge {
+            background: #2196f3;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            margin-left: 6px;
+        }
+        
+        .comment-time {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 2px;
+        }
+        
+        .comment-text {
+            margin-left: 44px;
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .comment-login {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .login-link {
+            color: #2196f3;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .comment-form {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .comment-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 12px;
+        }
+        
+        .comment-input:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+        
+        .comment-submit-btn {
+            width: 100%;
+            background: #2196f3;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .comment-submit-btn:hover {
+            background: #1976d2;
+        }
+        
+        .purchase-section {
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            background: #fff;
+            padding: 12px 16px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .purchase-btn {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            display: block;
+            background: #e53935;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        
+        .purchase-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 12px;
+            z-index: 200;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: #666;
+            font-size: 0.7rem;
+            flex: 1;
+            padding: 4px;
+        }
+        
+        .nav-item.active {
+            color: #2196f3;
+        }
+        
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+        
+        @media (min-width: 1024px) {
+            body {
+                padding-bottom: 100px;
+            }
+            
+            .bottom-nav {
+                max-width: 1200px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-radius: 12px 12px 0 0;
+            }
+            
+            .purchase-section {
+                position: static;
+                max-width: 800px;
+                margin: 20px auto;
+                padding: 20px 20px 80px;
+                box-shadow: none;
+                border-top: 8px solid #f5f5f5;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <a class="back" href="{% url 'team_giryulink:index' %}">← 商品一覧へ戻る</a>
-    <div class="card">
-      <div class="media">
-        <img src="{{ product.image }}" alt="{{ product.title }}">
-        <div class="meta">
-          {% if product %}
-            <h1>{{ product.name }}</h1>
-            <div class="price">¥{{ product.price|floatformat:0 }}</div>
-            <div class="section">
-              <strong>商品説明</strong>
-              <p>{{ product.description|default:"説明はありません。" }}</p>
-            </div>
-          {% else %}
-            <p>Product not found.</p>
-          {% endif %}
-        </div>
-      </div>
+    <div class="header">
+        <a href="{% url 'team_giryulink:index' %}" class="back-btn">←</a>
+        <div class="header-title">商品詳細</div>
     </div>
-  </div>
+    
+    <main>
+        {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.title }}" class="product-image">
+        {% else %}
+        <div class="product-image"></div>
+        {% endif %}
+        
+        <div class="product-info">
+            <div class="product-price">¥{{ product.price|floatformat:0 }}</div>
+            <div class="product-description">{{ product.description|default:"商品の説明はありません。" }}</div>
+        </div>
+        
+        <!-- 編集セクション（自分の商品で未購入の場合のみ表示） -->
+        {% if current_user and current_user.id == product.user_id and not product.is_sold %}
+        <div class="edit-section">
+            <a href="{% url 'team_giryulink:edit_product' product.id %}" class="edit-btn">
+                <span>✏️</span>
+                <span>商品情報を編集</span>
+            </a>
+        </div>
+        {% endif %}
+        
+        <div class="seller-section">
+            <div class="seller-info">
+                <div class="seller-avatar">👤</div>
+                <div class="seller-details">
+                    <div class="seller-name">{{ product.user.name|default:product.user.email }}</div>
+                    <div class="seller-label">出品者</div>
+                </div>
+            </div>
+            {% if current_user and current_user.id != product.user_id and product.is_sold and product.buyer_id == current_user.id %}
+            <a href="{% url 'team_giryulink:chat_room' product.chat_room.id %}" class="chat-btn">
+                <span>💬</span>
+                <span>チャット</span>
+            </a>
+            {% elif current_user and current_user.id == product.user_id and product.is_sold %}
+            <a href="{% url 'team_giryulink:chat_room' product.chat_room.id %}" class="chat-btn">
+                <span>💬</span>
+                <span>チャット</span>
+            </a>
+            {% endif %}
+        </div>
+        
+        <div class="comments-section">
+            <div class="comments-header">
+                <span>💬</span>
+                <span>コメント</span>
+                <span class="comment-count">({{ comments.count }})</span>
+            </div>
+            
+            {% for comment in comments %}
+            <div class="comment">
+                <div class="comment-header">
+                    <div class="comment-avatar">👤</div>
+                    <div class="comment-info">
+                        <div>
+                            <span class="comment-author">{{ comment.user.name|default:comment.user.email }}</span>
+                            {% if comment.user_id == product.user_id %}
+                            <span class="comment-badge">出品者</span>
+                            {% endif %}
+                        </div>
+                        <div class="comment-time">{{ comment.created_at|date:"n月j日 H:i" }}</div>
+                    </div>
+                </div>
+                <div class="comment-text">{{ comment.text }}</div>
+            </div>
+            {% empty %}
+            {% if current_user %}
+            <p style="text-align: center; color: #999; padding: 20px;">まだコメントがありません</p>
+            {% endif %}
+            {% endfor %}
+            
+            {% if not current_user %}
+            <div class="comment-login">
+                コメントするには<a href="{% url 'team_giryulink:login' %}" class="login-link">ログイン</a>が必要です
+            </div>
+            {% else %}
+            <form method="post" class="comment-form">
+                {% csrf_token %}
+                <textarea name="comment" placeholder="コメントを入力..." class="comment-input" rows="3" required></textarea>
+                <button type="submit" class="comment-submit-btn">投稿する</button>
+            </form>
+            {% endif %}
+        </div>
+    </main>
+    
+    {% if current_user and current_user.id != product.user_id and not product.is_sold %}
+    <div class="purchase-section">
+        <form method="post" action="{% url 'team_giryulink:purchase_product' product.id %}">
+            {% csrf_token %}
+            <button type="submit" class="purchase-btn" onclick="return confirm('この商品を購入しますか？')">
+                購入手続きへ
+            </button>
+        </form>
+    </div>
+    {% elif product.is_sold %}
+    <div class="purchase-section">
+        <button class="purchase-btn" disabled>購入済み</button>
+    </div>
+    {% endif %}
+    
+    <nav class="bottom-nav">
+        <a href="{% url 'team_giryulink:index' %}" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>ホーム</span>
+        </a>
+        <a href="{% url 'team_giryulink:history' %}" class="nav-item">
+            <span class="nav-icon">🕐</span>
+            <span>履歴</span>
+        </a>
+        <a href="{% url 'team_giryulink:add_product' %}" class="nav-item">
+            <span class="nav-icon">➕</span>
+            <span>出品</span>
+        </a>
+        <a href="{% url 'team_giryulink:chat_list' %}" class="nav-item">
+            <span class="nav-icon">💬</span>
+            <span>チャット</span>
+        </a>
+        <a href="{% url 'team_giryulink:my_page' %}" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>マイページ</span>
+        </a>
+    </nav>
 </body>
 </html>

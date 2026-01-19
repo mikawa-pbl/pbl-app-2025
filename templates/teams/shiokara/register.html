@@ -1,0 +1,331 @@
+{% extends "teams/shiokara/base.html" %}
+{% load static %}
+
+{% block title %}学生情報登録 - 就活支援サービス{% endblock %}
+
+{% block content %}
+<style>
+    .tut-logo-box {
+        flex: 0 0 auto;
+        order: 2;
+        margin-left: auto;
+    }
+
+    .tut-page-title {
+        order: 1;
+    }
+
+    .tut-logo-img {
+        max-height: 56px;
+        width: auto;
+        display: block;
+    }
+
+    .tut-page-title h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #42413F;
+    }
+
+    .tut-page-lead {
+        margin: 4px 0 0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .form-field {
+        margin-bottom: 24px;
+    }
+
+    .form-field label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-field input[type="text"],
+    .form-field input[type="password"],
+    .form-field select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .form-field input:focus,
+    .form-field select:focus {
+        outline: none;
+        border-color: #cc0000;
+        box-shadow: 0 0 0 2px rgba(204, 0, 0, 0.1);
+    }
+
+    .form-field small {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: normal;
+    }
+
+    .error-message {
+        background: #ffebee;
+        color: #c62828;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border-left: 4px solid #c62828;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+    }
+
+    .form-actions button {
+        flex: 1;
+        padding: 12px 24px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .form-actions button[type="submit"] {
+        background: #cc0000;
+        color: white;
+    }
+
+    .form-actions button[type="submit"]:hover {
+        background: #aa0000;
+    }
+
+    .form-actions button[type="button"] {
+        background: #f5f5f5;
+        color: #333;
+        border: 1px solid #ddd;
+    }
+
+    .form-actions button[type="button"]:hover {
+        background: #e8e8e8;
+    }
+
+    @media (max-width: 640px) {
+        .tut-page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .tut-logo-img {
+            max-height: 44px;
+        }
+        .tut-page-title h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" with active_page='register' %}
+
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
+        <header class="tut-page-header page-header">
+            <div class="tut-logo-box">
+                <img src="{% static 'image/mark_gikanavi.png' %}"
+                     alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
+            </div>
+            <div class="tut-page-title">
+                <h1>学生情報登録</h1>
+                <p class="tut-page-lead page-lead">
+                    学籍番号・学年・研究分野などを入力して新規登録してください。
+                </p>
+            </div>
+        </header>
+
+        {% if error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" style="max-width: 700px; margin-top: 24px;">
+            {% csrf_token %}
+
+            <div class="form-field">
+                <label for="id_student_id">学籍番号:</label>
+                <input type="text" name="student_id" id="id_student_id" value="{{ student_id }}" required>
+            </div>
+
+            <div class="form-field">
+                <label>課程:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="course" value="B" id="id_course_b" {% if course == "B" %}checked{% endif %}> 学部(B)</label>
+                    <label><input type="radio" name="course" value="M" id="id_course_m" {% if course == "M" %}checked{% endif %}> 修士(M)</label>
+                    <label><input type="radio" name="course" value="D" id="id_course_d" {% if course == "D" %}checked{% endif %}> 博士(D)</label>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label for="id_grade">学年:</label>
+                <select name="grade" id="id_grade" disabled>
+                    <option value="">課程を先に選択してください</option>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="id_department_name">学科・専攻:</label>
+                <select name="department_name" id="id_department_name" disabled>
+                    <option value="">課程を先に選択してください</option>
+                    <option value="1系">機械工学(1系)</option>
+                    <option value="2系">電気・電子情報工学(2系)</option>
+                    <option value="3系">情報・知能工学(3系)</option>
+                    <option value="4系">応用化学・生命工学(4系)</option>
+                    <option value="5系">建築・都市システム学(5系)</option>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="id_lab_field">研究分野:</label>
+                <select name="lab_field" id="id_lab_field" disabled>
+                    <option value="">学科・専攻を先に選択してください</option>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="id_password">パスワード:</label>
+                <input type="password" name="password" id="id_password" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">新規登録</button>
+                <button type="button" onclick="location.href='{% url 'shiokara:login' %}'">戻る</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const courseRadios = document.querySelectorAll('input[name="course"]');
+    const gradeSelect = document.getElementById('id_grade');
+    const deptSelect  = document.getElementById('id_department_name');
+    const fieldSelect = document.getElementById('id_lab_field');
+
+    const GRADE_OPTIONS = {
+      B: ['1年', '2年', '3年', '4年'],
+      M: ['1年', '2年'],
+      D: ['1年', '2年', '3年'],
+    };
+
+    const FIELD_OPTIONS = {
+      '1系': [
+        '機械・システムデザインコース',
+        '材料・生産加工コース',
+        'システム制御・ロボットコース',
+        '環境・エネルギーコース',
+      ],
+      '2系': [
+        '材料エレクトロニクスコース',
+        '機能電気システムコース',
+        '集積電子システムコース',
+        '情報通信システムコース',
+      ],
+      '3系': [
+        '計算機数理科学分野',
+        'データ情報学分野',
+        'ヒューマン・ブレイン情報学分野',
+        'メディア・ロボット情報学分野',
+      ],
+      '4系': [
+        '分子制御化学分野',
+        '分子生物化学分野',
+        '分子機能化学分野',
+      ],
+      '5系': [
+        '建築・都市デザイン学分野',
+        '都市・地域マネジメント学分野',
+      ],
+    };
+
+    function resetSelect(select, placeholderText) {
+      select.innerHTML = '';
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = placeholderText;
+      select.appendChild(opt);
+    }
+
+    function updateGradeOptions(course) {
+      resetSelect(gradeSelect, '学年を選択してください');
+      const list = GRADE_OPTIONS[course] || [];
+      list.forEach((label, idx) => {
+        const opt = document.createElement('option');
+        opt.value = (idx + 1).toString();
+        opt.textContent = label;
+        gradeSelect.appendChild(opt);
+      });
+    }
+
+    function updateFieldOptions() {
+      const dept = deptSelect.value;
+      resetSelect(fieldSelect, '研究分野を選択してください');
+      const list = FIELD_OPTIONS[dept] || [];
+      list.forEach((label) => {
+        const opt = document.createElement('option');
+        opt.value = label;
+        opt.textContent = label;
+        fieldSelect.appendChild(opt);
+      });
+      fieldSelect.disabled = list.length === 0;
+    }
+
+    function disableAllSelects() {
+      gradeSelect.disabled = true;
+      deptSelect.disabled  = true;
+      fieldSelect.disabled = true;
+      resetSelect(gradeSelect, '課程を先に選択してください');
+      resetSelect(fieldSelect, '学科・専攻を先に選択してください');
+      // deptSelect の中身はそのまま
+    }
+
+    courseRadios.forEach((radio) => {
+      radio.addEventListener('change', function () {
+        const course = this.value;
+        gradeSelect.disabled = false;
+        deptSelect.disabled  = false;
+        updateGradeOptions(course);
+        updateFieldOptions();
+      });
+    });
+
+    deptSelect.addEventListener('change', updateFieldOptions);
+
+    const checkedCourse = Array.from(courseRadios).find(r => r.checked);
+    if (!checkedCourse) {
+      disableAllSelects();
+    } else {
+      gradeSelect.disabled = false;
+      deptSelect.disabled  = false;
+      updateGradeOptions(checkedCourse.value);
+      updateFieldOptions();
+    }
+  });
+</script>
+
+{% endblock %}

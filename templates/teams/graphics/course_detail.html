@@ -220,9 +220,36 @@
             {% if request.session.graphics_user_id %}
             <a href="{% url 'graphics:add_book_review' %}?course_id={{ course.id }}&review_type=subject" class="review-btn">✏️ 科目レビューを投稿する</a>
             {% endif %}
+
+            <!-- 年度選択フォーム（全年度/最新年度ボタンは削除） -->
+            <div style="margin-top: 12px; margin-bottom: 16px;">
+                <form method="get" style="display: inline-block;">
+                    <label for="yearSelect" style="margin-right:8px; color:#475569; font-weight:600;">表示年度:</label>
+                    <select id="yearSelect" name="year" onchange="this.form.submit()" style="padding:6px 10px; border-radius:6px; border:1px solid #e2e8f0;">
+                        <option value="" {% if not selected_year %}selected{% endif %}>全年度</option>
+                        {% for item in year_options %}
+                            <option value="{{ item.year }}" {% if selected_year|stringformat:"s" == item.year|stringformat:"s" %}selected{% endif %}>{{ item.year }}年度 ({{ item.count }}件)</option>
+                        {% endfor %}
+                    </select>
+                </form>
+                <form method="get" style="display:inline-block; margin-left:12px;">
+                    <label for="sortSelect" style="margin-right:8px; color:#475569; font-weight:600;">並び替え:</label>
+                    <select id="sortSelect" name="sort" onchange="this.form.submit()" style="padding:6px 10px; border-radius:6px; border:1px solid #e2e8f0;">
+                        <option value="" {% if not selected_sort %}selected{% endif %}>新着順</option>
+                        <option value="rating_high" {% if selected_sort == 'rating_high' %}selected{% endif %}>評価の高い順</option>
+                        <option value="rating_low" {% if selected_sort == 'rating_low' %}selected{% endif %}>評価の低い順</option>
+                    </select>
+                    {% if selected_year %}
+                        <input type="hidden" name="year" value="{{ selected_year }}">
+                    {% endif %}
+                </form>
+            </div>
             {% if subject_reviews %}
                 {% for review in subject_reviews %}
                 <div class="review-card">
+                    <div style="font-size:14px; color:#475569; margin-bottom:8px;">
+                        <strong>年度:</strong> {{ review.course_offering.year }}年度（{{ review.course_offering.semester }}）
+                    </div>
                     <div class="rating">
                         <span class="star-rating">
                             {% for i in "12345" %}
@@ -243,8 +270,8 @@
                 {% if subject_reviews.has_other_pages %}
                 <div class="pagination">
                     {% if subject_reviews.has_previous %}
-                        <a href="?subject_page=1">≪ 最初</a>
-                        <a href="?subject_page={{ subject_reviews.previous_page_number }}">‹ 前へ</a>
+                        <a href="?subject_page=1{% if selected_year %}&year={{ selected_year }}{% endif %}">≪ 最初</a>
+                        <a href="?subject_page={{ subject_reviews.previous_page_number }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">‹ 前へ</a>
                     {% else %}
                         <span class="disabled">≪ 最初</span>
                         <span class="disabled">‹ 前へ</span>
@@ -254,13 +281,13 @@
                         {% if num == subject_reviews.number %}
                             <span class="current">{{ num }}</span>
                         {% elif num > subject_reviews.number|add:'-3' and num < subject_reviews.number|add:'3' %}
-                            <a href="?subject_page={{ num }}">{{ num }}</a>
+                            <a href="?subject_page={{ num }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">{{ num }}</a>
                         {% endif %}
                     {% endfor %}
 
                     {% if subject_reviews.has_next %}
-                        <a href="?subject_page={{ subject_reviews.next_page_number }}">次へ ›</a>
-                        <a href="?subject_page={{ subject_reviews.paginator.num_pages }}">最後 ≫</a>
+                        <a href="?subject_page={{ subject_reviews.next_page_number }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">次へ ›</a>
+                        <a href="?subject_page={{ subject_reviews.paginator.num_pages }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">最後 ≫</a>
                     {% else %}
                         <span class="disabled">次へ ›</span>
                         <span class="disabled">最後 ≫</span>
@@ -277,6 +304,20 @@
             {% if request.session.graphics_user_id %}
             <a href="{% url 'graphics:add_book_review' %}?subject={{ course.subject.name }}&review_type=book" class="review-btn">✏️ 書籍レビューを投稿する</a>
             {% endif %}
+            <div style="margin-top:12px; margin-bottom:12px;">
+                <form method="get" style="display:inline-block;">
+                    <label for="bookSort" style="margin-right:8px; color:#475569; font-weight:600;">参考書の並び替え:</label>
+                    <select id="bookSort" name="book_sort" onchange="this.form.submit()" style="padding:6px 10px; border-radius:6px; border:1px solid #e2e8f0;">
+                        <option value="" {% if not book_sort %}selected{% endif %}>新着順</option>
+                        <option value="avg_high" {% if book_sort == 'avg_high' %}selected{% endif %}>平均評価の高い順</option>
+                        <option value="avg_low" {% if book_sort == 'avg_low' %}selected{% endif %}>平均評価の低い順</option>
+                        <option value="count_high" {% if book_sort == 'count_high' %}selected{% endif %}>レビュー件数の多い順</option>
+                        <option value="count_low" {% if book_sort == 'count_low' %}selected{% endif %}>レビュー件数の少ない順</option>
+                    </select>
+                    {% if selected_year %}<input type="hidden" name="year" value="{{ selected_year }}">{% endif %}
+                    {% if selected_sort %}<input type="hidden" name="sort" value="{{ selected_sort }}">{% endif %}
+                </form>
+            </div>
             {% if books_with_reviews %}
                 {% for item in books_with_reviews %}
                 <div class="book-review-card">
@@ -291,7 +332,7 @@
                         <div class="rating">
                             平均評価:
                             <span class="star-rating" id="bookRating{{ forloop.counter }}"></span>
-                            ({{ item.avg_rating|floatformat:"1" }}/5)
+                            <span style="color:#FFA500;">({{ item.avg_rating|floatformat:"1" }}/5)</span>
                         </div>
                         <script>
                             (function() {
@@ -325,8 +366,8 @@
                 {% if books_with_reviews.has_other_pages %}
                 <div class="pagination">
                     {% if books_with_reviews.has_previous %}
-                        <a href="?books_page=1">≪ 最初</a>
-                        <a href="?books_page={{ books_with_reviews.previous_page_number }}">‹ 前へ</a>
+                        <a href="?books_page=1{% if book_sort %}&book_sort={{ book_sort }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">≪ 最初</a>
+                        <a href="?books_page={{ books_with_reviews.previous_page_number }}{% if book_sort %}&book_sort={{ book_sort }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">‹ 前へ</a>
                     {% else %}
                         <span class="disabled">≪ 最初</span>
                         <span class="disabled">‹ 前へ</span>
@@ -336,13 +377,13 @@
                         {% if num == books_with_reviews.number %}
                             <span class="current">{{ num }}</span>
                         {% elif num > books_with_reviews.number|add:'-3' and num < books_with_reviews.number|add:'3' %}
-                            <a href="?books_page={{ num }}">{{ num }}</a>
+                            <a href="?books_page={{ num }}{% if book_sort %}&book_sort={{ book_sort }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">{{ num }}</a>
                         {% endif %}
                     {% endfor %}
 
                     {% if books_with_reviews.has_next %}
-                        <a href="?books_page={{ books_with_reviews.next_page_number }}">次へ ›</a>
-                        <a href="?books_page={{ books_with_reviews.paginator.num_pages }}">最後 ≫</a>
+                        <a href="?books_page={{ books_with_reviews.next_page_number }}{% if book_sort %}&book_sort={{ book_sort }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">次へ ›</a>
+                        <a href="?books_page={{ books_with_reviews.paginator.num_pages }}{% if book_sort %}&book_sort={{ book_sort }}{% endif %}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">最後 ≫</a>
                     {% else %}
                         <span class="disabled">次へ ›</span>
                         <span class="disabled">最後 ≫</span>

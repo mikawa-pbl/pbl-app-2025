@@ -1,0 +1,59 @@
+@charset "UTF-8";
+
+/* コンテナ */
+.schedule-container, .schedule-container-view {
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    margin-bottom: 20px;
+}
+.schedule-container { max-height: 500px; }
+.schedule-container-view { max-height: 400px; }
+
+/* グリッドレイアウト */
+.schedule-grid, .schedule-grid-view {
+    display: grid;
+    grid-template-columns: 60px repeat(5, 1fr);
+    gap: 1px;
+}
+.schedule-grid { min-width: 600px; gap: 2px; } /* 編集用は少し隙間あり */
+
+/* ヘッダー */
+.grid-header, .grid-header-view {
+    position: sticky;
+    top: 0;
+    text-align: center;
+    padding: 5px;
+    z-index: 10;
+    font-weight: bold;
+}
+.grid-header { background-color: #f0f0f0; border-bottom: 2px solid #ddd; }
+.grid-header-view { background-color: #666; color: white; font-size: 0.9rem; }
+
+/* 時間ラベル */
+.time-label, .time-label-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+}
+.time-label {
+    text-align: right;
+    padding-right: 5px;
+    color: #666;
+    background-color: #fafafa;
+    border-right: 1px solid #eee;
+    justify-content: flex-end;
+}
+.time-label-view { background-color: #eee; text-align: center; font-size: 0.75em; }
+
+/* セル（ボタン・ボックス） */
+.slot-btn { height: 30px; background-color: #fff; border: 1px solid #eee; cursor: pointer; user-select: none; }
+.slot-btn:hover { background-color: #f0f8ff; }
+.slot-btn.active { background-color: #4CAF50; border-color: #45a049; }
+
+.slot-box { height: 25px; background-color: #f9f9f9; border: 1px solid #eee; }
+.slot-box.active { background-color: #28a745; }
+.slot-box.matched { background-color: #007bff; border: 1px solid #0056b3; }
+
+.row-separator, .border-bottom-bold { border-bottom: 1px solid #ccc; }

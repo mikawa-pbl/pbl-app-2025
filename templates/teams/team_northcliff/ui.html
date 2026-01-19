@@ -34,12 +34,18 @@
     <!-- (A) ヘッダー -->
     <header class="sticky top-0 z-10 flex items-center justify-between w-full px-4 py-3 bg-white shadow-sm">
         <h1 class="text-lg font-bold text-gray-800">技科大 混雑マップ</h1>
-        <div class="flex items-center space-x-3">
-            <button id="get-location-btn" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
-                現在情報の取得📍
-            </button>
-            <span id="points-display" class="text-base font-bold text-blue-600">保有: ...</span>
-            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <div class="relative">
+            <div id="user-menu-btn" class="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition">
+                <span id="points-display" class="text-base font-bold text-blue-600">保有: ...</span>
+                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <!-- ドロップダウンメニュー -->
+            <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden z-50 ring-1 ring-black ring-opacity-5">
+                <div class="px-4 py-2 text-xs text-gray-500 border-b">ユーザー切り替え</div>
+                <div id="user-list-container" class="max-h-60 overflow-y-auto">
+                    <!-- JSで追加 -->
+                </div>
+            </div>
         </div>
     </header>
 
@@ -89,7 +95,7 @@
                     <option value="moderate">🟡 やや混雑</option>
                     <option value="crowded">🔴 混雑</option>
                 </select>
-                <textarea id="post-comment" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="コメント (任意)"></textarea>
+                <textarea id="post-comment" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="例: 席は半分くらい空いています"></textarea>
             </div>
             <p id="post-distance-error" class="text-sm font-bold text-center text-red-600 mt-4 hidden"></p>
             <div class="flex justify-end mt-6 space-x-3">
@@ -100,6 +106,13 @@
                     投稿 (1P獲得)
                 </button>
             </div>
+        </div>
+    </div>
+
+    <div id="view-toggle" class="fixed bottom-6 right-6 z-[2000] bg-white rounded-full shadow-lg p-1 flex border border-gray-200">
+        <div class="flex items-center">
+            <a href="/team_northcliff/map_ui/{{ username }}/" class="px-6 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 rounded-full transition-all">地図</a>
+            <span class="px-6 py-2 text-sm font-bold text-white bg-blue-600 rounded-full cursor-default shadow-sm transition-all">リスト</span>
         </div>
     </div>
 
@@ -137,7 +150,6 @@
         const postModalTitle = document.getElementById('post-modal-title');
         const postStatusSelect = document.getElementById('post-status');
         const postCommentInput = document.getElementById('post-comment');
-        const getLocationBtn = document.getElementById('get-location-btn');
         const postModalDistance = document.getElementById('post-modal-distance');
         const postDistanceError = document.getElementById('post-distance-error');
 
@@ -192,6 +204,62 @@
             return json;
         }
 
+        // --- 位置情報許可のハンドリング ---
+        function handleLocationPermission() {
+            if (state.isLocationAcquired) return true;
+            // 起動時に位置情報を要求する通知（DBの位置情報を使用することを示す）
+            const confirmed = confirm("投稿や距離の表示には、位置情報が必要です。\n（登録された位置情報を使用します）\n\n許可しますか？");
+            if (confirmed) {
+                state.isLocationAcquired = true;
+                updateAllDistancesUI();
+                return true;
+            }
+            alert("位置情報を許可しないと、この機能は利用できません。");
+            return false;
+        }
+
+        // --- ユーザー切り替え機能 ---
+        async function setupUserSwitcher() {
+            const btn = document.getElementById('user-menu-btn');
+            const menu = document.getElementById('user-dropdown');
+            const listContainer = document.getElementById('user-list-container');
+            
+            // トグル
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('hidden');
+            };
+
+            // 外部クリックで閉じる
+            document.addEventListener('click', (e) => {
+                if (!btn.contains(e.target) && !menu.contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            });
+
+            // ユーザー一覧取得
+            try {
+                const data = await apiCall('/team_northcliff/api/users/');
+                if (data.users) {
+                    listContainer.innerHTML = '';
+                    data.users.forEach(u => {
+                        const div = document.createElement('div');
+                        div.className = 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer';
+                        div.textContent = u.name;
+                        if (u.name === username) {
+                             div.classList.add('bg-blue-50', 'font-bold');
+                        }
+                        div.onclick = () => {
+                            window.location.href = `/team_northcliff/ui/${encodeURIComponent(u.name)}/`;
+                        };
+                        listContainer.appendChild(div);
+                    });
+                }
+            } catch (e) {
+                console.error('ユーザー一覧取得失敗', e);
+            }
+        }
+
         // --- 初期データ読み込み ---
         async function initializeApp() {
             try {
@@ -200,7 +268,19 @@
                 state.userId = userData.user_id;
                 state.points = userData.points;
                 state.userLocation = { latitude: userData.latitude, longitude: userData.longitude };
+                
+                // 5分以内の閲覧権限を反映
+                if (userData.accessible_facility_ids) {
+                    userData.accessible_facility_ids.forEach(id => state.userFacilityAccess.add(id));
+                }
+
                 pointsDisplay.textContent = `保有: ${state.points}P`;
+
+                // 起動時に位置情報を要求
+                handleLocationPermission();
+                
+                // ユーザー切り替えセットアップ
+                setupUserSwitcher();
 
                 // 施設一覧を取得
                 const facilitiesData = await apiCall('/team_northcliff/api/facilities/');
@@ -239,14 +319,8 @@
                 if (isUnlocked) {
                     const statusDisplay = statusMap[facility.latest_status] || '情報なし';
                     cardContent += `<div><span class="text-sm font-medium text-gray-700">現在の状況：</span><span class="text-base font-bold">${statusDisplay}</span></div>`;
-                } else {
-                    cardContent += `
-                        <div class="flex space-x-2">
-                            <button class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" data-action="unlock" data-id="${facility.id}">最新情報を取得 (1P消費)</button>
-                            <button class="flex-none px-3 py-2 font-medium text-white bg-green-600 rounded-md hover:bg-green-700" data-action="post" data-facility-id="${facility.id}">投稿する</button>
-                        </div>
-                    `;
-                }
+                } 
+                // else: ロック中のメッセージなどは特にないので何もしない（ボタンは下に追加）
 
                 facilityCard.innerHTML = cardContent;
                 facilityList.appendChild(facilityCard);
@@ -270,7 +344,25 @@
                     });
                     facilityCard.appendChild(commentsContainer);
                 }
+
+                // --- ボタンは常に表示（最後に追記） ---
+                const btnContainer = document.createElement('div');
+                btnContainer.className = 'flex space-x-2 mt-4';
+                
+                let checkBtnHtml = '';
+                if (isUnlocked) {
+                   checkBtnHtml = `<button class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" data-action="update" data-id="${facility.id}">情報を更新</button>`;
+                } else {
+                   checkBtnHtml = `<button class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700" data-action="unlock" data-id="${facility.id}">最新情報を取得 (1P消費)</button>`;
+                }
+
+                btnContainer.innerHTML = `
+                    ${checkBtnHtml}
+                    <button class="flex-none px-3 py-2 font-medium text-white bg-green-600 rounded-md hover:bg-green-700" data-action="post" data-facility-id="${facility.id}">投稿する</button>
+                `;
+                facilityCard.appendChild(btnContainer);
             });
+
         }
         
         // --- 距離表示だけを更新 ---
@@ -299,35 +391,48 @@
                 document.body.classList.remove('overflow-hidden');
             }
         }
-        
-        // --- 位置情報許可のハンドリング ---
-        function handleLocationPermission() {
-            if (state.isLocationAcquired) return true;
-            const confirmed = confirm("投稿や距離の表示には、現在地情報の利用許可が必要です。（デモのため実際の位置情報は使用されません）\n\n許可しますか？");
-            if (confirmed) {
-                state.isLocationAcquired = true;
-                updateAllDistancesUI();
-                return true;
+
+        // --- 共通アクション実行 ---
+        async function executeUnlockInList(fid) {
+            try {
+                await apiCall(`/team_northcliff/api/${username}/access-facility/`, 'POST', { facility_id: fid });
+                // ポイント同期
+                const res = await apiCall(`/team_northcliff/api/${username}/user-data/`);
+                state.points = res.points;
+                state.userFacilityAccess.add(fid);
+                pointsDisplay.textContent = `保有: ${state.points}P`;
+                
+                // 施設再取得
+                const fData = await apiCall('/team_northcliff/api/facilities/');
+                state.facilities = fData.facilities;
+                render();
+            } catch (error) {
+                console.error('アクセスエラー:', error);
+                alert('情報取得に失敗しました');
             }
-            alert("位置情報を許可しないと、この機能は利用できません。");
-            return false;
         }
 
         // --- イベントリスナー ---
-        getLocationBtn.addEventListener('click', () => {
-             handleLocationPermission();
-        });
-
         facilityList.addEventListener('click', async (event) => {
             const btn = event.target.closest('button');
             if (!btn) return;
 
             const action = btn.dataset.action;
+            
+            // --- Unlock (課金確認あり) ---
             if (action === 'unlock') {
                 if (state.points <= 0) { alert('ポイントが足りません'); return; }
                 state.targetFacilityId = parseInt(btn.dataset.id);
                 openModal(confirmModal);
                 return;
+            }
+
+            // --- Update (課金確認なし・無料) ---
+            if (action === 'update') {
+               const fid = parseInt(btn.dataset.id);
+               // モーダルなしで即実行
+               await executeUnlockInList(fid);
+               return;
             }
 
             if (action === 'post') {
@@ -370,23 +475,16 @@
         });
 
         cancelUnlockBtn.addEventListener('click', () => {
-            closeModal(confirmModal);
-            state.targetFacilityId = null;
+             closeModal(confirmModal);
+             state.targetFacilityId = null;
         });
-
+ 
         confirmUnlockBtn.addEventListener('click', async () => {
-            try {
-                await apiCall(`/team_northcliff/api/${username}/access-facility/`, 'POST', { facility_id: state.targetFacilityId });
-                state.points -= 1;
-                state.userFacilityAccess.add(state.targetFacilityId);
-                pointsDisplay.textContent = `保有: ${state.points}P`;
-                render();
-            } catch (error) {
-                console.error('アクセスエラー:', error);
-                alert('情報取得に失敗しました');
-            }
-            closeModal(confirmModal);
-            state.targetFacilityId = null;
+             const fid = state.targetFacilityId;
+             closeModal(confirmModal);
+             state.targetFacilityId = null;
+             // 確認後は実行するだけ
+             await executeUnlockInList(fid);
         });
 
         cancelPostBtn.addEventListener('click', () => {
@@ -429,7 +527,7 @@
 
             } catch (error) {
                 // 既存のクールタイムエラー処理を維持
-                if (error && error.message && error.message.includes('１０分以内')) {
+                if (error && error.message && error.message.includes('分以内')) {
                     alert(error.message);
                 } else if (error && error.message && error.message.includes('位置情報が利用できない')) {
                     alert(error.message);

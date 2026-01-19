@@ -16,14 +16,7 @@ class MyPage(models.Model):
         ('回答しない', '回答しない'),
     ]
 
-    # 交際ステータスの選択肢
-    RELATIONSHIP_CHOICES = [
-        ('未婚', '未婚'),
-        ('既婚', '既婚'),
-        ('恋人あり', '恋人あり'),
-        ('募集中', '募集中'),
-        ('秘密', '秘密'),
-    ]
+
 
     GRADE_CHOICES = [
         ('B1','B1'),
@@ -43,10 +36,10 @@ class MyPage(models.Model):
     ]
 
     # 基本情報
-    name = models.CharField(max_length=100, verbose_name="名前")
+    name = models.CharField(max_length=100, verbose_name="名前(フルネーム推奨)")
     icon = models.ImageField(upload_to='icons/', blank=True, null=True, verbose_name="アイコン")
-    user_id = models.CharField(max_length=100, unique=True, verbose_name="ユーザID")
-    email = models.EmailField(max_length=100, verbose_name="メアド")
+    user_id = models.CharField(max_length=100, unique=True, verbose_name="学籍番号(数字6桁)")
+    email = models.EmailField(max_length=100, verbose_name="メールアドレス")
     password = models.CharField(max_length=100, verbose_name="パスワード")
     
     # プロフィール情報
@@ -64,7 +57,6 @@ class MyPage(models.Model):
         null=True,
     )
 
-    age = models.IntegerField(verbose_name="年齢",null=True)
     gender = models.CharField(
         max_length=50, 
         choices=GENDER_CHOICES, # プルダウンにする
@@ -76,14 +68,7 @@ class MyPage(models.Model):
     github_account = models.CharField(max_length=100, blank=True, null=True, verbose_name="githubアカウント")
     hobby = models.CharField(max_length=200, blank=True, null=True, verbose_name="趣味")
     birthplace = models.CharField(max_length=100, blank=True, null=True, verbose_name="出身")
-    birth_date = models.DateField(verbose_name="誕生日", null=True)
-    relationship_status = models.CharField(
-        max_length=50, 
-        choices=RELATIONSHIP_CHOICES, # プルダウンにする
-        blank=True, 
-        null=True, 
-        verbose_name="交際ステータス"
-    )
+    birth_date = models.DateField(verbose_name="誕生日", null=True, blank=True)
 
     def __str__(self):
         return self.name # ページの名前がその人の名前になる
@@ -116,3 +101,25 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.author.name}"
+
+class Message(models.Model):
+    sender = models.ForeignKey(MyPage, on_delete=models.CASCADE, related_name='sent_messages', verbose_name="送信者")
+    receiver = models.ForeignKey(MyPage, on_delete=models.CASCADE, related_name='received_messages', verbose_name="受信者")
+    content = models.TextField(verbose_name="内容")
+    timestamp = models.DateTimeField(auto_now_add=True, verbose_name="送信日時")
+    is_read = models.BooleanField(default=False, verbose_name="既読")
+
+    def __str__(self):
+        return f"Message from {self.sender.name} to {self.receiver.name}"
+class CommunityReadStatus(models.Model):
+    user = models.ForeignKey(MyPage, on_delete=models.CASCADE, related_name='community_read_statuses', verbose_name="ユーザー")
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='read_statuses', verbose_name="コミュニティ")
+    last_read_at = models.DateTimeField(auto_now=True, verbose_name="最終閲覧日時")
+
+    class Meta:
+        unique_together = ('user', 'community')
+        verbose_name = "コミュニティ既読状態"
+        verbose_name_plural = "コミュニティ既読状態"
+
+    def __str__(self):
+        return f"{self.user.name} - {self.community.name} (Last read: {self.last_read_at})"

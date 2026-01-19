@@ -33,6 +33,11 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
         }
         header h1 {
             font-size: 24px;
@@ -66,7 +71,7 @@
             height: 100vh;
             background-color: white;
             transition: right 0.3s ease;
-            z-index: 999;
+            z-index: 1002;
             padding-top: 60px;
             box-shadow: -2px 0 8px rgba(0,0,0,0.1);
         }
@@ -112,6 +117,7 @@
             max-width: 900px;
             margin: 0 auto;
             padding: 50px 20px;
+            padding-top: 100px;
         }
         .welcome-section {
             text-align: center;
@@ -273,7 +279,7 @@
         /* クイックアクションバー */
         .quick-actions {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin: 40px 0;
             padding: 30px;
@@ -341,6 +347,31 @@
             font-weight: 400;
             opacity: 0.8;
         }
+        /* 星評価スタイル */
+        .star-rating {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .star-filled {
+            color: #FFA500;
+        }
+        .star-half {
+            position: relative;
+            display: inline-block;
+            color: #cbd5e1;
+        }
+        .star-half::before {
+            content: '★';
+            position: absolute;
+            left: 0;
+            width: 50%;
+            overflow: hidden;
+            color: #FFA500;
+        }
+        .star-empty {
+            color: #cbd5e1;
+        }
     </style>
 </head>
 <body>
@@ -358,8 +389,16 @@
     <nav class="nav-menu" id="navMenu">
         <ul>
             <li><a href="{% url 'graphics:index' %}" onclick="toggleMenu()">ホーム</a></li>
-            <li><a href="{% url 'graphics:book_reviews' %}" onclick="toggleMenu()">レビュー一覧</a></li>
-            <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
+            {% if request.session.graphics_user_id %}
+                <li><a href="{% url 'graphics:my_reviews' %}" onclick="toggleMenu()">マイレビュー</a></li>
+                <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
+                <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
+                <li><a href="{% url 'graphics:logout' %}" onclick="toggleMenu()">ログアウト</a></li>
+            {% else %}
+                <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
+                <li><a href="{% url 'graphics:login' %}" onclick="toggleMenu()">ログイン</a></li>
+                <li><a href="{% url 'graphics:signup' %}" onclick="toggleMenu()">サインアップ</a></li>
+            {% endif %}
         </ul>
     </nav>
 
@@ -372,17 +411,44 @@
             <h2>TUT 参考書レビューシステムへようこそ</h2>
         </section>
 
+        <!-- ログイン状態表示 -->
+        {% if request.session.graphics_user_id %}
+            <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%); padding: 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; border: 2px solid rgba(37, 99, 235, 0.2);">
+                <p style="color: var(--primary-color); font-size: 18px; font-weight: 700; margin: 0;">
+                    ログイン中: {{ request.session.graphics_user_nickname }} さん
+                </p>
+            </div>
+        {% endif %}
+
         <!-- クイックアクションバー -->
         <div class="quick-actions">
-            <a href="{% url 'graphics:book_reviews' %}" class="quick-action-btn secondary">
-                <div class="quick-action-btn-text">
-                    <span>📚</span>
-                    <span class="quick-action-btn-label">レビューを検索</span>
-                </div>
-            </a>
-            <a href="{% url 'graphics:add_book_review' %}" class="quick-action-btn primary">
-                <span>✍️</span> レビューを投稿
-            </a>
+            {% if request.session.graphics_user_id %}
+                <a href="{% url 'graphics:my_reviews' %}" class="quick-action-btn secondary">
+                    <div class="quick-action-btn-text">
+                        <span>📝</span>
+                        <span class="quick-action-btn-label">マイレビュー</span>
+                    </div>
+                </a>
+                <a href="{% url 'graphics:search_courses' %}" class="quick-action-btn secondary">
+                    <div class="quick-action-btn-text">
+                        <span>📚</span>
+                        <span class="quick-action-btn-label">レビューを検索</span>
+                    </div>
+                </a>
+                <a href="{% url 'graphics:add_book_review' %}" class="quick-action-btn primary">
+                    <span>✍️</span> レビューを投稿
+                </a>
+            {% else %}
+                <a href="{% url 'graphics:login' %}" class="quick-action-btn primary">
+                    <span>🔐</span> ログイン
+                </a>
+                <a href="{% url 'graphics:signup' %}" class="quick-action-btn secondary">
+                    <div class="quick-action-btn-text">
+                        <span>📝</span>
+                        <span class="quick-action-btn-label">サインアップ</span>
+                    </div>
+                </a>
+            {% endif %}
         </div>
 
         <section class="description">
@@ -406,9 +472,40 @@
                     </ul>
                 </div>
             </div>
+        </section>
 
+        <!-- 最近のレビュー -->
+        {% if recent_subject_reviews %}
+        <section class="recent-reviews" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin: 40px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="color: #0f172a; font-size: 24px; margin: 0;">📋 最近の科目レビュー</h3>
+            </div>
+            {% for review in recent_subject_reviews %}
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #2563eb;">
+                <h4 style="color: #0f172a; margin-bottom: 10px;">{{ review.course_offering.subject.name }}</h4>
+                <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">{{ review.course_offering.year }}年度 {{ review.course_offering.semester }}</p>
+                <div style="font-size: 16px; margin: 8px 0;">
+                    <span class="star-rating">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <span class="star-filled">★</span>
+                            {% else %}
+                                <span class="star-empty">☆</span>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                    ({{ review.rating }}/5)
+                </div>
+                <p style="color: #334155; line-height: 1.6;">{{ review.review|truncatewords:30 }}</p>
+                <p style="color: #94a3b8; font-size: 13px; margin-top: 10px;">{{ review.created_at|date:"Y年m月d日" }}</p>
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+
+        <section style="margin-top: 40px;">
             <div class="features">
-                <a href="{% url 'graphics:book_reviews' %}" class="feature-card">
+                <a href="{% url 'graphics:search_courses' %}" class="feature-card">
                     <h4>📚 科目別レビュー</h4>
                     <p>おすすめ参考書を科目から検索・閲覧</p>
                 </a>

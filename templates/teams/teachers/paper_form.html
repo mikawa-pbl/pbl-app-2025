@@ -1,0 +1,122 @@
+{% extends "teams/teachers/base.html" %}
+{% block title %}{% if paper %}編集{% else %}新規登録{% endif %} | Paper DB{% endblock %}
+
+{% block content %}
+  <div class="card" style="margin-top:16px;">
+    <h2 style="font-size:18px;">{% if paper %}論文の編集{% else %}論文の新規登録{% endif %}</h2>
+    <p class="muted" style="margin-top:6px;">
+      「*」が必須項目の運用なら、フォーム上で未入力だとエラー表示されます。
+    </p>
+
+    {% if paper %}
+    <form method="post" enctype="multipart/form-data"
+        action="{% url 'teachers:paper_update' paper.pk %}" style="margin-top:14px;">
+    {% else %}
+    <form method="post" enctype="multipart/form-data"
+        action="{% url 'teachers:paper_create' %}" style="margin-top:14px;">
+    {% endif %}
+    
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="muted">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      {# 手でレイアウトを整える（as_pより綺麗） #}
+      <div class="grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="field">
+          <label>論文題目 *</label>
+          {{ form.title }} {{ form.title.errors }}
+        </div>
+        <div class="field">
+          <label>年 *</label>
+          {{ form.year }} {{ form.year.errors }}
+        </div>
+        <div class="field">
+          <label>論文著者 *</label>
+          {{ form.author }} {{ form.author.errors }}
+        </div>
+        <div class="field">
+          <label>掲載誌名 *</label>
+          {{ form.booktitle }} {{ form.booktitle.errors }}
+        </div>
+        <div class="field">
+          <label>DOI *</label>
+          {{ form.doi }} {{ form.DOI.errors }}
+        </div>
+        <div class="field">
+          <label>URL *</label>
+          {{ form.url }} {{ form.URL.errors }}
+        </div>
+        <div class="field">
+          <label>登録者 *</label>
+          {{ form.submitter }} {{ form.submitter.errors }}
+        </div>
+        <div class="field">
+          <label>キーワード</label>
+          {{ form.keywords }} {{ form.keywords.errors }}
+          <div class="help">例: SSL, HAR, class imbalance</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="field">
+          <label>どんな論文か *</label>
+          {{ form.imp_overview }} {{ form.imp_overview.errors }}
+        </div>
+        <div class="field">
+          <label>先行研究との比較 *</label>
+          {{ form.imp_comparison }} {{ form.imp_comparison.errors }}
+        </div>
+        <div class="field">
+          <label>中心的アイデア *</label>
+          {{ form.imp_idea }} {{ form.imp_idea.errors }}
+        </div>
+        <div class="field">
+          <label>有効性（検証方法と結果） *</label>
+          {{ form.imp_usefulness }} {{ form.imp_usefulness.errors }}
+        </div>
+        <div class="field">
+          <label>議論（利点・欠点・制限） *</label>
+          {{ form.imp_discussion }} {{ form.imp_discussion.errors }}
+        </div>
+        <div class="field">
+          <label>自身の研究との関連性</label>
+          {{ form.imp_relation }} {{ form.imp_relation.errors }}
+        </div>
+        <div class="field">
+          <label>その他</label>
+          {{ form.note }} {{ form.note.errors }}
+        </div>
+      </div>
+
+      <div class="section">
+        <h3 style="margin:0 0 10px;">添付ファイル</h3>
+
+        <div class="grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="field">
+            <label>論文ファイル（PDF）</label>
+            {{ form.paper_file }} {{ form.paper_file.errors }}
+          </div>
+          <div class="field">
+            <label>輪講スライド（pptx / pdf）</label>
+            {{ form.rc_slide }} {{ form.rc_slide.errors }}
+          </div>
+          <div class="field" style="grid-column: 1 / -1;">
+            <label>画像ファイル（png / jpg / pdf）</label>
+            {{ form.paper_figure }} {{ form.paper_figure.errors }}
+          </div>
+        </div>
+
+        <div class="help">
+          ※拡張子制限に引っかかるとエラーになります（pdf/pptx/png/jpg など）。
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <button class="btn primary" type="submit">{% if paper %}更新{% else %}登録{% endif %}</button>
+        <a class="btn" href="{% url 'teachers:paper_list' %}">キャンセル</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -178,7 +178,7 @@
         {% for item in items %}
         <a
           class="card-link"
-          href="{% url 'takenoko:product_details' %}?id={{ item.pk }}"
+          href="{% url 'takenoko:item_delete' %}?id={{ item.pk }}"
         >
           {% include "teams/takenoko/Components/item_card.html" %}
         </a>

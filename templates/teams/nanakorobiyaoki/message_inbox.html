@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メッセージ - TUT Connect</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #0d47a1;
+            --bg-color: #f5f7fa;
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --border-radius: 12px;
+            --text-main: #333;
+            --text-sub: #666;
+            --accent-color: #e3f2fd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #fff;
+            border-right: 1px solid #eee;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a237e;
+            margin-bottom: 40px;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            background: #b71c1c;
+            color: white;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 1.2rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: var(--text-sub);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s;
+            font-weight: 500;
+            gap: 12px;
+        }
+
+        .nav-link:hover {
+            background-color: #f5f5f5;
+            color: var(--text-main);
+        }
+
+        .nav-link.active {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .nav-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background-color: #1d9bf0;
+            /* Twitter Blue */
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid #fff;
+            line-height: 1;
+            min-width: 18px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.8rem;
+            color: #999;
+            margin: 20px 0 10px 10px;
+            font-weight: 700;
+        }
+
+        .mini-community-list {
+            list-style: none;
+            overflow-y: auto;
+            max-height: calc(100vh - 400px);
+            margin-right: -10px;
+            padding-right: 10px;
+        }
+
+        .mini-community-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .mini-community-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .mini-community-list::-webkit-scrollbar-thumb {
+            background: #eee;
+            border-radius: 10px;
+        }
+
+        .mini-community-list::-webkit-scrollbar-thumb:hover {
+            background: #ddd;
+        }
+
+        .mini-community-item a {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            gap: 10px;
+        }
+
+        .mini-community-item a:hover {
+            background: #f5f5f5;
+        }
+
+        .mini-icon {
+            width: 24px;
+            height: 24px;
+            background: #ddd;
+            border-radius: 50%;
+            display: block;
+            object-fit: cover;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            height: var(--header-height);
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Content Body */
+        .content-body {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        /* Message Link List */
+        .message-list {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .message-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s;
+            gap: 15px;
+        }
+
+        .message-item:last-child {
+            border-bottom: none;
+        }
+
+        .message-item:hover {
+            background-color: #fafafa;
+        }
+
+        .partner-avatar {
+            width: 48px;
+            height: 48px;
+            background: #ddd;
+            border-radius: 50%;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .partner-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .partner-info {
+            flex: 1;
+        }
+
+        .unread-count-badge {
+            background-color: #1d9bf0;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+            flex-shrink: 0;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .partner-name {
+            font-weight: 500;
+            font-size: 1.05rem;
+            color: var(--text-main);
+        }
+
+        .partner-name.unread {
+            font-weight: 700;
+        }
+
+        .partner-id {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .partner-time {
+            font-size: 0.85rem;
+            color: #666;
+            margin-left: auto;
+        }
+
+        .latest-snippet {
+            font-size: 0.95rem;
+            color: #666;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .latest-snippet.unread {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .arrow-icon {
+            color: #ccc;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">T</div>
+            TUT Connect
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:home' %}" class="nav-link">
+                    <span class="material-icons-round">home</span> ホーム
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:community_list' %}" class="nav-link">
+                    <span class="material-icons-round">grid_view</span> コミュニティを探す
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:message_inbox' %}" class="nav-link active">
+                    <div class="nav-icon-wrapper">
+                        <span class="material-icons-round">mail_outline</span>
+                        {% if unread_messages_count > 0 %}
+                        <span class="notification-badge">{{ unread_messages_count }}</span>
+                        {% endif %}
+                    </div>
+                    メッセージ
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:user_profile' request.session.user_id %}" class="nav-link">
+                    <span class="material-icons-round">person</span> プロフィール
+                </a>
+            </li>
+
+            <div class="sidebar-section-title">参加中のコミュニティ</div>
+            <ul class="mini-community-list">
+                {% for community in joined_communities %}
+                <li class="mini-community-item">
+                    <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}"
+                        style="justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            {% if community.image %}
+                            <img src="{{ community.image.url }}" class="mini-icon" alt="">
+                            {% else %}
+                            <span class="mini-icon" style="background: #e0e0e0;"></span>
+                            {% endif %}
+                            {{ community.name }}
+                        </div>
+                        {% if community.unread_posts_count > 0 %}
+                        <span class="notification-badge"
+                            style="position: static; font-size: 0.65rem; padding: 1px 4px; min-width: 14px;">
+                            {{community.unread_posts_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% empty %}
+                <li class="mini-community-item"><a href="#">なし</a></li>
+                {% endfor %}
+            </ul>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="header">
+            <div class="logo" style="margin-bottom: 0; font-size: 1rem; color: #666; font-weight: 500;">
+                メッセージ一覧
+            </div>
+            <div class="header-actions">
+            </div>
+        </header>
+
+        <div class="content-body">
+            <h1 class="page-title">メッセージ</h1>
+
+            <div class="message-list">
+                {% for item in partners_info %}
+                {% with partner=item.partner msg=item.latest_message unread=item.unread_count %}
+                <a href="{% url 'nanakorobiyaoki:chat_room' partner.user_id %}" class="message-item">
+                    <div class="partner-avatar">
+                        {% if partner.icon %}
+                        <img src="{{ partner.icon.url }}" alt="">
+                        {% else %}
+                        <img src="https://via.placeholder.com/48" alt="">
+                        {% endif %}
+                    </div>
+                    <div class="partner-info" style="flex: 1; overflow: hidden;">
+                        <div style="display: flex; align-items: center;">
+                            <div class="partner-name {% if unread > 0 %}unread{% endif %}">{{ partner.name }}</div>
+                            <div class="partner-id" style="margin-left: 8px;">@{{ partner.user_id }}</div>
+                            {% if msg %}
+                            <div class="partner-time">{{ msg.timestamp|date:"n月j日" }}</div>
+                            {% endif %}
+                        </div>
+                        {% if msg %}
+                        <div class="latest-snippet {% if unread > 0 %}unread{% endif %}">
+                            {% if msg.sender == partner %}{{ msg.content }}{% else %}あなた: {{ msg.content }}{% endif %}
+                        </div>
+                        {% else %}
+                        <div class="latest-snippet">まだメッセージはありません</div>
+                        {% endif %}
+                    </div>
+                    {% if unread > 0 %}
+                    <div class="unread-count-badge">{{ unread }}</div>
+                    {% endif %}
+                    <span class="material-icons-round arrow-icon">chevron_right</span>
+                </a>
+                {% endwith %}
+                {% empty %}
+                <div style="padding: 40px; text-align: center; color: #999;">
+                    メッセージはまだありません。
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

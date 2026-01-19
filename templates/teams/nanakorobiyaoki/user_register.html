@@ -7,6 +7,7 @@
     <title>新規登録 - TUT Connect</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 
     <style>
         :root {
@@ -151,13 +152,52 @@
             {% for field in form %}
             <div class="form-group">
                 <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                {% if field.name == 'password' %}
+                <div class="password-wrapper" style="position: relative;">
+                    {{ field }}
+                    <span class="password-toggle material-icons-round"
+                        onclick="togglePassword(this)">visibility_off</span>
+                </div>
+                {% else %}
                 {{ field }}
+                {% endif %}
+
                 {% if field.help_text %}
                 <span class="helptext">{{ field.help_text }}</span>
                 {% endif %}
                 {{ field.errors }}
             </div>
             {% endfor %}
+
+            <style>
+                .password-toggle {
+                    position: absolute;
+                    right: 15px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    cursor: pointer;
+                    color: #999;
+                    user-select: none;
+                }
+
+                .password-toggle:hover {
+                    color: var(--primary-color);
+                }
+            </style>
+
+            <script>
+                function togglePassword(icon) {
+                    const input = icon.previousElementSibling;
+                    if (input.type === "password") {
+                        input.type = "text";
+                        icon.textContent = "visibility";
+                    } else {
+                        input.type = "password";
+                        icon.textContent = "visibility_off";
+                    }
+                }
+            </script>
 
             <button type="submit" class="btn-primary">登録する</button>
         </form>

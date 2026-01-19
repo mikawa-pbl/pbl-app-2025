@@ -9,6 +9,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from .doors import DOORS
 from .forms import EntryForm, NamespacedLoginForm, SignupForm
+from .labs import LABORATORIES
 from .models import H34vvyUser, Entry
 
 
@@ -106,6 +107,7 @@ def signup_view(request):
         if form.is_valid():
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password1"]
+            laboratory = form.cleaned_data["laboratory"]
             # auth_user側のユーザー名は衝突を避けるために接頭辞を付与
             if len(username) > 150:
                 form.add_error(
@@ -122,10 +124,11 @@ def signup_view(request):
                     try:
                         user = H34vvyUser.objects.db_manager(
                             "h34vvy_u53rzz"
-                        ).create_user(username=username, password=password)
+                        ).create_user(username=username, password=password, laboratory=laboratory)
                     except Exception:
                         # H34vvyUser作成に失敗したらユーザーを削除しておく
-                        user.delete()
+                        if "user" in locals():
+                            user.delete()
                         form.add_error(
                             None, "登録に失敗しました。時間をおいて再度お試しください。"
                         )
@@ -157,8 +160,9 @@ def logout_view(request):
 
 @login_required(login_url=LOGIN_URL)
 def ranking_view(request):
+    # User Ranking
     accounts = list(H34vvyUser.objects.order_by("-points", "username").all())
-    rankings = []
+    user_rankings = []
     last_points = None
     last_rank = 0
     for idx, account in enumerate(accounts, start=1):
@@ -166,14 +170,54 @@ def ranking_view(request):
             rank = last_rank
         else:
             rank = idx
-        rankings.append({"account": account, "rank": rank})
+        user_rankings.append({"account": account, "rank": rank})
         last_points = account.points
         last_rank = rank
+
+    # Laboratory Ranking
+    from django.db.models import Sum
+
+    # 集計: { "laboratory": "lab_id", "total_points": 123 }
+    lab_stats = (
+        H34vvyUser.objects.order_by().values("laboratory")
+        .annotate(total_points=Sum("points"))
+        .order_by("-total_points")
+    )
+    
+    # ID -> Name マッピング用辞書
+    lab_map = {lab.id: lab.name for lab in LABORATORIES}
+
+    lab_rankings = []
+    last_points = None
+    last_rank = 0
+    rank_counter = 1
+
+    for stat in lab_stats:
+        lab_id = stat["laboratory"]
+        # laboratoryが空文字（未所属）の場合はランキング対象外にするならここでスキップ
+        if not lab_id:
+            continue
+            
+        points = stat["total_points"] or 0
+        lab_name = lab_map.get(lab_id, lab_id)
+
+        if points == last_points:
+            rank = last_rank
+        else:
+            rank = rank_counter
+        
+        lab_rankings.append({"lab": {"name": lab_name}, "rank": rank, "points": points})
+        
+        last_points = points
+        last_rank = rank
+        rank_counter += 1
+
     return render(
         request,
         "teams/h34vvy_u53rzz/ranking.html",
         {
-            "rankings": rankings,
+            "user_rankings": user_rankings,
+            "lab_rankings": lab_rankings,
             "nav_active": "ranking",
             "current_user_id": request.user.id,
         },

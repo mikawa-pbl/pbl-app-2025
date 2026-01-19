@@ -1,6 +1,6 @@
 <h3 class="text-2xl font-bold mb-4">Goods</h3>
 
-<div class="w-screen relative left-1/2 -translate-x-1/2 pb-8 pt-20">
+<div class="w-screen relative left-1/2 -translate-x-1/2 pb-8 pt-10 md:pt-20">
     <div class="absolute top-0 left-0 w-full h-full bg-[#F5E829]"
         style="clip-path: polygon(0 10rem, 100% 0, 100% 100%, 0 100%);"></div>
     <div class="container mx-auto px-4 relative">
@@ -10,7 +10,7 @@
                 <!-- <a href="/team_cake/goods/{{ good.id }}/" class="card-link"> -->
                 <!-- <a href="#" class="card-link"> -->
                 <a href="#" class="block"
-                    onclick="openModal('{{ good.id }}', '{{ good.name }}', '{{ good.price }}', '{{ good.description }}')">
+                    onclick="openModal('{{ good.id }}', '{{ good.name|escapejs }}', '{{ good.price }}', '{{ good.description|escapejs }}', '{% if good.original_price is not None %}{{ good.original_price }}{% endif %}')">
                     <div
                         class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                         <div class="relative pb-[75%]">
@@ -27,7 +27,26 @@
                             <p class="text-gray-500">{{ good.description|default:"説明なし" }}</p>
                         </div>
                         <div class="px-4 pb-4">
-                            <span class="text-[#D71718] font-bold">¥{{ good.price }}</span>
+                            {% if good.expiration_time %}
+                            <div class="text-xs font-bold text-white bg-red-600 px-2 py-1 rounded inline-block mb-2 expiration-timer"
+                                data-expire="{{ good.expiration_time.isoformat }}">
+                                命の灯火: 計算中...
+                            </div>
+                            {% endif %}
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    {% if good.original_price %}
+                                    <span class="text-gray-500 line-through text-sm mr-2">
+                                        ¥{{ good.original_price }}
+                                    </span>
+                                    {% endif %}
+                                    <span class="text-[#D71718] font-bold text-2xl">¥{{ good.price }}</span>
+                                </div>
+                                {% if good.original_price %}
+                                <span class="discount-badge text-red-600 font-bold text-2xl"
+                                    data-original="{{ good.original_price }}" data-price="{{ good.price }}"></span>
+                                {% endif %}
+                            </div>
                             <!-- <a href="/team_cake/goods/{{ good.id }}/" class="right">詳細</a> -->
                             <!-- <a href="#" class="right">詳細</a> -->
                         </div>
@@ -44,3 +63,59 @@
         </div>
     </div>
 </div>
+
+<script>
+    function updateTimers() {
+        const timers = document.querySelectorAll('.expiration-timer');
+        const now = new Date();
+
+        timers.forEach(timer => {
+            const expireStr = timer.getAttribute('data-expire');
+            if (!expireStr) return;
+
+            const expireDate = new Date(expireStr);
+            const diff = expireDate - now;
+
+            if (diff <= 0) {
+                // Should be deleted on refresh, but handle client-side just in case
+                timer.textContent = "廃棄されました...";
+                timer.classList.replace('bg-red-600', 'bg-gray-600');
+            } else {
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                timer.textContent = `🔥 命の灯火: 残り${hours}時間${minutes}分${seconds}秒`;
+
+                // Urgency effect
+                if (hours === 0 && minutes < 30) {
+                    timer.classList.add('animate-pulse');
+                    timer.style.fontWeight = '900';
+                }
+            }
+        });
+    }
+
+    setInterval(updateTimers, 1000);
+    updateTimers();
+
+    function updateDiscountBadges() {
+        document.querySelectorAll('.discount-badge').forEach(badge => {
+            const original = parseFloat(badge.dataset.original);
+            const price = parseFloat(badge.dataset.price);
+            if (original && price && original > price) {
+                const discount = Math.floor((1 - price / original) * 100);
+
+                // Yellow zigzag starburst SVG with more spikes
+                const svg = `
+                <svg viewBox="0 0 100 100" class="absolute inset-0 w-full h-full text-yellow-400 fill-current" style="transform: scale(1.4) rotate(-5deg);">
+                    <polygon points="50,0 60,12 75,5 80,22 95,30 85,45 100,60 85,75 90,95 72,85 60,98 50,85 40,98 28,85 10,95 15,75 0,60 15,45 5,30 20,22 25,5 40,12" />
+                </svg>`;
+
+                // Set relative positioning and larger padding for the badge container
+                badge.className = "discount-badge relative flex items-center justify-center font-bold text-red-600 text-xl w-24 h-24 ml-4";
+                badge.innerHTML = `${svg}<span class="relative z-10 transform -rotate-6 whitespace-nowrap">${discount}% <span class="text-sm">OFF</span></span>`;
+            }
+        });
+    }
+    updateDiscountBadges();
+</script>

@@ -80,8 +80,14 @@ class ExperimentPost(models.Model):
         help_text='Google Forms等のURLを入力してください'
     )
 
-    schedule = models.DateTimeField(
-        verbose_name='実施日時'
+    start_date = models.DateField(
+        verbose_name='募集開始日',
+        default=timezone.now
+    )
+
+    end_date = models.DateField(
+        verbose_name='募集終了日',
+        default=timezone.now
     )
 
     duration = models.CharField(
@@ -134,6 +140,35 @@ class ExperimentPost(models.Model):
 
     def __str__(self):
         return self.title
+
+    @staticmethod
+    def process_automatic_updates():
+        """
+        要件3.6 自動処理機能の実装
+        1. 募集終了日を過ぎた'open'ステータスの投稿を'closed'に変更
+        2. 募集終了日から1週間(7日)経過した投稿を物理削除
+        """
+        from datetime import timedelta
+        today = timezone.now().date()
+        
+        # 1. 自動ステータス変更: open でかつ end_date < today のものを closed に
+        # (end_date が昨日の日付なら、今日は募集終了している)
+        expired_posts = ExperimentPost.objects.filter(
+            status='open',
+            end_date__lt=today
+        )
+        if expired_posts.exists():
+            expired_posts.update(status='closed')
+
+        # 2. 自動削除: end_date から7日経過したものを削除
+        # 今日が 1/20 だとすると、end_date が 1/13 より前 (1/12以下) なら削除対象
+        # 1/13 + 7日 = 1/20 なので、今日削除される
+        deletion_threshold = today - timedelta(days=7)
+        posts_to_delete = ExperimentPost.objects.filter(
+            end_date__lt=deletion_threshold
+        )
+        if posts_to_delete.exists():
+            posts_to_delete.delete()
 
     class Meta:
         verbose_name = '実験募集投稿'

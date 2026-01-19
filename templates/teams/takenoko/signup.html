@@ -425,7 +425,7 @@
             pattern="[0-9]*"
             required
             placeholder="例：201101"
-            minlength="4" maxlength="20"
+            minlength="4" maxlength="6"
             value="{{ form.student_id.value|default_if_none:'' }}"
           />
           {% if form.student_id.errors %}

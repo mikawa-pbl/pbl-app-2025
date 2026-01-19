@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自分だけの質問対策 - TeamUD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-left: 80px;
+            transition: padding-left 0.3s;
+        }
+        body.menu-open {
+            padding-left: 280px;
+        }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 60px;
+            background: #2c3e50;
+            z-index: 1000;
+            transition: width 0.3s;
+            overflow: hidden;
+        }
+        .sidebar.open {
+            width: 250px;
+        }
+        .hamburger {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 60px;
+            padding: 20px;
+            cursor: pointer;
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            background: #2c3e50;
+            z-index: 10;
+        }
+        .menu-items {
+            margin-top: 80px;
+        }
+        .menu-item {
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .menu-item:hover {
+            background: #34495e;
+        }
+        .menu-item.logout {
+            background: #dc3545;
+            margin-top: 20px;
+        }
+        .menu-item.logout:hover {
+            background: #c82333;
+        }
+        .menu-icon {
+            font-size: 20px;
+            min-width: 20px;
+            flex-shrink: 0;
+        }
+        .menu-text {
+            max-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: max-width 0.3s ease;
+        }
+        .sidebar.open .menu-text {
+            max-width: 200px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 2em;
+        }
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+        .nav-links a {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .nav-links a:hover {
+            background: #764ba2;
+        }
+        .logout-btn {
+            background: #dc3545 !important;
+        }
+        .logout-btn:hover {
+            background: #c82333 !important;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .company-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .company-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
+        }
+        .company-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .company-card.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .company-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .company-info {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .questions-container {
+            display: none;
+        }
+        .questions-container.active {
+            display: block;
+        }
+        .question-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        .question-text {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+        .question-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 12px;
+        }
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .badge-stage {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .badge-date {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .badge-answered {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+        .badge-unanswered {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+        .answer-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .answer-input.has-answer {
+            border-color: #4caf50;
+        }
+        .save-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .save-btn:hover {
+            background: #764ba2;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.1em;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        .progress-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .progress-text {
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        .progress-bar-container {
+            width: 200px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: white;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="hamburger" onclick="toggleMenu()">☰</div>
+        <div class="menu-items">
+            <a href="{% url 'team_UD:calendar' %}" class="menu-item">
+                <span class="menu-icon">📅</span>
+                <span class="menu-text">カレンダー</span>
+            </a>
+            <a href="{% url 'team_UD:questions' %}" class="menu-item">
+                <span class="menu-icon">📝</span>
+                <span class="menu-text">質問対策</span>
+            </a>
+            <a href="{% url 'team_UD:statistics' %}" class="menu-item">
+                <span class="menu-icon">📊</span>
+                <span class="menu-text">面接質問統計</span>
+            </a>
+            <a href="{% url 'team_UD:logout' %}" class="menu-item logout">
+                <span class="menu-icon">🚪</span>
+                <span class="menu-text">ログアウト</span>
+            </a>
+        </div>
+    </div>
+    <div class="container">
+        <header>
+            <h1>📝 自分だけの質問対策</h1>
+        </header>
+
+        <div class="section">
+            <div class="section-title">🏢 今後予定がある会社</div>
+            <div id="companyList" class="company-list">
+                <div class="loading">会社情報を読み込み中...</div>
+            </div>
+        </div>
+
+        <div id="questionsSection" class="section questions-container">
+            <div id="progressInfo" class="progress-info">
+                <div class="progress-text">
+                    <span id="answeredCount">0</span> / <span id="totalCount">0</span> 回答済み
+                </div>
+                <div class="progress-bar-container">
+                    <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="section-title">
+                💡 <span id="selectedCompanyName"></span> の質問リスト
+            </div>
+            <div id="questionsList"></div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            sidebar.classList.toggle('open');
+            body.classList.toggle('menu-open');
+        }
+
+        let currentCompanyId = null;
+        let allQuestions = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUpcomingCompanies();
+        });
+
+        function loadUpcomingCompanies() {
+            fetch('/team_UD/api/questions/upcoming-companies/')
+                .then(response => response.json())
+                .then(data => {
+                    const companyList = document.getElementById('companyList');
+                    
+                    if (data.companies && data.companies.length > 0) {
+                        companyList.innerHTML = '';
+                        data.companies.forEach(company => {
+                            const card = document.createElement('div');
+                            card.className = 'company-card';
+                            card.onclick = () => selectCompany(company.id, company.name);
+                            card.innerHTML = `
+                                <div class="company-name">${escapeHtml(company.name)}</div>
+                                <div class="company-info">
+                                    📅 ${company.next_date}<br>
+                                    📍 ${escapeHtml(company.stage)}
+                                </div>
+                            `;
+                            companyList.appendChild(card);
+                        });
+                    } else {
+                        companyList.innerHTML = '<div class="no-data">今後の予定がある会社がありません</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('companyList').innerHTML = '<div class="no-data">データの読み込みに失敗しました</div>';
+                });
+        }
+
+        function selectCompany(companyId, companyName) {
+            currentCompanyId = companyId;
+            
+            // アクティブな会社カードを更新
+            document.querySelectorAll('.company-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.target.closest('.company-card').classList.add('active');
+            
+            // 会社名を表示
+            document.getElementById('selectedCompanyName').textContent = companyName;
+            
+            // 質問を読み込み
+            loadCompanyQuestions(companyId);
+            
+            // 質問セクションを表示
+            document.getElementById('questionsSection').classList.add('active');
+        }
+
+        function loadCompanyQuestions(companyId) {
+            const questionsList = document.getElementById('questionsList');
+            questionsList.innerHTML = '<div class="loading">質問を読み込み中...</div>';
+            
+            fetch(`/team_UD/api/questions/company/${companyId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    allQuestions = data.questions || [];
+                    
+                    if (allQuestions.length > 0) {
+                        questionsList.innerHTML = '';
+                        allQuestions.forEach((q, index) => {
+                            const item = document.createElement('div');
+                            item.className = 'question-item';
+                            item.innerHTML = `
+                                <div class="question-header">
+                                    <div class="question-text">${escapeHtml(q.question)}</div>
+                                </div>
+                                <div class="question-meta">
+                                    <span class="badge badge-stage">${escapeHtml(q.stage)}</span>
+                                    ${q.date ? `<span class="badge badge-date">${q.date}</span>` : ''}
+                                    <span class="badge ${q.has_answer ? 'badge-answered' : 'badge-unanswered'}">
+                                        ${q.has_answer ? '✓ 回答済み' : '未回答'}
+                                    </span>
+                                </div>
+                                <textarea 
+                                    class="answer-input ${q.has_answer ? 'has-answer' : ''}" 
+                                    placeholder="あなたの回答を入力してください..."
+                                    data-question-index="${index}"
+                                    onchange="saveAnswer(${index})"
+                                >${escapeHtml(q.answer || '')}</textarea>
+                                <button class="save-btn" onclick="saveAnswer(${index})">💾 保存</button>
+                            `;
+                            questionsList.appendChild(item);
+                        });
+                        updateProgress();
+                    } else {
+                        questionsList.innerHTML = '<div class="no-data">この会社の過去の質問データがありません</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    questionsList.innerHTML = '<div class="no-data">質問の読み込みに失敗しました</div>';
+                });
+        }
+
+        function saveAnswer(index) {
+            const question = allQuestions[index];
+            const textarea = document.querySelector(`textarea[data-question-index="${index}"]`);
+            const answer = textarea.value.trim();
+            
+            fetch('/team_UD/api/questions/save/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    company_id: currentCompanyId,
+                    question: question.question,
+                    answer: answer
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 回答済みステータスを更新
+                question.has_answer = answer.length > 0;
+                question.answer = answer;
+                
+                // UIを更新
+                if (answer.length > 0) {
+                    textarea.classList.add('has-answer');
+                } else {
+                    textarea.classList.remove('has-answer');
+                }
+                
+                // バッジを更新
+                const questionItem = textarea.closest('.question-item');
+                const badge = questionItem.querySelector('.badge-answered, .badge-unanswered');
+                if (answer.length > 0) {
+                    badge.className = 'badge badge-answered';
+                    badge.textContent = '✓ 回答済み';
+                } else {
+                    badge.className = 'badge badge-unanswered';
+                    badge.textContent = '未回答';
+                }
+                
+                updateProgress();
+                
+                // 保存成功のフィードバック
+                const btn = questionItem.querySelector('.save-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ 保存しました';
+                btn.style.background = '#4caf50';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('保存に失敗しました');
+            });
+        }
+
+        function updateProgress() {
+            const total = allQuestions.length;
+            const answered = allQuestions.filter(q => q.has_answer).length;
+            const percentage = total > 0 ? (answered / total * 100) : 0;
+            
+            document.getElementById('answeredCount').textContent = answered;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('progressBar').style.width = percentage + '%';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

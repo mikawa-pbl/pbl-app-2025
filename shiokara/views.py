@@ -8,6 +8,7 @@ from datetime import timedelta
 from django.views.decorators.cache import never_cache
 from django.conf import settings
 import json
+import random
 from pathlib import Path
 
 from .models import Department, Company, CompanyReview, Person, CompanyView, SiteFeedback
@@ -824,10 +825,11 @@ def company_experience_post(request, pk):
 
                 append_review_to_fixture(review)
 
-                # 投稿者にポイント付与（+5）
-                Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(points=F('points') + 5)
+                # 投稿者にポイント付与（ガチャ：3〜10ポイント）
+                points_awarded = random.randint(3, 10)
+                Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(points=F('points') + points_awarded)
                 # セッションに付与情報を入れてリダイレクト先でポップアップ表示する
-                request.session['points_awarded'] = 5
+                request.session['points_awarded'] = points_awarded
 
                 return redirect("shiokara:company_detail", pk=company.pk)
 

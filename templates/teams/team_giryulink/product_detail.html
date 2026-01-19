@@ -238,6 +238,45 @@
             font-weight: 600;
         }
         
+        .comment-form {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .comment-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 12px;
+        }
+        
+        .comment-input:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+        
+        .comment-submit-btn {
+            width: 100%;
+            background: #2196f3;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .comment-submit-btn:hover {
+            background: #1976d2;
+        }
+        
         .purchase-section {
             position: fixed;
             bottom: 60px;
@@ -401,6 +440,12 @@
             <div class="comment-login">
                 コメントするには<a href="{% url 'team_giryulink:login' %}" class="login-link">ログイン</a>が必要です
             </div>
+            {% else %}
+            <form method="post" class="comment-form">
+                {% csrf_token %}
+                <textarea name="comment" placeholder="コメントを入力..." class="comment-input" rows="3" required></textarea>
+                <button type="submit" class="comment-submit-btn">投稿する</button>
+            </form>
             {% endif %}
         </div>
     </main>

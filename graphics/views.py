@@ -201,6 +201,7 @@ def add_subject_review(request):
 def search_courses(request):
     """
     科目検索ビュー
+    同じ科目名・開講学科・開講学期の科目は統合して表示
     """
     # 検索が実行されたかどうか（GETリクエストが送信されたかどうか）
     # request.GET.keys()をチェックして、フォームが送信されたかを判定
@@ -265,13 +266,46 @@ def search_courses(request):
         # 重複を除去
         courses = courses.distinct()
 
+        # 科目を統合: 科目名・開講学科・開講学期が同じものを1つにまとめる
+        unified_courses = {}
+        for course in courses:
+            # 学科名のリストを取得してソート（一意なキーを作るため）
+            dept_names = sorted([dept.name for dept in course.departments.all()])
+            dept_key = ','.join(dept_names)
+
+            # 一意なキー: 科目名 + 学科 + 学期
+            unique_key = f"{course.subject.name}|{dept_key}|{course.semester}"
+
+            if unique_key not in unified_courses:
+                # 最新年度の情報を代表として使用
+                unified_courses[unique_key] = course
+            else:
+                # より新しい年度があれば更新
+                if course.year > unified_courses[unique_key].year:
+                    unified_courses[unique_key] = course
+
         # 各コースに学科数、平均評価、レビュー数を追加
         courses_with_ratings = []
-        for course in courses:
+        for unique_key, course in unified_courses.items():
             course.dept_count = course.departments.count()
 
-            # 科目レビューの平均評価とレビュー数を計算
-            subject_reviews = SubjectReview.objects.using('graphics').filter(course_offering=course)
+            # この科目の全年度のレビューを集計
+            # 科目名・学科・学期が同じすべてのCourseOfferingのレビューを取得
+            dept_names = sorted([dept.name for dept in course.departments.all()])
+            same_courses = CourseOffering.objects.using('graphics').filter(
+                subject__name=course.subject.name,
+                semester=course.semester
+            )
+            # 学科も一致するものだけ
+            for sc in same_courses:
+                sc_dept_names = sorted([dept.name for dept in sc.departments.all()])
+                if sc_dept_names != dept_names:
+                    same_courses = same_courses.exclude(id=sc.id)
+
+            # 科目レビューの平均評価とレビュー数を計算（全年度分）
+            subject_reviews = SubjectReview.objects.using('graphics').filter(
+                course_offering__in=same_courses
+            )
             review_count = subject_reviews.count()
             course.review_count = review_count
 
@@ -290,10 +324,8 @@ def search_courses(request):
                 courses_with_ratings.append(course)
 
         # フィルタ適用後のコースリストを使用
-        if has_review:
-            courses = courses_with_ratings
-
-        total_count = len(courses_with_ratings) if has_review else courses.count()
+        courses = courses_with_ratings
+        total_count = len(courses_with_ratings)
 
         # ページネーション (1ページあたり10件)
         paginator = Paginator(courses, 10)
@@ -441,20 +473,62 @@ def logout(request):
     return redirect('graphics:index')
 
 
-def course_detail(request, course_id):
+def course_detail_legacy(request, course_id):
     """
-    科目詳細ページ
-    科目情報と関連するレビュー（科目レビュー・参考書レビュー）を表示
+    旧URL用の科目詳細ビュー（後方互換性）
+    course_idから新URLへリダイレクト
     """
+    from urllib.parse import quote
     try:
         course = CourseOffering.objects.using('graphics').get(id=course_id)
+        # 新URLへリダイレクト
+        return redirect('graphics:course_detail',
+                       subject_name=quote(course.subject.name),
+                       semester=quote(course.semester))
     except CourseOffering.DoesNotExist:
         messages.error(request, '科目が見つかりませんでした。')
         return redirect('graphics:search_courses')
 
-    # この科目に関連する科目レビューを取得
+
+def course_detail(request, subject_name, semester):
+    """
+    科目詳細ページ
+    科目名と開講学期から科目を特定し、最新年度の情報を表示
+    過去年度の担当教員情報も表示
+    """
+    from urllib.parse import unquote
+
+    # URLエンコードされた科目名をデコード
+    subject_name = unquote(subject_name)
+    semester = unquote(semester)
+
+    # 科目名と学期から該当する全年度の開講情報を取得
+    courses = CourseOffering.objects.using('graphics').filter(
+        subject__name=subject_name,
+        semester=semester
+    ).order_by('-year')  # 新しい年度順
+
+    if not courses.exists():
+        messages.error(request, '科目が見つかりませんでした。')
+        return redirect('graphics:search_courses')
+
+    # 最新年度の情報を代表として使用
+    latest_course = courses.first()
+
+    # 過去年度の担当教員情報を収集
+    past_teachers_by_year = []
+    for course in courses:
+        if course.id != latest_course.id:
+            teachers = course.teachers.all()
+            teacher_names = ', '.join([teacher.name for teacher in teachers])
+            past_teachers_by_year.append({
+                'year': course.year,
+                'teachers': teacher_names
+            })
+
+    # この科目の全年度のレビューを取得
     subject_reviews_qs = SubjectReview.objects.using('graphics').filter(
-        course_offering=course
+        course_offering__in=courses
     ).order_by('-created_at')
 
     # ページネーション（科目レビュー）
@@ -469,7 +543,7 @@ def course_detail(request, course_id):
 
     # この科目に関連する参考書レビューを取得
     book_reviews = BookReview.objects.using('graphics').filter(
-        subject=course.subject.name
+        subject=latest_course.subject.name
     ).order_by('-created_at')
 
     # 書籍ごとにグループ化
@@ -505,18 +579,19 @@ def course_detail(request, course_id):
     except EmptyPage:
         books_with_reviews_paginated = books_paginator.page(books_paginator.num_pages)
 
-    # 担当教員のリストを取得
-    teachers = course.teachers.all()
+    # 担当教員のリストを取得（最新年度）
+    teachers = latest_course.teachers.all()
     teacher_names = ', '.join([teacher.name for teacher in teachers])
 
     # 学科のリストを取得
-    departments = course.departments.all()
+    departments = latest_course.departments.all()
     department_names = ', '.join([dept.name for dept in departments])
 
     context = {
-        'course': course,
+        'course': latest_course,
         'teacher_names': teacher_names,
         'department_names': department_names,
+        'past_teachers_by_year': past_teachers_by_year,  # 過去年度の担当教員
         'subject_reviews': subject_reviews,
         'books_with_reviews': books_with_reviews_paginated,
         'subject_reviews_count': subject_reviews_qs.count(),

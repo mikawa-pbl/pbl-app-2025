@@ -191,12 +191,28 @@
     <div class="container">
         <div class="course-header">
             <h2>{{ course.subject.name }}</h2>
-            <div class="course-meta"><strong>年度:</strong> {{ course.year }}年度</div>
+            <div class="course-meta"><strong>年度:</strong> {{ course.year }}年度（最新）</div>
             <div class="course-meta"><strong>開講学期:</strong> {{ course.semester }}</div>
             <div class="course-meta"><strong>対象年次:</strong> {{ course.grade }}</div>
             <div class="course-meta"><strong>担当教員:</strong> {{ teacher_names }}</div>
             <div class="course-meta"><strong>開講学科:</strong> {{ department_names }}</div>
             <div class="course-meta"><strong>必修:</strong> {% if course.is_required %}必修{% else %}選択{% endif %}</div>
+
+            {% if past_teachers_by_year %}
+            <div class="course-meta" style="margin-top: 15px;">
+                <button onclick="togglePastTeachers()" style="background: #64748b; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s;">
+                    📅 以前の年度の担当教員を表示
+                </button>
+                <div id="pastTeachers" style="display: none; margin-top: 15px; padding: 15px; background: #f1f5f9; border-radius: 6px; border-left: 4px solid #64748b;">
+                    <h4 style="margin-bottom: 10px; color: #475569; font-size: 16px;">以前の年度</h4>
+                    {% for item in past_teachers_by_year %}
+                    <div style="margin: 8px 0; padding: 8px; background: white; border-radius: 4px;">
+                        <strong>{{ item.year }}年度:</strong> {{ item.teachers }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <div class="section">
@@ -347,6 +363,18 @@
             const overlay = document.getElementById('overlay');
             navMenu.classList.toggle('active');
             overlay.classList.toggle('active');
+        }
+
+        function togglePastTeachers() {
+            const pastTeachers = document.getElementById('pastTeachers');
+            const button = event.target;
+            if (pastTeachers.style.display === 'none') {
+                pastTeachers.style.display = 'block';
+                button.textContent = '📅 以前の年度の担当教員を非表示';
+            } else {
+                pastTeachers.style.display = 'none';
+                button.textContent = '📅 以前の年度の担当教員を表示';
+            }
         }
     </script>
 </body>

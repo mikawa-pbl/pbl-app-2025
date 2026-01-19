@@ -270,7 +270,7 @@
         </div>
 
         {% if course_id %}
-        <a href="{% url 'graphics:course_detail' course_id %}" class="back-link">← 科目詳細に戻る</a>
+        <a href="{% url 'graphics:course_detail_legacy' course_id %}" class="back-link">← 科目詳細に戻る</a>
         {% else %}
         <a href="{% url 'graphics:index' %}" class="back-link">← ホームに戻る</a>
         {% endif %}

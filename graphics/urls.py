@@ -5,7 +5,10 @@ app_name = "graphics"
 urlpatterns = [
     path('', views.index, name='index'),
     path('members/', views.members, name='members'),
-    path('course/<int:course_id>/', views.course_detail, name='course_detail'),
+    # 新URL: 科目名と学期で科目詳細を表示
+    path('course/<str:subject_name>/<str:semester>/', views.course_detail, name='course_detail'),
+    # 旧URL: 後方互換性のため残す（将来的に削除可能）
+    path('course/<int:course_id>/', views.course_detail_legacy, name='course_detail_legacy'),
     path('book/<str:isbn>/', views.book_detail, name='book_detail'),
     # レビュー追加
     path('book-reviews/add/', views.add_book_review, name='add_book_review'),

@@ -26,9 +26,9 @@ def takenoko_login_required(view_func):
 
 
 def main(request):
-    # GETパラメータからタグを取得
+    # GETパラメータからタグと検索キーワードを取得
     selected_tag = request.GET.get('tag')
-    price_filter = request.GET.get('price')
+    query = request.GET.get('q')
     
     # アクティブな商品を取得（新着順）
     items = Item.objects.filter(status='active').order_by('-created_at')
@@ -42,9 +42,9 @@ def main(request):
     if selected_tag:
         items = items.filter(tags__name=selected_tag).distinct()
     
-    # 価格でフィルタリング（無料アイテム）
-    if price_filter == 'free':
-        items = items.filter(price=0)
+    # 検索キーワードでフィルタリング（商品名）
+    if query:
+        items = items.filter(name__icontains=query)
     
     items = items[:12]
     
@@ -55,7 +55,7 @@ def main(request):
         "items": items,
         "tags": tags,
         "selected_tag": selected_tag,
-        "price_filter": price_filter
+        "query": query
     })
 
 def purchased_items(request):
@@ -101,9 +101,10 @@ def signup(request):
     if request.method == "POST":
         form = TakenokoSignupForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            request.session[SESSION_KEY] = str(user.user_id)
             messages.success(request, "ユーザー登録が完了しました。")
-            return redirect("takenoko:login")
+            return redirect("takenoko:main")
         else:
             messages.error(request, "入力内容を確認してください。")
     else:

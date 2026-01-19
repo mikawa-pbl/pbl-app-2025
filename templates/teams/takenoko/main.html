@@ -225,7 +225,7 @@
     <!-- 検索 -->
     <div class="search-container">
       <form class="search-bar" method="get">
-        <input type="text" name="q" placeholder="何をお探しですか？" />
+        <input type="text" name="q" placeholder="何をお探しですか？" value="{{ query|default:'' }}" />
         <button type="submit"><i class="fas fa-search"></i></button>
       </form>
     </div>
@@ -235,16 +235,11 @@
       <div class="feature-box-container">
         {% for tag in tags %}
           {% if tag.name == selected_tag %}
-            <a href="{% url 'takenoko:main' %}" style="text-decoration: none;">
-              <div class="feature-box feature-box-active">
-                <i class="fas fa-{{ tag.icon }}"></i>
-                <p>{{ tag.display_name }}</p>
-                <div class="feature-circle"></div>
-              </div>
-            </a>
+            <a href="{% if query %}?q={{ query }}{% else %}{% url 'takenoko:main' %}{% endif %}" style="text-decoration: none;">
           {% else %}
-            <a href="{% url 'takenoko:main' %}?tag={{ tag.name }}" style="text-decoration: none;">
-              <div class="feature-box">
+            <a href="?tag={{ tag.name }}{% if query %}&q={{ query }}{% endif %}" style="text-decoration: none;">
+          {% endif %}
+              <div class="feature-box" style="{% if tag.name == selected_tag %}background-color: #B8E6D5; border: 2px solid #649CE4;{% endif %}">
                 <i class="fas fa-{{ tag.icon }}"></i>
                 <p>{{ tag.display_name }}</p>
                 <div class="feature-circle"></div>

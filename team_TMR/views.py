@@ -47,9 +47,12 @@ class ProfileView(LoginRequiredMixin, UpdateView):
     def get_object(self):
         return Profile.objects.filter(user_id=self.request.user.id).first()
 
+from django.core.serializers.json import DjangoJSONEncoder
+import json
+
 class RoadmapListView(LoginRequiredMixin, ListView):
     model = Roadmap
-    login_url = 'login/'
+    login_url = '/team_TMR/login/'
     template_name = 'teams/team_TMR/career/roadmap_list.html'
     context_object_name = 'roadmaps'
 
@@ -58,22 +61,30 @@ class RoadmapListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['target_user'] = self.request.user
+        context['is_owner'] = True
         raw_roadmaps = context['roadmaps']
-        gantt_data = []
+        
+        # Frappe Gantt用のデータ作成
+        tasks = []
         for r in raw_roadmaps:
-            months_active = []
-            for m in range(1, 13):
-                is_active = False
-                if r.start_date and r.end_date:
-                    s_m = r.start_date.month
-                    e_m = r.end_date.month
-                    if s_m <= e_m:
-                        if s_m <= m <= e_m: is_active = True
-                    else:
-                        if m >= s_m or m <= e_m: is_active = True
-                months_active.append(is_active)
-            gantt_data.append({'obj': r, 'months': months_active})
-        context['gantt_data'] = gantt_data
+             if r.start_date and r.end_date:
+                # 日付の順序が逆の場合は入れ替える
+                start = r.start_date
+                end = r.end_date
+                if start > end:
+                    start, end = end, start
+
+                tasks.append({
+                    'id': str(r.id),
+                    'name': r.title,
+                    'start': start.isoformat(),
+                    'end': end.isoformat(),
+                    'progress': 0,
+                    'custom_class': 'bar-blue',
+                    'description': r.content,
+                })
+        context['tasks_json'] = json.dumps(tasks, cls=DjangoJSONEncoder)
         return context
 
 class RoadmapCreateView(LoginRequiredMixin, CreateView):
@@ -129,3 +140,72 @@ class ESDeleteView(LoginRequiredMixin, DeleteView):
     template_name = 'teams/team_TMR/career/es_confirm_delete.html'
     success_url = reverse_lazy('es_list')
     def get_queryset(self): return ES.objects.filter(user_id=self.request.user.id)
+
+class MemberListView(LoginRequiredMixin, ListView):
+    model = Profile
+    template_name = 'teams/team_TMR/members.html'
+    context_object_name = 'profiles'
+
+    def get_queryset(self):
+        # 自分以外のユーザーも含めてリスト表示
+        queryset = Profile.objects.all().order_by('graduation_year')
+
+        # 検索パラメータの取得
+        q_nickname = self.request.GET.get('query_nickname')
+        q_lab = self.request.GET.get('query_lab')
+        q_field = self.request.GET.get('query_field')
+        q_decision = self.request.GET.get('query_decision')
+
+        # フィルタリング (AND条件)
+        if q_nickname:
+            queryset = queryset.filter(nickname__icontains=q_nickname)
+        if q_lab:
+            queryset = queryset.filter(lab__icontains=q_lab)
+        if q_field:
+            queryset = queryset.filter(research_field__icontains=q_field)
+        if q_decision:
+            queryset = queryset.filter(decision__icontains=q_decision)
+
+        return queryset
+
+class MemberRoadmapView(LoginRequiredMixin, ListView):
+    model = Roadmap
+    template_name = 'teams/team_TMR/career/roadmap_list.html'
+    context_object_name = 'roadmaps'
+
+    def get_queryset(self):
+        # URLのpkで指定されたユーザーのロードマップを取得
+        user_id = self.kwargs.get('pk')
+        return Roadmap.objects.filter(user_id=user_id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_id = self.kwargs.get('pk')
+        target_user = get_object_or_404(User, pk=user_id)
+        
+        # 閲覧対象のユーザー情報を渡す
+        context['target_user'] = target_user
+        context['is_owner'] = (self.request.user.id == target_user.id)
+
+        # Frappe Gantt用のデータ作成
+        raw_roadmaps = context['roadmaps']
+        tasks = []
+        for r in raw_roadmaps:
+             if r.start_date and r.end_date:
+                # 日付の順序が逆の場合は入れ替える
+                start = r.start_date
+                end = r.end_date
+                if start > end:
+                    start, end = end, start
+
+                tasks.append({
+                    'id': str(r.id),
+                    'name': r.title,
+                    'start': start.isoformat(),
+                    'end': end.isoformat(),
+                    'progress': 0,
+                    'custom_class': 'bar-blue',
+                    'description': r.content,
+                })
+        context['tasks_json'] = json.dumps(tasks, cls=DjangoJSONEncoder)
+        return context

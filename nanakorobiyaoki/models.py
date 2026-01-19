@@ -111,3 +111,15 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender.name} to {self.receiver.name}"
+class CommunityReadStatus(models.Model):
+    user = models.ForeignKey(MyPage, on_delete=models.CASCADE, related_name='community_read_statuses', verbose_name="ユーザー")
+    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='read_statuses', verbose_name="コミュニティ")
+    last_read_at = models.DateTimeField(auto_now=True, verbose_name="最終閲覧日時")
+
+    class Meta:
+        unique_together = ('user', 'community')
+        verbose_name = "コミュニティ既読状態"
+        verbose_name_plural = "コミュニティ既読状態"
+
+    def __str__(self):
+        return f"{self.user.name} - {self.community.name} (Last read: {self.last_read_at})"

@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
-from .models import MyPage, Member, Community, Post, Comment, Message
+from .models import MyPage, Member, Community, Post, Comment, Message, CommunityReadStatus
 from .forms import MyPageEditForm, UserRegisterForm, LoginForm, CommunityForm, PostForm, CommentForm, MessageForm
 
 def index(request):
@@ -127,6 +127,11 @@ def community_detail(request, community_id):
         user = get_object_or_404(MyPage, user_id=request.session['user_id'])
         if user in community.members.all():
             is_member = True
+            # 既読状態を更新または作成
+            CommunityReadStatus.objects.update_or_create(
+                user=user,
+                community=community
+            )
     return render(request, 'teams/nanakorobiyaoki/community_detail.html', {
         'community': community, 
         'posts': posts,
@@ -210,7 +215,13 @@ def comment_create(request, post_id):
     return redirect('nanakorobiyaoki:post_detail', post_id=post_id)
 
 def community_list(request):
-    communities = Community.objects.all().order_by('-created_at')
+    query = request.GET.get('q')
+    if query:
+        communities = Community.objects.filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        ).distinct().order_by('-created_at')
+    else:
+        communities = Community.objects.all().order_by('-created_at')
     return render(request, 'teams/nanakorobiyaoki/community_list.html', {
         'communities': communities,
     })

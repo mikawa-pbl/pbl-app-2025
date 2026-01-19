@@ -74,6 +74,8 @@
         .nav-menu {
             list-style: none;
             flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .nav-item {
@@ -141,6 +143,27 @@
 
         .mini-community-list {
             list-style: none;
+            overflow-y: auto;
+            max-height: calc(100vh - 400px);
+            margin-right: -10px;
+            padding-right: 10px;
+        }
+
+        .mini-community-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .mini-community-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .mini-community-list::-webkit-scrollbar-thumb {
+            background: #eee;
+            border-radius: 10px;
+        }
+
+        .mini-community-list::-webkit-scrollbar-thumb:hover {
+            background: #ddd;
         }
 
         .mini-community-item a {
@@ -353,13 +376,21 @@
             <ul class="mini-community-list">
                 {% for community in joined_communities %}
                 <li class="mini-community-item">
-                    <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}">
-                        {% if community.image %}
-                        <img src="{{ community.image.url }}" class="mini-icon" alt="">
-                        {% else %}
-                        <span class="mini-icon" style="background: #e0e0e0;"></span>
+                    <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}"
+                        style="justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            {% if community.image %}
+                            <img src="{{ community.image.url }}" class="mini-icon" alt="">
+                            {% else %}
+                            <span class="mini-icon" style="background: #e0e0e0;"></span>
+                            {% endif %}
+                            {{ community.name }}
+                        </div>
+                        {% if community.unread_posts_count > 0 %}
+                        <span class="notification-badge"
+                            style="position: static; font-size: 0.65rem; padding: 1px 4px; min-width: 14px;">
+                            {{community.unread_posts_count }}</span>
                         {% endif %}
-                        {{ community.name }}
                     </a>
                 </li>
                 {% empty %}

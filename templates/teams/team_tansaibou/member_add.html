@@ -2,87 +2,48 @@
 
 {% block title %}担当者登録 - Team 単細胞{% endblock %}
 
-{% block extra_style %}
-.form-container {
-    max-width: 500px;
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-h1 {
-    margin-bottom: 20px;
-}
-.form-group {
-    margin-bottom: 20px;
-}
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-.form-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-}
-.form-group input:focus {
-    outline: none;
-    border-color: #4CAF50;
-}
-.btn {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: 4px;
-    text-decoration: none;
-    cursor: pointer;
-    border: none;
-    font-size: 14px;
-}
-.btn-primary {
-    background-color: #4CAF50;
-    color: white;
-}
-.btn-primary:hover {
-    background-color: #45a049;
-}
-.btn-secondary {
-    background-color: #6c757d;
-    color: white;
-}
-.btn-secondary:hover {
-    background-color: #5a6268;
-}
-.form-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-{% endblock %}
-
 {% block content %}
-<div class="form-container">
-    <h1>担当者登録</h1>
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="name">名前 *</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        <div class="form-group">
-            <label for="student_id">学籍番号</label>
-            <input type="text" id="student_id" name="student_id">
-        </div>
-        <div class="form-group">
-            <label for="email">メールアドレス</label>
-            <input type="email" id="email" name="email">
-        </div>
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">登録</button>
-            <a href="{% url 'team_tansaibou:member_list' %}" class="btn btn-secondary">キャンセル</a>
-        </div>
-    </form>
+<div class="max-w-lg mx-auto px-4">
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">担当者登録</h1>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label for="name" class="block mb-2 text-sm font-medium text-gray-900">
+                    名前 <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="name" name="name" required
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"
+                       placeholder="担当者の名前を入力">
+            </div>
+
+            <div>
+                <label for="student_id" class="block mb-2 text-sm font-medium text-gray-900">学籍番号</label>
+                <input type="text" id="student_id" name="student_id"
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"
+                       placeholder="学籍番号を入力">
+            </div>
+
+            <div>
+                <label for="email" class="block mb-2 text-sm font-medium text-gray-900">メールアドレス</label>
+                <input type="email" id="email" name="email"
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"
+                       placeholder="example@email.com">
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="submit"
+                        class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5">
+                    登録
+                </button>
+                <a href="{% url 'team_tansaibou:member_list' %}"
+                   class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5">
+                    キャンセル
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

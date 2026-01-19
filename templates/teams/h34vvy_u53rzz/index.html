@@ -1,43 +1,68 @@
 {% extends 'teams/h34vvy_u53rzz/base.html' %}
 
 {% block content %}
-<div class="px-4 py-6 space-y-6">
-  <header class="space-y-2">
-    <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">
-      インキー救済システム
+<div class="px-5 py-8 space-y-8">
+  <header class="space-y-3 pt-2">
+    <p class="text-xs font-bold uppercase tracking-widest text-indigo-500">
+      IN-KEY RESCUE SYSTEM
     </p>
-    <h1 class="text-3xl font-bold text-slate-900">ドア開けてや</h1>
-    <p class="text-sm text-slate-600">
-      学生証を忘れてしまい校舎の外から入れなくなった学生が、学内の仲間にドアを開けてもらうためのWebサービスです。
-    </p>
+    <div>
+      <h1 class="text-4xl font-black tracking-tight text-slate-900">
+        <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">ドア開けてや</span>
+      </h1>
+      <p class="mt-2 text-sm font-medium leading-relaxed text-slate-500">
+        学生証を忘れても大丈夫。<br>仲間に助けを求めて、ピンチを脱出しよう。
+      </p>
+    </div>
   </header>
 
-  <section class="grid gap-4 md:grid-cols-2">
+  <section class="grid gap-5 md:grid-cols-2">
+    <!-- Primary Action Card -->
     <a href="{% url 'h34vvy_u53rzz:help' %}"
-      class="group rounded-xl bg-white p-6 shadow transition hover:-translate-y-0.5 hover:shadow-lg">
-      <div class="mb-2 flex items-center gap-2 text-sm font-medium text-blue-600">
-        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600">1</span>
-        ドア開放のリクエスト
+      class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 p-1 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/30 active:scale-95">
+      <div class="relative h-full rounded-[20px] bg-gradient-to-br from-indigo-500/50 to-purple-600/50 p-6 backdrop-blur-sm">
+        <div class="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10 blur-3xl transition duration-500 group-hover:bg-white/20"></div>
+        
+        <div class="mb-4 flex items-center justify-between">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-md shadow-inner border border-white/10">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+              <path d="M440-200h80v-40h40q17 0 28.5-11.5T600-280v-120q0-17-11.5-28.5T560-440H440v-40h160v-80h-80v-40h-80v40h-40q-17 0-28.5 11.5T360-520v120q0 17 11.5 28.5T400-360h120v40H360v80h80v40ZM280-80q-33 0-56.5-23.5T200-160q0-33 23.5-56.5T280-240q33 0 56.5 23.5T360-160q0 33-23.5 56.5T280-80Zm400 0q-33 0-56.5-23.5T600-160q0-33 23.5-56.5T680-240q33 0 56.5 23.5T760-160q0 33-23.5 56.5T680-80ZM40-280v-400q0-33 23.5-56.5T120-760h80v-80h560v80h80q33 0 56.5 23.5T920-680v400q0 33-23.5 56.5T840-200H120q-33 0-56.5-23.5T40-280Zm80 0h720v-400H120v400Zm0 0v-400 400Z"/>
+            </svg>
+          </div>
+          <span class="rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider backdrop-blur-md">Step 1</span>
+        </div>
+        
+        <h2 class="text-xl font-bold text-white">
+          助けを求める
+        </h2>
+        <p class="mt-2 text-sm font-medium text-indigo-100 leading-relaxed">
+          ドアを選んで救助をリクエスト。<br>近くにいる仲間へ通知を送ります。
+        </p>
       </div>
-      <h2 class="text-lg font-semibold text-slate-900">
-        助けを求める
-      </h2>
-      <p class="mt-2 text-sm text-slate-600">
-        閉め出されたドアを選び、学内にいる学生へ事情を伝えて開錠をお願いできます。
-      </p>
     </a>
 
+    <!-- Secondary Action Card -->
     <a href="{% url 'h34vvy_u53rzz:timeline' %}"
-      class="group rounded-xl bg-white p-6 shadow transition hover:-translate-y-0.5 hover:shadow-lg">
-      <div class="mb-2 flex items-center gap-2 text-sm font-medium text-green-600">
-        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-600">2</span>
-        タイムライン
+      class="group relative overflow-hidden rounded-3xl bg-white p-7 shadow-xl shadow-slate-200/50 ring-1 ring-slate-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-100/50 active:scale-95">
+      <div class="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-indigo-50/30 opacity-0 transition duration-300 group-hover:opacity-100"></div>
+      
+      <div class="relative z-10">
+        <div class="mb-4 flex items-center justify-between">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+              <path d="M720-400v-120H600v-80h120v-120h80v120h120v80H800v120h-80Zm-360-80q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM40-160v-112q0-34 17.5-62.5T104-378q62-31 126-46.5T360-440q66 0 130 15.5T616-378q29 15 46.5 43.5T680-272v112H40Zm80-80h480v-32q0-11-5.5-20T580-306q-54-27-109-40.5T360-360q-56 0-111 13.5T140-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T440-640q0-33-23.5-56.5T360-720q-33 0-56.5 23.5T280-640q0 33 23.5 56.5T360-560Zm0-80Zm0 400Z"/>
+            </svg>
+          </div>
+          <span class="rounded-full bg-indigo-50 px-3 py-1 text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Step 2</span>
+        </div>
+        
+        <h2 class="text-xl font-bold text-slate-800 group-hover:text-indigo-900 transition-colors">
+          助けに応じる
+        </h2>
+        <p class="mt-2 text-sm text-slate-500 group-hover:text-slate-600 transition-colors leading-relaxed">
+          困っている仲間をリアルタイムで確認。<br>場所を把握して駆けつけよう。
+        </p>
       </div>
-      <h2 class="text-lg font-semibold text-slate-900">
-        助けに応じる
-      </h2>
-      <p class="mt-2 text-sm text-slate-600">
-        学内にいる学生がリアルタイムで助けを必要としている人を確認し、どのドアに向かえばいいか把握できます。 </p>
     </a>
   </section>
 </div>

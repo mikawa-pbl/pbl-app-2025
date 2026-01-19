@@ -2,101 +2,116 @@
 {% load h34vvy_tags %}
 
 {% block content %}
-<div class="px-4 py-6 space-y-6">
+<div class="px-5 py-8 space-y-6">
   {% include "teams/h34vvy_u53rzz/_nav.html" %}
 
-  <header class="space-y-2">
-    <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">
-      ポイント
-    </p>
-    <h1 class="text-3xl font-bold text-slate-900">ランキング</h1>
-    <p class="text-sm text-slate-600">
-      助けに行った回数に応じたポイントの順位です。
+  <header class="space-y-1 text-center">
+    <h1 class="text-2xl font-black text-slate-900 tracking-tight">
+      Leaderboard
+    </h1>
+    <p class="text-xs font-bold uppercase tracking-widest text-indigo-500">
+      栄光のランキング
     </p>
   </header>
 
-  <div class="overflow-hidden rounded-xl bg-white shadow">
+  <div class="space-y-6">
     <!-- Tabs implementation using CSS Radio Hack -->
     <input type="radio" name="ranking_tab" id="tab_user" class="peer/user hidden" checked>
     <input type="radio" name="ranking_tab" id="tab_lab" class="peer/lab hidden">
 
-    <!-- Tab Navigation -->
-    <div class="flex border-b border-slate-200 bg-slate-50">
+    <!-- Modern Segmented Control -->
+    <div class="flex p-1 bg-slate-200/50 rounded-2xl backdrop-blur-sm">
       <label for="tab_user"
-        class="flex-1 cursor-pointer py-3 text-center text-sm font-semibold text-slate-500 hover:text-slate-700 peer-checked/user:border-b-2 peer-checked/user:border-blue-600 peer-checked/user:text-blue-600">
-        個人ランキング
+        class="flex-1 cursor-pointer py-2.5 text-center text-sm font-bold text-slate-500 transition-all rounded-xl peer-checked/user:bg-white peer-checked/user:text-indigo-600 peer-checked/user:shadow-sm hover:text-indigo-500">
+        個人
       </label>
       <label for="tab_lab"
-        class="flex-1 cursor-pointer py-3 text-center text-sm font-semibold text-slate-500 hover:text-slate-700 peer-checked/lab:border-b-2 peer-checked/lab:border-blue-600 peer-checked/lab:text-blue-600">
-        研究室ランキング
+        class="flex-1 cursor-pointer py-2.5 text-center text-sm font-bold text-slate-500 transition-all rounded-xl peer-checked/lab:bg-white peer-checked/lab:text-indigo-600 peer-checked/lab:shadow-sm hover:text-indigo-500">
+        研究室
       </label>
     </div>
 
     <!-- User Ranking Table -->
-    <div class="hidden peer-checked/user:block">
-      <table class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-          <tr>
-            <th class="px-4 py-3">順位</th>
-            <th class="px-4 py-3">ユーザー</th>
-            <th class="px-4 py-3 text-right">ポイント</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          {% for item in user_rankings %}
-          {% with account=item.account rank=item.rank %}
-          {% if account.user_id == current_user_id %}
-          <tr class="bg-blue-50/70 font-semibold text-blue-900">
-            {% else %}
-          <tr>
-            {% endif %}
-            <td class="px-4 py-3">{{ rank }}</td>
-            <td class="px-4 py-3">
-              {{ account.username }}
-              {% if account.laboratory %}
-              <span class="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">{{ account.lab_label }}</span>
-              {% endif %}
-            </td>
-            <td class="px-4 py-3 text-right font-semibold">{{ account.points }} pt</td>
-          </tr>
-          {% endwith %}
-          {% empty %}
-          <tr>
-            <td colspan="3" class="px-4 py-6 text-center text-slate-500">
-              まだランキング対象のユーザーがいません。
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="hidden peer-checked/user:block animate-fade-in-up">
+      <div class="overflow-hidden rounded-3xl bg-white shadow-xl shadow-slate-200/50 ring-1 ring-slate-100">
+        <table class="min-w-full divide-y divide-slate-100 text-sm">
+          <thead class="bg-indigo-50/50">
+            <tr>
+              <th class="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-indigo-500">#</th>
+              <th class="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-indigo-500">User</th>
+              <th class="px-5 py-4 text-right text-xs font-bold uppercase tracking-wider text-indigo-500">Pts</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            {% for item in user_rankings %}
+            {% with account=item.account rank=item.rank %}
+            <tr class="{% if account.user_id == current_user_id %}bg-indigo-50/30{% endif %} transition hover:bg-slate-50">
+              <td class="px-5 py-4 font-bold {% if rank == 1 %}text-yellow-500 text-lg{% elif rank == 2 %}text-slate-400 text-lg{% elif rank == 3 %}text-amber-700 text-lg{% else %}text-slate-500{% endif %}">
+                {{ rank }}
+              </td>
+              <td class="px-5 py-4">
+                <div class="font-bold text-slate-800">{{ account.username }}</div>
+                {% if account.laboratory %}
+                <div class="mt-0.5 inline-block rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+                  {{ account.lab_label }}
+                </div>
+                {% endif %}
+              </td>
+              <td class="px-5 py-4 text-right">
+                <span class="inline-block min-w-[3rem] rounded-full bg-slate-100 px-2 py-1 text-xs font-black text-slate-700">
+                  {{ account.points }}
+                </span>
+              </td>
+            </tr>
+            {% endwith %}
+            {% empty %}
+            <tr>
+              <td colspan="3" class="px-5 py-8 text-center text-slate-400 text-xs font-medium">
+                まだランキング対象がいません
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Laboratory Ranking Table -->
-    <div class="hidden peer-checked/lab:block">
-      <table class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-          <tr>
-            <th class="px-4 py-3">順位</th>
-            <th class="px-4 py-3">研究室</th>
-            <th class="px-4 py-3 text-right">合計ポイント</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          {% for item in lab_rankings %}
-          <tr>
-            <td class="px-4 py-3">{{ item.rank }}</td>
-            <td class="px-4 py-3">{{ item.lab.name }}</td>
-            <td class="px-4 py-3 text-right font-semibold">{{ item.points }} pt</td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="3" class="px-4 py-6 text-center text-slate-500">
-              まだランキング対象の研究室がいません。
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="hidden peer-checked/lab:block animate-fade-in-up">
+        <div class="overflow-hidden rounded-3xl bg-white shadow-xl shadow-slate-200/50 ring-1 ring-slate-100">
+            <table class="min-w-full divide-y divide-slate-100 text-sm">
+                <thead class="bg-purple-50/50">
+                <tr>
+                    <th class="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-purple-500">#</th>
+                    <th class="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-purple-500">Lab</th>
+                    <th class="px-5 py-4 text-right text-xs font-bold uppercase tracking-wider text-purple-500">Total</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                {% for item in lab_rankings %}
+                <tr class="transition hover:bg-slate-50">
+                    <td class="px-5 py-4 font-bold {% if item.rank == 1 %}text-yellow-500 text-lg{% elif item.rank == 2 %}text-slate-400 text-lg{% elif item.rank == 3 %}text-amber-700 text-lg{% else %}text-slate-500{% endif %}">
+                    {{ item.rank }}
+                    </td>
+                    <td class="px-5 py-4 font-bold text-slate-800">
+                    {{ item.lab.name }}
+                    </td>
+                    <td class="px-5 py-4 text-right">
+                        <span class="inline-block min-w-[3rem] rounded-full bg-purple-50 px-2 py-1 text-xs font-black text-purple-700">
+                            {{ item.points }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="px-5 py-8 text-center text-slate-400 text-xs font-medium">
+                    まだランキング対象がいません
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
   </div>
 </div>

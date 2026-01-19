@@ -421,6 +421,12 @@ def profit_analysis(request):
     if total_revenue > 0:
         profit_margin = round((total_profit / total_revenue) * 100, 1)
 
+    # 在庫評価額（現在の在庫 × 仕入れ原価）を計算
+    inventory_value = Decimal('0')
+    products = Product.objects.using(DB).filter(store=store, is_active=True)
+    for product in products:
+        inventory_value += product.cost_price * product.stock
+
     # 商品別データをリストに変換（利益額でソート）
     product_list = []
     for data in product_profits.values():
@@ -442,9 +448,10 @@ def profit_analysis(request):
     product_list.sort(key=lambda x: x['profit'], reverse=True)
 
     return JsonResponse({
-        'total_revenue': int(total_revenue),
-        'total_cost': int(total_cost),
-        'total_profit': int(total_profit),
-        'profit_margin': profit_margin,
-        'products': product_list[:20],  # 上位20件
+        'total_revenue': int(total_revenue),        # 売上高
+        'total_cogs': int(total_cost),              # 売上原価（Cost of Goods Sold）
+        'total_profit': int(total_profit),          # 粗利益
+        'profit_margin': profit_margin,             # 粗利益率
+        'inventory_value': int(inventory_value),    # 在庫評価額
+        'products': product_list[:20],
     })

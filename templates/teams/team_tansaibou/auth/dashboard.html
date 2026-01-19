@@ -66,28 +66,34 @@
     </div>
 
     <!-- 損益サマリーカード -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
-            <div class="text-base text-gray-700 font-medium mb-1">本日の粗利益</div>
-            <div id="totalProfit" class="text-2xl font-bold text-green-600">
-                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-24 mx-auto"></div>
-            </div>
-        </div>
-        <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
-            <div class="text-base text-gray-700 font-medium mb-1">利益率</div>
-            <div id="profitMargin" class="text-2xl font-bold text-gray-900">
-                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-16 mx-auto"></div>
-            </div>
-        </div>
-        <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
-            <div class="text-base text-gray-700 font-medium mb-1">総売上</div>
+            <div class="text-base text-gray-700 font-medium mb-1">売上高</div>
             <div id="totalRevenue" class="text-2xl font-bold text-blue-600">
                 <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-20 mx-auto"></div>
             </div>
         </div>
         <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
-            <div class="text-base text-gray-700 font-medium mb-1">総原価</div>
-            <div id="totalCost" class="text-2xl font-bold text-gray-600">
+            <div class="text-base text-gray-700 font-medium mb-1">売上原価</div>
+            <div id="totalCogs" class="text-2xl font-bold text-gray-600">
+                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-20 mx-auto"></div>
+            </div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
+            <div class="text-base text-gray-700 font-medium mb-1">粗利益</div>
+            <div id="totalProfit" class="text-2xl font-bold text-green-600">
+                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-24 mx-auto"></div>
+            </div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
+            <div class="text-base text-gray-700 font-medium mb-1">粗利益率</div>
+            <div id="profitMargin" class="text-2xl font-bold text-gray-900">
+                <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-16 mx-auto"></div>
+            </div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-5 text-center">
+            <div class="text-base text-gray-700 font-medium mb-1">在庫評価額</div>
+            <div id="inventoryValue" class="text-2xl font-bold text-orange-600">
                 <div class="skeleton-loader animate-pulse h-8 bg-gray-200 rounded w-20 mx-auto"></div>
             </div>
         </div>
@@ -95,17 +101,17 @@
 
     <!-- 商品別利益テーブル -->
     <div class="bg-white border border-gray-200 rounded-lg shadow p-5 mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-green-500">商品別利益（本日）</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b-2 border-green-500">商品別損益（本日）</h3>
         <div class="relative overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-500">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                     <tr>
                         <th scope="col" class="px-4 py-3">商品名</th>
                         <th scope="col" class="px-4 py-3 w-16">販売数</th>
-                        <th scope="col" class="px-4 py-3 w-24">売上</th>
-                        <th scope="col" class="px-4 py-3 w-24">原価</th>
-                        <th scope="col" class="px-4 py-3 w-24">利益</th>
-                        <th scope="col" class="px-4 py-3 w-20">利益率</th>
+                        <th scope="col" class="px-4 py-3 w-24">売上高</th>
+                        <th scope="col" class="px-4 py-3 w-24">売上原価</th>
+                        <th scope="col" class="px-4 py-3 w-24">粗利益</th>
+                        <th scope="col" class="px-4 py-3 w-20">粗利率</th>
                     </tr>
                 </thead>
                 <tbody id="profitTable">
@@ -444,10 +450,11 @@ async function fetchProfitAnalysis() {
         const data = await response.json();
 
         // サマリー更新
+        document.getElementById('totalRevenue').textContent = formatCurrency(data.total_revenue);
+        document.getElementById('totalCogs').textContent = formatCurrency(data.total_cogs);
         document.getElementById('totalProfit').textContent = formatCurrency(data.total_profit);
         document.getElementById('profitMargin').textContent = data.profit_margin + '%';
-        document.getElementById('totalRevenue').textContent = formatCurrency(data.total_revenue);
-        document.getElementById('totalCost').textContent = formatCurrency(data.total_cost);
+        document.getElementById('inventoryValue').textContent = formatCurrency(data.inventory_value);
 
         // 利益に応じて色を変更
         const profitEl = document.getElementById('totalProfit');

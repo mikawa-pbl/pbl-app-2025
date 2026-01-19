@@ -60,18 +60,14 @@
 <body>
     {% csrf_token %}
 
-    <div class="fixed top-2 right-2 z-[1000]">
-        <div id="user-menu-btn" class="flex items-center space-x-3 bg-white p-2 rounded-lg shadow-md cursor-pointer hover:bg-gray-50 transition">
+    <div class="fixed top-2 right-2 z-[1000] flex space-x-2">
+        <div class="flex items-center space-x-3 bg-white p-2 rounded-lg shadow-md">
             <span id="points-display" class="text-base font-bold text-blue-600">保有: ...</span>
-            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         </div>
-        <!-- ドロップダウンメニュー -->
-        <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden ring-1 ring-black ring-opacity-5">
-            <div class="px-4 py-2 text-xs text-gray-500 border-b">ユーザー切り替え</div>
-            <div id="user-list-container" class="max-h-60 overflow-y-auto">
-                <!-- JSで追加 -->
-            </div>
-        </div>
+        <a href="/team_northcliff/" class="flex items-center justify-center bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition text-red-500" title="ログアウト">
+            <!-- Logout Icon -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        </a>
     </div>
     <div id="map"></div>
 
@@ -170,8 +166,7 @@
                 // 起動時に位置情報を要求
                 handleLocationPermission();
 
-                // ユーザー切り替えセットアップ
-                setupUserSwitcher();
+
 
                 // 施設情報取得
                 await loadFacilities();
@@ -205,47 +200,7 @@
             return false;
         }
 
-        // --- ユーザー切り替え機能 ---
-        async function setupUserSwitcher() {
-            const btn = document.getElementById('user-menu-btn');
-            const menu = document.getElementById('user-dropdown');
-            const listContainer = document.getElementById('user-list-container');
-            
-            // トグル
-            btn.onclick = (e) => {
-                e.stopPropagation();
-                menu.classList.toggle('hidden');
-            };
 
-            // 外部クリックで閉じる
-            document.addEventListener('click', (e) => {
-                if (!btn.contains(e.target) && !menu.contains(e.target)) {
-                    menu.classList.add('hidden');
-                }
-            });
-
-            // ユーザー一覧取得
-            try {
-                const data = await apiCall('/team_northcliff/api/users/');
-                if (data.users) {
-                    listContainer.innerHTML = '';
-                    data.users.forEach(u => {
-                        const div = document.createElement('div');
-                        div.className = 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer';
-                        div.textContent = u.name;
-                        if (u.name === username) {
-                             div.classList.add('bg-blue-50', 'font-bold');
-                        }
-                        div.onclick = () => {
-                            window.location.href = `/team_northcliff/map_ui/${encodeURIComponent(u.name)}/`;
-                        };
-                        listContainer.appendChild(div);
-                    });
-                }
-            } catch (e) {
-                console.error('ユーザー一覧取得失敗', e);
-            }
-        }
 
         // --- ユーザー位置情報の表示 ---
         function setUserLocationMarker() {

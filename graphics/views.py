@@ -11,6 +11,7 @@ from .utils import (
     get_semester_choices,
     get_all_reviews
 )
+from datetime import datetime
 
 
 # ログインチェック用デコレータ
@@ -116,6 +117,9 @@ def add_book_review(request):
             review.save(using='graphics')
             messages.success(request, '参考書レビューを登録しました。')
             return redirect('graphics:my_reviews')
+        else:
+            # バリデーションエラーの場合、review_typeをbookに設定
+            review_type_param = 'book'
 
     context = {
         'book_form': book_form,
@@ -175,6 +179,7 @@ def add_subject_review(request):
                 context = {
                     'book_form': book_form,
                     'subject_form': form,
+                    'review_type': 'subject',
                 }
                 return render(request, 'teams/graphics/add_book_review.html', context)
 
@@ -190,8 +195,17 @@ def add_subject_review(request):
             review.save(using='graphics')
             messages.success(request, '科目レビューを登録しました。')
             return redirect('graphics:my_reviews')
+        else:
+            # バリデーションエラーの場合、フォームデータを保持してページを再表示
+            book_form = BookReviewForm()
+            context = {
+                'book_form': book_form,
+                'subject_form': form,
+                'review_type': 'subject',
+            }
+            return render(request, 'teams/graphics/add_book_review.html', context)
 
-    # POSTでない場合やバリデーションエラーの場合は、add_book_reviewにリダイレクト
+    # POSTでない場合は、add_book_reviewにリダイレクト
     return redirect('graphics:add_book_review')
 
 
@@ -531,6 +545,20 @@ def course_detail(request, subject_name, semester):
         course_offering__in=courses
     ).order_by('-created_at')
 
+    # 年度フィルタ（GETパラメータ 'year'）
+    # デフォルトは全年度（空文字）
+    selected_year = request.GET.get('year', '')
+    # selected_year が数値で来ている場合のみフィルタを適用
+    if selected_year and str(selected_year).isdigit():
+        subject_reviews_qs = subject_reviews_qs.filter(course_offering__year=int(selected_year))
+
+    # ソート（rating_high, rating_low, default: 作成日時順）
+    selected_sort = request.GET.get('sort', '')
+    if selected_sort == 'rating_high':
+        subject_reviews_qs = subject_reviews_qs.order_by('-rating', '-created_at')
+    elif selected_sort == 'rating_low':
+        subject_reviews_qs = subject_reviews_qs.order_by('rating', '-created_at')
+
     # ページネーション（科目レビュー）
     subject_paginator = Paginator(subject_reviews_qs, 5)
     subject_page = request.GET.get('subject_page', 1)
@@ -557,11 +585,18 @@ def course_detail(request, subject_name, semester):
                     'review_count': 0,
                     'avg_rating': 0,
                     'total_rating': 0,
+                    'latest_created_at': None,
                 }
             books_dict[isbn]['review_count'] += 1
             # rating が 0 以上の場合のみ集計（スター未選択を除外）
             if review.rating > 0:
                 books_dict[isbn]['total_rating'] += review.rating
+            # 最新のレビュー日時を記録
+            created_at = getattr(review, 'created_at', None)
+            if created_at:
+                cur = books_dict[isbn].get('latest_created_at')
+                if not cur or created_at > cur:
+                    books_dict[isbn]['latest_created_at'] = created_at
 
     # 平均評価を計算
     books_with_reviews = []
@@ -569,7 +604,23 @@ def course_detail(request, subject_name, semester):
         data['avg_rating'] = data['total_rating'] / data['review_count'] if data['review_count'] > 0 else 0
         books_with_reviews.append(data)
 
-    # ページネーション（参考書）
+    # デフォルト: 新着順（最新レビュー日時の降順）
+    books_with_reviews.sort(key=lambda x: x.get('latest_created_at') or datetime.min, reverse=True)
+
+    # 参考書リストのソート（GETパラメータ 'book_sort'）
+    # options: avg_high, avg_low, count_high, count_low
+    book_sort = request.GET.get('book_sort', '')
+    if book_sort:
+        if book_sort == 'avg_high':
+            books_with_reviews.sort(key=lambda x: (x.get('avg_rating', 0)), reverse=True)
+        elif book_sort == 'avg_low':
+            books_with_reviews.sort(key=lambda x: (x.get('avg_rating', 0)))
+        elif book_sort == 'count_high':
+            books_with_reviews.sort(key=lambda x: (x.get('review_count', 0)), reverse=True)
+        elif book_sort == 'count_low':
+            books_with_reviews.sort(key=lambda x: (x.get('review_count', 0)))
+
+    # ページネーション（参考書） - ソート後にページネート
     books_paginator = Paginator(books_with_reviews, 5)
     books_page = request.GET.get('books_page', 1)
     try:
@@ -587,6 +638,20 @@ def course_detail(request, subject_name, semester):
     departments = latest_course.departments.all()
     department_names = ', '.join([dept.name for dept in departments])
 
+    # 年度別レビュー件数と最新年度
+    years = sorted(list({c.year for c in courses}), reverse=True)
+    year_counts = {}
+    for y in years:
+        # 当該年度に該当するCourseOfferingのレビュー数を集計
+        year_offerings = courses.filter(year=y)
+        year_counts[y] = SubjectReview.objects.using('graphics').filter(course_offering__in=year_offerings).count()
+
+    # 最新年度（courses が存在する前提で latest_course.year を使用）
+    latest_year = latest_course.year if latest_course else (years[0] if years else None)
+
+    # テンプレートで扱いやすいように (year, count) のリストを作成
+    year_options = [{'year': y, 'count': year_counts.get(y, 0)} for y in years]
+
     context = {
         'course': latest_course,
         'teacher_names': teacher_names,
@@ -596,6 +661,13 @@ def course_detail(request, subject_name, semester):
         'books_with_reviews': books_with_reviews_paginated,
         'subject_reviews_count': subject_reviews_qs.count(),
         'books_count': len(books_with_reviews),
+        # 年度選択用（テンプレートで利用）
+        'year_choices': years,
+        'year_options': year_options,
+        'selected_year': selected_year,
+        'latest_year': latest_year,
+        'selected_sort': selected_sort,
+        'book_sort': book_sort,
     }
 
     return render(request, 'teams/graphics/course_detail.html', context)
@@ -620,7 +692,16 @@ def book_detail(request, isbn):
         return redirect('graphics:book_review_list')
 
     # この書籍に対するレビューを取得
-    reviews_qs = BookReview.objects.using('graphics').filter(book=book).order_by('-created_at')
+    reviews_qs = BookReview.objects.using('graphics').filter(book=book)
+
+    # ソート（rating_high, rating_low, default: 作成日時順）
+    book_selected_sort = request.GET.get('sort', '')
+    if book_selected_sort == 'rating_high':
+        reviews_qs = reviews_qs.order_by('-rating', '-created_at')
+    elif book_selected_sort == 'rating_low':
+        reviews_qs = reviews_qs.order_by('rating', '-created_at')
+    else:
+        reviews_qs = reviews_qs.order_by('-created_at')
 
     # 平均評価を計算（rating > 0 のレビューのみ）
     total_rating = 0
@@ -647,6 +728,7 @@ def book_detail(request, isbn):
         'reviews_count': reviews_qs.count(),
         'avg_rating': avg_rating,
         'course_id': course_id,  # 遷移元のcourse_idをテンプレートに渡す
+        'book_selected_sort': book_selected_sort,
     }
 
     return render(request, 'teams/graphics/book_detail.html', context)

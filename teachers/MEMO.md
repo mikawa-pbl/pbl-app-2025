@@ -8,7 +8,7 @@ https://miro.com/app/board/uXjVJDYQgec=/
 ## 管理コマンド等
 ### データベースを更新したとき
 (PBLプロジェクトのトップで)
-uv run python manage.py makemigration --database=teachers
+uv run python manage.py makemigrations
 uv run python manage.py migrate --database=teachers
 
 ### データベースへの接続（確認)
@@ -94,3 +94,5 @@ DBの設計(追加項目)
 ## 追加機能
 * ソートの順を切り替える機能
 
+## 本番環境
+http://133.15.185.8/

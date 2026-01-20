@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
-from .models import Good
-from .forms import GoodsForm
+from django.contrib import messages
+from .models import Good, SOSMessage
+from .forms import GoodsForm, SOSMessageForm
 from types import SimpleNamespace
 from django.db import connections
 from pathlib import Path
@@ -8,12 +9,17 @@ import mimetypes
 import uuid
 from django.http import FileResponse, Http404
 from django.conf import settings
+from django.utils import timezone
+from PIL import Image
 
 # def index(request):
 #     return render(request, 'teams/team_cake/index.html')
 
-def index(request):
+def _get_index_context():
     try:
+        # Auto-delete expired goods before fetching
+        Good.objects.using('team_cake').filter(expiration_time__lt=timezone.now()).delete()
+        
         # 通常はORMで取得（UUIDField の変換が走る）
         qs = Good.objects.using('team_cake').all()
         
@@ -21,22 +27,34 @@ def index(request):
         all_goods = list(qs)
         slider_goods = all_goods[-3:] if len(all_goods) >= 3 else all_goods
         slider_goods = list(reversed(slider_goods))
+
+        sos_message = SOSMessage.objects.using('team_cake').filter(is_active=True).order_by('-created_at').first()
         
-        return render(request, 'teams/team_cake/index.html', {'goods': qs, 'slider_goods': slider_goods})
+        return {'goods': qs, 'slider_goods': slider_goods, 'sos_message': sos_message}
     except ValueError:
         # DB に古い整数 ID 等、UUID として変換できない値が入っている場合のフォールバック。
         # テンプレートは objects の `.name` / `.price` を参照する想定のため SimpleNamespace を作る。
         conn = connections['team_cake']
         with conn.cursor() as cur:
-            cur.execute('SELECT id, name, price, description, image_filename FROM team_cake_good')
+            cur.execute('SELECT id, name, price, description, image_filename, original_price FROM team_cake_good')
             rows = cur.fetchall()
 
-        goods = [SimpleNamespace(id=row[0], name=row[1], price=row[2], description=row[3], image_filename=row[4]) for row in rows]
+        goods = [SimpleNamespace(id=row[0], name=row[1], price=row[2], description=row[3], image_filename=row[4], original_price=row[5]) for row in rows]
         
         slider_goods = goods[-3:] if len(goods) >= 3 else goods
         slider_goods = list(reversed(slider_goods))
         
-        return render(request, 'teams/team_cake/index.html', {'goods': goods, 'slider_goods': slider_goods})
+        return {'goods': goods, 'slider_goods': slider_goods, 'sos_message': None}
+
+def index(request):
+    context = _get_index_context()
+    context['is_staff'] = False
+    return render(request, 'teams/team_cake/index.html', context)
+
+def admin_index(request):
+    context = _get_index_context()
+    context['is_staff'] = True
+    return render(request, 'teams/team_cake/index.html', context)
 
 def registration_goods(request):
     if request.method == 'POST':
@@ -48,30 +66,26 @@ def registration_goods(request):
             # handle uploaded file (if any) and save it under this app's templates images dir
             uploaded = request.FILES.get('image')
             if uploaded:
-                base_dir = Path(__file__).resolve().parent
+                base_dir = Path(__file__).resolve().parent.parent
                 images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                 images_dir.mkdir(parents=True, exist_ok=True)
 
-                # generate unique filename preserving extension
-                orig_name = uploaded.name
-                ext = ''
-                if '.' in orig_name:
-                    ext = '.' + orig_name.split('.')[-1]
-                filename = f"{uuid.uuid4().hex}{ext}"
+                # generate unique filename with .webp extension
+                filename = f"{uuid.uuid4().hex}.webp"
                 dest_path = (images_dir / filename).resolve()
 
                 # prevent directory traversal
                 if not str(dest_path).startswith(str(images_dir)):
                     raise Http404("Invalid target path")
 
-                with open(dest_path, 'wb') as out:
-                    for chunk in uploaded.chunks():
-                        out.write(chunk)
+                image = Image.open(uploaded)
+                image.save(dest_path, format="WEBP")
 
                 good.image_filename = filename
 
             # Save to the team_cake db explicitly (router may handle but be explicit)
             good.save(using='team_cake')
+            messages.success(request, '商品登録が完了しました！')
             return redirect('team_cake:registration_goods')
     else:
         form = GoodsForm()
@@ -91,23 +105,18 @@ def edit_good(request, pk):
 
             uploaded = request.FILES.get('image')
             if uploaded:
-                base_dir = Path(__file__).resolve().parent
+                base_dir = Path(__file__).resolve().parent.parent
                 images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                 images_dir.mkdir(parents=True, exist_ok=True)
 
-                orig_name = uploaded.name
-                ext = ''
-                if '.' in orig_name:
-                    ext = '.' + orig_name.split('.')[-1]
-                filename = f"{uuid.uuid4().hex}{ext}"
+                filename = f"{uuid.uuid4().hex}.webp"
                 dest_path = (images_dir / filename).resolve()
 
                 if not str(dest_path).startswith(str(images_dir)):
                     raise Http404("Invalid target path")
 
-                with open(dest_path, 'wb') as out:
-                    for chunk in uploaded.chunks():
-                        out.write(chunk)
+                image = Image.open(uploaded)
+                image.save(dest_path, format="WEBP")
 
                 # Delete old image
                 if good.image_filename:
@@ -133,7 +142,7 @@ def delete_good(request, pk):
             good.delete()
 
             if image_filename:
-                base_dir = Path(__file__).resolve().parent
+                base_dir = Path(__file__).resolve().parent.parent
                 images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                 image_path = images_dir / image_filename
                 if image_path.exists():
@@ -149,7 +158,7 @@ def delete_good(request, pk):
                     cur.execute('DELETE FROM team_cake_good WHERE id = %s', [pk])
 
                     if image_filename:
-                        base_dir = Path(__file__).resolve().parent
+                        base_dir = Path(__file__).resolve().parent.parent
                         images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
                         image_path = images_dir / image_filename
                         if image_path.exists():
@@ -159,16 +168,27 @@ def delete_good(request, pk):
     return redirect('team_cake:index')
 
 
+
+def add_sos_message(request):
+    if request.method == 'POST':
+        form = SOSMessageForm(request.POST)
+        if form.is_valid():
+            sos = form.save(commit=False)
+            sos.save(using='team_cake')
+            return redirect('team_cake:index')
+    else:
+        form = SOSMessageForm()
+    
+    return render(request, 'teams/team_cake/add_sos_message.html', {'form': form})
+
+
 def serve_template_image(request, filename: str):
     """
     Serve files placed under templates/teams/team_cake/images/ at
     /team_cake/images/<filename> similar to `team_USL.serve_template_image`.
     """
     base_dir = Path(__file__).resolve().parent.parent
-    images_dir = base_dir / 'team_cake' / 'templates' / 'teams' / 'team_cake' / 'images'
-    # If code runs with different cwd layout, also try app dir variant
-    if not images_dir.exists():
-        images_dir = Path(__file__).resolve().parent / 'templates' / 'teams' / 'team_cake' / 'images'
+    images_dir = base_dir / 'templates' / 'teams' / 'team_cake' / 'images'
 
     file_path = (images_dir / filename).resolve()
 

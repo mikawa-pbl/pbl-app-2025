@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>チャット一覧 - Team Giryulink</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; 
+            background: #f6f7fb; 
+            color: #222; 
+            padding-bottom: 80px;
+        }
+        
+        .site { max-width: 960px; margin: 0 auto; padding: 12px; }
+        
+        header { 
+            display: flex; 
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 12px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            margin: -12px -12px 16px -12px;
+        }
+        
+        h1 { margin: 0; font-size: 1.3rem; }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-block;
+            background: #f5f5f5;
+            color: #666;
+        }
+        
+        .chat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .chat-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .chat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        
+        .chat-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f0f0f0;
+        }
+        
+        .chat-info {
+            flex: 1;
+        }
+        
+        .chat-product {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 4px;
+        }
+        
+        .chat-other-user {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .chat-role {
+            font-size: 0.75rem;
+            color: #999;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+        
+        @media (min-width: 640px) {
+            .site { padding: 24px; }
+            h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="site">
+        <header>
+            <h1>💬 チャット一覧</h1>
+            <a href="{% url 'team_giryulink:index' %}" class="nav-btn">← トップページ</a>
+        </header>
+        
+        {% if chat_rooms %}
+        <div class="chat-list">
+            {% for room in chat_rooms %}
+            <a href="{% url 'team_giryulink:chat_room' room.id %}" class="chat-card">
+                {% if room.product.image %}
+                <img src="{{ room.product.image.url }}" alt="{{ room.product.title }}" class="chat-image">
+                {% else %}
+                <div class="chat-image"></div>
+                {% endif %}
+                <div class="chat-info">
+                    <div class="chat-product">{{ room.product.title }}</div>
+                    {% if room.seller_id == current_user.id %}
+                    <div class="chat-other-user">購入者: {{ room.buyer.name|default:room.buyer.email }}</div>
+                    <div class="chat-role">（出品者として）</div>
+                    {% else %}
+                    <div class="chat-other-user">出品者: {{ room.seller.name|default:room.seller.email }}</div>
+                    <div class="chat-role">（購入者として）</div>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">💬</div>
+            <h3>チャットがありません</h3>
+            <p>商品を購入するとチャットが開始されます。</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <nav class="bottom-nav" style="position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-around; padding: 8px 0 12px; z-index: 200;">
+        <a href="{% url 'team_giryulink:index' %}" class="nav-item" style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #666; font-size: 0.7rem; flex: 1; padding: 4px;">
+            <span style="font-size: 1.5rem;">🏠</span>
+            <span>ホーム</span>
+        </a>
+        <a href="{% url 'team_giryulink:history' %}" class="nav-item" style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #666; font-size: 0.7rem; flex: 1; padding: 4px;">
+            <span style="font-size: 1.5rem;">🕐</span>
+            <span>履歴</span>
+        </a>
+        <a href="{% url 'team_giryulink:add_product' %}" class="nav-item" style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #666; font-size: 0.7rem; flex: 1; padding: 4px;">
+            <span style="font-size: 1.5rem;">➕</span>
+            <span>出品</span>
+        </a>
+        <a href="{% url 'team_giryulink:chat_list' %}" class="nav-item" style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #2196f3; font-size: 0.7rem; flex: 1; padding: 4px;">
+            <span style="font-size: 1.5rem;">💬</span>
+            <span>チャット</span>
+        </a>
+        <a href="{% url 'team_giryulink:my_page' %}" class="nav-item" style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #666; font-size: 0.7rem; flex: 1; padding: 4px;">
+            <span style="font-size: 1.5rem;">👤</span>
+            <span>マイページ</span>
+        </a>
+    </nav>
+</body>
+</html>
+

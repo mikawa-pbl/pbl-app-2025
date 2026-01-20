@@ -10,7 +10,10 @@
 <h2>アプリ利用ユーザー</h2>
 <ul>
     {% for user in users %}
-    <li><a href="/team_northcliff/ui/{{ user.name }}/">{{ user.name }}</a></li>
+    <li>
+        {{ user.name }} —
+        <a href="/team_northcliff/map_ui/{{ user.name }}/">ログイン</a>
+    </li>
     {% endfor %}
 </ul>
 </body>

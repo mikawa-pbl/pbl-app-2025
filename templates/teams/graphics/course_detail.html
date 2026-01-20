@@ -1,0 +1,381 @@
+{% load tz %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.subject.name }} - 科目詳細</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; line-height: 1.6; }
+        header { background: #2563eb; color: white; padding: 20px 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 1001; }
+        header h1 { font-size: 24px; }
+        /* ハンバーガーメニュー */
+        .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            z-index: 1000;
+        }
+        .hamburger span {
+            width: 30px;
+            height: 3px;
+            background-color: white;
+            transition: all 0.3s;
+        }
+        /* メニュー */
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: white;
+            transition: right 0.3s ease;
+            z-index: 1002;
+            padding-top: 60px;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+        }
+        .nav-menu.active {
+            right: 0;
+        }
+        .nav-menu ul {
+            list-style: none;
+        }
+        .nav-menu li {
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .nav-menu a {
+            display: block;
+            padding: 18px 30px;
+            color: #1e293b;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .nav-menu a:hover {
+            background-color: #f8fafc;
+            color: #2563eb;
+            padding-left: 35px;
+        }
+        /* オーバーレイ */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+        .overlay.active {
+            display: block;
+        }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; padding-top: 100px; }
+        .course-header { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .course-header h2 { color: #0f172a; margin-bottom: 15px; }
+        .course-meta { color: #64748b; margin: 5px 0; }
+        .section { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .section h3 { color: #0f172a; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; }
+        .review-card { background: #f8fafc; padding: 20px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #2563eb; }
+        .review-card .rating { color: #FFA500; font-size: 18px; margin: 10px 0; }
+        .review-card .date { color: #94a3b8; font-size: 14px; }
+        .book-review-card { display: flex; gap: 20px; background: #f8fafc; padding: 20px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #10b981; }
+        .book-cover { flex-shrink: 0; }
+        .book-cover img { max-width: 100px; max-height: 140px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .back-link { display: inline-block; color: #2563eb; text-decoration: none; margin-top: 20px; font-weight: 600; }
+        .back-link:hover { color: #1d4ed8; }
+        .no-reviews { color: #94a3b8; text-align: center; padding: 40px; }
+        .review-btn { display: inline-block; background: #2563eb; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-top: 10px; font-weight: 600; transition: all 0.2s; }
+        .review-btn:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3); }
+        /* ページネーション */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        .pagination a, .pagination span {
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #334155;
+            transition: all 0.2s;
+            min-width: 40px;
+            text-align: center;
+        }
+        .pagination a:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        .pagination .current {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        .pagination .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        /* 星評価スタイル */
+        .star-rating {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .star-filled {
+            color: #FFA500;
+        }
+        .star-half {
+            position: relative;
+            display: inline-block;
+            color: #cbd5e1;
+        }
+        .star-half::before {
+            content: '★';
+            position: absolute;
+            left: 0;
+            width: 50%;
+            overflow: hidden;
+            color: #FFA500;
+        }
+        .star-empty {
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header>
+        <h1>TUT 参考書レビューシステム</h1>
+        <button class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    <!-- ナビゲーションメニュー -->
+    <nav class="nav-menu" id="navMenu">
+        <ul>
+            <li><a href="{% url 'graphics:index' %}" onclick="toggleMenu()">ホーム</a></li>
+            {% if request.session.graphics_user_id %}
+                <li><a href="{% url 'graphics:my_reviews' %}" onclick="toggleMenu()">マイレビュー</a></li>
+                <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
+                <li><a href="{% url 'graphics:add_book_review' %}" onclick="toggleMenu()">レビュー追加</a></li>
+                <li><a href="{% url 'graphics:logout' %}" onclick="toggleMenu()">ログアウト</a></li>
+            {% else %}
+                <li><a href="{% url 'graphics:search_courses' %}" onclick="toggleMenu()">授業評価を検索</a></li>
+                <li><a href="{% url 'graphics:login' %}" onclick="toggleMenu()">ログイン</a></li>
+                <li><a href="{% url 'graphics:signup' %}" onclick="toggleMenu()">サインアップ</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- オーバーレイ -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="container">
+        <div class="course-header">
+            <h2>{{ course.subject.name }}</h2>
+            <div class="course-meta"><strong>年度:</strong> {{ course.year }}年度（最新）</div>
+            <div class="course-meta"><strong>開講学期:</strong> {{ course.semester }}</div>
+            <div class="course-meta"><strong>対象年次:</strong> {{ course.grade }}</div>
+            <div class="course-meta"><strong>担当教員:</strong> {{ teacher_names }}</div>
+            <div class="course-meta"><strong>開講学科:</strong> {{ department_names }}</div>
+            <div class="course-meta"><strong>必修:</strong> {% if course.is_required %}必修{% else %}選択{% endif %}</div>
+
+            {% if past_teachers_by_year %}
+            <div class="course-meta" style="margin-top: 15px;">
+                <button onclick="togglePastTeachers()" style="background: #64748b; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.2s;">
+                    📅 以前の年度の担当教員を表示
+                </button>
+                <div id="pastTeachers" style="display: none; margin-top: 15px; padding: 15px; background: #f1f5f9; border-radius: 6px; border-left: 4px solid #64748b;">
+                    <h4 style="margin-bottom: 10px; color: #475569; font-size: 16px;">以前の年度</h4>
+                    {% for item in past_teachers_by_year %}
+                    <div style="margin: 8px 0; padding: 8px; background: white; border-radius: 4px;">
+                        <strong>{{ item.year }}年度:</strong> {{ item.teachers }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h3>🎓 科目レビュー ({{ subject_reviews_count }}件)</h3>
+            {% if request.session.graphics_user_id %}
+            <a href="{% url 'graphics:add_book_review' %}?course_id={{ course.id }}&review_type=subject" class="review-btn">✏️ 科目レビューを投稿する</a>
+            {% endif %}
+            {% if subject_reviews %}
+                {% for review in subject_reviews %}
+                <div class="review-card">
+                    <div class="rating">
+                        <span class="star-rating">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}
+                                    <span class="star-filled">★</span>
+                                {% else %}
+                                    <span class="star-empty">☆</span>
+                                {% endif %}
+                            {% endfor %}
+                        </span>
+                        ({{ review.rating }}/5)
+                    </div>
+                    <p>{{ review.review }}</p>
+                    <div class="date">投稿日: {{ review.created_at|date:"Y年m月d日" }}</div>
+                </div>
+                {% endfor %}
+
+                {% if subject_reviews.has_other_pages %}
+                <div class="pagination">
+                    {% if subject_reviews.has_previous %}
+                        <a href="?subject_page=1">≪ 最初</a>
+                        <a href="?subject_page={{ subject_reviews.previous_page_number }}">‹ 前へ</a>
+                    {% else %}
+                        <span class="disabled">≪ 最初</span>
+                        <span class="disabled">‹ 前へ</span>
+                    {% endif %}
+
+                    {% for num in subject_reviews.paginator.page_range %}
+                        {% if num == subject_reviews.number %}
+                            <span class="current">{{ num }}</span>
+                        {% elif num > subject_reviews.number|add:'-3' and num < subject_reviews.number|add:'3' %}
+                            <a href="?subject_page={{ num }}">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if subject_reviews.has_next %}
+                        <a href="?subject_page={{ subject_reviews.next_page_number }}">次へ ›</a>
+                        <a href="?subject_page={{ subject_reviews.paginator.num_pages }}">最後 ≫</a>
+                    {% else %}
+                        <span class="disabled">次へ ›</span>
+                        <span class="disabled">最後 ≫</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="no-reviews">まだレビューがありません</div>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h3>📚 この科目の参考書 ({{ books_count }}冊)</h3>
+            {% if request.session.graphics_user_id %}
+            <a href="{% url 'graphics:add_book_review' %}?subject={{ course.subject.name }}&review_type=book" class="review-btn">✏️ 書籍レビューを投稿する</a>
+            {% endif %}
+            {% if books_with_reviews %}
+                {% for item in books_with_reviews %}
+                <div class="book-review-card">
+                    {% if item.book.cover_image_url %}
+                    <div class="book-cover">
+                        <img src="{{ item.book.cover_image_url }}" alt="{{ item.book.title }}">
+                    </div>
+                    {% endif %}
+                    <div style="flex-grow: 1;">
+                        <h4>{{ item.book.title|default:"タイトル不明" }}</h4>
+                        <p style="color: #64748b; margin: 5px 0;">著者: {{ item.book.author|default:"不明" }}</p>
+                        <div class="rating">
+                            平均評価:
+                            <span class="star-rating" id="bookRating{{ forloop.counter }}"></span>
+                            ({{ item.avg_rating|floatformat:"1" }}/5)
+                        </div>
+                        <script>
+                            (function() {
+                                const avgRating = {{ item.avg_rating }};
+                                const fullStars = Math.floor(avgRating);
+                                const hasHalfStar = (avgRating - fullStars) >= 0.5;
+                                const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+                                let starsHtml = '';
+                                for (let i = 0; i < fullStars; i++) {
+                                    starsHtml += '<span class="star-filled">★</span>';
+                                }
+                                if (hasHalfStar) {
+                                    starsHtml += '<span class="star-half">☆</span>';
+                                }
+                                for (let i = 0; i < emptyStars; i++) {
+                                    starsHtml += '<span class="star-empty">☆</span>';
+                                }
+
+                                document.getElementById('bookRating{{ forloop.counter }}').innerHTML = starsHtml;
+                            })();
+                        </script>
+                        <p style="color: #64748b; margin: 10px 0;">レビュー数: {{ item.review_count }}件</p>
+                        <a href="{% url 'graphics:book_detail' item.book.isbn %}?course_id={{ course.id }}" style="display: inline-block; background: #2563eb; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-top: 10px; font-weight: 600; transition: background 0.2s;">
+                            📝 レビューを見る
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+
+                {% if books_with_reviews.has_other_pages %}
+                <div class="pagination">
+                    {% if books_with_reviews.has_previous %}
+                        <a href="?books_page=1">≪ 最初</a>
+                        <a href="?books_page={{ books_with_reviews.previous_page_number }}">‹ 前へ</a>
+                    {% else %}
+                        <span class="disabled">≪ 最初</span>
+                        <span class="disabled">‹ 前へ</span>
+                    {% endif %}
+
+                    {% for num in books_with_reviews.paginator.page_range %}
+                        {% if num == books_with_reviews.number %}
+                            <span class="current">{{ num }}</span>
+                        {% elif num > books_with_reviews.number|add:'-3' and num < books_with_reviews.number|add:'3' %}
+                            <a href="?books_page={{ num }}">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if books_with_reviews.has_next %}
+                        <a href="?books_page={{ books_with_reviews.next_page_number }}">次へ ›</a>
+                        <a href="?books_page={{ books_with_reviews.paginator.num_pages }}">最後 ≫</a>
+                    {% else %}
+                        <span class="disabled">次へ ›</span>
+                        <span class="disabled">最後 ≫</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="no-reviews">まだ参考書レビューがありません</div>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'graphics:search_courses' %}" class="back-link">← 検索結果に戻る</a>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const navMenu = document.getElementById('navMenu');
+            const overlay = document.getElementById('overlay');
+            navMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function togglePastTeachers() {
+            const pastTeachers = document.getElementById('pastTeachers');
+            const button = event.target;
+            if (pastTeachers.style.display === 'none') {
+                pastTeachers.style.display = 'block';
+                button.textContent = '📅 以前の年度の担当教員を非表示';
+            } else {
+                pastTeachers.style.display = 'none';
+                button.textContent = '📅 以前の年度の担当教員を表示';
+            }
+        }
+    </script>
+</body>
+</html>

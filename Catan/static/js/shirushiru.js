@@ -44,18 +44,9 @@ function saveStatus() {
         }
     }
 
-    
-
     // ここでサーバーにデータを送信して永続化する処理を追加できます
     // 最終更新時刻を更新（ローカル表示用）
-    lastUpdated = new Date().toLocaleString(undefined, {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    });
+    lastUpdated = new Date();
 
     // 在室変更時の通知（サンプル）
     // alert('在室状況を更新しました');
@@ -77,18 +68,81 @@ function openDetailDialogFromRow(tr) {
     const locElem = document.getElementById('detail-location');
     const comElem = document.getElementById('detail-comment');
     const updatedElem = document.getElementById('detail-updated');
-     const talkElem = document.getElementById('detail-talk');
+    const talkElem = document.getElementById('detail-talk');
 
+    // const now = new Date().toLocaleString(undefined, {
+    //         year: 'numeric',
+    //         month: '2-digit',
+    //         day: '2-digit',
+    //         hour: '2-digit',
+    //         minute: '2-digit',
+    //         hour12: false
+    //     });
 
+    const now = new Date();
+    const diffMS = now - lastUpdated;
+
+    // lastUpdated が Date でない場合は表示を '-' にする
+    let updatedText = '-';
+    if (lastUpdated instanceof Date) {
+        const diffMin = Math.floor(diffMS / 60000);
+        const diffHour = Math.floor(diffMS / 3600000);
+        const diffDay = Math.floor(diffMS / 86400000);
+
+    if (diffMin < 60) {
+            updatedText = diffMin + '分前';  
+        } else if (diffHour < 24) {
+
+            updatedText = diffHour + '時間前';
+        } else if (diffDay <= 7) {
+            updatedText = diffDay + '日前';
+        } else {
+            // 7日より前は最終更新日時を表示（日本ロケール、24時間表示）
+            updatedText = lastUpdated.toLocaleString('ja-JP', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        }
+    }
+
+    let fullName = '';
+    if (name == '小林(あ)'){
+        fullName = '小林 あおい';
+    } else if (name == '小林(わ)') {
+        fullName = '小林 わたる';
+    }else {
+        fullName = name + ' 太郎';
+    }
     if (gradeElem) gradeElem.textContent = gradeHeading || '-';
-    if (nameElem) nameElem.textContent = name || '-';
+    if (nameElem) nameElem.textContent = fullName || '-';
     if (locElem) locElem.textContent = location || '-';
     if (comElem) comElem.textContent = comment || '-';
-    if (updatedElem) updatedElem.textContent = lastUpdated || '-';
-    if (talkElem) talkElem.textContent = talk || '-';
+    if (updatedElem) updatedElem.textContent = updatedText || '-';
+    if (talkElem) talkElem.textContent = talk || '🗣️';
 
 
     document.getElementById('detailDialog').classList.add('show');
+
+    // ゲストの場合は詳細ダイアログのボタンを「在室状況変更」に切り替える
+    const actionBtn = document.getElementById('detail-action-btn');
+    try {
+        if (actionBtn) {
+            const guestName = document.getElementById('user-name-cell') ? document.getElementById('user-name-cell').textContent.trim() : 'ゲスト';
+            if (name && name === guestName) {
+                actionBtn.textContent = '✏️ 在室状況変更';
+                actionBtn.onclick = function () { closeDetailDialog(); openDialog(); };
+            } else {
+                actionBtn.textContent = 'Slack（DM）へ移動';
+                actionBtn.onclick = function () { window.open('https://iimlabofficial.slack.com/archives/D06T65ZTJRW','_blank'); };
+            }
+        }
+    } catch (e) {
+        console.error('detail action button setup error', e);
+    }
 }
 
 function closeDetailDialog() {

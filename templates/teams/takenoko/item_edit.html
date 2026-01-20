@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="ja">
@@ -141,40 +142,59 @@
 
       /* ===== 画像アップロード ===== */
       .uploader {
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-        flex-wrap: wrap;
-      }
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
 
-      .thumbs {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-      .thumb {
-        width: 96px;
-        height: 96px;
-        border-radius: 16px;
-        border: 1.5px dashed rgba(100, 156, 228, 0.6);
-        background: #fbfef9;
-        overflow: hidden;
-        display: flex;
+    .thumbs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .thumb {
+      width: 92px;
+      height: 92px;
+      border-radius: 16px;
+      border: 1.5px dashed rgba(100,156,228,0.6);
+      background: #FBFEF9;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .thumb .empty {
+      color: rgba(100,156,228,0.9);
+      font-size: 28px;
+    }
+      .thumb .remove-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 26px;
+        height: 26px;
+        border-radius: 999px;
+        border: none;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        position: relative;
-        box-sizing: border-box;
+        font-size: 14px;
+        line-height: 1;
       }
-      .thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-      }
-      .thumb .empty {
-        color: rgba(100, 156, 228, 0.9);
-        font-size: 28px;
-      }
+      .thumb .remove-btn:focus { outline: 2px solid rgba(100,156,228,0.6); }
 
       .upload-btn {
         display: inline-flex;
@@ -245,6 +265,11 @@
         cursor: pointer;
       }
 
+      /* 削除チェックボックスを非表示 */
+      input[name="delete_images"] {
+        display: none;
+      }
+
       @media (min-width: 768px) {
         .card {
           padding: 28px;
@@ -269,45 +294,121 @@
       // ===== 画像プレビュー（最大5枚） =====
       const MAX_IMAGES = 5;
       let selectedFiles = [];
+      const existingImages = [{% for img in item.images.all %}{url: '{{ img.image.url }}', id: {{ img.id }}},{% endfor %}];
+      const deletedImageIds = new Set();
 
       function $(id) {
         return document.getElementById(id);
       }
 
-      function renderThumbs() {
-        const thumbs = $("thumbs");
-        thumbs.innerHTML = "";
+      function syncInputFiles() {
+        const dt = new DataTransfer();
+        selectedFiles.forEach(f => dt.items.add(f));
+        $("images").files = dt.files;
+      }
 
+      function renderThumbs() {
+        const container = $("allImages");
+        container.innerHTML = "";
+
+        const visibleExistingImages = existingImages.filter(img => !deletedImageIds.has(img.id));
+
+        // 既存画像
+        visibleExistingImages.forEach((img, idx) => {
+          const box = document.createElement("div");
+          box.className = "thumb";
+          box.innerHTML = `<img src="${img.url}" alt="img${idx + 1}"><button type="button" class="remove-btn" aria-label="画像を削除" onclick="toggleDelete(${img.id})">×</button>`;
+          container.appendChild(box);
+        });
+
+        // 新規画像
         selectedFiles.forEach((file, idx) => {
           const url = URL.createObjectURL(file);
           const box = document.createElement("div");
           box.className = "thumb";
-          box.innerHTML = `<img src="${url}" alt="画像${idx + 1}">`;
-          thumbs.appendChild(box);
+          box.innerHTML = `<img src="${url}" alt="画像${idx+1}"><button type="button" class="remove-btn" aria-label="画像を削除" onclick="removeImage(${idx})">×</button>`;
+          container.appendChild(box);
         });
 
-        for (let i = selectedFiles.length; i < MAX_IMAGES; i++) {
+        // 空のスロット
+        const totalImages = visibleExistingImages.length + selectedFiles.length;
+        for (let i = totalImages; i < MAX_IMAGES; i++) {
           const box = document.createElement("div");
           box.className = "thumb";
           box.innerHTML = `<div class="empty"><i class="fas fa-image"></i></div>`;
-          thumbs.appendChild(box);
+          container.appendChild(box);
         }
 
-        $("pickBtn").disabled = selectedFiles.length >= MAX_IMAGES;
+        // ボタンのdisabled
+        const pickBtn = $("pickBtn");
+        if (pickBtn) pickBtn.disabled = totalImages >= MAX_IMAGES;
+      }
+
+      function removeImage(index) {
+        if (index < 0 || index >= selectedFiles.length) return;
+        selectedFiles.splice(index, 1);
+        syncInputFiles();
+        renderThumbs();
+      }
+
+      function toggleDelete(id) {
+        if (deletedImageIds.has(id)) {
+          deletedImageIds.delete(id);
+          let checkbox = document.querySelector(`input[name="delete_images"][value="${id}"]`);
+          if (checkbox) checkbox.remove();
+        } else {
+          deletedImageIds.add(id);
+          const newCheckbox = document.createElement("input");
+          newCheckbox.type = "checkbox";
+          newCheckbox.name = "delete_images";
+          newCheckbox.value = id;
+          newCheckbox.checked = true;
+          document.getElementById("sellForm").appendChild(newCheckbox);
+        }
+        renderThumbs();
       }
 
       function addImages(fileList) {
         const files = Array.from(fileList || []);
         if (files.length === 0) return;
 
-        const canAdd = Math.max(0, MAX_IMAGES - selectedFiles.length);
+        const canAdd = Math.max(0, MAX_IMAGES - existingImages.length - selectedFiles.length);
         selectedFiles = selectedFiles.concat(files.slice(0, canAdd));
 
+        syncInputFiles();
+        renderThumbs();
+      }
+
+      function removeImage(index) {
+        selectedFiles.splice(index, 1);
         const dt = new DataTransfer();
         selectedFiles.forEach((f) => dt.items.add(f));
         $("images").files = dt.files;
-
         renderThumbs();
+      }
+
+      function toggleExistingImageDelete(imgId) {
+        const el = $("existing_img_" + imgId);
+        const hidden = $("delete_img_" + imgId);
+        if (!el || !hidden) return;
+        const marked = el.classList.toggle("marked");
+        const btn = el.querySelector(".remove-btn");
+        if (marked) {
+          if (btn) btn.textContent = "×";
+          hidden.disabled = false;
+        } else {
+          if (btn) btn.textContent = "×";
+          hidden.disabled = true;
+        }
+        updatePickBtnState();
+      }
+
+      function updatePickBtnState() {
+        const existing = document.querySelectorAll("#existingThumbs .thumb").length;
+        const toBeDeleted = document.querySelectorAll("#existingThumbs input[type='hidden']:not([disabled])").length;
+        const existingRemaining = Math.max(0, existing - toBeDeleted);
+        const total = existingRemaining + selectedFiles.length;
+        $("pickBtn").disabled = total >= MAX_IMAGES || selectedFiles.length >= MAX_IMAGES;
       }
 
       // ===== 対象学年タグ select の色（required無しでも薄色placeholder化） =====
@@ -354,6 +455,66 @@
         if (hidden) hidden.remove();
       }
 
+      // ===== カテゴリタグ select の色 =====
+      function updateTagSelectColor() {
+        const sel = $("tagSelect");
+        if (!sel) return;
+        sel.style.color = sel.value ? "#333" : "#888";
+      }
+
+      // ===== カテゴリタグ（複数選択） =====
+      function addCategoryTag() {
+        const sel = $("tagSelect");
+        const val = sel.value;
+        const text = sel.options[sel.selectedIndex]?.text || "";
+        if (!val) return;
+
+        const exists = document.querySelector(`input[name="tags"][value="${val}"]`);
+        if (exists) return;
+
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = "tags";
+        hidden.value = val;
+        $("tagHidden").appendChild(hidden);
+
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.setAttribute("data-tag", val);
+        chip.innerHTML = `${text}<button type="button" aria-label="削除" onclick="removeCategoryTag('${val}')">×</button>`;
+        $("tagChips").appendChild(chip);
+
+        sel.value = "";
+        updateTagSelectColor();
+      }
+
+      function removeCategoryTag(val) {
+        const chip = document.querySelector(`.chip[data-tag="${val}"]`);
+        if (chip) chip.remove();
+        const hidden = document.querySelector(`input[name="tags"][value="${val}"]`);
+        if (hidden) hidden.remove();
+      }
+
+      function getOptionText(selectId, val) {
+        const sel = $(selectId);
+        const opt = sel.querySelector(`option[value="${val}"]`);
+        return opt ? opt.text : "";
+      }
+
+      function addHiddenAndChip(name, val, text, chipsId, dataAttr) {
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = name;
+        hidden.value = val;
+        $(name + "Hidden").appendChild(hidden);
+
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.setAttribute("data-" + dataAttr, val);
+        chip.innerHTML = `${text}<button type="button" aria-label="削除" onclick="remove${name.charAt(0).toUpperCase() + name.slice(1)}Tag('${val}')">×</button>`;
+        $(chipsId).appendChild(chip);
+      }
+
       // ===== 価格入力（最大99999 / 数字のみ） =====
       function normalizePrice() {
         const el = $("price");
@@ -375,6 +536,21 @@
         // 対象学年タグは任意：送信ブロックなし
         updateGradeSelectColor();
         $("gradeSelect").addEventListener("change", updateGradeSelectColor);
+
+        updateTagSelectColor();
+        $("tagSelect").addEventListener("change", updateTagSelectColor);
+
+        // エラー再表示時、選択を復元（必要なときだけ配列に値が入る）
+        const PRESELECTED_GRADES = {{ selected_grades|safe }};
+        const PRESELECTED_TAGS = {{ selected_tags|safe }};
+        PRESELECTED_GRADES.forEach(val => {
+          const text = getOptionText("gradeSelect", val);
+          addHiddenAndChip("grades", val, text, "gradeChips", "grade");
+        });
+        PRESELECTED_TAGS.forEach(val => {
+          const text = getOptionText("tagSelect", val);
+          addHiddenAndChip("tags", val, text, "tagChips", "tag");
+        });
       });
     </script>
   </head>
@@ -390,35 +566,29 @@
       <section class="card">
         <h1 class="title">商品を編集</h1>
 
-        <form
-          action="{% url 'takenoko:edit_complete' %}"
-          id="sellForm"
-          method="post"
-          enctype="multipart/form-data"
-        >
+        <form action="" id="sellForm" method="post" enctype="multipart/form-data">
           {% csrf_token %}
 
-          <!-- 画像（最大5枚） -->
+          <!-- 画像 -->
           <div class="field">
-            <label class="label">画像（最大5枚）</label>
+            <label class="label">画像</label>
+            <div id="allImages" style="display:flex; gap:12px; flex-wrap:wrap;"></div>
+            <p class="text-sm text-gray-500 mt-2">※ 最大5枚</p>
+          </div>
 
-            <div class="uploader">
-              <div class="thumbs" id="thumbs"></div>
-
-              <div style="display: flex; flex-direction: column; gap: 8px">
-                <label class="upload-btn" id="pickBtn" for="images">
-                  <i class="fas fa-plus"></i> 画像を追加
-                </label>
-                <input
-                  id="images"
-                  name="images"
-                  class="file-input"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                />
-              </div>
-            </div>
+          <!-- 新規画像追加 -->
+          <div class="field">
+            <label class="upload-btn" id="pickBtn" for="images">
+                <i class="fas fa-plus"></i> 画像を追加
+              </label>
+              <input
+                id="images"
+                name="images"
+                class="file-input"
+                type="file"
+                accept="image/*"
+                multiple
+              />
           </div>
 
           <!-- 商品名 -->
@@ -430,7 +600,7 @@
               class="input"
               type="text"
               required
-              placeholder="例：計算機科学の教科書"
+              value="{{ form.name.value|default_if_none:'' }}"
             />
           </div>
 
@@ -446,72 +616,98 @@
               pattern="[0-9]*"
               maxlength="6"
               required
-              placeholder="例：5000（¥99,999まで）"
+              value="{{ form.price.value|default_if_none:'' }}"
             />
           </div>
 
           <!-- 商品詳細 -->
           <div class="field">
-            <label class="label" for="detail">商品詳細</label>
+            <label class="label" for="description">商品詳細</label>
             <textarea
-              id="detail"
-              name="detail"
+              id="description"
+              name="description"
               class="textarea"
               maxlength="300"
               required
-              placeholder="状態、受け渡し場所、注意点など（300文字まで）"
-            ></textarea>
+            >{{ form.description.value|default_if_none:'' }}</textarea>
           </div>
 
-          <!-- 商品状態 -->
+          <!-- 商品状態（choicesをフォームから動的表示） -->
           <div class="field">
             <label class="label" for="condition">商品状態</label>
             <div class="select-wrap">
               <select id="condition" name="condition" class="select" required>
-                <option value="" selected disabled>選択してください</option>
-                <option value="new">新品・未使用</option>
-                <option value="like_new">未使用に近い</option>
-                <option value="good">目立った傷や汚れなし</option>
-                <option value="fair">やや傷や汚れあり</option>
-                <option value="poor">傷や汚れあり</option>
+                <option value="" disabled {% if not form.condition.value %}selected{% endif %}>選択してください</option>
+                {% for val, label in form.fields.condition.choices %}
+                  <option value="{{ val }}" {% if form.condition.value == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
               </select>
             </div>
           </div>
 
-          <!-- 対象学年タグ（複数可） ※任意 -->
+          <!-- 対象学年（DBのTargetGrade） -->
           <div class="field">
-            <label class="label" for="gradeSelect"
-              >対象学年タグ（複数可）</label
-            >
-
-            <div style="display: flex; gap: 10px">
-              <div class="select-wrap" style="flex: 1">
-                <!-- ★requiredなし：空でも送信できる -->
+            <label class="label" for="gradeSelect">対象学年タグ（複数可）</label>
+            <div style="display:flex; gap:10px;">
+              <div class="select-wrap" style="flex:1;">
                 <select id="gradeSelect" class="select">
                   <option value="" selected disabled>追加する学年を選択</option>
-                  <option value="b1">学部1年</option>
-                  <option value="b2">学部2年</option>
-                  <option value="b3">学部3年</option>
-                  <option value="b4">学部4年</option>
-                  <option value="m1">修士1年</option>
-                  <option value="m2">修士2年</option>
-                  <option value="d">博士</option>
+                  {% for val, label in form.fields.grades.choices %}
+                    <option value="{{ val }}">{{ label }}</option>
+                  {% endfor %}
                 </select>
               </div>
-
-              <button type="button" class="upload-btn" onclick="addGradeTag()">
-                <i class="fas fa-tag"></i> 追加
-              </button>
+              <button type="button" class="upload-btn" onclick="addGradeTag()"><i class="fas fa-tag"></i> 追加</button>
             </div>
-
-            <!-- hidden inputs（選んだ分だけ送る。0個なら送られない＝任意） -->
-            <div id="gradeHidden"></div>
-
-            <!-- 表示チップ -->
-            <div class="chips" id="gradeChips"></div>
+            <div id="gradeHidden">
+              {% for g in selected_grades %}
+                <input type="hidden" name="grades" value="{{ g }}">
+              {% endfor %}
+            </div>
+            <div class="chips" id="gradeChips">
+              {% for g in selected_grades %}
+                <span class="chip" data-grade="{{ g }}">
+                  {% for val, label in form.fields.grades.choices %}
+                    {% if val == g %}{{ label }}{% endif %}
+                  {% endfor %}
+                  <button type="button" aria-label="削除" onclick="removeGradeTag('{{ g }}')">×</button>
+                </span>
+              {% endfor %}
+            </div>
           </div>
 
-          <!-- 出品ボタン -->
+          <!-- タグ（Tagモデル） -->
+          <div class="field">
+            <label class="label" for="tagSelect">カテゴリタグ（複数可）</label>
+            <div style="display:flex; gap:10px;">
+              <div class="select-wrap" style="flex:1;">
+                <select id="tagSelect" class="select">
+                  <option value="" selected disabled>追加するタグを選択</option>
+                  {% for val, label in form.fields.tags.choices %}
+                    <option value="{{ val }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <button type="button" class="upload-btn" onclick="addCategoryTag()"><i class="fas fa-tag"></i> 追加</button>
+            </div>
+            <div id="tagHidden">
+              {% for t in selected_tags %}
+                <input type="hidden" name="tags" value="{{ t }}">
+              {% endfor %}
+            </div>
+            <div class="chips" id="tagChips">
+              {% for t in selected_tags %}
+                <span class="chip" data-tag="{{ t }}">
+                  {% for val, label in form.fields.tags.choices %}
+                    {% if val == t %}{{ label }}{% endif %}
+                  {% endfor %}
+                  <button type="button" aria-label="削除" onclick="removeCategoryTag('{{ t }}')">×</button>
+                </span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- 送信 -->
           <div class="actions">
             <button type="submit" class="submit-btn">編集する</button>
           </div>

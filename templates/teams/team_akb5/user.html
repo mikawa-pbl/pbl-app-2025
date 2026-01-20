@@ -3,6 +3,28 @@
 
 {% block title %}ネットワーク状況一覧 - User{% endblock %}
 
+{% block head %}
+
+<style>
+    .leaflet-marker-icon,
+    .leaflet-marker-shadow {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        outline: none;
+        padding: 0;
+    }
+    .leaflet-marker-icon img {
+        background: transparent;
+        display: block;
+    }
+    /* Red filter for default blue marker */
+    .marker-pin-red {
+        filter: hue-rotate(150deg) brightness(1.5) saturate(10);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 
 
@@ -67,8 +89,17 @@
         const reportsData = {{ reports_geojson| safe}};
 
     // Add markers to the map
-    L.geoJSON(reportsData, {
-        onEachFeature: function (feature, layer) {
+        L.geoJSON(reportsData, {
+            pointToLayer: function (feature, latlng) {
+                // Create a default icon instance to apply specific class
+                const icon = new L.Icon.Default();
+                if (feature.properties.symptom === 'つながらない') {
+                    icon.options.className = 'marker-pin-red';
+                }
+                // For '遅い', it remains default (blue)
+                return L.marker(latlng, { icon: icon });
+            },
+            onEachFeature: function (feature, layer) {
             if (feature.properties) {
                 let popupContent = ``;
                 if (feature.properties.symptom) {

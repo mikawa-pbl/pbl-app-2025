@@ -1,189 +1,73 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>マイページ</title>
-    <style>
-        body { font-family: sans-serif; margin: 20px; padding: 0 20px; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; }
-        
-        .profile-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
-        .section-title {
-            border-left: 4px solid #007bff;
-            padding-left: 10px;
-            margin-bottom: 15px;
-            margin-top: 0;
-            font-size: 1.2em;
-        }
-        .profile-item { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; display: flex; justify-content: space-between; }
-        .profile-label { font-weight: bold; color: #666; font-size: 0.9em; }
-        .profile-value { font-weight: bold; }
-
-        .btn-back { display: inline-block; padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; }
-        .btn-edit { display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 4px; margin-right: 10px;}
-        
-        .schedule-grid { display: grid; grid-template-columns: 80px repeat(5, 1fr); gap: 5px; margin-bottom: 20px; overflow-x: auto; }
-        .grid-header { font-weight: bold; text-align: center; background-color: #f0f0f0; padding: 10px; }
-        .time-label { font-size: 0.8em; text-align: center; display: flex; flex-direction: column; justify-content: center; background-color: #f9f9f9; border: 1px solid #ddd; }
-        .slot-btn { height: 40px; border: 1px solid #eee; background-color: #fff; display: flex; align-items: center; justify-content: center; } /* 閲覧用なので少しシンプルに */
-        .slot-btn.active { background-color: #4CAF50; color: white; border-color: #4CAF50; font-weight: bold; }
-        .slot-btn.active::after { content: "〇"; }
-    </style>
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/schedule.css' %}">
 </head>
-<body>
-
+<body class="app-page">
 <div class="container">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'team_shouronpou:post_list' %}" class="btn-outline">&larr; 掲示板に戻る</a>
+    </div>
+
     <h2>マイページ</h2>
 
     <div class="profile-card">
         <h3 class="section-title">基本情報</h3>
-        
-        <div class="profile-item">
-            <span class="profile-label">ユーザー名</span>
-            <span class="profile-value">{{ user.username }}</span>
-        </div>
-        <div class="profile-item">
-            <span class="profile-label">所属</span>
-            <span class="profile-value">{{ user.affiliation|default:"-" }}</span>
-        </div>
-        <div class="profile-item">
-            <span class="profile-label">年齢</span>
-            <span class="profile-value">{{ user.age|default:"-" }} 歳</span>
-        </div>
-        <div class="profile-item">
-            <span class="profile-label">性別</span>
-            <span class="profile-value">{{ user.get_gender_display|default:"-" }}</span>
-        </div>
-        <div class="profile-item">
-            <span class="profile-label">国籍</span>
-            <span class="profile-value">{{ user.get_nationality_display|default:"-" }}</span>
-        </div>
+        <div class="profile-item"><span class="profile-label">ユーザー名</span><span class="profile-value">{{ user.username }}</span></div>
+        <div class="profile-item"><span class="profile-label">所属</span><span class="profile-value">{{ user.affiliation|default:"-" }}</span></div>
+        <div class="profile-item"><span class="profile-label">年齢</span><span class="profile-value">{{ user.age|default:"-" }} 歳</span></div>
     </div>
 
     <div class="profile-card">
-        <h3 class="section-title">実験参加の希望条件</h3>
-        
-        <div class="profile-item">
-            <span class="profile-label">希望報酬</span>
-            <span class="profile-value">{{ user.desired_reward|default:"特に指定なし" }}</span>
-        </div>
-        <div class="profile-item">
-            <span class="profile-label">許容所要時間</span>
-            <span class="profile-value">
-                {% if user.desired_max_time %}
-                    最大 {{ user.desired_max_time }} 分まで
-                {% else %}
-                    特に指定なし
-                {% endif %}
-            </span>
-        </div>
-        
-        <div style="margin-top: 15px;">
-            <span class="profile-label" style="margin-bottom:10px; display:block;">参加可能時間帯</span>
-            
-            <div class="schedule-grid" style="pointer-events: none;"> <div class="grid-header"></div>
-                <div class="grid-header">月</div>
-                <div class="grid-header">火</div>
-                <div class="grid-header">水</div>
-                <div class="grid-header">木</div>
-                <div class="grid-header">金</div>
-        
-                <div class="time-label"><strong>1限</strong><span>8:50-</span></div>
-                <div class="slot-btn" data-value="mon_1"></div>
-                <div class="slot-btn" data-value="tue_1"></div>
-                <div class="slot-btn" data-value="wed_1"></div>
-                <div class="slot-btn" data-value="thu_1"></div>
-                <div class="slot-btn" data-value="fri_1"></div>
-                
-                <div class="time-label"><strong>2限</strong><span>10:30-</span></div>
-                <div class="slot-btn" data-value="mon_2"></div>
-                <div class="slot-btn" data-value="tue_2"></div>
-                <div class="slot-btn" data-value="wed_2"></div>
-                <div class="slot-btn" data-value="thu_2"></div>
-                <div class="slot-btn" data-value="fri_2"></div>
-
-                <div class="time-label"><strong>昼休み</strong><span>12:00-</span></div>
-                <div class="slot-btn" data-value="mon_lunch"></div>
-                <div class="slot-btn" data-value="tue_lunch"></div>
-                <div class="slot-btn" data-value="wed_lunch"></div>
-                <div class="slot-btn" data-value="thu_lunch"></div>
-                <div class="slot-btn" data-value="fri_lunch"></div>
-
-                <div class="time-label"><strong>3限</strong><span>13:00-</span></div>
-                <div class="slot-btn" data-value="mon_3"></div>
-                <div class="slot-btn" data-value="tue_3"></div>
-                <div class="slot-btn" data-value="wed_3"></div>
-                <div class="slot-btn" data-value="thu_3"></div>
-                <div class="slot-btn" data-value="fri_3"></div>
-
-                <div class="time-label"><strong>4限</strong><span>14:40-</span></div>
-                <div class="slot-btn" data-value="mon_4"></div>
-                <div class="slot-btn" data-value="tue_4"></div>
-                <div class="slot-btn" data-value="wed_4"></div>
-                <div class="slot-btn" data-value="thu_4"></div>
-                <div class="slot-btn" data-value="fri_4"></div>
-
-                <div class="time-label"><strong>5限</strong><span>16:20-</span></div>
-                <div class="slot-btn" data-value="mon_5"></div>
-                <div class="slot-btn" data-value="tue_5"></div>
-                <div class="slot-btn" data-value="wed_5"></div>
-                <div class="slot-btn" data-value="thu_5"></div>
-                <div class="slot-btn" data-value="fri_5"></div>
-
-                <div class="time-label"><strong>6限</strong><span>18:00-</span></div>
-                <div class="slot-btn" data-value="mon_6"></div>
-                <div class="slot-btn" data-value="tue_6"></div>
-                <div class="slot-btn" data-value="wed_6"></div>
-                <div class="slot-btn" data-value="thu_6"></div>
-                <div class="slot-btn" data-value="fri_6"></div>
-
-                <div class="time-label"><strong>放課後</strong><span>19:30~</span></div>
-                <div class="slot-btn" data-value="mon_after"></div>
-                <div class="slot-btn" data-value="tue_after"></div>
-                <div class="slot-btn" data-value="wed_after"></div>
-                <div class="slot-btn" data-value="thu_after"></div>
-                <div class="slot-btn" data-value="fri_after"></div>
+        <h3 class="section-title">作成した募集</h3>
+        {% if my_posts %}
+            <div style="display: grid; gap: 10px;">
+                {% for post in my_posts %}
+                <div style="border: 1px solid #eee; padding: 15px; border-radius: 5px; background: #fafafa; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>{{ post.title }}</strong><br>
+                        <small>参加者: {{ post.current_participants }} 名</small>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                        <a href="{% url 'team_shouronpou:post_detail' post.pk %}" class="btn-outline" style="font-size: 0.8rem;">詳細</a>
+                        <a href="{% url 'team_shouronpou:post_edit' post.pk %}" class="btn-outline" style="font-size: 0.8rem; background-color: #ffc107; color: #000; border: none;">編集</a>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-            <input type="hidden" id="user_slots_data" value="{{ user.available_slots }}">
-        </div>
+        {% else %}
+            <p style="text-align: center; color: #999;">まだ投稿はありません。</p>
+        {% endif %}
     </div>
 
-    <div style="margin-top: 20px; text-align: center;">
-        <a href="{% url 'team_shouronpou:profile_edit' %}" class="btn-edit">プロフィールを編集する</a>
-        <a href="{% url 'team_shouronpou:post_list' %}" class="btn-back">掲示板に戻る</a>
+    <div class="profile-card">
+        <h3 class="section-title">応募済みの実験</h3>
+        {% if my_applications %}
+            <div style="display: grid; gap: 10px;">
+                {% for app in my_applications %}
+                <div style="border: 1px solid #eee; padding: 15px; border-radius: 5px; background: #e7f3ff; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>{{ app.post.title }}</strong><br>
+                        <small>応募日時: {{ app.applied_at|date:"Y/m/d" }}</small>
+                    </div>
+                    <a href="{% url 'team_shouronpou:post_detail' app.post.pk %}" class="btn-outline" style="font-size: 0.8rem;">詳細を確認</a>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="text-align: center; color: #999;">応募した実験はありません。</p>
+        {% endif %}
+    </div>
+
+    <div style="margin-top: 30px; text-align: center;">
+        <a href="{% url 'team_shouronpou:profile_edit' %}" class="btn btn-primary">プロフィール編集</a>
+        <a href="{% url 'team_shouronpou:logout' %}" class="btn btn-secondary" style="margin-left: 10px;">ログアウト</a>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const slotsInput = document.getElementById('user_slots_data');
-    const slotBtns = document.querySelectorAll('.slot-btn');
-    let savedSlots = [];
-
-    try {
-        const rawValue = slotsInput.value;
-        if (rawValue) {
-            const validJson = rawValue.replace(/'/g, '"');
-            savedSlots = JSON.parse(validJson);
-        }
-    } catch(e) { savedSlots = []; }
-
-    // 保存されているスロットを緑色にする
-    slotBtns.forEach(btn => {
-        const val = btn.dataset.value;
-        if (savedSlots.includes(val)) {
-            btn.classList.add('active');
-        }
-    });
-});
-</script>
-
+<script src="{% static 'team_shouronpou/js/schedule_viewer.js' %}"></script>
 </body>
 </html>

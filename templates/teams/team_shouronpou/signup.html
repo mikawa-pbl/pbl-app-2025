@@ -1,17 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>新規ユーザー登録</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 400px; margin: 0 auto; }
-        input { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px; margin-top: 20px;}
-        .helptext { font-size: 0.8em; color: #666; display: block; margin-bottom: 10px; }
-        ul { font-size: 0.8em; color: #dc3545; padding-left: 20px; margin-top: 0;}
-    </style>
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/style.css' %}">
 </head>
-<body>
+<body class="auth-page">
     <h2 style="text-align: center;">新規アカウント作成</h2>
     
     <form method="post">

@@ -38,6 +38,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('name', models.CharField(max_length=50, primary_key=True, serialize=False, unique=True, verbose_name='タグ名')),
                 ('display_name', models.CharField(max_length=100, verbose_name='表示名')),
+                ('icon', models.CharField(max_length=50, verbose_name='アイコン', default='tag')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
             ],
             options={

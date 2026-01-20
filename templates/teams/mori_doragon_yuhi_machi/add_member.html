@@ -19,7 +19,7 @@
     <p class="error">{{ error_message }}</p>
 {% endif %}
 
-<form action="{% url 'mori_doragon_yuhi_machi:add_member' %}" method="POST">
+<form action="{% url 'mori_doragon_yuhi_machi:add_member' %}" method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <label for="member_name">名前：</label>
     <input type="text" name="member_name" id="member_name" placeholder="例：山田 太郎" required>
@@ -27,6 +27,18 @@
     <br><br> <label for="member_photo">顔写真：</label>
     <input type="file" name="member_photo" id="member_photo" accept="image/*">
 
+    <br><br>
+    <label>
+        学年:
+        <select name="grade">
+            <option value="Staff">Staff</option>
+            <option value="Dr">Dr</option>
+            <option value="M2">M2</option>
+            <option value="M1">M1</option>
+            <option value="B4">B4</option>
+            <option value="Other" selected>Other</option>
+        </select>
+    </label>
     <br><br>
     <button type="submit">追加する</button>
 </form>

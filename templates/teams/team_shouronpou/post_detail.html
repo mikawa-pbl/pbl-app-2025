@@ -1,295 +1,126 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ post.title }} - 募集詳細</title>
-    <style>
-        body { font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; color: #333; }
-        a { text-decoration: none; }
-        
-        /* メインコンテナ（中央寄せ） */
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        /* ヘッダー */
-        .header { border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 30px; }
-        .header h1 { margin: 0 0 10px 0; color: #0056b3; font-size: 1.8rem; }
-        .meta-info { color: #666; font-size: 0.9rem; }
-
-        /* セクション見出し */
-        h3 {
-            border-left: 5px solid #0056b3;
-            padding-left: 10px;
-            margin-top: 40px;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            background-color: #f9f9f9;
-            padding-top: 5px;
-            padding-bottom: 5px;
-        }
-
-        /* テーブル */
-        table.info-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        table.info-table th { width: 30%; text-align: left; padding: 10px; background-color: #f8f9fa; border-bottom: 1px solid #eee; }
-        table.info-table td { padding: 10px; border-bottom: 1px solid #eee; }
-
-        /* 時間割グリッド */
-        .schedule-grid { display: grid; grid-template-columns: 60px repeat(5, 1fr); gap: 4px; margin-bottom: 20px; overflow-x: auto; }
-        .grid-header { font-weight: bold; text-align: center; background-color: #666; color: white; padding: 5px; font-size: 0.8rem; border-radius: 3px;}
-        .time-label { font-size: 0.75em; text-align: center; display: flex; flex-direction: column; justify-content: center; background-color: #eee; font-weight: bold;}
-        
-        .slot-box { 
-            height: 40px; 
-            border: 1px solid #ddd; 
-            background-color: #fff; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            border-radius: 3px;
-        }
-        /* 緑色（登録済み）の状態 */
-        .slot-box.active { 
-            background-color: #28a745; 
-            color: white; 
-            font-weight: bold; 
-        }
-        .slot-box.active::after { content: "〇"; }
-
-        /* 応募状況・アクションエリア */
-        .status-section {
-            background-color: #f0f8ff;
-            border: 1px solid #cce5ff;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            margin-top: 40px;
-        }
-        .status-number { font-size: 1.5rem; font-weight: bold; margin: 10px 0; }
-        
-        /* ボタン */
-        .btn { display: inline-block; padding: 10px 20px; border-radius: 5px; text-align: center; cursor: pointer; border: none; font-size: 1rem; color: white; transition: opacity 0.2s; margin: 5px; }
-        .btn:hover { opacity: 0.8; }
-        .btn-success { background-color: #28a745; width: 100%; max-width: 300px; padding: 15px; font-weight: bold; font-size: 1.1rem; }
-        .btn-primary { background-color: #007bff; }
-        .btn-danger { background-color: #dc3545; }
-        .btn-secondary { background-color: #6c757d; }
-        .btn-outline { background-color: transparent; border: 1px solid #6c757d; color: #6c757d; padding: 5px 10px; font-size: 0.9rem;}
-        .btn-outline:hover { background-color: #f0f0f0; }
-
-    </style>
+    <title>{{ post.title }} - 詳細</title>
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/schedule.css' %}">
 </head>
-<body>
-
+<body class="app-page">
 <div class="container">
-    <div style="margin-bottom: 20px;">
-        <a href="{% url 'team_shouronpou:post_list' %}" class="btn-outline">&larr; 一覧に戻る</a>
-    </div>
-
-    <div class="header">
-        <h1>{{ post.title }}</h1>
-        <div class="meta-info">
-            投稿日: {{ post.created_at|date:"Y/m/d H:i" }} | 
-            投稿者: {{ post.created_by.username|default:"ゲスト" }}
-        </div>
-    </div>
-
-    <h3>実験概要</h3>
-    <table class="info-table">
-        <tr>
-            <th>実施場所 (研究室)</th>
-            <td>{{ post.department }} / {{ post.laboratory }}</td>
-        </tr>
-        <tr>
-            <th>報酬</th>
-            <td>{{ post.reward }}</td>
-        </tr>
-        <tr>
-            <th>所要時間</th>
-            <td>{{ post.duration }} 分</td>
-        </tr>
-    </table>
-
-    <h3>募集内容</h3>
-    <div style="line-height: 1.8; white-space: pre-wrap;">{{ post.content|urlize }}</div>
-
-    <h3>参加条件・配慮事項</h3>
-    <table class="info-table">
-        <tr>
-            <th>国籍条件</th>
-            <td>{{ post.get_condition_nationality_display|default:"指定なし" }}</td>
-        </tr>
-        <tr>
-            <th>性別条件</th>
-            <td>{{ post.get_condition_gender_display|default:"指定なし" }}</td>
-        </tr>
-        <tr>
-            <th>対象年齢</th>
-            <td>{{ post.target_age|default:"指定なし" }}</td>
-        </tr>
-        <tr>
-            <th>健康面の配慮</th>
-            <td>{{ post.health_notes|default:"特になし"|linebreaksbr }}</td>
-        </tr>
-        {% if post.free_notes %}
-        <tr>
-            <th>その他</th>
-            <td>{{ post.free_notes|linebreaksbr }}</td>
-        </tr>
-        {% endif %}
-    </table>
-
-    <h3>実験受け入れ可能時間</h3>
-    <div class="schedule-grid">
-        <div class="grid-header" style="background: transparent;"></div>
-        <div class="grid-header">月</div>
-        <div class="grid-header">火</div>
-        <div class="grid-header">水</div>
-        <div class="grid-header">木</div>
-        <div class="grid-header">金</div>
-
-        <div class="time-label">1限</div>
-        <div class="slot-box" data-value="mon_1"></div>
-        <div class="slot-box" data-value="tue_1"></div>
-        <div class="slot-box" data-value="wed_1"></div>
-        <div class="slot-box" data-value="thu_1"></div>
-        <div class="slot-box" data-value="fri_1"></div>
+    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <a href="{% url 'team_shouronpou:post_list' %}" class="btn-outline">&larr; 掲示板に戻る</a>
         
-        <div class="time-label">2限</div>
-        <div class="slot-box" data-value="mon_2"></div>
-        <div class="slot-box" data-value="tue_2"></div>
-        <div class="slot-box" data-value="wed_2"></div>
-        <div class="slot-box" data-value="thu_2"></div>
-        <div class="slot-box" data-value="fri_2"></div>
-
-        <div class="time-label">昼</div>
-        <div class="slot-box" data-value="mon_lunch"></div>
-        <div class="slot-box" data-value="tue_lunch"></div>
-        <div class="slot-box" data-value="wed_lunch"></div>
-        <div class="slot-box" data-value="thu_lunch"></div>
-        <div class="slot-box" data-value="fri_lunch"></div>
-
-        <div class="time-label">3限</div>
-        <div class="slot-box" data-value="mon_3"></div>
-        <div class="slot-box" data-value="tue_3"></div>
-        <div class="slot-box" data-value="wed_3"></div>
-        <div class="slot-box" data-value="thu_3"></div>
-        <div class="slot-box" data-value="fri_3"></div>
-
-        <div class="time-label">4限</div>
-        <div class="slot-box" data-value="mon_4"></div>
-        <div class="slot-box" data-value="tue_4"></div>
-        <div class="slot-box" data-value="wed_4"></div>
-        <div class="slot-box" data-value="thu_4"></div>
-        <div class="slot-box" data-value="fri_4"></div>
-
-        <div class="time-label">5限</div>
-        <div class="slot-box" data-value="mon_5"></div>
-        <div class="slot-box" data-value="tue_5"></div>
-        <div class="slot-box" data-value="wed_5"></div>
-        <div class="slot-box" data-value="thu_5"></div>
-        <div class="slot-box" data-value="fri_5"></div>
-
-        <div class="time-label">6限</div>
-        <div class="slot-box" data-value="mon_6"></div>
-        <div class="slot-box" data-value="tue_6"></div>
-        <div class="slot-box" data-value="wed_6"></div>
-        <div class="slot-box" data-value="thu_6"></div>
-        <div class="slot-box" data-value="fri_6"></div>
-
-        <div class="time-label">放課後</div>
-        <div class="slot-box" data-value="mon_after"></div>
-        <div class="slot-box" data-value="tue_after"></div>
-        <div class="slot-box" data-value="wed_after"></div>
-        <div class="slot-box" data-value="thu_after"></div>
-        <div class="slot-box" data-value="fri_after"></div>
-    </div>
-    <input type="hidden" id="saved_slots_data" value="{{ post.available_slots }}">
-
-    <div class="status-section">
-        <p>募集期間: 
-            {% if post.recruitment_start_date or post.recruitment_end_date %}
-                {{ post.recruitment_start_date|date:"Y/m/d"|default:"-" }} 〜 {{ post.recruitment_end_date|date:"Y/m/d"|default:"-" }}
-            {% else %}
-                常時募集中
-            {% endif %}
-        </p>
-
-        <div style="display: flex; justify-content: space-around; margin: 20px 0;">
-            <div>
-                <small>募集人数</small>
-                <div class="status-number">
-                    {% if post.max_participants %}{{ post.max_participants }}名{% else %}無制限{% endif %}
-                </div>
-            </div>
-            <div>
-                <small>現在の参加者</small>
-                <div class="status-number">{{ post.current_participants }}名</div>
-            </div>
-            {% if post.max_participants %}
-            <div>
-                <small>残り枠</small>
-                <div class="status-number" style="color: {% if post.remaining_spots == 0 %}#dc3545{% else %}#28a745{% endif %};">
-                    {{ post.remaining_spots }}名
-                </div>
-            </div>
-            {% endif %}
+        {% if login_user and login_user.id == post.created_by.id %}
+        <div>
+            <a href="{% url 'team_shouronpou:post_edit' post.pk %}" class="btn btn-secondary">編集</a>
+            <a href="{% url 'team_shouronpou:post_delete' post.pk %}" class="btn btn-danger">削除</a>
         </div>
-
-        <div style="margin-top: 20px;">
-            {% if post.max_participants and post.remaining_spots == 0 %}
-                <button class="btn btn-secondary" disabled>満員のため応募できません</button>
-            {% else %}
-                <form action="{% url 'team_shouronpou:post_apply' post.pk %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-success">この募集に応募する</button>
-                </form>
-            {% endif %}
-        </div>
-    </div>
-
-    <div style="margin-top: 40px; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
-        {% if not post.created_by_id or login_user and post.created_by_id == login_user.id %}
-            <a href="{% url 'team_shouronpou:post_edit' post.pk %}" class="btn btn-primary" style="font-size: 0.9rem;">編集する</a>
-            <a href="{% url 'team_shouronpou:post_delete' post.pk %}" class="btn btn-danger" style="font-size: 0.9rem;">削除する</a>
         {% endif %}
     </div>
 
+    <h1>{{ post.title }}</h1>
+    
+    <div class="profile-card">
+        <h3 class="section-title">実験の概要</h3>
+        <table class="info-table">
+            <tr><th>学部・学科</th><td>{{ post.department }}</td></tr>
+            <tr><th>研究室</th><td>{{ post.laboratory }}</td></tr>
+            <tr><th>報酬</th><td>{{ post.reward }}</td></tr>
+            <tr><th>所要時間</th><td>{{ post.duration }} 分</td></tr>
+            <tr><th>募集期限</th><td>{{ post.recruitment_end_date }}</td></tr>
+            <tr>
+                <th>受入可能時間</th>
+                <td>
+                    <input type="hidden" id="view_slots_data" value="{{ post.available_slots|safe }}">
+                    {% if login_user %}
+                        <input type="hidden" id="login_user_slots" value="{{ login_user.available_slots|safe }}">
+                    {% endif %}
+                    
+                    <div class="schedule-container-view">
+                        <div id="viewGrid" class="schedule-grid-view"></div>
+                    </div>
+                </td>
+            </tr>
+            <tr><th>内容</th><td>{{ post.content|linebreaksbr }}</td></tr>
+        </table>
+    </div>
+
+    <div class="profile-card">
+        <h3 class="section-title">参加条件・注意事項</h3>
+        <table class="info-table">
+            <tr><th>健康上の注意</th><td>{{ post.health_notes|linebreaksbr|default:"特になし" }}</td></tr>
+            <tr><th>備考</th><td>{{ post.free_notes|linebreaksbr|default:"特になし" }}</td></tr>
+        </table>
+    </div>
+
+    <div class="footer-actions">
+        <div class="status-badge">
+            <div><span class="status-label">現在の参加者</span><br><span class="status-number">{{ post.current_participants }}</span></div>
+            <div style="font-size: 1.5rem; color: #ccc; padding-top: 10px;">/</div>
+            <div><span class="status-label">定員</span><br><span class="status-number">{{ post.max_participants|default:"∞" }}</span></div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            {% if login_user %}
+                {% if is_applied %}
+                    <form action="{% url 'team_shouronpou:cancel_application' post.pk %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-danger" style="width: 250px;">応募を取り消す</button>
+                    </form>
+                {% else %}
+                    <button onclick="showModal()" class="btn-primary" style="width: 250px;">この実験に応募する</button>
+                {% endif %}
+            {% else %}
+                <button onclick="showModal()" class="btn-primary" style="width: 250px;">ゲストとして応募する</button>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if login_user and login_user.id == post.created_by.id %}
+    <div class="profile-card" style="margin-top: 40px; border-top: 5px solid #007bff;">
+        <h3 class="section-title">【募集主限定】応募者リスト</h3>
+        <table class="info-table">
+            <thead>
+                <tr><th>ユーザー名</th><th>メールアドレス</th><th>応募日時</th></tr>
+            </thead>
+            <tbody>
+                {% for app in post.applications.all %}
+                <tr>
+                    <td>{{ app.user.username|default:"ゲスト" }}</td>
+                    <td><a href="mailto:{{ app.email }}">{{ app.email }}</a></td>
+                    <td>{{ app.applied_at|date:"Y/m/d H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" style="text-align: center;">まだ応募者はありません。</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const slotsInput = document.getElementById('saved_slots_data');
-        const slotBoxes = document.querySelectorAll('.slot-box');
-        let savedSlots = [];
+<div id="applyModal" class="modal">
+    <div class="modal-content">
+        <h2>実験への応募</h2>
+        <p style="font-weight:bold; color:#666; margin-bottom:5px;">募集者からのメッセージ:</p>
+        <div class="message-box">{{ post.message_for_applicants|default:"応募にあたって、連絡用のメールアドレスを入力してください。" }}</div>
+        
+        <form action="{% url 'team_shouronpou:post_apply' post.pk %}" method="POST">
+            {% csrf_token %}
+            <label for="id_email" style="display:block; margin-bottom:5px; font-weight:bold;">メールアドレス:</label>
+            <input type="email" id="id_email" name="applicant_email" required placeholder="example@mail.com" style="width:100%; padding:10px; margin-bottom:20px; border:1px solid #ccc; border-radius:4px;">
+            
+            <div style="display:flex; gap:10px; justify-content: flex-end;">
+                <button type="button" onclick="hideModal()" class="btn-secondary">キャンセル</button>
+                <button type="submit" class="btn-primary">応募を確定する</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-        try {
-            const rawValue = slotsInput.value;
-            if (rawValue) {
-                // Pythonのリスト形式をJSONに変換
-                const validJson = rawValue.replace(/'/g, '"');
-                savedSlots = JSON.parse(validJson);
-            }
-        } catch(e) {
-            console.error("Parse error:", e);
-            savedSlots = [];
-        }
-
-        // 緑色に反映
-        slotBoxes.forEach(box => {
-            const val = box.dataset.value;
-            if (savedSlots.includes(val)) {
-                box.classList.add('active');
-            }
-        });
-    });
-</script>
-
+<script src="{% static 'team_shouronpou/js/schedule_viewer.js' %}"></script>
+<script src="{% static 'team_shouronpou/js/apply_modal.js' %}"></script>
 </body>
 </html>

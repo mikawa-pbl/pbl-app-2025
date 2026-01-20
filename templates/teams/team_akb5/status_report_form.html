@@ -3,12 +3,90 @@
 {% block title %}ネットワーク状況の投稿{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <style>
     #map {
         height: 400px;
         width: 100%;
     }
+    .leaflet-marker-icon,
+    .leaflet-marker-shadow {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        outline: none;
+        padding: 0;
+    }
+    .leaflet-marker-icon img {
+        background: transparent;
+        display: block;
+    }
+    .wan-check {
+        margin: 1.25rem 0 1.5rem;
+        padding: 1.25rem 1.5rem;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #f4f8ff 0%, #eef4ff 45%, #e9f1ff 100%);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+        display: grid;
+        gap: 0.75rem;
+    }
+    .wan-check-title {
+        display: flex;
+        align-items: center;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: 0.02em;
+    }
+    .wan-check-grid {
+        display: grid;
+        gap: 0.75rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .wan-check-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+    .wan-check-label {
+        font-size: 0.9rem;
+        color: #475569;
+        margin-bottom: 0.25rem;
+    }
+    .wan-check-status::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #94a3b8;
+    }
+    .wan-check-status.is-checking::before {
+        background: #3b82f6;
+        animation: wan-pulse 1.2s ease-in-out infinite;
+    }
+    .wan-check-status.is-ok::before {
+        background: #22c55e;
+    }
+    .wan-check-status.is-fail::before {
+        background: #ef4444;
+    }
+    @keyframes wan-pulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+        }
+        50% {
+            transform: scale(1.15);
+            box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+        }
+    }
+    @media (max-width: 720px) {
+        .wan-check-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
 </style>
 {% endblock %}
 
@@ -18,20 +96,40 @@
 <p>地図をクリックして、位置情報を選択してください。</p>
 <div id="map"></div>
 
-<form method="post">
+<form method="post" id="status-report-form">
     {% csrf_token %}
+    <section class="wan-check" aria-live="polite">
+        <div class="wan-check-title">ネットワーク自動診断</div>
+        <div class="wan-check-grid">
+            <div>
+                <div class="wan-check-label">WAN疎通確認</div>
+                <div id="wan-check-status" class="wan-check-status is-checking">確認中...</div>
+            </div>
+            <div>
+                <div class="wan-check-label">学内ネットワーク疎通確認</div>
+                <div id="dns-check-status" class="wan-check-status is-checking">確認中...</div>
+            </div>
+        </div>
+    </section>
     {{ form.as_p }}
+    <p id="symptom-alert" style="color: #d32f2f; display: none;">症状を選択してください。</p>
+    <p id="pin-alert" style="color: #d32f2f; display: none;">地図にピンを打ってください。</p>
     <button type="submit">投稿する</button>
 </form>
 
 <hr>
-<a href="{% url 'team_akb5:admin' %}">一覧に戻る</a>
+<a href="{% url 'team_akb5:user' %}">一覧に戻る</a>
 
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
         const latitudeInput = document.getElementById('id_latitude');
         const longitudeInput = document.getElementById('id_longitude');
+        const form = document.getElementById('status-report-form');
+        const symptomInput = document.getElementById('id_symptom');
+        const symptomAlert = document.getElementById('symptom-alert');
+        const pinAlert = document.getElementById('pin-alert');
+        const wanStatus = document.getElementById('wan-check-status');
+        const dnsStatus = document.getElementById('dns-check-status');
 
         // Map coordinates
         const lat1 = 34.70315;
@@ -55,13 +153,54 @@
         const lat = urlParams.get('lat');
         const lng = urlParams.get('lng');
 
+        const updatePinStatus = (latValue, lngValue) => {
+            latitudeInput.value = latValue;
+            longitudeInput.value = lngValue;
+            if (pinAlert) {
+                pinAlert.style.display = 'none';
+            }
+        };
+
         if (lat && lng) {
             const initialLatLng = L.latLng(lat, lng);
-            latitudeInput.value = lat;
-            longitudeInput.value = lng;
+            updatePinStatus(lat, lng);
             marker = L.marker(initialLatLng).addTo(map);
             map.setView(initialLatLng, 15);
         }
+
+        const setStatusClass = (statusEl, state) => {
+            statusEl.classList.remove('is-checking', 'is-ok', 'is-fail');
+            statusEl.classList.add(state);
+        };
+
+        const runConnectivityCheck = (targetUrl, statusEl) => {
+            if (!statusEl) {
+                return;
+            }
+            setStatusClass(statusEl, 'is-checking');
+            const img = new Image();
+            const timeoutId = setTimeout(() => {
+                img.onload = null;
+                img.onerror = null;
+                setStatusClass(statusEl, 'is-fail');
+                statusEl.textContent = '失敗 (タイムアウト)';
+            }, 5000);
+
+            img.onload = () => {
+                clearTimeout(timeoutId);
+                setStatusClass(statusEl, 'is-ok');
+                statusEl.textContent = '成功';
+            };
+            img.onerror = () => {
+                clearTimeout(timeoutId);
+                setStatusClass(statusEl, 'is-fail');
+                statusEl.textContent = '失敗';
+            };
+            img.src = targetUrl + '?ping=' + Date.now();
+        };
+
+        runConnectivityCheck('https://www.google.com/favicon.ico', wanStatus);
+        runConnectivityCheck('https://www.tut.ac.jp/favicon.ico', dnsStatus);
 
         map.on('mousedown', function (e) {
             isDragged = false;
@@ -77,8 +216,42 @@
                     map.removeLayer(marker);
                 }
                 marker = L.marker(e.latlng).addTo(map);
-                latitudeInput.value = e.latlng.lat;
-                longitudeInput.value = e.latlng.lng;
+                updatePinStatus(e.latlng.lat, e.latlng.lng);
+            }
+        });
+
+        if (symptomInput) {
+            symptomInput.removeAttribute('required');
+            symptomInput.addEventListener('change', () => {
+                if (symptomAlert) {
+                    symptomAlert.style.display = symptomInput.value ? 'none' : 'block';
+                }
+            });
+        }
+
+        form.addEventListener('submit', (event) => {
+            let hasError = false;
+
+            if (symptomInput && !symptomInput.value) {
+                hasError = true;
+                if (symptomAlert) {
+                    symptomAlert.style.display = 'block';
+                }
+            } else if (symptomAlert) {
+                symptomAlert.style.display = 'none';
+            }
+
+            if (!latitudeInput.value || !longitudeInput.value) {
+                hasError = true;
+                if (pinAlert) {
+                    pinAlert.style.display = 'block';
+                }
+            } else if (pinAlert) {
+                pinAlert.style.display = 'none';
+            }
+
+            if (hasError) {
+                event.preventDefault();
             }
         });
     });

@@ -2,6 +2,24 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.utils import timezone
 
+class Laboratory(models.Model):
+    """
+    研究室モデル (Ver 5.0)
+    動的に追加可能にするため、ハードコードからモデルへ移行
+    """
+    name = models.CharField(
+        verbose_name='研究室名',
+        max_length=100,
+        unique=True
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = '研究室'
+        verbose_name_plural = '研究室一覧'
+
 class ExperimentPost(models.Model):
     """
     実験協力者募集の投稿モデル（Ver 3.0）
@@ -16,23 +34,8 @@ class ExperimentPost(models.Model):
     )
     ## *後で検討：終了間近、強調を作成するか？*
 
-    # # カテゴリの選択肢 (要件3.2のフィルタリング項目より)
-    # CATEGORY_CHOICES = (
-    #     ('psychology', '心理学'),
-    #     ('medical', '医学'),
-    #     ('engineering', '工学'),
-    #     ('survey', 'アンケート'),
-    #     ('other', 'その他'),
-    # )
-    ## *後で変更：タグが荒い？制限は必要*
-
-    # 研究室の選択肢(V3.1)
-    LAB_CHOICES = (
-        ('hukumura', '生体運動制御システム研究室（福村研）'),
-        ('kitazaki', '視覚心理物理学研究室（北崎研）'),
-        ('nakauti', '視覚認知情報学研究室（中内研）'),
-        ('other', 'その他'),
-    )
+    # 研究室の選択肢(V3.1) -> Laboratoryモデルへ移行(V5.0)
+    # LAB_CHOICES = ( ... ) 廃止
 
     # フィールド定義
     title = models.CharField(
@@ -59,19 +62,13 @@ class ExperimentPost(models.Model):
         verbose_name='実験概要'
     )
     
-    # category = models.CharField(
-    #     verbose_name='カテゴリ',
-    #     max_length=50,
-    #     choices=CATEGORY_CHOICES,
-    #     default='other'
-    # )
-
-    # フィールド定義部分の修正（category → laboratory に変更）V3.1
-    category = models.CharField(
-        max_length=50,
-        choices=LAB_CHOICES, # ここで上記の選択肢を指定
-        verbose_name='研究室', # 画面上のラベルも「研究室」に変更
-        default='other'
+    # フィールド定義部分の修正（category → laboratory に変更）V5.0
+    laboratory = models.ForeignKey(
+        'Laboratory',
+        on_delete=models.PROTECT, # 研究室が削除されても投稿は消さない（あるいはSET_NULL）だが、通常研究室は消さないのでPROTECT
+        verbose_name='研究室',
+        null=True, # 既存データ移行用 & 任意選択
+        blank=True
     )
 
     # 重要：Google Forms 機能
@@ -80,8 +77,14 @@ class ExperimentPost(models.Model):
         help_text='Google Forms等のURLを入力してください'
     )
 
-    schedule = models.DateTimeField(
-        verbose_name='実施日時'
+    start_date = models.DateField(
+        verbose_name='募集開始日',
+        default=timezone.now
+    )
+
+    end_date = models.DateField(
+        verbose_name='募集終了日',
+        default=timezone.now
     )
 
     duration = models.CharField(
@@ -134,6 +137,35 @@ class ExperimentPost(models.Model):
 
     def __str__(self):
         return self.title
+
+    @staticmethod
+    def process_automatic_updates():
+        """
+        要件3.6 自動処理機能の実装
+        1. 募集終了日を過ぎた'open'ステータスの投稿を'closed'に変更
+        2. 募集終了日から1週間(7日)経過した投稿を物理削除
+        """
+        from datetime import timedelta
+        today = timezone.now().date()
+        
+        # 1. 自動ステータス変更: open でかつ end_date < today のものを closed に
+        # (end_date が昨日の日付なら、今日は募集終了している)
+        expired_posts = ExperimentPost.objects.filter(
+            status='open',
+            end_date__lt=today
+        )
+        if expired_posts.exists():
+            expired_posts.update(status='closed')
+
+        # 2. 自動削除: end_date から7日経過したものを削除
+        # 今日が 1/20 だとすると、end_date が 1/13 より前 (1/12以下) なら削除対象
+        # 1/13 + 7日 = 1/20 なので、今日削除される
+        deletion_threshold = today - timedelta(days=7)
+        posts_to_delete = ExperimentPost.objects.filter(
+            end_date__lt=deletion_threshold
+        )
+        if posts_to_delete.exists():
+            posts_to_delete.delete()
 
     class Meta:
         verbose_name = '実験募集投稿'

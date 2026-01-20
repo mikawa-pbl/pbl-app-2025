@@ -12,6 +12,11 @@ urlpatterns = [
     # 統計ページ
     path("statistics/", views.statistics_view, name="statistics"),
     path("api/statistics/", views.get_statistics, name="get_statistics"),
+    # 質問対策ページ
+    path("questions/", views.questions_view, name="questions"),
+    path("api/questions/upcoming-companies/", views.get_upcoming_companies, name="get_upcoming_companies"),
+    path("api/questions/company/<int:company_id>/", views.get_company_questions, name="get_company_questions"),
+    path("api/questions/save/", views.save_question_answer, name="save_question_answer"),
     # アカウント関連
     path("register/", views.register_view, name="register"),
     path("login/", views.login_view, name="login"),

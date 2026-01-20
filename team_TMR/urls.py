@@ -24,6 +24,10 @@ urlpatterns = [
 
     # プロフィール
     path('profile/', views.ProfileView.as_view(), name='profile'),
+    
+    # メンバーリスト
+    path('members/', views.MemberListView.as_view(), name='member_list'),
+    path('members/<int:pk>/', views.MemberRoadmapView.as_view(), name='member_roadmap'),
 
     # ロードマップ
     path('roadmaps/', views.RoadmapListView.as_view(), name='roadmap_list'),

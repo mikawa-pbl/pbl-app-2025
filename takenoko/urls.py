@@ -16,4 +16,5 @@ urlpatterns = [
     path('item_edit/', views.item_edit, name='item_edit'),
     path('edit_complete/', views.edit_complete, name='edit_complete'),
     path('logout/', views.logout, name='logout'),
+    path('toggle_item_status/', views.toggle_item_status, name='toggle_item_status'),
 ]

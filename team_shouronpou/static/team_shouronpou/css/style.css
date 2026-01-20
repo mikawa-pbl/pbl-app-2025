@@ -1,0 +1,273 @@
+@charset "UTF-8";
+
+/* =========================================
+   基本設定 (Base)
+   ========================================= */
+body {
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5; /* デフォルト背景色 */
+}
+
+a {
+    text-decoration: none;
+    color: #007bff;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* =========================================
+   ページ別レイアウト (Layouts)
+   ========================================= */
+
+/* 1. 認証ページ用 (login.html, signup.html) */
+body.auth-page {
+    max-width: 400px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 40px 20px;
+}
+body.auth-page h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+body.auth-page .links {
+    margin-top: 20px;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+/* 2. アプリ閲覧ページ用 (post_detail.html, mypage.html) */
+body.app-page {
+    background-color: #f0f2f5;
+}
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* 3. フォーム入力ページ用 (post_new.html, profile_edit.html) */
+body.form-page {
+    max-width: 700px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 30px;
+}
+
+/* =========================================
+   共通コンポーネント (Components)
+   ========================================= */
+
+/* ボタン */
+button, .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s, transform 0.1s;
+    text-align: center;
+}
+button:active, .btn:active {
+    transform: translateY(1px);
+}
+
+.btn-primary { background-color: #007bff; color: #fff; }
+.btn-primary:hover { background-color: #0056b3; }
+
+.btn-success { background-color: #28a745; color: #fff; }
+.btn-success:hover { background-color: #218838; }
+
+.btn-danger { background-color: #dc3545; color: #fff; }
+.btn-danger:hover { background-color: #c82333; }
+
+.btn-secondary { background-color: #6c757d; color: #fff; }
+.btn-secondary:hover { background-color: #5a6268; }
+
+.btn-cancel { background-color: #eee; color: #333; margin-left: 10px; }
+
+/* アウトラインボタン */
+.btn-outline {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #007bff;
+    border: 1px solid #007bff;
+    background-color: transparent;
+    transition: all 0.2s;
+}
+.btn-outline:hover {
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* フォーム要素 */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="password"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; 
+    font-size: 1rem;
+}
+
+/* フォームの横並び */
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.form-col {
+    flex: 1;
+}
+
+/* =========================================
+   詳細・マイページ用パーツ
+   ========================================= */
+
+/* 情報テーブル (詳細画面用) */
+table.info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+table.info-table th {
+    width: 30%;
+    text-align: left;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    font-weight: bold;
+}
+table.info-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+/* プロフィールカード (マイページ用) */
+.profile-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+.profile-item {
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+.profile-label {
+    font-weight: bold;
+    color: #666;
+    font-size: 0.9em;
+}
+.profile-value {
+    font-weight: bold;
+}
+.section-title {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+/* 詳細画面のバッジエリア */
+.footer-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.status-badge {
+    display: flex;
+    gap: 20px;
+    text-align: center;
+}
+.status-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* 投稿一覧のボタンリンク用 */
+.btn-link { 
+    text-decoration: none; 
+    padding: 5px 12px; 
+    border-radius: 4px; 
+    font-size: 0.9em; 
+    display: inline-block;
+}
+.btn-mypage { background-color: #007bff; color: white; }
+.btn-logout { background-color: #6c757d; color: white; margin-left: 5px; }
+
+/* =========================================
+   レスポンシブ調整
+   ========================================= */
+@media (max-width: 600px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    .container {
+        padding: 15px;
+    }
+    .profile-item {
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+
+.modal {
+    display: none;        /* 初期状態：非表示 */
+    position: fixed;      /* 画面に固定 */
+    z-index: 10000;       /* 最前面へ */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6); /* 背景を暗くする */
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.message-box {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+    font-size: 0.95rem;
+}

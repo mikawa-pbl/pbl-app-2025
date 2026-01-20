@@ -16,6 +16,75 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            padding-left: 80px;
+            transition: padding-left 0.3s;
+        }
+        body.menu-open {
+            padding-left: 280px;
+        }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 60px;
+            background: #2c3e50;
+            z-index: 1000;
+            transition: width 0.3s;
+            overflow: hidden;
+        }
+        .sidebar.open {
+            width: 250px;
+        }
+        .hamburger {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 60px;
+            padding: 20px;
+            cursor: pointer;
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            background: #2c3e50;
+            z-index: 10;
+        }
+        .menu-items {
+            margin-top: 80px;
+        }
+        .menu-item {
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .menu-item:hover {
+            background: #34495e;
+        }
+        .menu-item.logout {
+            background: #dc3545;
+            margin-top: 20px;
+        }
+        .menu-item.logout:hover {
+            background: #c82333;
+        }
+        .menu-icon {
+            font-size: 20px;
+            min-width: 20px;
+            flex-shrink: 0;
+        }
+        .menu-text {
+            max-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: max-width 0.3s ease;
+        }
+        .sidebar.open .menu-text {
+            max-width: 200px;
         }
 
         .user-info {
@@ -197,11 +266,6 @@
             color: #1976d2;
         }
 
-        .badge-status {
-            background: #f3e5f5;
-            color: #7b1fa2;
-        }
-
         .badge-date {
             background: #fff3e0;
             color: #e65100;
@@ -229,10 +293,26 @@
     </style>
 </head>
 <body>
-    <!-- ユーザー情報バー -->
-    <div class="user-info">
-        <div class="username">ようこそ、{{ username }}さん</div>
-        <a href="{% url 'team_UD:logout' %}" class="logout-btn">ログアウト</a>
+    <div class="sidebar" id="sidebar">
+        <div class="hamburger" onclick="toggleMenu()">☰</div>
+        <div class="menu-items">
+            <a href="{% url 'team_UD:calendar' %}" class="menu-item">
+                <span class="menu-icon">📅</span>
+                <span class="menu-text">カレンダー</span>
+            </a>
+            <a href="{% url 'team_UD:questions' %}" class="menu-item">
+                <span class="menu-icon">📝</span>
+                <span class="menu-text">質問対策</span>
+            </a>
+            <a href="{% url 'team_UD:statistics' %}" class="menu-item">
+                <span class="menu-icon">📊</span>
+                <span class="menu-text">面接質問統計</span>
+            </a>
+            <a href="{% url 'team_UD:logout' %}" class="menu-item logout">
+                <span class="menu-icon">🚪</span>
+                <span class="menu-text">ログアウト</span>
+            </a>
+        </div>
     </div>
 
     <div class="container">
@@ -265,24 +345,9 @@
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="interview_date">面接日</label>
-                        <input type="date" id="interview_date" name="interview_date">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="status">選考状況 *</label>
-                        <select id="status" name="status" required>
-                            <option value="">選択してください</option>
-                            <option value="応募予定">応募予定</option>
-                            <option value="選考中">選考中</option>
-                            <option value="結果待ち">結果待ち</option>
-                            <option value="通過">通過</option>
-                            <option value="不合格">不合格</option>
-                            <option value="辞退">辞退</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="interview_date">面接日</label>
+                    <input type="date" id="interview_date" name="interview_date">
                 </div>
 
                 <div class="form-group">
@@ -304,7 +369,6 @@
                         <div class="memo-company">{{ memo.company_name }}</div>
                         <div class="memo-badges">
                             <span class="badge badge-interview">{{ memo.interview_stage }}</span>
-                            <span class="badge badge-status">{{ memo.status }}</span>
                             {% if memo.interview_date %}
                             <span class="badge badge-date">{{ memo.interview_date }}</span>
                             {% endif %}
@@ -319,5 +383,13 @@
             {% endif %}
         </div>
     </div>
+    <script>
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            sidebar.classList.toggle('open');
+            body.classList.toggle('menu-open');
+        }
+    </script>
 </body>
 </html>

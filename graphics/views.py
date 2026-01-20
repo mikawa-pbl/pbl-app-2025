@@ -117,6 +117,9 @@ def add_book_review(request):
             review.save(using='graphics')
             messages.success(request, '参考書レビューを登録しました。')
             return redirect('graphics:my_reviews')
+        else:
+            # バリデーションエラーの場合、review_typeをbookに設定
+            review_type_param = 'book'
 
     context = {
         'book_form': book_form,
@@ -176,6 +179,7 @@ def add_subject_review(request):
                 context = {
                     'book_form': book_form,
                     'subject_form': form,
+                    'review_type': 'subject',
                 }
                 return render(request, 'teams/graphics/add_book_review.html', context)
 
@@ -191,8 +195,17 @@ def add_subject_review(request):
             review.save(using='graphics')
             messages.success(request, '科目レビューを登録しました。')
             return redirect('graphics:my_reviews')
+        else:
+            # バリデーションエラーの場合、フォームデータを保持してページを再表示
+            book_form = BookReviewForm()
+            context = {
+                'book_form': book_form,
+                'subject_form': form,
+                'review_type': 'subject',
+            }
+            return render(request, 'teams/graphics/add_book_review.html', context)
 
-    # POSTでない場合やバリデーションエラーの場合は、add_book_reviewにリダイレクト
+    # POSTでない場合は、add_book_reviewにリダイレクト
     return redirect('graphics:add_book_review')
 
 

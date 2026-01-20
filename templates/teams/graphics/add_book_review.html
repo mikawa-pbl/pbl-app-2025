@@ -256,6 +256,40 @@
         .star.active {
             content: '★';
         }
+        /* レビュー文字数カウンター */
+        .char-counter {
+            text-align: right;
+            margin-top: 5px;
+            font-size: 14px;
+            color: #64748b;
+        }
+        .char-counter.over-limit {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        /* contenteditable レビュー入力エリア */
+        .review-editable {
+            width: 100%;
+            min-height: 150px;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            line-height: 1.6;
+            background-color: white;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .review-editable:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .review-editable .over-text {
+            background-color: rgba(239, 68, 68, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -331,8 +365,10 @@
             </div>
 
             <div class="form-group">
-                <label for="{{ subject_form.review.id_for_label }}">{{ subject_form.review.label }}</label>
-                {{ subject_form.review }}
+                <label>{{ subject_form.review.label }}</label>
+                <div class="review-editable" id="subject-review-editable" contenteditable="true" data-placeholder="この科目のレビューを書いてください（授業の難易度、内容、おすすめポイントなど）">{{ subject_form.review.value|default:'' }}</div>
+                <input type="hidden" name="review" id="subject-review-hidden" value="{{ subject_form.review.value|default:'' }}">
+                <div class="char-counter" id="subject-review-counter">0 / 500</div>
                 {% if subject_form.review.errors %}
                     <div class="error">{{ subject_form.review.errors }}</div>
                 {% endif %}
@@ -400,8 +436,10 @@
             <div id="book-info-loading" style="display: none; margin-bottom: 25px; padding: 15px; background-color: #f0f9ff; color: #0369a1; border-left: 4px solid #0ea5e9; border-radius: 8px;">書籍情報を取得中...</div>
 
             <div class="form-group">
-                <label for="{{ book_form.review.id_for_label }}">{{ book_form.review.label }}</label>
-                {{ book_form.review }}
+                <label>{{ book_form.review.label }}</label>
+                <div class="review-editable" id="book-review-editable" contenteditable="true" data-placeholder="この参考書のレビューを書いてください">{{ book_form.review.value|default:'' }}</div>
+                <input type="hidden" name="review" id="book-review-hidden" value="{{ book_form.review.value|default:'' }}">
+                <div class="char-counter" id="book-review-counter">0 / 500</div>
                 {% if book_form.review.errors %}
                     <div class="error">{{ book_form.review.errors }}</div>
                 {% endif %}
@@ -511,6 +549,10 @@
             // 科目名オートコンプリート
             setupSubjectReviewAutocomplete();  // 科目レビュー用
             setupBookReviewAutocomplete();      // 参考書レビュー用
+
+            // レビュー文字数カウンターのセットアップ（contenteditable版）
+            setupReviewEditable('subject-review-editable', 'subject-review-hidden', 'subject-review-counter', 500);
+            setupReviewEditable('book-review-editable', 'book-review-hidden', 'book-review-counter', 500);
 
             // review_typeパラメータに応じて初期タブを設定
             {% if review_type == 'subject' %}
@@ -766,6 +808,118 @@
                     bookSubjectSuggestionsDiv.classList.remove('active');
                 }
             });
+        }
+
+        // contenteditable レビュー入力のセットアップ
+        function setupReviewEditable(editableId, hiddenId, counterId, maxLength) {
+            const editable = document.getElementById(editableId);
+            const hidden = document.getElementById(hiddenId);
+            const counter = document.getElementById(counterId);
+
+            if (!editable || !hidden || !counter) return;
+
+            // テキストをHTMLエスケープする関数
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // カーソル位置を保存・復元するためのユーティリティ
+            function saveCaretPosition(el) {
+                const selection = window.getSelection();
+                if (selection.rangeCount === 0) return null;
+                const range = selection.getRangeAt(0);
+                const preCaretRange = range.cloneRange();
+                preCaretRange.selectNodeContents(el);
+                preCaretRange.setEnd(range.endContainer, range.endOffset);
+                return preCaretRange.toString().length;
+            }
+
+            function restoreCaretPosition(el, pos) {
+                if (pos === null) return;
+                const selection = window.getSelection();
+                const range = document.createRange();
+
+                let currentPos = 0;
+                let found = false;
+
+                function traverse(node) {
+                    if (found) return;
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        const len = node.textContent.length;
+                        if (currentPos + len >= pos) {
+                            range.setStart(node, pos - currentPos);
+                            range.collapse(true);
+                            found = true;
+                        } else {
+                            currentPos += len;
+                        }
+                    } else {
+                        for (let child of node.childNodes) {
+                            traverse(child);
+                            if (found) break;
+                        }
+                    }
+                }
+
+                traverse(el);
+                if (found) {
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+            }
+
+            // 表示更新（超過部分にマーカー）
+            function updateDisplay() {
+                const text = editable.innerText || editable.textContent || '';
+                const length = text.length;
+
+                // hidden inputに値を設定
+                hidden.value = text;
+
+                // カウンター更新
+                counter.textContent = `${length} / ${maxLength}`;
+
+                if (length > maxLength) {
+                    counter.classList.add('over-limit');
+
+                    // カーソル位置を保存
+                    const caretPos = saveCaretPosition(editable);
+
+                    // 超過部分にマーカーを表示
+                    const normalText = text.substring(0, maxLength);
+                    const overText = text.substring(maxLength);
+                    editable.innerHTML = escapeHtml(normalText) + '<span class="over-text">' + escapeHtml(overText) + '</span>';
+
+                    // カーソル位置を復元
+                    restoreCaretPosition(editable, caretPos);
+                } else {
+                    counter.classList.remove('over-limit');
+                    // マーカー不要の場合はinnerHTMLを更新しない（入力中の挙動を維持）
+                }
+            }
+
+            // イベントリスナー
+            editable.addEventListener('input', updateDisplay);
+            editable.addEventListener('paste', function(e) {
+                // プレーンテキストのみ貼り付け
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                document.execCommand('insertText', false, text);
+            });
+
+            // フォーム送信前にhiddenに値を設定
+            const form = editable.closest('form');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    const text = editable.innerText || editable.textContent || '';
+                    hidden.value = text;
+                });
+            }
+
+            // 初期化
+            updateDisplay();
         }
     </script>
 </body>

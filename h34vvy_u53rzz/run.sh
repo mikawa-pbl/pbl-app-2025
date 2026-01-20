@@ -2,6 +2,7 @@
 
 set -e
 
-uv run python manage.py makemigrations
-uv run python manage.py migrate --database=h34vvy_u53rzz
-uv run python manage.py runserver
+uv run manage.py makemigrations h34vvy_u53rzz
+uv run manage.py migrate --database default
+uv run manage.py migrate --database h34vvy_u53rzz
+uv run manage.py runserver

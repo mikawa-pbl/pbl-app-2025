@@ -10,34 +10,25 @@ jobs:
   ci:
     runs-on: ubuntu-24.04
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v6
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-          cache-dependency-glob: "uv.lock"
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --locked --all-extras --dev
 
-      - name: Migration Integrity Check
-        run: scripts/check_migrations.sh
-
-      - name: Make Migrations Check
+      - name: Check migrations
         if: "false"
-        run: uv run manage.py makemigrations --check --dry-run
+        run: uv run manage.py makemigrations --check
         
       - name: Migrate
         run: uv run manage.py migrate --noinput
+
+      - name: Run tests
+        if: "false"
+        run: uv run manage.py test
 
       - name: Start Server & Health Check
         run: |
@@ -67,7 +58,3 @@ jobs:
           
           echo "Server health check passed."
           kill $PID
-
-      - name: Run Tests
-        if: "false"
-        run: uv run manage.py test

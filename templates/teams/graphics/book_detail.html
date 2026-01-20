@@ -229,7 +229,7 @@
             <div style="margin-bottom:12px;">
                 <form method="get" style="display:inline-block;">
                     <label for="bookSort" style="margin-right:8px; color:#475569; font-weight:600;">並び替え:</label>
-                    <select id="bookSort" name="sort" onchange="this.form.submit()" style="padding:6px 10px; border-radius:6px; border:1px solid #e2e8f0;">
+                    <select id="bookSort" name="sort" style="padding:6px 10px; border-radius:6px; border:1px solid #e2e8f0;">
                         <option value="" {% if not book_selected_sort %}selected{% endif %}>新着順</option>
                         <option value="rating_high" {% if book_selected_sort == 'rating_high' %}selected{% endif %}>評価の高い順</option>
                         <option value="rating_low" {% if book_selected_sort == 'rating_low' %}selected{% endif %}>評価の低い順</option>
@@ -293,6 +293,38 @@
             navMenu.classList.toggle('active');
             overlay.classList.toggle('active');
         }
+
+        // スクロール位置を保持するためのフィルタリング処理
+        (function() {
+            // ページ読み込み時にスクロール位置を復元
+            const urlParams = new URLSearchParams(window.location.search);
+            const scrollY = urlParams.get('scrollY');
+            if (scrollY) {
+                window.scrollTo(0, parseInt(scrollY, 10));
+                // URLからscrollYパラメータを削除してURLをクリーンにする
+                urlParams.delete('scrollY');
+                const newUrl = urlParams.toString()
+                    ? window.location.pathname + '?' + urlParams.toString()
+                    : window.location.pathname;
+                history.replaceState(null, '', newUrl);
+            }
+
+            // フィルタリング用のselect要素にスクロール位置保持機能を追加
+            const filterSelects = document.querySelectorAll('#bookSort');
+            filterSelects.forEach(function(select) {
+                select.addEventListener('change', function(e) {
+                    e.preventDefault();
+                    const form = this.form;
+                    // 現在のスクロール位置を隠しフィールドとして追加
+                    const scrollInput = document.createElement('input');
+                    scrollInput.type = 'hidden';
+                    scrollInput.name = 'scrollY';
+                    scrollInput.value = window.scrollY;
+                    form.appendChild(scrollInput);
+                    form.submit();
+                });
+            });
+        })();
     </script>
 </body>
 </html>

@@ -1,0 +1,114 @@
+# CIのセットアップ手順
+
+## CI(Continuous Integration)とは?
+
+CIとは、本番環境に移す前に、コードの品質を保証するための自動化されたテストプロセスです。
+CIを使用することによって2つのメリットがあります。
+1つは、開発環境では問題がなかったのに本番環境にデプロイする際に問題が生じることをなくすことができることです。もう一つは、プロダクト全体の品質を保証することができることです。
+
+## CIの設定手順
+
+以後、変数として以下の2つを使用します。
+
+- `<チーム名>` : `pbl_project/settings.py` の `DATABASES` に登録されているエイリアス名 (例: `team_terrace`)
+- `<チームのディレクトリ名>` :　実際のアプリディレクトリ(=`pbl-app-2025`直下にあるチームごとのディレクトリ名) (例: `team_terrace`)
+
+多くの場合、`<チーム名>`と`<チームのディレクトリ名>`は同じ名前になります。
+
+### 1. yamlファイルの作成
+
+`.github/workflows/<チーム名>.yaml`を作成し、以下の内容を記述してください。
+
+```yaml
+name: Test <チーム名>
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "<チームのディレクトリ名>/**"
+      - ".github/workflows/<チーム名>.yaml"
+      - ".github/workflows/reusable_team_ci.yaml"
+
+jobs:
+  call-workflow:
+    uses: ./.github/workflows/reusable_team_ci.yaml
+    with:
+      target_app: "<チーム名>"
+```
+
+### 2. `pbl_project/settings.py`の設定（重要）
+
+始めてtestsを書いた後、`uv run python manage.py test <チーム名>`を実行すると、`django.core.exceptions.ImproperlyConfigured: Circular dependency in TEST[DEPENDENCIES]`というエラーが出ることがあります。この場合、テスト実行時のデータベース依存関係エラーが発生しているため、pbl_project/settings.pyの`DATABASES`に以下を追記してください。
+
+```python
+    '<チーム名>': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / '<チーム名>' / 'db.sqlite3',
+        # ▼ここから追加
+        'TEST': {
+            'DEPENDENCIES': [],  # 外部のデータベース(defaultなど)を使用していない場合、依存関係を空に設定する
+        },
+        # ▲ここまで追加
+    },
+```
+
+### 3. テストファイルの作成(任意)
+
+CIでは、`<チーム名>/tests.py` に記述されたテストが自動的に実行されます。
+新しい機能を実装した際は、その機能が正しく動作することを保証するためにテストを作成することを推奨します。
+
+**`tests.py` の記述例:**
+
+```python
+from django.test import TestCase
+from .models import MyModel  # 自チームのモデルをインポート
+
+class MyTeamTests(TestCase):
+    # 【重要】自チームのデータベースエイリアスを指定
+    # これを指定しないと、デフォルトのデータベースが使用され、エラーになる可能性があります
+    databases = {'<チーム名>'}
+
+    def setUp(self):
+        # テストデータの作成（テスト実行のたびにリセットされます）
+        MyModel.objects.using('<チーム名>').create(name="test data")
+
+    def test_example(self):
+        # テストの実行
+        count = MyModel.objects.using('<チーム名>').count()
+        self.assertEqual(count, 1)
+```
+
+---
+
+## CIの実行の流れとチェック内容
+
+このCIは、（1.で作成した.yamlファイルによって）mainブランチへのプルリクエスト時に、`<チームのディレクトリ名>`以下のファイルに変更があった場合のみ実行されます。
+CIは以下の順序で実行され、問題があればその時点で失敗（Fail）し、以降の処理は行われません。
+
+### 1. migrationファイルの完全性チェック
+
+- **内容**: マージ元のブランチ（例: `<チーム名>/...`）の最新のコミットとマージ先のブランチ（例: `main`）の最新のコミットにおけるマイグレーションファイルを比較し、マージ元の既存のマイグレーションファイルが変更されないかを確認します。
+- **落ちる例**:
+  - マージ先のブランチにあるマイグレーションファイルをマージ元のブランチで修正・削除してしまった場合（例:`The following existing migration files have been modified or deleted:` ）。
+
+### 2. makemigrationsの実行チェック
+
+- **内容**: `models.py` の変更に対するマイグレーションファイルが作成されているかを確認します（`--check` オプションを使用）。
+- **落ちる例**:
+  - `models.py` にフィールドを追加したが、`makemigrations` を実行して生成されたmigrationsファイルをコミットし忘れた場合
+（例: `Migrations for　<チーム名>...`（以後、追加を忘れているファイルの一覧が出ます））。
+
+### 3. サーバー起動チェック
+
+- **内容**: 開発サーバー（`runserver`）をバックグラウンドで起動し、HTTPリクエストに応答するかを確認します。
+- **落ちる例**:
+  - `views.py` や `urls.py` に `ImportError` や `SyntaxError` があり、Djangoが起動しない場合（例：`Server process died.` / `Server failed to respond.`など）。
+
+### 4. テストの実行
+
+- **内容**: `<チーム名>/tests.py` に記述されたユニットテストを実行します。
+- **落ちる例**:
+  - 実装したロジックがテストの期待値と異なる場合（ 例：`AssertionError`）。
+  - テスト中で循環参照をしている場合（例：test1.pyで`import test2`を入れており、また、test2.pyでも`import test1`を入れている）（例：`django.core.exceptions.ImproperlyConfigured`）

@@ -1,63 +1,163 @@
-# Create your views here.
-from django.shortcuts import render, redirect
-from django.views import View
-from .models import Member
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
+from django.urls import reverse_lazy, reverse
+from django.db.models import Q
+from django.contrib import messages
+from .models import ExperimentPost
+from .forms import ExperimentPostForm, PasswordConfirmForm
 
-from .models import Post # Post_content をインポート
-from .forms import PostForm # PostForm をインポート
+# テンプレートの格納パス定数 (変更が容易なように)
+TEMPLATE_DIR = 'teams/team_empiricism/'
 
-# データベース名を定数化 (settings.py や routers.py で設定した名前)
-APP_DB = 'team_empiricism' 
-
-def index(request):
-    return render(request, 'teams/team_empiricism/index.html')
-
-def members(request):
-    qs = Member.objects.using('team_empiricism').all()  # ← team_empiricism DBを明示
-    return render(request, 'teams/team_empiricism/members.html', {'members': qs})
-
-
-class BoardView(View):
+class ExperimentListView(ListView):
     """
-    掲示板ページ（投稿一覧と投稿フォーム）のビュー
-    （マルチDB構成対応）
+    3.2 掲示板(一覧)機能
+    ・記事一覧表示、検索、フィルタリング、ソート、ページネーション
     """
-    
-    # テンプレートのパス（APP_DIRS=False のため、プロジェクト直下からのパス）
-    template_name = 'teams/team_empiricism/board.html'
+    model = ExperimentPost # models.py
+    template_name = TEMPLATE_DIR + 'experiment_list.html'
+    context_object_name = 'posts'
+    paginate_by = 10  # ページネーション
 
-    def get(self, request, *args, **kwargs):
-        """ GETリクエスト時の処理 """
+    def get_queryset(self):
+        # 一覧表示時に自動処理を実行（要件3.6）
+        ExperimentPost.process_automatic_updates()
         
-        # データベースを明示的に指定
-        posts = Post.objects.using(APP_DB).all()
-        form = PostForm()
+        queryset = ExperimentPost.objects.all()
         
-        context = {
-            'posts': posts,
-            'form': form,
-        }
-        return render(request, self.template_name, context)
+        # --- フィルタリング (検索) 機能 ---
+        # キーワード検索 (タイトル・本文)
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(title__icontains=query) |
+                Q(description__icontains=query) |
+                Q(organizer_name__icontains=query) # 主催者名でも検索可能に(V3)
+            )
+        
+        # カテゴリフィルタ
+        category = self.request.GET.get('category')
+        if category:
+            queryset = queryset.filter(category=category)
+            
+        # ステータスフィルタ
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+            
+        # --- ソート機能 ---
+        sort_by = self.request.GET.get('sort', 'newest')
+        
+        if sort_by == 'newest':
+            # 投稿日時順 (新しい順)
+            queryset = queryset.order_by('-created_at')
+        elif sort_by == 'oldest':
+            # 投稿日時順 (古い順)
+            queryset = queryset.order_by('created_at')
+        elif sort_by == 'schedule_near':
+            # 実験実施日順 (近い順、ただし過去のものは除外または後ろにするなどの調整が可能)
+            # ここでは単純に募集開始日昇順
+            queryset = queryset.order_by('start_date')
 
-    def post(self, request, *args, **kwargs):
-        """ POSTリクエスト時の処理（フォームが送信された時） """
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 検索条件を保持するためにコンテキストに追加
+        context['current_sort'] = self.request.GET.get('sort', 'newest')
+        context['current_category'] = self.request.GET.get('category', '')
+        context['current_q'] = self.request.GET.get('q', '')
+        return context
+
+class ExperimentDetailView(DetailView):
+    """
+    3.3 投稿詳細・応募機能
+    誰でも閲覧可能(V3)
+    """
+    model = ExperimentPost
+    template_name = TEMPLATE_DIR + 'experiment_detail.html'
+    context_object_name = 'post'
+
+class ExperimentCreateView(CreateView):
+    """
+    3.4 投稿機能
+    ログイン不要、誰でも投稿可能(V3)
+    """
+    model = ExperimentPost
+    form_class = ExperimentPostForm
+    template_name = TEMPLATE_DIR + 'experiment_form.html'
+    success_url = reverse_lazy('experiment_list')
+
+class PasswordConfirmView(FormView):
+    """
+    編集・削除前のパスワード確認画面
+    """
+    template_name = TEMPLATE_DIR + 'password_confirm.html'
+    form_class = PasswordConfirmForm
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.post_obj = get_object_or_404(ExperimentPost, pk=self.kwargs['pk'])
+        self.action = self.kwargs.get('action') # 'edit' or 'delete'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['post'] = self.post_obj
+        context['action'] = self.action
+        return context
+
+    def form_valid(self, form):
+        input_password = form.cleaned_data['password']
         
-        form = PostForm(request.POST)
+        # パスワード照合
+        if input_password == self.post_obj.edit_password:
+            # 認証成功: セッションにフラグを立てる
+            # キー: verified_post_{pk}
+            self.request.session[f'verified_post_{self.post_obj.pk}'] = True
+            
+            if self.action == 'edit':
+                return redirect('experiment_edit', pk=self.post_obj.pk)
+            elif self.action == 'delete':
+                return redirect('experiment_delete', pk=self.post_obj.pk)
         
-        if form.is_valid():
-            # 1. データをまだDBに保存しない (commit=False)
-            post_instance = form.save(commit=False)
-            
-            # 2. データベースを明示的に指定して保存
-            post_instance.save(using=APP_DB) 
-            
-            # 'team_empiricism:board' (urls.py で設定した name='board') にリダイレクト
-            return redirect('team_empiricism:board')
-        else:
-            # バリデーション失敗時
-            posts = Post.objects.using(APP_DB).all()
-            context = {
-                'posts': posts,
-                'form': form, # エラー情報が含まれたフォーム
-            }
-            return render(request, self.template_name, context)
+        # 認証失敗
+        form.add_error('password', 'パスワードが間違っています。')
+        return self.form_invalid(form)
+
+class ExperimentUpdateView(UpdateView):
+    """
+    3.4 編集機能
+    パスワード確認済みの場合のみアクセス可(V3)
+    """
+    model = ExperimentPost
+    form_class = ExperimentPostForm
+    template_name = TEMPLATE_DIR + 'experiment_form.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        # セッション確認
+        pk = self.kwargs['pk']
+        if not request.session.get(f'verified_post_{pk}'):
+            # 未認証ならパスワード確認画面へ
+            return redirect('password_confirm', pk=pk, action='edit')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        # 編集完了後はセッションから認証情報を消しても良いが、
+        # 続けて編集する可能性も考慮して保持するか、あるいは削除するか。
+        # ここでは保持する。
+        return reverse('experiment_detail', kwargs={'pk': self.object.pk})
+
+class ExperimentDeleteView(DeleteView):
+    """
+    3.4 削除機能
+    パスワード確認済みの場合のみアクセス可(V3)
+    """
+    model = ExperimentPost
+    template_name = TEMPLATE_DIR + 'experiment_confirm_delete.html'
+    success_url = reverse_lazy('experiment_list')
+
+    def dispatch(self, request, *args, **kwargs):
+        pk = self.kwargs['pk']
+        if not request.session.get(f'verified_post_{pk}'):
+            return redirect('password_confirm', pk=pk, action='delete')
+        return super().dispatch(request, *args, **kwargs)

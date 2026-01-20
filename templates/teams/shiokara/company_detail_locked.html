@@ -1,0 +1,17 @@
+{% extends "teams/shiokara/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="locked-page" style="max-width:720px;margin:40px auto;padding:24px;background:#fff;border-radius:10px;border:1px solid #eee;">
+    <h1>ポイントが不足しています</h1>
+    <p>企業詳細を閲覧するには1ポイントが必要です。現在のポイントが足りません。</p>
+    <p>
+        - 口コミを投稿すると＋5ポイント獲得できます。<br>
+        - マイページで所持ポイントを確認できます。
+    </p>
+    <div style="margin-top:16px;display:flex;gap:8px;">
+        <a class="btn" href="{% url 'shiokara:company_experience_post' pk=company.pk %}">口コミを投稿してポイントを得る</a>
+        <a class="btn" href="{% url 'shiokara:department_list' %}">学科一覧へ戻る</a>
+    </div>
+</div>
+{% endblock %}

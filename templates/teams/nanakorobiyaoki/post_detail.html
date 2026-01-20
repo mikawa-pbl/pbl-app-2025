@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投稿詳細 - TUT Connect</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #0d47a1;
+            --bg-color: #f5f7fa;
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --border-radius: 12px;
+            --text-main: #333;
+            --text-sub: #666;
+            --accent-color: #e3f2fd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar & Layout */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #fff;
+            border-right: 1px solid #eee;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a237e;
+            margin-bottom: 40px;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            background: #b71c1c;
+            color: white;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 1.2rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: var(--text-sub);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s;
+            font-weight: 500;
+            gap: 12px;
+        }
+
+        .nav-link:hover {
+            background-color: #f5f5f5;
+            color: var(--text-main);
+        }
+
+        .nav-link.active {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .nav-link .material-icons-round {
+            font-size: 24px;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            height: var(--header-height);
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: var(--text-main);
+        }
+
+        .content-body {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Post & Comment Styles */
+        .post-card {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .post-author-avatar {
+            width: 48px;
+            height: 48px;
+            background: #ddd;
+            border-radius: 50%;
+        }
+
+        .post-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .post-info span {
+            color: #999;
+            font-size: 0.85rem;
+        }
+
+        .post-body {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .post-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .comment-section {
+            background: #fcfcfc;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            padding: 20px;
+        }
+
+        .comment-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .comment-input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: none;
+            height: 46px;
+            /* Single line height look */
+            line-height: 24px;
+        }
+
+        .comment-submit {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .comment-list {
+            list-style: none;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comment-item:last-child {
+            border-bottom: none;
+        }
+
+        .comment-avatar {
+            width: 36px;
+            height: 36px;
+            background: #eee;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .comment-content-box {
+            background: #fff;
+            padding: 10px 15px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            flex: 1;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .comment-date {
+            color: #999;
+            font-weight: 400;
+            font-size: 0.8rem;
+        }
+
+        .comment-text {
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">T</div>
+            TUT Connect
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:home' %}" class="nav-link">
+                    <span class="material-icons-round">home</span> ホーム
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:community_list' %}" class="nav-link active">
+                    <span class="material-icons-round">grid_view</span> コミュニティを探す
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:user_profile' request.session.user_id %}" class="nav-link">
+                    <span class="material-icons-round">person</span> プロフィール
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header class="header">
+            <a href="{% url 'nanakorobiyaoki:community_detail' post.community.id %}" class="back-link">
+                <span class="material-icons-round">arrow_back</span> コミュニティに戻る
+            </a>
+        </header>
+
+        <div class="content-body">
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-author-avatar">
+                        {% if post.author.icon %}
+                        <img src="{{ post.author.icon.url }}" alt=""
+                            style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                        {% endif %}
+                    </div>
+                    <div class="post-info">
+                        <h3>{{ post.author.name }}</h3>
+                        <span>{{ post.created_at|date:"Y年n月j日 H:i" }}</span>
+                    </div>
+                </div>
+
+                <div class="post-body">
+                    {{ post.content|linebreaksbr }}
+                </div>
+
+                {% if post.image %}
+                <img src="{{ post.image.url }}" class="post-image" alt="">
+                {% endif %}
+
+                <div class="comment-section">
+                    <h4 style="margin-bottom: 20px; color: #555;">コメント ({{ comments.count }})</h4>
+
+                    <form action="{% url 'nanakorobiyaoki:comment_create' post.id %}" method="post"
+                        class="comment-form">
+                        {% csrf_token %}
+                        <textarea name="content" class="comment-input" placeholder="コメントを入力..." required></textarea>
+                        <button type="submit" class="comment-submit">
+                            <span class="material-icons-round" style="color: white;">send</span>
+                        </button>
+                    </form>
+
+                    <ul class="comment-list">
+                        {% for comment in comments %}
+                        <li class="comment-item">
+                            <div class="comment-avatar">
+                                {% if comment.author.icon %}
+                                <img src="{{ comment.author.icon.url }}" alt=""
+                                    style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                                {% endif %}
+                            </div>
+                            <div class="comment-content-box">
+                                <div class="comment-author">
+                                    {{ comment.author.name }}
+                                    <span class="comment-date">{{ comment.created_at|date:"n/j H:i" }}</span>
+                                </div>
+                                <div class="comment-text">
+                                    {{ comment.content|linebreaksbr }}
+                                </div>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li style="color: #999; text-align: center; padding: 10px;">コメントはまだありません。</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

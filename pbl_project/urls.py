@@ -14,16 +14,18 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
 from django.contrib import admin
-from django.urls import include, path
-
+from django.urls import include,path
+from django.conf import settings
+from django.conf.urls.static import static
+from django.shortcuts import redirect
 from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name="index"),
     path('team_USL/', include('team_USL.urls')),
+    path('team_terrace/', include('team_terrace.urls')),
     path('team_kitajaki/', include('team_kitajaki.urls')),
     path('agileca/', include('agileca.urls')),
     path('team_scim/', include('team_scim.urls')),
@@ -46,4 +48,11 @@ urlpatterns = [
     path('team_giryulink/', include('team_giryulink.urls')),
     path('takenoko/', include('takenoko.urls')), 
     path('teachers/', include('teachers.urls')),
+    path("", lambda request: redirect("team_giryulink:index")),
+    path("admin/", admin.site.urls),
+    path("team_giryulink/", include("team_giryulink.urls")),
 ]
+
+# Serve media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

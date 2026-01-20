@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>新規ユーザー登録</title>
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/style.css' %}">
+</head>
+<body class="auth-page">
+    <h2 style="text-align: center;">新規アカウント作成</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div style="margin-bottom: 15px;">
+                <strong>{{ field.label_tag }}</strong><br>
+                {{ field }}
+                {% if field.help_text %}
+                    <span class="helptext">{{ field.help_text }}</span>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div style="color: red; font-size: 0.9em;">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button type="submit">登録する</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{% url 'team_shouronpou:login' %}">ログイン画面に戻る</a>
+    </div>
+</body>
+</html>

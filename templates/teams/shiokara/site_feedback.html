@@ -1,0 +1,228 @@
+{% extends "teams/shiokara/base.html" %}
+{% load static %}
+
+{% block title %}サイト要望 - 就活支援サービス{% endblock %}
+
+{% block content %}
+<style>
+    .tut-logo-box {
+        flex: 0 0 auto;
+        order: 2;
+        margin-left: auto;
+    }
+
+    .tut-page-title {
+        order: 1;
+    }
+
+    .tut-logo-img {
+        max-height: 56px;
+        width: auto;
+        display: block;
+    }
+
+    .tut-page-title h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #42413F;
+    }
+
+    .tut-page-lead {
+        margin: 4px 0 0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .form-field {
+        margin-bottom: 24px;
+    }
+
+    .form-field label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-field textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        font-family: inherit;
+        resize: vertical;
+    }
+
+    .form-field textarea:focus {
+        outline: none;
+        border-color: #cc0000;
+        box-shadow: 0 0 0 2px rgba(204, 0, 0, 0.1);
+    }
+
+    .form-field small {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .error-message {
+        background: #ffebee;
+        color: #c62828;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border-left: 4px solid #c62828;
+    }
+
+    .success-message {
+        background: #e8f5e9;
+        color: #2e7d32;
+        padding: 16px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #4caf50;
+        font-weight: 600;
+    }
+
+    .info-box {
+        background: #f5f7f7;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        border-left: 4px solid #0066cc;
+    }
+
+    .info-box h3 {
+        margin: 0 0 8px 0;
+        font-size: 1rem;
+        color: #0066cc;
+    }
+
+    .info-box p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+    }
+
+    .form-actions button {
+        flex: 1;
+        padding: 12px 24px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .form-actions button[type="submit"] {
+        background: #cc0000;
+        color: white;
+    }
+
+    .form-actions button[type="submit"]:hover {
+        background: #aa0000;
+    }
+
+    .form-actions a {
+        flex: 1;
+        text-decoration: none;
+    }
+
+    .form-actions .back-button {
+        width: 100%;
+        padding: 12px 24px;
+        font-size: 1rem;
+        background: #f5f5f5;
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: block;
+        text-align: center;
+    }
+
+    .form-actions .back-button:hover {
+        background: #e8e8e8;
+    }
+
+    @media (max-width: 640px) {
+        .tut-page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .tut-logo-img {
+            max-height: 44px;
+        }
+        .tut-page-title h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" with active_page='feedback' %}
+
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
+        <header class="tut-page-header page-header">
+            <div class="tut-logo-box">
+                <img src="{% static 'image/mark_gikanavi.png' %}"
+                     alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
+            </div>
+            <div class="tut-page-title">
+                <h1>サイト要望・アンケート</h1>
+                <p class="tut-page-lead page-lead">
+                    サイトに関する要望やご意見をお聞かせください。投稿すると1ポイント獲得できます。
+                </p>
+            </div>
+        </header>
+
+        {% if success %}
+            <div class="success-message">
+                ✅ ご意見ありがとうございました！1ポイントを獲得しました。
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <div class="info-box">
+            <h3>💡 ポイント獲得について</h3>
+            <p>
+                サイトへの要望を投稿すると、<strong>1ポイント</strong>を獲得できます。<br>
+                これまでに投稿した要望: <strong>{{ feedback_count }}件</strong>
+            </p>
+        </div>
+
+        <form method="post" style="max-width: 800px; margin-top: 24px;">
+            {% csrf_token %}
+
+            <div class="form-field">
+                <label for="id_feedback_text">サイトに関する要望・ご意見:</label>
+                <textarea name="feedback_text" id="id_feedback_text" rows="8" required placeholder="例: 企業比較機能があると便利です。&#10;例: 検索機能をもっと充実させてほしい。&#10;例: スマホで見やすくしてほしい。"></textarea>
+                <small>※ 10文字以上入力してください。具体的なご意見をお待ちしております。</small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">投稿して1ポイント獲得</button>
+                <a href="{% url 'shiokara:my_page' %}">
+                    <span class="back-button">マイページに戻る</span>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

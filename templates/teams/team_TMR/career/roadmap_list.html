@@ -1,0 +1,98 @@
+{% extends 'teams/team_TMR/base.html' %}
+
+{% block title %}ロードマップ (年間計画){% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">ロードマップ (年間計画)</h2>
+        <a href="{% url 'roadmap_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition">
+            + 計画を追加
+        </a>
+    </div>
+
+    <div id="gantt_chart_div" class="w-full bg-white shadow rounded-lg overflow-hidden" style="min-height: 400px;">
+        <div class="p-10 text-center text-gray-400">
+            読み込み中...
+        </div>
+    </div>
+
+    <div id="no_data_message" class="hidden mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
+        <p class="font-bold">⚠️ チャートに表示できるデータがありません</p>
+        <p class="text-sm mt-1">
+            「+ 計画を追加」から、必ず<span class="font-bold text-red-600">「開始日」と「終了日」を入力して</span>作成してください。<br>
+            日付が入っていないデータはグラフに表示されません。
+        </p>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['gantt']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        // DjangoのデータをJS用に変換
+        var chartData = [
+            {% for roadmap in object_list %}
+                {% if roadmap.start_date and roadmap.end_date %}
+                [
+                    "{{ roadmap.id }}",            // ID
+                    "{{ roadmap.title|escapejs }}", // タイトル
+                    "null",                        // リソース（分類）
+                    new Date("{{ roadmap.start_date|date:'Y-m-d' }}"), // 開始日
+                    new Date("{{ roadmap.end_date|date:'Y-m-d' }}"),   // 終了日
+                    null,  // 期間（自動計算）
+                    0,     // 進捗（0%）
+                    null   // 依存関係
+                ],
+                {% endif %}
+            {% endfor %}
+        ];
+
+        // データがない場合の処理
+        if (chartData.length === 0) {
+            document.getElementById('gantt_chart_div').style.display = 'none';
+            document.getElementById('no_data_message').classList.remove('hidden');
+            return;
+        }
+
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Task ID');
+        data.addColumn('string', 'Task Name');
+        data.addColumn('string', 'Resource');
+        data.addColumn('date', 'Start Date');
+        data.addColumn('date', 'End Date');
+        data.addColumn('number', 'Duration');
+        data.addColumn('number', 'Percent Complete');
+        data.addColumn('string', 'Dependencies');
+
+        data.addRows(chartData);
+
+        var options = {
+            height: (chartData.length * 45) + 50, // データの数に合わせて高さを自動調整
+            gantt: {
+                trackHeight: 40,
+                barCornerRadius: 4,
+                palette: [
+                    { "color": "#2563eb", "dark": "#1d4ed8", "light": "#60a5fa" }
+                ]
+            }
+        };
+
+        var chart = new google.visualization.Gantt(document.getElementById('gantt_chart_div'));
+        
+        // クリックしたら編集画面へ遷移
+        google.visualization.events.addListener(chart, 'select', function() {
+            var selection = chart.getSelection();
+            if (selection.length > 0) {
+                var row = selection[0].row;
+                var id = data.getValue(row, 0); // IDを取得
+                window.location.href = "/team_TMR/roadmaps/" + id + "/edit/";
+            }
+        });
+
+        chart.draw(data, options);
+    }
+</script>
+{% endblock %}

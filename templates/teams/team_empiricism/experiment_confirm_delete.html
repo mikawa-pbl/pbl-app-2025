@@ -1,0 +1,30 @@
+<!-- templates/teams/team_empiricism/experiment_confirm_delete.html -->
+{% extends 'teams/team_empiricism/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger shadow-sm">
+            <div class="card-header bg-danger text-white">
+                投稿の削除確認
+            </div>
+            <div class="card-body text-center">
+                <h5 class="card-title text-danger mb-4">本当に削除しますか？</h5>
+                <p class="card-text mb-4">
+                    以下の投稿を削除しようとしています。<br>
+                    <strong>「{{ object.title }}」</strong>
+                </p>
+                <p class="text-muted small">※この操作は取り消せません。</p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-block">
+                        <button type="submit" class="btn btn-danger">削除する</button>
+                        <a href="{% url 'experiment_detail' object.pk %}" class="btn btn-secondary">キャンセル</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

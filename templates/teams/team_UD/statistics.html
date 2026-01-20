@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面接質問統計</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .description {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        .search-box {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .search-box input {
+            flex: 1;
+            max-width: 500px;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .search-box button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .search-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .statistics-container {
+            margin-top: 30px;
+        }
+        .company-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .company-name {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        .stage-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border-left: 4px solid #764ba2;
+        }
+        .stage-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .stage-title::before {
+            content: "📋";
+            font-size: 1.2em;
+        }
+        .questions-list {
+            list-style: none;
+            padding: 0;
+        }
+        .questions-list li {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+            transition: all 0.2s;
+        }
+        .questions-list li:hover {
+            background: #e3ecff;
+            transform: translateX(5px);
+        }
+        .questions-list li::before {
+            content: "💬 ";
+            margin-right: 8px;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            font-size: 1.2em;
+        }
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+            font-size: 1.2em;
+        }
+        .nav-links {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+        .nav-links a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .nav-links a:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        .question-count {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 面接質問統計</h1>
+            <p class="description">みんなの面接で聞かれた質問を会社・段階別に確認できます（匿名データ）</p>
+        </header>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="会社名で検索...（例: トヨタ、ソニー）">
+            <button onclick="searchStatistics()">🔍 検索</button>
+        </div>
+
+        <div id="statisticsContainer" class="statistics-container">
+            <div class="loading">統計データを読み込み中...</div>
+        </div>
+
+        <div class="nav-links">
+            <a href="{% url 'team_UD:calendar' %}">📅 カレンダーに戻る</a>
+            <a href="{% url 'team_UD:logout' %}">🚪 ログアウト</a>
+        </div>
+    </div>
+
+    <script>
+        // ページ読み込み時に統計を取得
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatistics();
+            
+            // Enterキーで検索
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchStatistics();
+                }
+            });
+        });
+
+        function loadStatistics(searchQuery = '') {
+            const container = document.getElementById('statisticsContainer');
+            container.innerHTML = '<div class="loading">統計データを読み込み中...</div>';
+
+            let url = '/team_UD/api/statistics/';
+            if (searchQuery) {
+                url += `?search=${encodeURIComponent(searchQuery)}`;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        container.innerHTML = `<div class="no-data">エラー: ${data.error}</div>`;
+                        return;
+                    }
+
+                    if (!data.statistics || data.statistics.length === 0) {
+                        container.innerHTML = '<div class="no-data">まだ統計データがありません。<br>面接のメモを記録すると、ここに表示されます。</div>';
+                        return;
+                    }
+
+                    let html = '';
+                    data.statistics.forEach(company => {
+                        html += `<div class="company-section">`;
+                        html += `<div class="company-name">${escapeHtml(company.company_name)}</div>`;
+                        
+                        company.stages.forEach(stage => {
+                            html += `<div class="stage-section">`;
+                            html += `<div class="stage-title">${escapeHtml(stage.stage)}<span class="question-count">${stage.questions.length}件</span></div>`;
+                            html += `<ul class="questions-list">`;
+                            
+                            stage.questions.forEach(question => {
+                                html += `<li>${escapeHtml(question)}</li>`;
+                            });
+                            
+                            html += `</ul></div>`;
+                        });
+                        
+                        html += `</div>`;
+                    });
+
+                    container.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    container.innerHTML = '<div class="no-data">統計データの読み込みに失敗しました</div>';
+                });
+        }
+
+        function searchStatistics() {
+            const searchQuery = document.getElementById('searchInput').value.trim();
+            loadStatistics(searchQuery);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

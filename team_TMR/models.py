@@ -18,6 +18,10 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, db_constraint=False)
     nickname = models.CharField(max_length=100, blank=True)
     affiliation = models.CharField(max_length=200, blank=True, help_text="所属（例：〇〇大学 〇〇学部）")
+    lab = models.CharField(max_length=200, blank=True, verbose_name="研究室")
+    research_field = models.CharField(max_length=200, blank=True, verbose_name="研究分野")
+    decision = models.CharField(max_length=200, blank=True, verbose_name="内定先")
+    graduation_year = models.IntegerField(null=True, blank=True, verbose_name="卒業年度")
     contact = models.EmailField(max_length=255, blank=True, null=True, help_text="連絡先（任意）")
 
     def __str__(self):

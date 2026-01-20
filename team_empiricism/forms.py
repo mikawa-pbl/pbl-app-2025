@@ -10,7 +10,7 @@ class ExperimentPostForm(forms.ModelForm):
         fields = [
             'title', 'description', 'reward', 'duration',
             'start_date', 'end_date', 'location', 'requirements',
-            'capacity', 'organizer_name', 'category', 'application_url',
+            'capacity', 'organizer_name', 'laboratory', 'application_url',
             'edit_password', 'status'
         ]
         # 'application_url': Google Forms 機能

@@ -236,10 +236,15 @@
         {% for tag in tags %}
           {% if tag.name == selected_tag %}
             <a href="{% if query %}?q={{ query }}{% else %}{% url 'takenoko:main' %}{% endif %}" style="text-decoration: none;">
+              <div class="feature-box feature-box-active">
+                <i class="fas fa-{{ tag.icon }}"></i>
+                <p>{{ tag.display_name }}</p>
+                <div class="feature-circle"></div>
+              </div>
+            </a>
           {% else %}
             <a href="?tag={{ tag.name }}{% if query %}&q={{ query }}{% endif %}" style="text-decoration: none;">
-          {% endif %}
-              <div class="feature-box" style="{% if tag.name == selected_tag %}background-color: #B8E6D5; border: 2px solid #649CE4;{% endif %}">
+              <div class="feature-box">
                 <i class="fas fa-{{ tag.icon }}"></i>
                 <p>{{ tag.display_name }}</p>
                 <div class="feature-circle"></div>

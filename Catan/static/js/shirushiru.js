@@ -113,7 +113,7 @@ function openDetailDialogFromRow(tr) {
     if (name == '小林(あ)'){
         fullName = '小林 あおい';
     } else if (name == '小林(わ)') {
-        fulltName = '小林 わたる';
+        fullName = '小林 わたる';
     }else {
         fullName = name + ' 太郎';
     }

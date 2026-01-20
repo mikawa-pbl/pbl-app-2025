@@ -18,6 +18,7 @@ urlpatterns = [
     path("product/<int:pk>/purchase/", views.purchase_product, name="purchase_product"),
     path("chat/", views.chat_list, name="chat_list"),
     path("chat/<int:room_id>/", views.chat_room, name="chat_room"),
+    path("chat/<int:room_id>/confirm/", views.confirm_purchase, name="confirm_purchase"),
     path("history/", views.history, name="history"),
     path("add-product/", views.add_product_page, name="add_product"),
     path("my-page/", views.my_page, name="my_page"),

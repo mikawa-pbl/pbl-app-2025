@@ -17,4 +17,5 @@ urlpatterns = [
     path('gikamap/search/attributes/', views.search_by_attributes, name='search_attributes'),
     path('gikamap/search/professor/', views.search_by_professor, name='search_professor'),
     path('gikamap/search/roomname/', views.search_by_room_name, name='search_roomname'),
+    path('gikamap/search/complex/', views.search_complex, name='search_complex'),
 ]

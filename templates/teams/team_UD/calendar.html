@@ -15,6 +15,75 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            padding-left: 80px;
+            transition: padding-left 0.3s;
+        }
+        body.menu-open {
+            padding-left: 280px;
+        }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 60px;
+            background: #2c3e50;
+            z-index: 1000;
+            transition: width 0.3s;
+            overflow: hidden;
+        }
+        .sidebar.open {
+            width: 250px;
+        }
+        .hamburger {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 60px;
+            padding: 20px;
+            cursor: pointer;
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            background: #2c3e50;
+            z-index: 10;
+        }
+        .menu-items {
+            margin-top: 80px;
+        }
+        .menu-item {
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .menu-item:hover {
+            background: #34495e;
+        }
+        .menu-item.logout {
+            background: #dc3545;
+            margin-top: 20px;
+        }
+        .menu-item.logout:hover {
+            background: #c82333;
+        }
+        .menu-icon {
+            font-size: 20px;
+            min-width: 20px;
+            flex-shrink: 0;
+        }
+        .menu-text {
+            max-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: max-width 0.3s ease;
+        }
+        .sidebar.open .menu-text {
+            max-width: 200px;
         }
         .container {
             max-width: 1200px;
@@ -243,13 +312,13 @@
             font-size: 0.75em;
             font-weight: 600;
         }
+        .memo-badge-job {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
         .memo-badge-interview {
             background: #e3f2fd;
             color: #1976d2;
-        }
-        .memo-badge-status {
-            background: #f3e5f5;
-            color: #7b1fa2;
         }
         .memo-badge-date {
             background: #fff3e0;
@@ -486,6 +555,27 @@
     </style>
 </head>
 <body>
+    <div class="sidebar" id="sidebar">
+        <div class="hamburger" onclick="toggleMenu()">☰</div>
+        <div class="menu-items">
+            <a href="{% url 'team_UD:calendar' %}" class="menu-item">
+                <span class="menu-icon">📅</span>
+                <span class="menu-text">カレンダー</span>
+            </a>
+            <a href="{% url 'team_UD:questions' %}" class="menu-item">
+                <span class="menu-icon">📝</span>
+                <span class="menu-text">質問対策</span>
+            </a>
+            <a href="{% url 'team_UD:statistics' %}" class="menu-item">
+                <span class="menu-icon">📊</span>
+                <span class="menu-text">面接質問統計</span>
+            </a>
+            <a href="{% url 'team_UD:logout' %}" class="menu-item logout">
+                <span class="menu-icon">🚪</span>
+                <span class="menu-text">ログアウト</span>
+            </a>
+        </div>
+    </div>
     <div class="container">
         <header>
             <h1>📅 カレンダー</h1>
@@ -522,17 +612,6 @@
             </div>
             {% endfor %}
         </div>
-
-        <div style="background: #e3f2fd; padding: 15px 20px; border-radius: 10px; margin-top: 30px; font-size: 0.9em; color: #1976d2; border-left: 4px solid #2196f3;">
-            <strong>📊 データ収集について</strong><br>
-            †マークの項目（会社名、イベント・工程、聞かれたこと）は、匿名で統計データとして収集され、他のユーザーと共有されます。<br>
-            メモ内容や個人情報は共有されません。統計データは「面接質問統計」ページで確認できます。
-        </div>
-
-        <div class="nav-links">
-            <a href="{% url 'team_UD:statistics' %}">📊 面接質問統計</a>
-            <a href="{% url 'team_UD:logout' %}">🚪 ログアウト</a>
-        </div>
     </div>
 
     <!-- メモ入力モーダル -->
@@ -559,82 +638,49 @@
                         <div id="companyDropdown" class="company-dropdown"></div>
                     </div>
                     <div class="form-group">
-                        <label for="modalInterviewStage">イベント・工程 <span class="required-mark">*</span><span class="data-collection-mark">†</span></label>
-                        <select id="modalInterviewStage" required>
+                        <label for="modalJobCategory">職種カテゴリー</label>
+                        <select id="modalJobCategory">
                             <option value="">選択してください</option>
-                            <optgroup label="選考前">
-                                <option value="企業研究">企業研究</option>
-                                <option value="説明会">説明会</option>
-                                <option value="カジュアル面談">カジュアル面談</option>
-                                <option value="OB/OG訪問">OB/OG訪問</option>
-                            </optgroup>
-                            <optgroup label="応募・書類選考">
-                                <option value="ES作成中">ES作成中</option>
-                                <option value="ES提出">ES提出</option>
-                                <option value="書類選考">書類選考</option>
-                            </optgroup>
-                            <optgroup label="試験・面接">
-                                <option value="適性検査">適性検査</option>
-                                <option value="Webテスト">Webテスト</option>
-                                <option value="一次面接">一次面接</option>
-                                <option value="二次面接">二次面接</option>
-                                <option value="三次面接">三次面接</option>
-                                <option value="最終面接">最終面接</option>
-                                <option value="グループディスカッション">グループディスカッション</option>
-                            </optgroup>
-                            <optgroup label="内定関連">
-                                <option value="内定通知">内定通知</option>
-                                <option value="オファー面談">オファー面談</option>
-                                <option value="内定者懇親会">内定者懇親会</option>
-                                <option value="内定後イベント">内定後イベント</option>
-                                <option value="承諾書〆切">承諾書〆切</option>
-                            </optgroup>
-                            <optgroup label="その他">
-                                <option value="インターン">インターン</option>
-                                <option value="その他">その他</option>
-                            </optgroup>
+                            <option value="営業職">営業職</option>
+                            <option value="技術職（エンジニア）">技術職（エンジニア）</option>
+                            <option value="事務職">事務職</option>
+                            <option value="企画・マーケティング職">企画・マーケティング職</option>
+                            <option value="研究開発職">研究開発職</option>
+                            <option value="製造・生産職">製造・生産職</option>
+                            <option value="専門職（金融・コンサル等）">専門職（金融・コンサル等）</option>
+                            <option value="クリエイティブ職">クリエイティブ職</option>
+                            <option value="その他">その他</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="modalInterviewDate">実施日・〆切日</label>
-                        <input type="date" id="modalInterviewDate">
+                        <label for="modalCategory">カテゴリ <span class="required-mark">*</span></label>
+                        <select id="modalCategory" required>
+                            <option value="">選択してください</option>
+                            <option value="選考前">選考前</option>
+                            <option value="応募・書類選考">応募・書類選考</option>
+                            <option value="試験・面接">試験・面接</option>
+                            <option value="内定関連">内定関連</option>
+                            <option value="その他">その他</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="modalStatus">選考状況 <span class="required-mark">*</span></label>
-                        <select id="modalStatus" required>
-                            <option value="">選択してください</option>
-                            <optgroup label="選考前・選考中">
-                                <option value="興味あり">興味あり</option>
-                                <option value="エントリー予定">エントリー予定</option>
-                                <option value="予定あり">予定あり</option>
-                                <option value="結果待ち">結果待ち</option>
-                            </optgroup>
-                            <optgroup label="選考結果">
-                                <option value="書類通過">書類通過</option>
-                                <option value="一次通過">一次通過</option>
-                                <option value="二次通過">二次通過</option>
-                                <option value="最終通過">最終通過</option>
-                                <option value="内定">内定</option>
-                                <option value="内定承諾">内定承諾</option>
-                            </optgroup>
-                            <optgroup label="不合格・辞退">
-                                <option value="書類不合格">書類不合格</option>
-                                <option value="一次不合格">一次不合格</option>
-                                <option value="二次不合格">二次不合格</option>
-                                <option value="最終不合格">最終不合格</option>
-                                <option value="選考辞退">選考辞退</option>
-                                <option value="内定辞退">内定辞退</option>
-                            </optgroup>
+                        <label for="modalInterviewStage">詳細 <span class="required-mark">*</span><span class="data-collection-mark">†</span></label>
+                        <select id="modalInterviewStage" required disabled>
+                            <option value="">まずカテゴリを選択してください</option>
                         </select>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="modalInterviewDate">実施日・〆切日</label>
+                    <input type="date" id="modalInterviewDate">
+                </div>
                 
-                <!-- 面接時の追加入力欄（初期は非表示） -->
+                <!-- 面接時の追加入力欄 -->
                 <div id="interviewFields" style="display: none;">
                     <div class="form-group">
-                        <label>どんなことを聞かれたか？ <span class="required-mark">*</span><span class="data-collection-mark">†</span></label>
+                        <label>どんなことを聞かれたか？ <span class="data-collection-mark">†</span></label>
                         <div id="questionsContainer">
                             <div class="question-item" style="display: flex; gap: 8px; margin-bottom: 8px;">
                                 <input type="text" class="question-input" placeholder="質問内容を入力..." style="flex: 1;">
@@ -650,60 +696,92 @@
                     <textarea id="modalMemoInput" placeholder="面接の内容、感じたこと、質問された内容などを記録しましょう"></textarea>
                 </div>
                 <button onclick="saveModalMemo()">💾 保存</button>
+                <div style="padding: 5px 0; font-size: 0.8em; color: #dc3545;">
+                    ※ †マークの項目は匿名で統計データとして収集されます
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            sidebar.classList.toggle('open');
+            body.classList.toggle('menu-open');
+        }
+
         let currentYear, currentMonth, currentDay;
         let editingMemoId = null;  // 編集中のメモIDを保持
         let originalMemoDate = null;  // 編集前のメモの日付を保持
         let searchTimeout = null;  // 検索のデバウンス用
+
+        // カテゴリと詳細の対応マップ
+        const categoryDetailsMap = {
+            '選考前': ['企業研究', '説明会', 'カジュアル面談', 'OB/OG訪問'],
+            '応募・書類選考': ['ES作成中', 'ES提出', '書類選考'],
+            '試験・面接': ['適性検査', 'Webテスト', '一次面接', '二次面接', '三次面接', '最終面接', 'グループディスカッション'],
+            '内定関連': ['内定通知', 'オファー面談', '内定者懇親会', '内定後イベント', '承諾書〆切'],
+            'その他': ['インターン', 'その他']
+        };
 
         // ページ読み込み時に各日付のメモを確認してインジケータを表示
         document.addEventListener('DOMContentLoaded', function() {
             // 会社名検索機能の初期化
             initCompanySearch();
             
-            // イベント・工程の選択変更時に追加フィールドを表示/非表示
-            initInterviewFieldsToggle();
+            // カテゴリ選択時の処理
+            document.getElementById('modalCategory').addEventListener('change', function() {
+                updateInterviewStageOptions(this.value);
+                toggleInterviewFields();
+            });
+            
+            // 実施日変更時の処理
+            document.getElementById('modalInterviewDate').addEventListener('change', function() {
+                toggleInterviewFields();
+            });
         });
-        
-        function initInterviewFieldsToggle() {
-            const stageSelect = document.getElementById('modalInterviewStage');
-            const statusSelect = document.getElementById('modalStatus');
+
+        function toggleInterviewFields() {
+            const category = document.getElementById('modalCategory').value;
+            const interviewDate = document.getElementById('modalInterviewDate').value;
             const interviewFields = document.getElementById('interviewFields');
             
-            // 面接系のイベント一覧
-            const interviewStages = [
-                '一次面接',
-                '二次面接',
-                '三次面接',
-                '最終面接',
-                'グループディスカッション'
-            ];
-            
-            function updateInterviewFieldsVisibility() {
-                const selectedStage = stageSelect.value;
-                const selectedStatus = statusSelect.value;
+            // カテゴリが「試験・面接」で、かつ実施日が過去または今日の日付の場合のみ表示
+            if (category === '試験・面接' && interviewDate) {
+                const today = new Date();
+                const todayStr = today.getFullYear() + '-' + 
+                                String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                                String(today.getDate()).padStart(2, '0');
                 
-                // 聞かれたことフィールドを非表示にする選考状況
-                const hiddenStatuses = ['興味あり', 'エントリー予定', '予定あり', '選考辞退'];
-                
-                // 面接系イベントかつ特定の状況以外の場合に表示
-                if (interviewStages.includes(selectedStage) && !hiddenStatuses.includes(selectedStatus)) {
+                // 日付文字列で比較（YYYY-MM-DD形式）
+                if (interviewDate <= todayStr) {
                     interviewFields.style.display = 'block';
                 } else {
                     interviewFields.style.display = 'none';
-                    // 面接以外の場合はクリア
-                    clearInterviewQuestions();
                 }
+            } else {
+                interviewFields.style.display = 'none';
             }
-            
-            stageSelect.addEventListener('change', updateInterviewFieldsVisibility);
-            statusSelect.addEventListener('change', updateInterviewFieldsVisibility);
         }
-        
+
+        function updateInterviewStageOptions(category) {
+            const stageSelect = document.getElementById('modalInterviewStage');
+            stageSelect.innerHTML = '<option value="">選択してください</option>';
+            
+            if (category && categoryDetailsMap[category]) {
+                stageSelect.disabled = false;
+                categoryDetailsMap[category].forEach(detail => {
+                    const option = document.createElement('option');
+                    option.value = detail;
+                    option.textContent = detail;
+                    stageSelect.appendChild(option);
+                });
+            } else {
+                stageSelect.disabled = true;
+                stageSelect.innerHTML = '<option value="">まずカテゴリを選択してください</option>';
+            }
+        }
         function addQuestion() {
             const container = document.getElementById('questionsContainer');
             const newItem = document.createElement('div');
@@ -912,13 +990,15 @@
             document.getElementById('modalMemoTitle').value = '';
             document.getElementById('modalCompanyName').value = '';
             document.getElementById('modalCompanyId').value = '';
+            document.getElementById('modalCategory').value = '';
             document.getElementById('modalInterviewStage').value = '';
+            document.getElementById('modalInterviewStage').disabled = true;
+            document.getElementById('modalInterviewStage').innerHTML = '<option value="">まずカテゴリを選択してください</option>';
             document.getElementById('modalInterviewDate').value = '';
-            document.getElementById('modalStatus').value = '';
             document.getElementById('modalMemoInput').value = '';
             clearInterviewQuestions();
-            document.getElementById('interviewFields').style.display = 'none';
             document.getElementById('companyDropdown').classList.remove('active');
+            document.getElementById('interviewFields').style.display = 'none';
         }
 
         function loadModalMemos(callback) {
@@ -939,11 +1019,11 @@
                             }
 
                             let badgeHtml = '<div class="memo-item-badges">';
+                            if (memo.job_category) {
+                                badgeHtml += `<span class="memo-badge memo-badge-job">${escapeHtml(memo.job_category)}</span>`;
+                            }
                             if (memo.interview_stage) {
                                 badgeHtml += `<span class="memo-badge memo-badge-interview">${escapeHtml(memo.interview_stage)}</span>`;
-                            }
-                            if (memo.status) {
-                                badgeHtml += `<span class="memo-badge memo-badge-status">${escapeHtml(memo.status)}</span>`;
                             }
                             if (memo.interview_date) {
                                 badgeHtml += `<span class="memo-badge memo-badge-date">${memo.interview_date}</span>`;
@@ -1009,28 +1089,20 @@
             const memoTitle = document.getElementById('modalMemoTitle').value.trim();
             const companyName = document.getElementById('modalCompanyName').value.trim();
             const companyId = document.getElementById('modalCompanyId').value;
+            const jobCategory = document.getElementById('modalJobCategory').value;
             const interviewStage = document.getElementById('modalInterviewStage').value;
             const interviewDate = document.getElementById('modalInterviewDate').value;
-            const status = document.getElementById('modalStatus').value;
             const content = document.getElementById('modalMemoInput').value.trim();
             const interviewQuestions = getInterviewQuestions();
 
             // 必須フィールドのチェック（contentは任意）
-            if (!companyName || !interviewStage || !status) {
-                alert('必須項目(会社名、イベント・工程、選考状況)を入力してください');
+            if (!companyName || !interviewStage) {
+                alert('必須項目(会社名、イベント・工程)を入力してください');
                 return;
             }
             
             if (!companyId) {
                 alert('会社リストから会社を選択してください');
-                return;
-            }
-            
-            // 面接系イベントかつ特定の状況以外の場合は「聞かれたこと」も必須
-            const interviewStages = ['一次面接', '二次面接', '三次面接', '最終面接', 'グループディスカッション'];
-            const hiddenStatuses = ['興味あり', 'エントリー予定', '予定あり', '選考辞退'];
-            if (interviewStages.includes(interviewStage) && !hiddenStatuses.includes(status) && !interviewQuestions) {
-                alert('面接の場合、「どんなことを聞かれたか？」は必須です（最低1つ入力してください）');
                 return;
             }
 
@@ -1046,9 +1118,9 @@
                 title: memoTitle,
                 date: dateStr,
                 company_id: parseInt(companyId),
+                job_category: jobCategory,
                 interview_stage: interviewStage,
                 interview_date: interviewDate || null,
-                status: status,
                 content: content,
                 interview_questions: interviewQuestions
             };
@@ -1090,19 +1162,32 @@
             document.getElementById('modalMemoTitle').value = memo.title || '';
             document.getElementById('modalCompanyName').value = memo.company_name;
             document.getElementById('modalCompanyId').value = memo.company_id || '';
-            document.getElementById('modalInterviewStage').value = memo.interview_stage;
-            document.getElementById('modalInterviewDate').value = memo.interview_date || '';
-            document.getElementById('modalStatus').value = memo.status;
-            document.getElementById('modalMemoInput').value = memo.content;
-            setInterviewQuestions(memo.interview_questions || '');
+            document.getElementById('modalJobCategory').value = memo.job_category || '';
             
-            // 面接系イベントかつ特定の状況以外の場合は追加フィールドを表示
-            const interviewStages = ['一次面接', '二次面接', '三次面接', '最終面接', 'グループディスカッション'];
-            const hiddenStatuses = ['興味あり', 'エントリー予定', '予定あり', '選考辞退'];
-            if (interviewStages.includes(memo.interview_stage) && !hiddenStatuses.includes(memo.status)) {
-                document.getElementById('interviewFields').style.display = 'block';
+            // interview_stageからカテゴリを判別
+            const stage = memo.interview_stage;
+            let category = '';
+            for (const [cat, details] of Object.entries(categoryDetailsMap)) {
+                if (details.includes(stage)) {
+                    category = cat;
+                    break;
+                }
             }
             
+            // カテゴリを設定
+            if (category) {
+                document.getElementById('modalCategory').value = category;
+                updateInterviewStageOptions(category);
+                document.getElementById('modalInterviewStage').value = stage;
+            }
+            
+            document.getElementById('modalInterviewDate').value = memo.interview_date || '';
+            document.getElementById('modalMemoInput').value = memo.content;
+            setInterviewQuestions(memo.interview_questions || '');
+
+            // 面接フィールドの表示/非表示を更新
+            toggleInterviewFields();
+
             // フォームを表示
             showMemoForm();
 

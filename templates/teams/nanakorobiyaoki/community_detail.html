@@ -246,6 +246,30 @@
             margin-bottom: 20px;
         }
 
+        .category-badge {
+            font-size: 0.85rem;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .category-授業 {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .category-サークル {
+            background: #f1f8e9;
+            color: #33691e;
+        }
+
+        .category-その他 {
+            background: #f5f5f5;
+            color: #616161;
+        }
+
         .action-btn {
             background: var(--primary-color);
             color: white;
@@ -497,7 +521,7 @@
             </li>
 
             <li class="nav-item">
-                <a href="{% url 'nanakorobiyaoki:user_profile' request.session.user_id %}" class="nav-link">
+                <a href="{% url 'nanakorobiyaoki:user_profile' login_user.user_id %}" class="nav-link">
                     <span class="material-icons-round">person</span> プロフィール
                 </a>
             </li>
@@ -557,6 +581,9 @@
                     {% endif %}
                 </div>
                 <div class="community-info">
+                    <span class="category-badge category-{{ community.category }}">
+                        {{ community.category }}
+                    </span>
                     <h1 class="community-title">{{ community.name }}</h1>
                     <p class="community-desc">{{ community.description|default:"説明文がありません"|linebreaksbr }}</p>
                     <div class="community-meta" style="align-items: center;">

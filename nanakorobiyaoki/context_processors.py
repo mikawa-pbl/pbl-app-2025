@@ -22,6 +22,7 @@ def nanakorobiyaoki_context(request):
                     ).exclude(author=user).count()
 
             return {
+                'login_user': user,
                 'joined_communities': joined_communities,
                 'unread_messages_count': unread_count,
             }

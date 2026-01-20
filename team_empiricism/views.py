@@ -35,10 +35,10 @@ class ExperimentListView(ListView):
                 Q(organizer_name__icontains=query) # 主催者名でも検索可能に(V3)
             )
         
-        # カテゴリフィルタ
+        # カテゴリフィルタ (Laboratory ID)
         category = self.request.GET.get('category')
         if category:
-            queryset = queryset.filter(category=category)
+            queryset = queryset.filter(laboratory__id=category)
             
         # ステータスフィルタ
         status = self.request.GET.get('status')
@@ -67,6 +67,10 @@ class ExperimentListView(ListView):
         context['current_sort'] = self.request.GET.get('sort', 'newest')
         context['current_category'] = self.request.GET.get('category', '')
         context['current_q'] = self.request.GET.get('q', '')
+        
+        # フィルタ用研究室一覧 (Ver 5.0)
+        from .models import Laboratory
+        context['laboratories'] = Laboratory.objects.all()
         return context
 
 class ExperimentDetailView(DetailView):
@@ -161,3 +165,34 @@ class ExperimentDeleteView(DeleteView):
         if not request.session.get(f'verified_post_{pk}'):
             return redirect('password_confirm', pk=pk, action='delete')
         return super().dispatch(request, *args, **kwargs)
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.db import IntegrityError
+import json
+from .models import Laboratory
+
+@require_POST
+def add_laboratory(request):
+    """
+    研究室を動的に追加するAPI (Ver 5.0)
+    """
+    try:
+        data = json.loads(request.body)
+        name = data.get('name')
+        if not name:
+            return JsonResponse({'error': 'Name is required'}, status=400)
+        
+        lab, created = Laboratory.objects.get_or_create(name=name)
+        
+        return JsonResponse({
+            'id': lab.id,
+            'name': lab.name,
+            'created': created
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except IntegrityError:
+        return JsonResponse({'error': 'Database error'}, status=500)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

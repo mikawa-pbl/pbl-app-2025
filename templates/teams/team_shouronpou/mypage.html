@@ -8,68 +8,66 @@
     <link rel="stylesheet" href="{% static 'team_shouronpou/css/schedule.css' %}">
 </head>
 <body class="app-page">
-
 <div class="container">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'team_shouronpou:post_list' %}" class="btn-outline">&larr; 掲示板に戻る</a>
+    </div>
+
     <h2>マイページ</h2>
 
     <div class="profile-card">
         <h3 class="section-title">基本情報</h3>
-        
-        <div class="profile-item">
-            <span class="profile-label">ユーザー名</span>
-            <span class="profile-value">{{ user.username }}</span>
-        </div>
-        <div class="profile-item">
-            <span class="profile-label">所属</span>
-            <span class="profile-value">{{ user.affiliation|default:"-" }}</span>
-        </div>
-        <div class="profile-item">
-            <span class="profile-label">年齢</span>
-            <span class="profile-value">{{ user.age|default:"-" }} 歳</span>
-        </div>
-        <div class="profile-item">
-            <span class="profile-label">性別</span>
-            <span class="profile-value">{{ user.get_gender_display|default:"-" }}</span>
-        </div>
-        <div class="profile-item">
-            <span class="profile-label">国籍</span>
-            <span class="profile-value">{{ user.nationality|default:"-" }}</span>
-        </div>
+        <div class="profile-item"><span class="profile-label">ユーザー名</span><span class="profile-value">{{ user.username }}</span></div>
+        <div class="profile-item"><span class="profile-label">所属</span><span class="profile-value">{{ user.affiliation|default:"-" }}</span></div>
+        <div class="profile-item"><span class="profile-label">年齢</span><span class="profile-value">{{ user.age|default:"-" }} 歳</span></div>
     </div>
 
     <div class="profile-card">
-        <h3 class="section-title">実験参加の希望条件</h3>
-        
-        
-        <div class="profile-item">
-            <span class="profile-label">許容所要時間</span>
-            <span class="profile-value">
-                {% if user.desired_max_time %}
-                    最大 {{ user.desired_max_time }} 分まで
-                {% else %}
-                    特に指定なし
-                {% endif %}
-            </span>
-        </div>
-        
-        <div style="margin-top: 15px;">
-            <span class="profile-label" style="margin-bottom:10px; display:block;">参加可能時間帯</span>
-            
-            <input type="hidden" id="user_slots_data" value="{{ user.available_slots }}">
-            
-            <div class="schedule-container-view">
-                <div class="schedule-grid-view" id="viewGrid"></div>
+        <h3 class="section-title">作成した募集</h3>
+        {% if my_posts %}
+            <div style="display: grid; gap: 10px;">
+                {% for post in my_posts %}
+                <div style="border: 1px solid #eee; padding: 15px; border-radius: 5px; background: #fafafa; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>{{ post.title }}</strong><br>
+                        <small>参加者: {{ post.current_participants }} 名</small>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                        <a href="{% url 'team_shouronpou:post_detail' post.pk %}" class="btn-outline" style="font-size: 0.8rem;">詳細</a>
+                        <a href="{% url 'team_shouronpou:post_edit' post.pk %}" class="btn-outline" style="font-size: 0.8rem; background-color: #ffc107; color: #000; border: none;">編集</a>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-        </div>
+        {% else %}
+            <p style="text-align: center; color: #999;">まだ投稿はありません。</p>
+        {% endif %}
     </div>
 
-    <div style="margin-top: 20px; text-align: center;">
-        <a href="{% url 'team_shouronpou:profile_edit' %}" class="btn-edit">プロフィールを編集する</a>
-        <a href="{% url 'team_shouronpou:post_list' %}" class="btn-back">掲示板に戻る</a>
+    <div class="profile-card">
+        <h3 class="section-title">応募済みの実験</h3>
+        {% if my_applications %}
+            <div style="display: grid; gap: 10px;">
+                {% for app in my_applications %}
+                <div style="border: 1px solid #eee; padding: 15px; border-radius: 5px; background: #e7f3ff; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>{{ app.post.title }}</strong><br>
+                        <small>応募日時: {{ app.applied_at|date:"Y/m/d" }}</small>
+                    </div>
+                    <a href="{% url 'team_shouronpou:post_detail' app.post.pk %}" class="btn-outline" style="font-size: 0.8rem;">詳細を確認</a>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="text-align: center; color: #999;">応募した実験はありません。</p>
+        {% endif %}
+    </div>
+
+    <div style="margin-top: 30px; text-align: center;">
+        <a href="{% url 'team_shouronpou:profile_edit' %}" class="btn btn-primary">プロフィール編集</a>
+        <a href="{% url 'team_shouronpou:logout' %}" class="btn btn-secondary" style="margin-left: 10px;">ログアウト</a>
     </div>
 </div>
-
 <script src="{% static 'team_shouronpou/js/schedule_viewer.js' %}"></script>
-
 </body>
 </html>

@@ -3,7 +3,6 @@ from .models import Post, Account
 import json
 
 class PostForm(forms.ModelForm):
-    # --- 人数選択肢 ---
     SELECTION_CHOICES = [
         (str(i), f'{i}名') for i in range(1, 11)
     ] + [
@@ -32,112 +31,61 @@ class PostForm(forms.ModelForm):
             'department', 'laboratory', 'reward', 'duration',
             'content', 'recruitment_end_date',
             'max_participants', 'available_slots', 
-            
-            # 条件フィールド
             'condition_nationality', 'condition_gender',
-            
-            # 任意項目
-            'target_age', 'health_notes', 'free_notes', 
+            'target_age', 'health_notes', 'free_notes',
+            'message_for_applicants'  # 追加
         ]
         widgets = {
             'recruitment_end_date': forms.DateInput(attrs={'type': 'date'}),
-            
-            # 国籍はテキスト入力
             'condition_nationality': forms.TextInput(attrs={'placeholder': '例: 指定なし、日本国籍のみ など'}),
-            
-            # 性別はラジオボタン（必須・デフォルト指定なし）
-            'condition_gender': forms.RadioSelect(),
-            
-            'available_slots': forms.HiddenInput(), 
-            
-            'content': forms.Textarea(attrs={
-                'rows': 4,
-                'placeholder': '募集内容（100文字以内）',
-                'maxlength': '100',
+            'target_age': forms.TextInput(attrs={'placeholder': '例: 20代、18歳以上 など'}),
+            'available_slots': forms.HiddenInput(),
+            'content': forms.Textarea(attrs={'rows': 4}),
+            'health_notes': forms.Textarea(attrs={'rows': 2}),
+            'free_notes': forms.Textarea(attrs={'rows': 2}),
+            # 追加
+            'message_for_applicants': forms.Textarea(attrs={
+                'rows': 3, 
+                'placeholder': '例: 応募ありがとうございます。詳細は example@mail.com までご連絡ください。'
             }),
-            'department': forms.TextInput(attrs={'placeholder': '例: 機械工学系'}),
-            'laboratory': forms.TextInput(attrs={'placeholder': '例: 〇〇研究室'}),
-            'reward': forms.TextInput(attrs={'placeholder': '例: Amazonギフト券 1000円分'}),
-            'duration': forms.NumberInput(attrs={'placeholder': '例: 60'}),
-            'target_age': forms.TextInput(attrs={'placeholder': '例: 20歳以上、学生限定など'}),
-            'health_notes': forms.Textarea(attrs={'rows': 3, 'placeholder': '光の点滅があります、など'}),
-            'free_notes': forms.Textarea(attrs={'rows': 3, 'placeholder': 'その他特記事項があれば'}),
-        }
-        labels = {
-            'duration': '実験所要時間（分）',
-            'health_notes': '健康面で配慮すべき事項（任意）',
-            'free_notes': '自由項目（任意）',
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        # 編集時の初期値設定
         if self.instance.pk:
-            current_max = self.instance.max_participants
-            if current_max is None:
-                self.fields['participants_selector'].initial = 'unlimited'
-            elif 1 <= current_max <= 10:
-                self.fields['participants_selector'].initial = str(current_max)
+            if self.instance.max_participants is None:
+                self.initial['participants_selector'] = 'unlimited'
+            elif 1 <= self.instance.max_participants <= 10:
+                self.initial['participants_selector'] = str(self.instance.max_participants)
             else:
-                self.fields['participants_selector'].initial = 'custom'
-                self.fields['custom_participants'].initial = current_max
-                self.fields['custom_participants'].widget.attrs.update({'style': 'display:inline-block;'})
-            
-            # 時間割データの復元
-            if self.instance.available_slots:
-                self.initial['available_slots'] = json.dumps(self.instance.available_slots)
-
-    def clean_available_slots(self):
-        data = self.cleaned_data.get('available_slots')
-        if isinstance(data, str):
-            try:
-                if not data: return []
-                return json.loads(data)
-            except json.JSONDecodeError:
-                return []
-        return data
+                self.initial['participants_selector'] = 'custom'
+                self.initial['custom_participants'] = self.instance.max_participants
 
     def clean(self):
         cleaned_data = super().clean()
-        
-        # 人数入力の制御
         selector = cleaned_data.get('participants_selector')
         custom_val = cleaned_data.get('custom_participants')
-        final_max = None
 
-        if selector == 'custom':
+        if selector == 'unlimited':
+            cleaned_data['max_participants'] = None
+        elif selector == 'custom':
             if not custom_val:
                 self.add_error('custom_participants', '人数を入力してください。')
-            else:
-                final_max = custom_val
-        elif selector == 'unlimited':
-            final_max = None
-        elif selector:
-            final_max = int(selector)
-
-        cleaned_data['max_participants'] = final_max
-        
-        # ★重要: ここにあった「enable_gender」等のif文は全て削除しました。
-        # データはそのまま保存されます。
-
+            cleaned_data['max_participants'] = custom_val
+        else:
+            cleaned_data['max_participants'] = int(selector)
         return cleaned_data
 
-
-# 新規登録用フォーム
 class AccountForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, label="パスワード")
-    
     class Meta:
         model = Account
         fields = ['username', 'password']
 
-# ログイン用フォーム
 class LoginForm(forms.Form):
     username = forms.CharField(label="ユーザー名")
     password = forms.CharField(widget=forms.PasswordInput, label="パスワード")
 
-# プロフィール編集用フォーム
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Account
@@ -167,6 +115,6 @@ class ProfileForm(forms.ModelForm):
             try:
                 if not data: return []
                 return json.loads(data)
-            except json.JSONDecodeError:
+            except:
                 return []
         return data

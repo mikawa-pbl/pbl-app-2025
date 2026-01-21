@@ -61,6 +61,17 @@ class BookReviewForm(forms.ModelForm):
             'review': 'レビュー',
         }
 
+    def clean_review(self):
+        """
+        レビューの文字数バリデーション
+        """
+        review = self.cleaned_data.get('review', '')
+        if len(review) > 500:
+            raise forms.ValidationError(
+                f'レビューは500文字以内で入力してください。現在{len(review)}文字です。'
+            )
+        return review
+
     def clean_isbn(self):
         """
         ISBNコードのバリデーション
@@ -145,6 +156,17 @@ class SubjectReviewForm(forms.ModelForm):
         labels = {
             'review': 'レビュー',
         }
+
+    def clean_review(self):
+        """
+        レビューの文字数バリデーション
+        """
+        review = self.cleaned_data.get('review', '')
+        if len(review) > 500:
+            raise forms.ValidationError(
+                f'レビューは500文字以内で入力してください。現在{len(review)}文字です。'
+            )
+        return review
 
 
 class SignupForm(PasswordConfirmMixin, forms.ModelForm):
@@ -288,6 +310,17 @@ class BookReviewEditForm(forms.ModelForm):
             'review': 'レビュー内容',
         }
 
+    def clean_review(self):
+        """
+        レビューの文字数バリデーション
+        """
+        review = self.cleaned_data.get('review', '')
+        if len(review) > 500:
+            raise forms.ValidationError(
+                f'レビューは500文字以内で入力してください。現在{len(review)}文字です。'
+            )
+        return review
+
 
 class SubjectReviewEditForm(forms.ModelForm):
     """
@@ -317,3 +350,14 @@ class SubjectReviewEditForm(forms.ModelForm):
         labels = {
             'review': 'レビュー内容',
         }
+
+    def clean_review(self):
+        """
+        レビューの文字数バリデーション
+        """
+        review = self.cleaned_data.get('review', '')
+        if len(review) > 500:
+            raise forms.ValidationError(
+                f'レビューは500文字以内で入力してください。現在{len(review)}文字です。'
+            )
+        return review

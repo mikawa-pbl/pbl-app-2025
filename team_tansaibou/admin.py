@@ -1,5 +1,53 @@
 from django.contrib import admin
-from .models import Member, Product, ProductSet, ProductSetItem, PriceHistory, Transaction, TransactionItem
+from django import forms
+from .models import Store, Member, Product, ProductSet, ProductSetItem, PriceHistory, Transaction, TransactionItem
+
+
+class StoreAdminForm(forms.ModelForm):
+    """Store用のカスタムフォーム（パスワードリセット用）"""
+    new_password = forms.CharField(
+        label='新しいパスワード',
+        widget=forms.PasswordInput,
+        required=False,
+        help_text='変更する場合のみ入力してください'
+    )
+
+    class Meta:
+        model = Store
+        fields = ['username', 'email', 'name', 'slug', 'description', 'is_active']
+
+    def save(self, commit=True):
+        store = super().save(commit=False)
+        new_password = self.cleaned_data.get('new_password')
+        if new_password:
+            store.set_password(new_password)
+        if commit:
+            store.save()
+        return store
+
+
+@admin.register(Store)
+class StoreAdmin(admin.ModelAdmin):
+    form = StoreAdminForm
+    list_display = ['username', 'name', 'email', 'is_active', 'created_at']
+    list_filter = ['is_active']
+    search_fields = ['username', 'name', 'email']
+    readonly_fields = ['created_at', 'updated_at']
+    fieldsets = (
+        ('ログイン情報', {
+            'fields': ('username', 'new_password', 'email')
+        }),
+        ('店舗情報', {
+            'fields': ('name', 'slug', 'description')
+        }),
+        ('状態', {
+            'fields': ('is_active',)
+        }),
+        ('システム情報', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ['collapse']
+        }),
+    )
 
 @admin.register(Member)
 class MemberAdmin(admin.ModelAdmin):

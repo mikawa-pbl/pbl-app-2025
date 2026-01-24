@@ -2,122 +2,71 @@
 
 {% block title %}商品登録 - Team Tansaibou{% endblock %}
 
-{% block extra_style %}
-form {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    max-width: 600px;
-    margin: 0 auto;
-}
-h1 {
-    color: #333;
-    margin-bottom: 30px;
-    text-align: center;
-}
-.form-group {
-    margin-bottom: 20px;
-}
-label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #555;
-}
-input[type="text"],
-input[type="number"],
-textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-}
-textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-.checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.checkbox-group input[type="checkbox"] {
-    width: auto;
-}
-.button-group {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-}
-button, .btn-secondary {
-    flex: 1;
-    padding: 14px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-}
-button {
-    background-color: #4CAF50;
-    color: white;
-}
-button:hover {
-    background-color: #45a049;
-}
-.btn-secondary {
-    background-color: #999;
-    color: white;
-}
-.btn-secondary:hover {
-    background-color: #888;
-}
-.required {
-    color: red;
-}
-{% endblock %}
-
 {% block content %}
-<h1>📦 商品登録</h1>
+<div class="max-w-2xl mx-auto px-4">
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">商品登録</h1>
 
-<form method="post">
-    {% csrf_token %}
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
 
-    <div class="form-group">
-        <label for="name">商品名 <span class="required">*</span></label>
-        <input type="text" id="name" name="name" required>
+            <div>
+                <label for="name" class="block mb-2 text-sm font-medium text-gray-900">
+                    商品名 <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="name" name="name" required
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="current_price" class="block mb-2 text-sm font-medium text-gray-900">
+                        販売価格（円） <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="current_price" name="current_price" min="0" step="1" required
+                           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+                <div>
+                    <label for="cost_price" class="block mb-2 text-sm font-medium text-gray-900">
+                        仕入れ価格（円） <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="cost_price" name="cost_price" min="0" step="1" value="0" required
+                           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                </div>
+            </div>
+
+            <div>
+                <label for="stock" class="block mb-2 text-sm font-medium text-gray-900">
+                    初期在庫数 <span class="text-red-500">*</span>
+                </label>
+                <input type="number" id="stock" name="stock" value="0" min="0" required
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            </div>
+
+            <div>
+                <label for="description" class="block mb-2 text-sm font-medium text-gray-900">説明</label>
+                <textarea id="description" name="description" rows="3"
+                          placeholder="商品の説明を入力してください"
+                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"></textarea>
+            </div>
+
+            <div class="flex items-center">
+                <input type="checkbox" id="is_active" name="is_active" checked
+                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                <label for="is_active" class="ml-2 text-sm font-medium text-gray-900">販売中にする</label>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="submit"
+                        class="text-white bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5">
+                    登録する
+                </button>
+                <a href="{% url 'team_tansaibou:product_list' %}"
+                   class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5">
+                    キャンセル
+                </a>
+            </div>
+        </form>
     </div>
-
-    <div class="form-group">
-        <label for="current_price">価格（円） <span class="required">*</span></label>
-        <input type="number" id="current_price" name="current_price" min="0" step="1" required>
-    </div>
-
-    <div class="form-group">
-        <label for="stock">初期在庫数 <span class="required">*</span></label>
-        <input type="number" id="stock" name="stock" value="0" min="0" required>
-    </div>
-
-    <div class="form-group">
-        <label for="description">説明</label>
-        <textarea id="description" name="description" placeholder="商品の説明を入力してください"></textarea>
-    </div>
-
-    <div class="form-group">
-        <div class="checkbox-group">
-            <input type="checkbox" id="is_active" name="is_active" checked>
-            <label for="is_active" style="margin:0;">販売中にする</label>
-        </div>
-    </div>
-
-    <div class="button-group">
-        <a href="{% url 'team_tansaibou:product_list' %}" class="btn-secondary">キャンセル</a>
-        <button type="submit">登録する</button>
-    </div>
-</form>
+</div>
 {% endblock %}

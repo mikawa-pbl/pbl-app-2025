@@ -315,7 +315,7 @@ def stock_prediction(request):
                 'name': product.name,
                 'current_stock': product.stock,
                 'predicted_remaining': max(0, round(predicted_remaining)),
-                'loss_amount': max(0, round(predicted_remaining * float(product.current_price))),
+                'loss_amount': max(0, round(predicted_remaining * float(product.cost_price))),  # 原価ベースで計算
             })
 
     # 売り切れ予測をステータス（危険度）順にソート
@@ -330,4 +330,128 @@ def stock_prediction(request):
         'loss_predictions': loss_predictions[:10],
         'hours_elapsed': round(hours_elapsed, 1),
         'remaining_hours': round(remaining_hours, 1),
+    })
+
+
+@api_login_required
+def profit_analysis(request):
+    """損益分析（本日分）- 粗利益、利益率、商品別利益"""
+    store = request.current_store
+    start, end = get_today_range()
+
+    # 通常商品の売上データを取得（原価情報含む）
+    product_items = TransactionItem.objects.using(DB).filter(
+        transaction__store=store,
+        transaction__transaction_date__range=(start, end),
+        product__isnull=False
+    ).select_related('product')
+
+    # 商品別の利益計算
+    product_profits = {}
+    total_revenue = Decimal('0')
+    total_cost = Decimal('0')
+
+    for item in product_items:
+        product = item.product
+        revenue = item.subtotal  # 販売価格 × 数量
+        cost = product.cost_price * item.quantity  # 原価 × 数量
+        profit = revenue - cost
+
+        total_revenue += revenue
+        total_cost += cost
+
+        if product.id not in product_profits:
+            product_profits[product.id] = {
+                'name': product.name,
+                'quantity': 0,
+                'revenue': Decimal('0'),
+                'cost': Decimal('0'),
+                'profit': Decimal('0'),
+                'price': product.current_price,
+                'cost_price': product.cost_price,
+            }
+
+        product_profits[product.id]['quantity'] += item.quantity
+        product_profits[product.id]['revenue'] += revenue
+        product_profits[product.id]['cost'] += cost
+        product_profits[product.id]['profit'] += profit
+
+    # セット商品の利益計算（セットに含まれる商品の原価合計を使用）
+    set_items = TransactionItem.objects.using(DB).filter(
+        transaction__store=store,
+        transaction__transaction_date__range=(start, end),
+        product_set__isnull=False
+    ).select_related('product_set')
+
+    for item in set_items:
+        product_set = item.product_set
+        revenue = item.subtotal  # セット価格 × 数量
+
+        # セット商品の原価を計算（セット内商品の原価合計）
+        set_cost = Decimal('0')
+        for set_item in product_set.items.using(DB).select_related('product'):
+            set_cost += set_item.product.cost_price * set_item.quantity
+
+        cost = set_cost * item.quantity
+        profit = revenue - cost
+
+        total_revenue += revenue
+        total_cost += cost
+
+        set_key = f'set_{product_set.id}'
+        if set_key not in product_profits:
+            product_profits[set_key] = {
+                'name': f'{product_set.name} (セット)',
+                'quantity': 0,
+                'revenue': Decimal('0'),
+                'cost': Decimal('0'),
+                'profit': Decimal('0'),
+                'price': product_set.price,
+                'cost_price': set_cost,
+            }
+
+        product_profits[set_key]['quantity'] += item.quantity
+        product_profits[set_key]['revenue'] += revenue
+        product_profits[set_key]['cost'] += cost
+        product_profits[set_key]['profit'] += profit
+
+    # 利益率計算
+    total_profit = total_revenue - total_cost
+    profit_margin = 0
+    if total_revenue > 0:
+        profit_margin = round((total_profit / total_revenue) * 100, 1)
+
+    # 在庫評価額（現在の在庫 × 仕入れ原価）を計算
+    inventory_value = Decimal('0')
+    products = Product.objects.using(DB).filter(store=store, is_active=True)
+    for product in products:
+        inventory_value += product.cost_price * product.stock
+
+    # 商品別データをリストに変換（利益額でソート）
+    product_list = []
+    for data in product_profits.values():
+        item_margin = 0
+        if data['revenue'] > 0:
+            item_margin = round((data['profit'] / data['revenue']) * 100, 1)
+
+        product_list.append({
+            'name': data['name'],
+            'quantity': data['quantity'],
+            'revenue': int(data['revenue']),
+            'cost': int(data['cost']),
+            'profit': int(data['profit']),
+            'margin': item_margin,
+            'unit_price': int(data['price']),
+            'unit_cost': int(data['cost_price']),
+        })
+
+    product_list.sort(key=lambda x: x['profit'], reverse=True)
+
+    return JsonResponse({
+        'total_revenue': int(total_revenue),        # 売上高
+        'total_cogs': int(total_cost),              # 売上原価（Cost of Goods Sold）
+        'total_profit': int(total_profit),          # 粗利益
+        'profit_margin': profit_margin,             # 粗利益率
+        'inventory_value': int(inventory_value),    # 在庫評価額
+        'products': product_list[:20],
     })

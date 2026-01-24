@@ -16,9 +16,7 @@
       padding: 40px 16px 80px;
       text-align: center;
     }
-    h1 {
-      margin-bottom: 24px;
-    }
+    h1 { margin-bottom: 24px; }
     .today-date {
       font-size: 1.1rem;
       color: #444;
@@ -43,13 +41,14 @@
       font-size: 1.5rem;
       font-weight: bold;
     }
+
     .rating-section {
       background: #ffffff;
       padding: 30px 20px;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
       margin-bottom: 30px;
-      text-align: left; /* フォーム要素の配置調整 */
+      text-align: left;
     }
     .rating-group {
       margin-bottom: 25px;
@@ -68,35 +67,61 @@
       margin-bottom: 15px;
       display: block;
     }
+
     .face-ratings {
       display: flex;
       justify-content: space-around;
       align-items: center;
       margin-top: 10px;
     }
-    .face-rating {
-      text-align: center;
-      cursor: pointer;
-    }
-    .face-rating input[type="radio"] {
-      display: none;
-    }
+    .face-rating { text-align: center; cursor: pointer; }
+    .face-rating input[type="radio"] { display: none; }
     .face-rating label {
       display: block;
-      font-size: 2.5rem; /* 顔文字のサイズ */
+      font-size: 2.5rem;
       transition: transform 0.2s;
       padding: 5px;
-      line-height: 1; /* 行の高さを詰める */
+      line-height: 1;
       border-radius: 50%;
     }
-    .face-rating label:hover {
-      transform: scale(1.1);
-    }
+    .face-rating label:hover { transform: scale(1.1); }
     .face-rating input[type="radio"]:checked + label {
-      outline: 3px solid #6c5ce7; /* 選択時の強調 */
+      outline: 3px solid #6c5ce7;
       outline-offset: 2px;
       background: #e8e6fb;
     }
+
+    /* ★コメント欄 */
+    .comment-label {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #333;
+      margin: 18px 0 10px;
+      display: block;
+    }
+    .comment-box {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 90px;
+      resize: vertical;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 12px 12px;
+      font-size: 1rem;
+      outline: none;
+      background: #fafafa;
+    }
+    .comment-box:focus {
+      border-color: #6c5ce7;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(108,92,231,0.15);
+    }
+    .comment-hint {
+      color: #777;
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+
     .submit-button {
       background-color: #007bff;
       color: white;
@@ -108,12 +133,9 @@
       margin-top: 20px;
       transition: background-color 0.2s;
     }
-    .submit-button:hover {
-      background-color: #0056b3;
-    }
-    .back-link {
-      margin-top: 32px;
-    }
+    .submit-button:hover { background-color: #0056b3; }
+
+    .back-link { margin-top: 32px; }
     .success-message {
       color: green;
       font-size: 1.2rem;
@@ -147,10 +169,13 @@
     {% if success_message %}
       <div class="success-message">{{ success_message }}</div>
       {% if submitted_taste or submitted_volume %}
-        <p>あなたの評価: 味: **{{ submitted_taste }}**/5, 量: **{{ submitted_volume }}**/5</p>
+        <p>あなたの評価: 味: <b>{{ submitted_taste }}</b>/5, 量: <b>{{ submitted_volume }}</b>/5</p>
+      {% endif %}
+      {% if submitted_comment %}
+        <p style="color:#666; margin-top: 8px;">あなたのコメント: {{ submitted_comment }}</p>
       {% endif %}
     {% else %}
-      
+
       <div class="rating-section">
         <form method="POST">
           {% csrf_token %}
@@ -205,6 +230,12 @@
                 <label for="volume5" title="多すぎる（5）">🐷</label>
               </div>
             </div>
+
+            <!-- ★コメント欄（Amazonっぽい自由記述） -->
+            <label class="comment-label" for="comment">コメント（任意）</label>
+            <textarea id="comment" name="comment" class="comment-box" maxlength="300"
+              placeholder="例：クリーミーで美味しい。量もちょうど良かった。"></textarea>
+            <div class="comment-hint">※300文字まで。個人情報や誹謗中傷は書かないでください。</div>
           </div>
 
           <button type="submit" class="submit-button">評価を送信</button>

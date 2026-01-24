@@ -43,5 +43,4 @@ urlpatterns = [
     path('api/dashboard/daily-comparison/', api_views.daily_comparison, name='api_daily_comparison'),
     path('api/dashboard/product-ranking/', api_views.product_ranking, name='api_product_ranking'),
     path('api/dashboard/stock-prediction/', api_views.stock_prediction, name='api_stock_prediction'),
-    path('api/dashboard/profit-analysis/', api_views.profit_analysis, name='api_profit_analysis'),
 ]

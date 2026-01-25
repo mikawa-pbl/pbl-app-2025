@@ -14,7 +14,9 @@ def seed_data(apps, schema_editor):
         {"facility_id": "lib", "name": "🏢 図書館"},
         {"facility_id": "hiba", "name": "🍴 食堂（ひばり）"},
         {"facility_id": "kita", "name": "🅿️ 北駐車場"},
-        {"facility_id": "cafe", "name": "☕️ カフェ"},
+        #{"facility_id": "cafe", "name": "☕️ カフェ"},
+        {"facility_id": "bus", "name": "🚌 バス停"},
+        {"facility_id": "gym", "name": "🏋️ ジム"},
     ]
     facilities = []
     for data in facilities_data:

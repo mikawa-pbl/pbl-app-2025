@@ -28,7 +28,9 @@ class Facility(models.Model):
         ("lib", "🏢 図書館"),
         ("hiba", "🍴 食堂（ひばり）"),
         ("kita", "🅿️ 北駐車場"),
-        ("cafe", "☕️ カフェ"),
+        #("cafe", "☕️ カフェ"),
+        ("bus", "🚌 バス停"),
+        ("gym", "🏋️ ジム"),
     ]
 
     facility_id = models.CharField(max_length=10, unique=True, choices=FACILITY_CHOICES)

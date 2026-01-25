@@ -14,7 +14,9 @@ def seed_location_data(apps, schema_editor):
         "🍴 食堂（ひばり）": {"latitude": 34.700797551357624, "longitude": 137.40906746128755},
         "🅿️ 北駐車場": {"latitude": 34.7030802064815, "longitude": 137.40754813094193},
         "🏢 図書館": {"latitude": 34.70084228819001, "longitude": 137.41008130531003},
-        "☕️ カフェ": {"latitude": 34.700938, "longitude": 137.408937},
+        #"☕️ カフェ": {"latitude": 34.700938, "longitude": 137.408937},
+        "🚌 バス停": {"latitude": 34.700886, "longitude": 137.412739},
+        "🏋️ ジム": {"latitude": 34.701172, "longitude": 137.406699},
     }
 
     for name, coords in facility_locations.items():

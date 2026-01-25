@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='Facility',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('facility_id', models.CharField(choices=[('lib', '🏢 図書館'), ('hiba', '🍴 食堂（ひばり）'), ('kita', '🅿️ 北駐車場'), ('cafe', '☕️ カフェ')], max_length=10, unique=True)),
+                ('facility_id', models.CharField(choices=[('lib', '🏢 図書館'), ('hiba', '🍴 食堂（ひばり）'), ('kita', '🅿️ 北駐車場'), ('bus', '🚌 バス停'), ('gym', '🏋️ ジム')], max_length=10, unique=True)),
                 ('name', models.CharField(max_length=100, verbose_name='施設名')),
             ],
             options={

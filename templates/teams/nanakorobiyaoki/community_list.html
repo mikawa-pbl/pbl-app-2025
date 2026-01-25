@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コミュニティを探す - TUT Connect</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #0d47a1;
+            --bg-color: #f5f7fa;
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --border-radius: 12px;
+            --text-main: #333;
+            --text-sub: #666;
+            --accent-color: #e3f2fd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar & Layout */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #fff;
+            border-right: 1px solid #eee;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a237e;
+            margin-bottom: 40px;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            background: #b71c1c;
+            color: white;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 1.2rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: var(--text-sub);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s;
+            font-weight: 500;
+            gap: 12px;
+        }
+
+        .nav-link:hover {
+            background-color: #f5f5f5;
+            color: var(--text-main);
+        }
+
+        .nav-link.active {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .nav-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background-color: #1d9bf0;
+            /* Twitter Blue */
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid #fff;
+            line-height: 1;
+            min-width: 18px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            height: var(--header-height);
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .search-bar {
+            background: #f5f7fa;
+            border-radius: 20px;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            width: 400px;
+            gap: 10px;
+            color: #999;
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            outline: none;
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .content-body {
+            padding: 40px;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .page-subtitle {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1px;
+        }
+
+        .tab-item {
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #666;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .tab-item:hover {
+            color: var(--primary-color);
+        }
+
+        .tab-item.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .category-badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+
+        .category-授業 {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .category-サークル {
+            background: #f1f8e9;
+            color: #33691e;
+        }
+
+        .category-その他 {
+            background: #f5f5f5;
+            color: #616161;
+        }
+
+        /* Grid & Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: #e3f2fd;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #1565c0;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .card-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-info {
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .member-count {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .go-btn {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .create-btn-fixed {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--primary-color);
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(13, 71, 161, 0.3);
+            text-decoration: none;
+            transition: transform 0.2s;
+            z-index: 200;
+        }
+
+        .create-btn-fixed:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Sidebar Extra Styles */
+        .sidebar-section-title {
+            font-size: 0.8rem;
+            color: #999;
+            margin: 20px 0 10px 10px;
+            font-weight: 700;
+        }
+
+        .mini-community-list {
+            list-style: none;
+            overflow-y: auto;
+            max-height: calc(100vh - 400px);
+            margin-right: -10px;
+            padding-right: 10px;
+        }
+
+        .mini-community-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .mini-community-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .mini-community-list::-webkit-scrollbar-thumb {
+            background: #eee;
+            border-radius: 10px;
+        }
+
+        .mini-community-list::-webkit-scrollbar-thumb:hover {
+            background: #ddd;
+        }
+
+        .mini-community-item a {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            gap: 10px;
+        }
+
+        .mini-community-item a:hover {
+            background: #f5f5f5;
+        }
+
+        .mini-icon {
+            width: 24px;
+            height: 24px;
+            background: #ddd;
+            border-radius: 50%;
+            display: block;
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">T</div>
+            TUT Connect
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:home' %}" class="nav-link">
+                    <span class="material-icons-round">home</span> ホーム
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:community_list' %}" class="nav-link active">
+                    <span class="material-icons-round">grid_view</span> コミュニティを探す
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:message_inbox' %}" class="nav-link">
+                    <div class="nav-icon-wrapper">
+                        <span class="material-icons-round">mail_outline</span>
+                        {% if unread_messages_count > 0 %}
+                        <span class="notification-badge">{{ unread_messages_count }}</span>
+                        {% endif %}
+                    </div>
+                    メッセージ
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:user_profile' login_user.user_id %}" class="nav-link">
+                    <span class="material-icons-round">person</span> プロフィール
+                </a>
+            </li>
+
+            <div class="sidebar-section-title">参加中のコミュニティ</div>
+            <ul class="mini-community-list">
+                {% for community in joined_communities %}
+                <li class="mini-community-item">
+                    <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}"
+                        style="justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            {% if community.image %}
+                            <img src="{{ community.image.url }}" class="mini-icon" alt="">
+                            {% else %}
+                            <span class="mini-icon" style="background: #e0e0e0;"></span>
+                            {% endif %}
+                            {{ community.name }}
+                        </div>
+                        {% if community.unread_posts_count > 0 %}
+                        <span class="notification-badge"
+                            style="position: static; font-size: 0.65rem; padding: 1px 4px; min-width: 14px;">
+                            {{community.unread_posts_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% empty %}
+                <li class="mini-community-item"><a href="#">なし</a></li>
+                {% endfor %}
+            </ul>
+        </ul>
+    </nav>
+
+    <!-- Main -->
+    <main class="main-content">
+        <header class="header">
+            <form action="{% url 'nanakorobiyaoki:community_list' %}" method="get">
+                <div class="search-bar">
+                    <span class="material-icons-round">search</span>
+                    <input type="text" name="q" placeholder="コミュニティを検索" value="{{ request.GET.q|default:'' }}">
+                    <button type="submit" style="display: none;"></button>
+                </div>
+            </form>
+            <div class="header-actions">
+            </div>
+        </header>
+
+        <div class="content-body">
+            <h1 class="page-title">コミュニティを探す</h1>
+            <p class="page-subtitle">興味のあるコミュニティを見つけて参加しましょう</p>
+
+            <div class="category-tabs">
+                <a href="?category=すべて&q={{ q }}"
+                    class="tab-item {% if current_category == 'すべて' %}active{% endif %}">すべて</a>
+                <a href="?category=授業&q={{ q }}"
+                    class="tab-item {% if current_category == '授業' %}active{% endif %}">授業</a>
+                <a href="?category=サークル&q={{ q }}"
+                    class="tab-item {% if current_category == 'サークル' %}active{% endif %}">サークル</a>
+                <a href="?category=その他&q={{ q }}"
+                    class="tab-item {% if current_category == 'その他' %}active{% endif %}">その他</a>
+            </div>
+
+            <div class="grid">
+                {% for community in communities %}
+                <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}" class="card"
+                    style="text-decoration: none; color: inherit; display: flex;">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            {% if community.image %}
+                            <img src="{{ community.image.url }}" alt="">
+                            {% else %}
+                            <span class="material-icons-round">groups</span>
+                            {% endif %}
+                        </div>
+                        <div class="card-info">
+                            <span class="category-badge category-{{ community.category }}">
+                                {{community.category}}
+                            </span>
+                            <div class="card-title">{{ community.name }}</div>
+                            <div class="card-desc">{{ community.description|default:"説明はありません" }}</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <span class="member-count">{{ community.members.count }} メンバー</span>
+                        <span class="go-btn">詳細を見る</span>
+                    </div>
+                </a>
+                {% empty %}
+                <div style="grid-column: 1 / -1; text-align: center; color: #999; padding: 40px;">
+                    コミュニティが見つかりませんでした。
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+
+    <!-- FAB for Creating Community -->
+    <a href="{% url 'nanakorobiyaoki:community_create' %}" class="create-btn-fixed" title="コミュニティを作成">
+        <span class="material-icons-round" style="font-size: 28px;">add</span>
+    </a>
+</body>
+
+</html>

@@ -1,7 +1,6 @@
 # routers.py （プロジェクト直下）
 class TeamPerAppRouter:
-    """
-    team_a アプリは team_a DB、team_b アプリは team_b DB へルーティングする。
+    """team_a アプリは team_a DB、team_b アプリは team_b DB へルーティングする。
     それ以外は default。
     """
 
@@ -29,6 +28,7 @@ class TeamPerAppRouter:
         'takenoko': 'takenoko',
         "h34vvy_u53rzz": "h34vvy_u53rzz",
         'team_giryulink': 'team_giryulink',
+        'teachers': 'teachers',
     }
 
     def db_for_read(self, model, **hints):

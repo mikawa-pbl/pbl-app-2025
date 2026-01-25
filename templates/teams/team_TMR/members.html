@@ -1,12 +1,104 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>Team TMR Members</title></head>
-<body>
-  <h1>Team TMR Members</h1>
-  <ul>
-    {% for member in members %}
-      <li>{{ member.last_name }} {{ member.first_name }}</li>
+{% extends 'teams/team_TMR/base.html' %}
+
+{% block title %}先輩一覧{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <h2 class="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-blue-500 pb-2 inline-block">先輩一覧</h2>
+
+  <!-- 検索フォーム -->
+  <div class="bg-white rounded-lg shadow p-6 mb-8">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div>
+        <label for="query_lab" class="block text-sm font-medium text-gray-700">研究室</label>
+        <input type="text" name="query_lab" id="query_lab" value="{{ request.GET.query_lab }}" placeholder="例：佐藤研"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border">
+      </div>
+      <div>
+        <label for="query_nickname" class="block text-sm font-medium text-gray-700">ニックネーム</label>
+        <input type="text" name="query_nickname" id="query_nickname" value="{{ request.GET.query_nickname }}"
+          placeholder="名前で検索"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border">
+      </div>
+      <div>
+        <label for="query_field" class="block text-sm font-medium text-gray-700">研究分野</label>
+        <input type="text" name="query_field" id="query_field" value="{{ request.GET.query_field }}"
+          placeholder="例：AI, Web..."
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border">
+      </div>
+      <div>
+        <label for="query_decision" class="block text-sm font-medium text-gray-700">内定先</label>
+        <input type="text" name="query_decision" id="query_decision" value="{{ request.GET.query_decision }}"
+          placeholder="企業名など"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border">
+      </div>
+      <div class="md:col-span-2 lg:col-span-4 flex justify-end">
+        <a href="{% url 'member_list' %}"
+          class="mr-3 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          リセット
+        </a>
+        <button type="submit"
+          class="py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          検索
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for profile in profiles %}
+    <a href="{% url 'member_roadmap' profile.user.id %}"
+      class="block bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden transform hover:-translate-y-1">
+      <div class="p-6">
+        <div class="flex items-center mb-4">
+          <div
+            class="bg-blue-100 text-blue-600 rounded-full h-12 w-12 flex items-center justify-center text-xl font-bold mr-4">
+            {{ profile.user.username|slice:":1"|upper }}
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-gray-900">
+              {% if profile.nickname %}
+              {{ profile.nickname }}
+              {% else %}
+              {{ profile.user.username }}
+              {% endif %}
+              <span class="text-sm text-gray-500 font-normal ml-2">({{ profile.graduation_year|default:"-" }}卒)</span>
+            </h3>
+            <p class="text-sm text-gray-600">{{ profile.affiliation }}</p>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div>
+            <span
+              class="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full font-semibold">研究室</span>
+            <span class="text-gray-700 text-sm ml-1">{{ profile.lab|default:"未設定" }}</span>
+          </div>
+          <div>
+            <span
+              class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-semibold">研究分野</span>
+            <span class="text-gray-700 text-sm ml-1">{{ profile.research_field|default:"-" }}</span>
+          </div>
+          <div>
+            <span class="inline-block bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full font-semibold">内定先</span>
+            <span class="text-gray-700 text-sm ml-1">{{ profile.decision|default:"-" }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-6 py-3 border-t border-gray-100">
+        <span class="text-blue-600 text-sm font-semibold flex items-center justify-end">
+          ロードマップを見る <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
+      </div>
+    </a>
     {% empty %}
-      <li>データがありません</li>
+    <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-10 bg-gray-50 rounded-lg">
+      <p class="text-gray-500">条件に一致するメンバーはいません。</p>
+    </div>
     {% endfor %}
-  </ul>
-  <p><a href="/team_TMR/">Team TMR トップへ</a></p>
-</body></html>
+  </div>
+</div>
+{% endblock %}

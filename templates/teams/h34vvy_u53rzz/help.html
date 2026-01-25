@@ -1,499 +1,110 @@
+{% extends 'teams/h34vvy_u53rzz/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="{% static "campus-map/dist/campus-map.css" %}" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>助けを求める</title>
-  </head>
-  <body class="bg-slate-50 px-4 py-6 font-sans text-slate-900">
-    {% include "teams/h34vvy_u53rzz/_nav.html" %}
-    <div class="mx-auto max-w-4xl space-y-6">
-      <header>
-        <h1 class="text-2xl font-bold text-slate-900">助けを求める</h1>
-        <p class="mt-2 text-sm text-slate-600">
-          利用可能なドア一覧から、現在地に最も近いものを選んでください。
-        </p>
-      </header>
 
-      <div id="campus-map" class="w-full h-[400px]"></div>
+{% block endofhead %}
+<link href="{% static 'campus-map/dist/campus-map.css' %}" rel="stylesheet" />
+{% endblock %}
 
-      <div class="overflow-hidden rounded-lg bg-white shadow">
-        <table class="w-full border-collapse text-sm">
-          <thead class="bg-slate-100 text-left text-xs font-semibold uppercase text-slate-600">
-            <tr>
-              <th class="border border-slate-200 px-4 py-3">名称</th>
-              <th class="border border-slate-200 px-4 py-3">現在地からの距離</th>
-            </tr>
-          </thead>
-          <tbody id="doorTableBody">
-            {% for door in doors %}
-            <tr
-              class="door-row cursor-pointer border border-slate-200 text-slate-800 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 hover:bg-indigo-50"
-              tabindex="0"
-              data-door-id="{{ door.id }}"
-              data-door-label="{{ door.label }}"
-              data-door-lng="{{ door.coordinate.0 }}"
-              data-door-lat="{{ door.coordinate.1 }}"
-            >
-              <td class="px-4 py-3">{{ door.label }}</td>
-              <td class="px-4 py-3 text-right text-slate-600" data-distance-cell>
-                未取得
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td class="px-4 py-3 text-center text-slate-500" colspan="3">
-                登録されているドアがありません。
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      <p id="geoSortStatus" class="text-xs text-slate-500">
-        位置情報の許可後、現在地に近い順にドアを並び替えます。
+{% block content %}
+<div class="flex flex-col w-full h-full">
+  <div id="campus-map" class="flex-3"></div>
+
+  <div class="flex-2 overflow-y-auto bg-slate-50/50">
+    <header class="sticky top-0 z-10 border-b border-white/50 bg-white/80 px-5 py-4 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
+      <h1 class="text-lg font-black text-slate-900">
+        Select a Door
+      </h1>
+      <p class="text-xs font-semibold text-indigo-500 uppercase tracking-wider">
+        リストから選択してリクエスト
       </p>
+    </header>
 
-      <p
-        id="commentHint"
-        class="{% if selected_door %}hidden{% endif %} text-sm text-slate-600"
-      >
-        ドアをクリックするとコメント入力欄が現れます。
-      </p>
-
-      <section
-        id="commentSection"
-        class="{% if not selected_door %}hidden{% endif %} rounded-lg bg-white p-6 shadow"
-      >
-        <div class="flex items-start justify-between gap-4">
-          <h2 class="text-xl font-semibold text-slate-900">
-            選択中のドアにコメントを送信
-          </h2>
-          <button
-            type="button"
-            id="commentClose"
-            class="text-sm font-medium text-slate-500 transition hover:text-slate-800"
-            aria-label="コメントフォームを閉じる"
-          >
-            閉じる
-          </button>
-        </div>
-        <p class="mt-1 text-sm text-slate-600">
-          選択中のドア:
-          <strong id="selectedDoorName" class="text-slate-900">
-            {% if selected_door %}
-            {{ selected_door.label }}
-            {% else %}
-            未選択
-            {% endif %}
-          </strong>
-        </p>
-
-        <form method="post" class="mt-4 space-y-4">
-          {% csrf_token %}
-          <input
-            type="hidden"
-            name="door_id"
-            id="selectedDoorInput"
-            value="{% if selected_door %}{{ selected_door.id }}{% endif %}"
-          />
-          {% if form.non_field_errors %}
-          <ul class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-            {% for error in form.non_field_errors %}
-            <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
-          {% endif %}
-
-          <div class="space-y-1">
-            {{ form.comment.label_tag }}
-            {{ form.comment }}
-            {% if form.comment.errors %}
-            <ul class="text-sm text-red-600">
-              {% for error in form.comment.errors %}
-              <li>{{ error }}</li>
-              {% endfor %}
-            </ul>
-            {% endif %}
+    <div id="doorTableBody" class="space-y-3 p-4 pb-24">
+      {% for door in doors %}
+      <div
+        class="door-row group cursor-pointer rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-indigo-100/50 hover:ring-indigo-200"
+        tabindex="0" data-door-id="{{ door.id }}" data-door-label="{{ door.label }}"
+        data-door-lng="{{ door.coordinate.0 }}" data-door-lat="{{ door.coordinate.1 }}">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 font-bold transition-colors group-hover:bg-indigo-600 group-hover:text-white">
+                {{ forloop.counter }}
+             </div>
+             <span class="font-bold text-slate-700 group-hover:text-indigo-900 transition-colors">
+                {{ door.label }}
+             </span>
           </div>
-
-          <button
-            type="submit"
-            id="commentSubmit"
-            class="inline-flex items-center rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-            {% if not selected_door %}disabled{% endif %}
-          >
-            コメントを送信
-          </button>
-        </form>
-      </section>
+          <span class="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-lg group-hover:bg-white group-hover:text-indigo-500" data-distance-cell>
+            ---m
+          </span>
+        </div>
+      </div>
+      {% empty %}
+      <div class="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm font-medium text-slate-500">
+        登録されているドアがありません。
+      </div>
+      {% endfor %}
     </div>
+  </div>
+</div>
+{% endblock %}
 
-    <script type="module">
-      import { createCampusMap } from "{% static "campus-map/dist/campus-map.js" %}"
+{% block endofbody %}
+<dialog id="commentDialog"
+  class="fixed left-1/2 top-1/2 w-[min(560px,90vw)] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-transparent p-0 backdrop:bg-black/50">
+  <section id="commentSection" class="{% if not selected_door %}hidden{% endif %} rounded-lg bg-white p-6 shadow">
+    <div class="flex items-start justify-between gap-4">
+      <h2 class="text-xl font-semibold text-slate-900">
+        選択中のドアにコメントを送信
+      </h2>
+      <button type="button" id="commentClose" class="text-lg font-semibold text-slate-500 transition hover:text-slate-800"
+        aria-label="コメントフォームを閉じる">
+        ×
+      </button>
+    </div>
+    <p class="mt-1 text-sm text-slate-600">
+      選択中のドア:
+      <strong id="selectedDoorName" class="text-slate-900">
+        {% if selected_door %}
+        {{ selected_door.label }}
+        {% else %}
+        未選択
+        {% endif %}
+      </strong>
+    </p>
 
-      const doors = [
-        {% for door in doors %}
-        {
-          id: "{{ door.id|escapejs }}",
-          label: "{{ door.label|escapejs }}",
-          coordinate: [{{ door.coordinate.0 }}, {{ door.coordinate.1 }}],
-        }{% if not forloop.last %},{% endif %}
+    <form method="post" class="mt-4 space-y-4">
+      {% csrf_token %}
+      <input type="hidden" name="door_id" id="selectedDoorInput"
+        value="{% if selected_door %}{{ selected_door.id }}{% endif %}" />
+      {% if form.non_field_errors %}
+      <ul class="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+        {% for error in form.non_field_errors %}
+        <li>{{ error }}</li>
         {% endfor %}
-      ];
+      </ul>
+      {% endif %}
 
-      const mapContainer = document.querySelector("#campus-map");
-      const map = mapContainer ? createCampusMap(mapContainer) : null;
-      const tableBody = document.getElementById("doorTableBody");
-      const section = document.getElementById("commentSection");
-      const hint = document.getElementById("commentHint");
-      const doorInput = document.getElementById("selectedDoorInput");
-      const doorName = document.getElementById("selectedDoorName");
-      const submitButton = document.getElementById("commentSubmit");
-      const commentField = document.getElementById("id_comment");
-      const closeButton = document.getElementById("commentClose");
-      const geoStatus = document.getElementById("geoSortStatus");
-      const rowEntries = Array.from(document.querySelectorAll(".door-row")).map((row) => ({
-        id: row.dataset.doorId ?? "",
-        label: row.dataset.doorLabel ?? "",
-        lat: Number(row.dataset.doorLat),
-        lng: Number(row.dataset.doorLng),
-        row,
-        distanceCell: row.querySelector("[data-distance-cell]"),
-        distance: Number.POSITIVE_INFINITY,
-      }));
-      const rowsById = new Map(rowEntries.map((entry) => [entry.id, entry]));
-      const state = {
-        activeDoorId: doorInput?.value || null,
-        locked: Boolean(doorInput?.value),
-      };
+      <div class="space-y-1">
+        {{ form.comment.label_tag }}
+        {{ form.comment }}
+        {% if form.comment.errors %}
+        <ul class="text-sm text-red-600">
+          {% for error in form.comment.errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
 
-      setupMapLayers();
-      bindTableInteractions();
-      initGeolocationSorting();
+      <button type="submit" id="commentSubmit"
+        class="inline-flex items-center rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+        {% if not selected_door %}disabled{% endif %}>
+        コメントを送信
+      </button>
+    </form>
+  </section>
+</dialog>
 
-      if (closeButton) {
-        closeButton.addEventListener("click", resetSelection);
-      }
-
-      if (state.locked && state.activeDoorId) {
-        hideOtherRows(state.activeDoorId);
-      }
-
-      function setupMapLayers() {
-        if (!map) {
-          return;
-        }
-        const features = doors
-          .filter(
-            (door) =>
-              Array.isArray(door.coordinate) &&
-              door.coordinate.length === 2 &&
-              door.coordinate.every((value) => Number.isFinite(value)),
-          )
-          .map((door) => ({
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: door.coordinate,
-            },
-            properties: {
-              id: door.id,
-              label: door.label,
-            },
-          }));
-
-        if (features.length === 0) {
-          return;
-        }
-
-        map.on("load", () => {
-          map.addSource("doors", {
-            type: "geojson",
-            data: {
-              type: "FeatureCollection",
-              features,
-            },
-          });
-
-          map.addLayer({
-            id: "doors-pin",
-            type: "circle",
-            source: "doors",
-            paint: {
-              "circle-color": "#2563EB",
-              "circle-radius": 8,
-              "circle-stroke-color": "#FFFFFF",
-              "circle-stroke-width": 2,
-            },
-          });
-
-          map.addLayer({
-            id: "doors-label",
-            type: "symbol",
-            source: "doors",
-            layout: {
-              "text-field": ["get", "label"],
-              "text-size": 12,
-              "text-offset": [0, 1.2],
-              "text-anchor": "top",
-              "text-allow-overlap": false,
-            },
-            paint: {
-              "text-color": "#0F172A",
-            },
-          });
-
-          map.on("click", "doors-pin", handleDoorFeatureClick);
-          map.on("click", "doors-label", handleDoorFeatureClick);
-
-          fitMapToFeatures(features);
-        });
-      }
-
-      function handleDoorFeatureClick(event) {
-        const feature = event.features?.[0];
-        if (!feature) {
-          return;
-        }
-        focusOnFeature(feature);
-        const doorId = feature.properties?.id;
-        const entry = selectDoor(doorId, { force: true });
-        if (entry) {
-          entry.row.focus();
-        }
-      }
-
-      function focusOnFeature(feature) {
-        if (feature.geometry?.type !== "Point") {
-          return;
-        }
-        const [lng, lat] = feature.geometry.coordinates;
-        focusMapOnCoordinates(lng, lat);
-      }
-
-      function focusMapOnCoordinates(lng, lat) {
-        if (!map || !Number.isFinite(lng) || !Number.isFinite(lat)) {
-          return;
-        }
-        map.easeTo({
-          center: [lng, lat],
-          zoom: Math.max(map.getZoom(), 18),
-          duration: 500,
-        });
-      }
-
-      function fitMapToFeatures(features) {
-        if (!map || features.length === 0) {
-          return;
-        }
-        const bounds = features.reduce(
-          (acc, feature) => {
-            const [lng, lat] = feature.geometry.coordinates;
-            return {
-              minLng: Math.min(acc.minLng, lng),
-              minLat: Math.min(acc.minLat, lat),
-              maxLng: Math.max(acc.maxLng, lng),
-              maxLat: Math.max(acc.maxLat, lat),
-            };
-          },
-          {
-            minLng: Number.POSITIVE_INFINITY,
-            minLat: Number.POSITIVE_INFINITY,
-            maxLng: Number.NEGATIVE_INFINITY,
-            maxLat: Number.NEGATIVE_INFINITY,
-          },
-        );
-
-        if (
-          Number.isFinite(bounds.minLng) &&
-          Number.isFinite(bounds.maxLng) &&
-          Number.isFinite(bounds.minLat) &&
-          Number.isFinite(bounds.maxLat)
-        ) {
-          if (bounds.minLng === bounds.maxLng && bounds.minLat === bounds.maxLat) {
-            map.setCenter([bounds.minLng, bounds.minLat]);
-            map.setZoom(18);
-          } else {
-            map.fitBounds(
-              [
-                [bounds.minLng, bounds.minLat],
-                [bounds.maxLng, bounds.maxLat],
-              ],
-              {
-                padding: 40,
-                maxZoom: 19,
-                duration: 0,
-              },
-            );
-          }
-        }
-      }
-
-      function bindTableInteractions() {
-        rowEntries.forEach(({ row, id }) => {
-          if (!id) {
-            return;
-          }
-          row.addEventListener("click", () => selectDoor(id));
-          row.addEventListener("keypress", (event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              selectDoor(id);
-            }
-          });
-        });
-      }
-
-      function initGeolocationSorting() {
-        if (!navigator.geolocation) {
-          if (geoStatus) {
-            geoStatus.textContent = "この端末では位置情報が利用できません。";
-          }
-          return;
-        }
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            sortRowsByDistance(position);
-            if (geoStatus) {
-              geoStatus.textContent = "現在地に近い順に並び替えました。";
-            }
-          },
-          () => {
-            if (geoStatus) {
-              geoStatus.textContent = "位置情報を利用できませんでした。元の順序で表示しています。";
-            }
-          },
-        );
-      }
-
-      function sortRowsByDistance(position) {
-        if (!tableBody || !position?.coords) {
-          return;
-        }
-        const { latitude, longitude } = position.coords;
-        const sortedEntries = rowEntries
-          .map((entry) => {
-            if (!Number.isFinite(entry.lat) || !Number.isFinite(entry.lng)) {
-              return { entry, distance: Number.POSITIVE_INFINITY };
-            }
-            return {
-              entry,
-              distance: calcDistance(latitude, longitude, entry.lat, entry.lng),
-            };
-          })
-          .sort((a, b) => a.distance - b.distance);
-
-        sortedEntries.forEach(({ entry, distance }) => {
-          entry.distance = distance;
-          updateDistanceCell(entry, distance);
-          tableBody.appendChild(entry.row);
-        });
-      }
-
-      function calcDistance(lat1, lng1, lat2, lng2) {
-        const earthRadius = 6371000;
-        const dLat = toRadians(lat2 - lat1);
-        const dLng = toRadians(lng2 - lng1);
-        const a =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos(toRadians(lat1)) *
-            Math.cos(toRadians(lat2)) *
-            Math.sin(dLng / 2) *
-            Math.sin(dLng / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return earthRadius * c;
-      }
-
-      function toRadians(value) {
-        return (value * Math.PI) / 180;
-      }
-
-      function updateDistanceCell(entry, distance = entry.distance) {
-        if (!entry?.distanceCell) {
-          return;
-        }
-        entry.distanceCell.textContent = formatDistance(distance);
-      }
-
-      function formatDistance(distance) {
-        if (!Number.isFinite(distance)) {
-          return "未取得";
-        }
-        return `${Math.round(distance)} m`;
-      }
-
-      function selectDoor(doorId, options = {}) {
-        const { force = false } = options;
-        if (!doorId) {
-          return null;
-        }
-        const entry = rowsById.get(doorId);
-        if (!entry) {
-          return null;
-        }
-        if (!force && state.locked && state.activeDoorId && doorId !== state.activeDoorId) {
-          return null;
-        }
-        state.activeDoorId = doorId;
-        state.locked = true;
-
-        if (doorInput) {
-          doorInput.value = doorId;
-        }
-        if (doorName) {
-          const label = entry.label || entry.row.dataset.doorLabel || "名称未設定";
-          doorName.textContent = label;
-        }
-        section?.classList.remove("hidden");
-        hint?.classList.add("hidden");
-        if (submitButton) {
-          submitButton.disabled = false;
-        }
-        if (commentField) {
-          commentField.focus();
-        }
-        hideOtherRows(doorId);
-        return entry;
-      }
-
-      function resetSelection() {
-        state.activeDoorId = null;
-        state.locked = false;
-        if (doorInput) {
-          doorInput.value = "";
-        }
-        if (doorName) {
-          doorName.textContent = "未選択";
-        }
-        section?.classList.add("hidden");
-        hint?.classList.remove("hidden");
-        if (submitButton) {
-          submitButton.disabled = true;
-        }
-        if (commentField) {
-          commentField.value = "";
-          commentField.blur();
-        }
-        showAllRows();
-      }
-
-      function hideOtherRows(activeId) {
-        rowEntries.forEach(({ id, row }) => {
-          if (id === activeId) {
-            row.classList.remove("hidden");
-          } else {
-            row.classList.add("hidden");
-          }
-        });
-      }
-
-      function showAllRows() {
-        rowEntries.forEach(({ row }) => row.classList.remove("hidden"));
-      }
-    </script>
-  </body>
-</html>
+{% include "teams/h34vvy_u53rzz/_campus_map.html" %}
+{% endblock %}

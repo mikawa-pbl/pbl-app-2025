@@ -1,202 +1,527 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ user.name }} のマイページ</title>
+    <title>{{ user.name }} - TUT Connect</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
     <style>
-        /* === 基本設定 === */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-            background-color: #f4f7f6; /* 薄いグレーの背景 */
-            color: #333;
-            margin: 0;
-            padding: 30px;
-            display: grid;
-            place-items: center;
-            min-height: 90vh;
+        :root {
+            --primary-color: #0d47a1;
+            --bg-color: #f5f7fa;
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --border-radius: 12px;
+            --text-main: #333;
+            --text-sub: #666;
+            --accent-color: #e3f2fd;
         }
 
-        /* === プロフィールカード全体 === */
-        .profile-card {
-            width: 100%;
-            max-width: 700px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            overflow: hidden; /* 角丸をキレイに見せるため */
-        }
-
-        /* === ヘッダー (アイコンと名前) === */
-        .profile-header {
-            display: flex;
-            align-items: center;
-            padding: 24px 30px;
-            background-color: #f9f9f9;
-            border-bottom: 1px solid #eee;
-        }
-
-        /* ユーザーが設定したアイコン画像 */
-        .profile-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%; /* アイコンを丸くする */
-            object-fit: cover; /* 画像が崩れないように */
-            margin-right: 20px;
-            border: 3px solid #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            flex-shrink: 0;
-        }
-
-        /* === 【CSS追加】イニシャルアイコンのスタイル === */
-        .profile-initial-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-color: #007bff; /* 背景色 */
-            color: #ffffff; /* 文字色 */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem; /* 文字サイズ (一覧より大きく) */
-            font-weight: bold;
-            margin-right: 20px;
-            border: 3px solid #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            flex-shrink: 0;
-        }
-
-        .profile-header h1 {
-            font-size: 2.0rem; /* h1を大きく */
-            margin: 0;
-            font-weight: 700;
-        }
-
-        /* === 詳細 (dlリスト) === */
-        .profile-details {
-            padding: 10px 30px 30px 30px;
-        }
-
-        .profile-details dl {
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-        /* 項目名 (dt) */
-        .profile-details dt {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #666; /* 項目名は少し薄く */
-            padding-top: 18px;
-            margin-bottom: 4px;
-        }
-        
-        /* 項目内容 (dd) */
-        .profile-details dd {
-            font-size: 1.1rem;
-            margin: 0;
-            padding-bottom: 18px;
-            border-bottom: 1px solid #f0f0f0; /* 薄い区切り線 */
-            word-wrap: break-word; /* 長い文字列も折り返す */
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
         }
 
-        /* 「一言」は改行を反映し、線なしに */
-        .profile-details dt.one-word {
-            margin-top: 24px;
-        }
-        .profile-details dd.one-word {
-            border-bottom: none;
-            font-style: italic;
-            color: #555;
-            line-height: 1.6;
-        }
-
-        /* === フッター (戻るリンク) === */
-        .profile-footer {
-            text-align: center;
-            padding: 20px 30px;
-            background-color: #f9f9f9;
-            border-top: 1px solid #eee;
+        /* Sidebar & Layout */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #fff;
+            border-right: 1px solid #eee;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 100;
         }
 
-        .profile-footer a {
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a237e;
+            margin-bottom: 40px;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            background: #b71c1c;
+            color: white;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 1.2rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: var(--text-sub);
             text-decoration: none;
-            color: #007bff;
-            font-weight: 600;
+            border-radius: 8px;
+            transition: background 0.2s;
+            font-weight: 500;
+            gap: 12px;
         }
-        .profile-footer a:hover {
-            text-decoration: underline;
+
+        .nav-link:hover {
+            background-color: #f5f5f5;
+            color: var(--text-main);
+        }
+
+        .nav-link.active {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .nav-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-link .material-icons-round {
+            font-size: 24px;
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background-color: #1d9bf0;
+            /* Twitter Blue */
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid #fff;
+            line-height: 1;
+            min-width: 18px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            height: var(--header-height);
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .search-bar {
+            background: #f5f7fa;
+            border-radius: 20px;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            width: 400px;
+            gap: 10px;
+            color: #999;
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            outline: none;
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .content-body {
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Profile Specific */
+        .profile-card {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .profile-cover {
+            height: 200px;
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            position: relative;
+        }
+
+        .profile-content {
+            padding: 20px 40px 40px;
+            position: relative;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            background: #fff;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            position: absolute;
+            top: -60px;
+            left: 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .profile-avatar-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-header-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .edit-btn {
+            border: 1px solid #ddd;
+            background: #fff;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .edit-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .profile-info {
+            margin-top: 20px;
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .profile-id {
+            color: #888;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .bio-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Sidebar Extra Styles */
+        .sidebar-section-title {
+            font-size: 0.8rem;
+            color: #999;
+            margin: 20px 0 10px 10px;
+            font-weight: 700;
+        }
+
+        .mini-community-list {
+            list-style: none;
+            overflow-y: auto;
+            max-height: calc(100vh - 400px);
+            margin-right: -10px;
+            padding-right: 10px;
+        }
+
+        .mini-community-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .mini-community-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .mini-community-list::-webkit-scrollbar-thumb {
+            background: #eee;
+            border-radius: 10px;
+        }
+
+        .mini-community-list::-webkit-scrollbar-thumb:hover {
+            background: #ddd;
+        }
+
+        .mini-community-item a {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            gap: 10px;
+        }
+
+        .mini-community-item a:hover {
+            background: #f5f5f5;
+        }
+
+        .mini-icon {
+            width: 24px;
+            height: 24px;
+            background: #ddd;
+            border-radius: 50%;
+            display: block;
+            object-fit: cover;
         }
     </style>
 </head>
-<body>
 
-    <div class="profile-card">
-        
-        <header class="profile-header">
-            {% if user.icon %}
-                <img src="{{ user.icon.url }}" alt="アイコン" class="profile-icon">
-            {% else %}
-                <span class="profile-initial-icon">
-                    {{ user.name.0|upper }}
-                </span>
-            {% endif %}
-            
-            <h1>{{ user.name }}</h1>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">T</div>
+            TUT Connect
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:home' %}" class="nav-link">
+                    <span class="material-icons-round">home</span> ホーム
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:community_list' %}" class="nav-link">
+                    <span class="material-icons-round">grid_view</span> コミュニティを探す
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:message_inbox' %}" class="nav-link">
+                    <div class="nav-icon-wrapper">
+                        <span class="material-icons-round">mail_outline</span>
+                        {% if unread_messages_count > 0 %}
+                        <span class="notification-badge">{{ unread_messages_count }}</span>
+                        {% endif %}
+                    </div>
+                    メッセージ
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:user_profile' login_user.user_id %}" class="nav-link active">
+                    <span class="material-icons-round">person</span> プロフィール
+                </a>
+            </li>
+
+            <div class="sidebar-section-title">参加中のコミュニティ</div>
+            <ul class="mini-community-list">
+                {% for community in joined_communities %}
+                <li class="mini-community-item">
+                    <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}"
+                        style="justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            {% if community.image %}
+                            <img src="{{ community.image.url }}" class="mini-icon" alt="">
+                            {% else %}
+                            <span class="mini-icon" style="background: #e0e0e0;"></span>
+                            {% endif %}
+                            {{ community.name }}
+                        </div>
+                        {% if community.unread_posts_count > 0 %}
+                        <span class="notification-badge"
+                            style="position: static; font-size: 0.65rem; padding: 1px 4px; min-width: 14px;">
+                            {{community.unread_posts_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% empty %}
+                <li class="mini-community-item"><a href="#">なし</a></li>
+                {% endfor %}
+            </ul>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header class="header">
+            <div></div>
+            <div class="header-actions">
+                <a href="{% url 'nanakorobiyaoki:logout' %}"
+                    style="font-size: 0.8rem; color: #666; text-decoration: none;">ログアウト</a>
+            </div>
         </header>
 
-        <main class="profile-details">
-            <dl>
-                <dt>ユーザID</dt>
-                <dd>{{ user.user_id }}</dd>
+        <div class="content-body">
+            <div class="profile-card">
+                <div class="profile-cover"></div>
+                <div class="profile-content">
+                    <div class="profile-avatar-large">
+                        {% if user.icon %}
+                        <img src="{{ user.icon.url }}" alt="Avatar">
+                        {% else %}
+                        <img src="https://via.placeholder.com/120" alt="Avatar">
+                        {% endif %}
+                    </div>
 
-                <dt>学年学科</dt>
-                <dd>{{ user.grade_department }}</dd>
+                    <div class="profile-header-actions">
+                        {% if request.session.user_id == user.user_id %}
+                        <!-- 自分のプロフィールの場合のみ編集ボタンを表示 -->
+                        <a href="{% url 'nanakorobiyaoki:user_profile_edit' user.user_id %}"
+                            class="edit-btn">プロフィールを編集</a>
+                        {% else %}
+                        <!-- 他人のプロフィールの場合はメッセージボタンを表示 -->
+                        <a href="{% url 'nanakorobiyaoki:chat_room' user.user_id %}" class="edit-btn"
+                            style="background: var(--primary-color); color: white; border: none; display: inline-flex; align-items: center; gap: 5px;">
+                            <span class="material-icons-round" style="font-size: 18px;">mail_outline</span>
+                            メッセージ
+                        </a>
+                        {% endif %}
+                    </div>
 
-                <dt>年齢</dt>
-                <dd>{{ user.age }} 歳</dd>
+                    <div class="profile-info">
+                        <h1 class="profile-name">{{ user.name }}</h1>
+                        <div class="profile-id">@{{ user.user_id }}</div>
 
-                <dt>性別</dt>
-                <dd>{{ user.gender }}</dd>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">{{ user.communities.count }}</span>
+                                <span class="stat-label">参加コミュニティ</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">0</span> <!-- 投稿数は未実装なので0としておく -->
+                                <span class="stat-label">投稿</span>
+                            </div>
+                        </div>
 
-                <dt>誕生日</dt>
-                <dd>{{ user.birth_date }}</dd>
+                        <div class="profile-details"
+                            style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                            <h3 style="font-size: 1.1rem; margin-bottom: 20px; color: #333;">詳細プロフィール</h3>
+                            <dl style="display: grid; grid-template-columns: 140px 1fr; gap: 15px; font-size: 0.95rem;">
+                                <dt style="color: #888; font-weight: 500;">一言</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.one_word|default:"-"|linebreaksbr }}</dd>
 
-                <dt>趣味</dt>
-                <dd>{{ user.hobby|default:"—" }}</dd>
+                                <dt style="color: #888; font-weight: 500;">学年</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.grade|default:"-" }}</dd>
 
-                <dt>出身</dt>
-                <dd>{{ user.birthplace|default:"—" }}</dd>
+                                <dt style="color: #888; font-weight: 500;">学科</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.department|default:"-" }}</dd>
 
-                <dt>所属サークル</dt>
-                <dd>{{ user.club|default:"—" }}</dd>
+                                <dt style="color: #888; font-weight: 500;">年齢</dt>
+                                <dd style="margin: 0; color: #333;">{% if user.age %}{{ user.age }}歳
+                                    {% else %}-{% endif %}</dd>
 
-                <dt>GitHub</dt>
-                <dd>{{ user.github_account|default:"—" }}</dd>
+                                <dt style="color: #888; font-weight: 500;">性別</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.gender|default:"-" }}</dd>
 
-                <dt>交際ステータス</dt>
-                <dd>{{ user.relationship_status|default:"—" }}</dd>
-                
-                <dt class="one-word">一言</dt>
-                <dd class="one-word">
-                    {{ user.one_word|linebreaksbr|default:"—" }}
-                </dd>
-            </dl>
-        </main>
+                                <dt style="color: #888; font-weight: 500;">所属サークル</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.club|default:"-" }}</dd>
 
-        
-        <footer class="profile-footer">
-            <a href="{% url 'nanakorobiyaoki:user_profile_edit' user.user_id %}" style="text-decoration: none; color: #007bff; font-weight: 600; margin-right: 20px;">
-                編集する
-            </a>
-            
-            <a href="{% url 'nanakorobiyaoki:users' %}" style="text-decoration: none; color: #6c757d; font-weight: 600;">
-                ユーザ一覧に戻る
-            </a>
-        </footer>
+                                <dt style="color: #888; font-weight: 500;">GitHub</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.github_account|default:"-" }}</dd>
 
+                                <dt style="color: #888; font-weight: 500;">趣味</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.hobby|default:"-" }}</dd>
 
-    </div>
+                                <dt style="color: #888; font-weight: 500;">出身</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.birthplace|default:"-" }}</dd>
 
+                                <dt style="color: #888; font-weight: 500;">誕生日</dt>
+                                <dd style="margin: 0; color: #333;">{{ user.birth_date|default:"-" }}</dd>
+
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 </body>
+
 </html>

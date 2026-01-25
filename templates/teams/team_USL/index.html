@@ -1,83 +1,58 @@
-<!-- templates/team_a/members.html -->
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>部屋検索</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+
     <style>
         body {
             margin: 0;
             font-family: system-ui, -apple-system, BlinkMacSystemFont,
-                         "Segoe UI", sans-serif;
-        }
-
-        .container {
-            display: flex;
-            height: 100vh;
-        }
-
-        /* 左: 画像エリア */
-        .left-panel {
-            flex: 2;
-            position: relative;
+                "Segoe UI", sans-serif;
             background-color: #f5f5f5;
+        }
+
+        .page {
+            min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            flex-direction: column;
         }
 
-        .floorplan-wrapper {
-            position: relative;
-            max-width: 100%;
-            max-height: 100%;
-        }
-
-        .floorplan-wrapper img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .cursor-dot {
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background-color: red;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
-        }
-
-        /* 右: 検索エリア */
-        .right-panel {
-            flex: 1;
-            border-left: 1px solid #ddd;
-            padding: 24px;
-            box-sizing: border-box;
+        /* 検索バー（上部） */
+        .search-header {
             background-color: #ffffff;
+            border-bottom: 1px solid #ddd;
+            padding: 12px 12px 8px;
         }
 
-        h1 {
-            font-size: 20px;
-            margin-top: 0;
-            margin-bottom: 16px;
+        .search-title {
+            font-size: 18px;
+            margin: 0 0 8px;
         }
 
-        .form-group {
-            margin-bottom: 12px;
+        .search-form {
+            display: flex;
+            gap: 4px;
+            align-items: flex-end;
         }
 
-        label {
-            display: block;
-            font-size: 14px;
-            margin-bottom: 4px;
+        .search-field {
+            flex: 1;
+            min-width: 0;
         }
 
-        input[type="text"],
-        input[type="number"] {
+        .search-label {
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        .search-input {
             width: 100%;
+            height: 36px;
             padding: 6px 8px;
             box-sizing: border-box;
             border-radius: 4px;
@@ -85,90 +60,513 @@
             font-size: 14px;
         }
 
-        button {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
+        .search-building {
+            flex: 0 0 62px;
         }
 
-        button[type="submit"] {
+        .search-button {
+            flex: 0 0 44px;
+        }
+
+        .search-button button {
+            width: 100%;
+            height: 36px;
+            padding: 0;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
             background-color: #007bff;
             color: #fff;
+            cursor: pointer;
         }
 
         .error {
             color: #d32f2f;
-            margin-top: 8px;
             font-size: 13px;
+            padding: 4px 12px 0;
         }
 
-        .result-info {
-            margin-top: 16px;
+        /* Container for Floor Map + Controls */
+        .floor-map-container {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        /* Floor Controls (Right Side) */
+        .floor-controls {
+            flex: 0 0 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .floor-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            /* Circle */
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.2s;
+        }
+
+        .floor-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .floor-btn.disabled {
+            background-color: #e0e0e0;
+            color: #aaa;
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+        .current-floor-label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* マップ部分（下部） */
+        .content {
+            flex: 1;
+            padding: 12px;
+            box-sizing: border-box;
+        }
+
+        .map-card-all,
+        .map-card-floor {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .map-title {
+            font-size: 15px;
+            margin: 0 0 6px;
+        }
+
+        .map-wrapper-all {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .map-wrapper-floor {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .map-wrapper-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            cursor: move;
+        }
+
+        .map-wrapper-inner img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .cursor-dot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: red;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+        }
+
+        @media (min-width: 768px) {
+            .content {
+                max-width: 480px;
+                margin: 0 auto;
+            }
+        }
+
+        /* Header Layout */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .search-title {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .help-btn {
+            background-color: transparent;
+            border: 1px solid #007bff;
+            color: #007bff;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .help-btn:hover {
+            background-color: #e7f1ff;
+        }
+
+        /* Modal Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .overlay-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        .overlay-title {
+            margin-top: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .overlay-body {
             font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: left;
+            line-height: 1.6;
         }
 
-        .no-selection-text {
-            color: #777;
+        .close-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 4px;
+            cursor: pointer;
             font-size: 14px;
         }
     </style>
 </head>
+
 <body>
-<div class="container">
-    <!-- 左: 画像 + カーソル -->
-    <div class="left-panel">
-        {% if room and room.floor %}
-            <div class="floorplan-wrapper">
-                <!-- floor_table の url を使用 -->
-                <!--img src="{{ room.floor.url }}" alt="フロア画像"-->
-                <!-- x, y は 0〜100 の割合として使用 -->
-                <div class="cursor-dot"
-                     style="left: {{ room.x }}%; top: {{ room.y }}%;"></div>
-            </div>
-        {% else %}
-            <div class="no-selection-text">
-                <img src="images/A-3.png" alt="フロア画像">
-                右側で部屋を検索すると、このエリアにフロア図と部屋位置が表示されます。
-            </div>
-        {% endif %}
-    </div>
+    <div class="page">
 
-    <!-- 右: 検索フォーム -->
-    <div class="right-panel">
-        <h1>部屋検索</h1>
-        <form method="get">
-            <div class="form-group">
-                <label for="building_id">棟</label>
-                <input type="number"
-                       id="building_id"
-                       name="building_id"
-                       value="{{ building_id }}">
+        <header class="search-header">
+            <div class="header-row">
+                <h1 class="search-title">部屋検索</h1>
+                <button type="button" class="help-btn" onclick="toggleHelp()">このページについて</button>
             </div>
-            <div class="form-group">
-                <label for="room_number">部屋番号</label>
-                <input type="text"
-                       id="room_number"
-                       name="room_number"
-                       value="{{ room_number }}">
-            </div>
-            <button type="submit">検索</button>
-        </form>
+            <form method="get" class="search-form">
+                <div class="search-field search-building">
+                    <div class="search-label">棟</div>
+                    <select id="building_id" name="building_id" class="search-input">
+                        {% for opt in building_options %}
+                        <option value="{{ opt.value }}" {% if opt.selected %}selected{% endif %}>{{ opt.label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        {% if error_message %}
+                <div class="search-field">
+                    <div class="search-label">部屋番号</div>
+                    <input type="text" pattern="^[0-9]+$" id="room_number" name="room_number" class="search-input"
+                        value="{{ room_number }}">
+                </div>
+
+                <div class="search-button">
+                    <button type="submit" aria-label="検索">🔍</button>
+                </div>
+            </form>
+            {% if error_message %}
             <div class="error">{{ error_message }}</div>
-        {% endif %}
+            {% endif %}
+        </header>
 
-        {% if room %}
-            <div class="result-info">
-                <div>棟ID: {{ room.building_id }}</div>
-                <div>部屋番号: {{ room.room_number }}</div>
-                <div>フロア: {{ room.floor.floor }}F</div>
-                <div>座標: (x={{ room.x }}, y={{ room.y }})</div>
-            </div>
-        {% endif %}
+        <main class="content">
+            <section class="map-card-all">
+                <h2 class="map-title">全体マップ (拡大できます)</h2>
+                <div class="map-wrapper-all">
+                    <div id="zoom-all" class="map-wrapper-inner">
+                        <img src="images/campus_all.png" alt="全体マップ">
+                    </div>
+                </div>
+            </section>
+
+            <section class="map-card-floor">
+                <h2 class="map-title">詳細マップ（フロアマップ）</h2>
+
+                <div class="floor-map-container">
+                    <div class="map-wrapper-floor">
+                        <div id="zoom-floor" class="map-wrapper-inner" data-dot-x="{{ x|default:'none' }}"
+                            data-dot-y="{{ y|default:'none' }}">
+
+                            {% if floor_image_url %}
+                            <img src="{{ floor_image_url }}" alt="フロア画像">
+                            {% if x is not None and y is not None %}
+                            <div class="cursor-dot" style="left: {{ x }}%; top: {{ y }}%;"></div>
+                            {% endif %}
+                            {% else %}
+                            {% if building_id == "init" or building_id == "" %} <!--検索できていない場合-->
+                            <img src="images/gikajika_input.png" alt="検索してね＾＾">
+                            {% else %}
+                            <img src="images/gikajika.png" alt="エラー＾＾"><!--作ってない-->
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Floor Switching Controls (JS Implementation) -->
+                    {% if current_floor is not None and min_floor is not None and max_floor is not None %}
+                    <div class="floor-controls">
+                        <!-- Up Button -->
+                        <button id="btn-up" class="floor-btn" aria-label="上の階へ"
+                            onclick="switchFloor(currentFloor + 1)">▲</button>
+
+                        <span id="floor-label" class="current-floor-label">{{ current_floor }}F</span>
+
+                        <!-- Down Button -->
+                        <button id="btn-down" class="floor-btn" aria-label="下の階へ"
+                            onclick="switchFloor(currentFloor - 1)">▼</button>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+        </main>
     </div>
-</div>
+
+    <!-- Help Overlay -->
+    <div id="help-overlay" class="overlay" onclick="toggleHelp()">
+        <div class="overlay-content" onclick="event.stopPropagation()">
+            <h2 class="overlay-title">このページについて</h2>
+            <div class="overlay-body">
+                <p>校内の部屋を検索して、場所を確認できるシステムです。</p>
+                <p>
+                    1. <b>棟</b>を選択してください。<br>
+                    2. <b>部屋番号</b>を入力して検索ボタンを押してください。(例:101)<br>
+                    3. マップが表示されます。🔴が検索した部屋の位置です。
+                </p>
+                <p>※フロアの切り替えは右側のボタンで行えます。</p>
+                <p>※棟のみを選択して検索することも可能です。</p>
+            </div>
+            <button class="close-btn" onclick="toggleHelp()">閉じる</button>
+        </div>
+    </div>
+
+    <!-- Data passing for JavaScript -->
+    {{ floor_map_data|json_script:"floor-map-data" }}
+    {{ min_floor|json_script:"min-floor" }}
+    {{ max_floor|json_script:"max-floor" }}
+    {{ target_room_floor|json_script:"target-room-floor" }}
+    {{ current_floor|json_script:"current-floor" }}
+    {{ x|json_script:"dot-x" }}
+    {{ y|json_script:"dot-y" }}
+
+    <script>
+        function applySmartZoom(id, xPct, yPct, scale) {
+            const elem = document.getElementById(id);
+            if (!elem) return;
+
+            const img = elem.querySelector('img');
+
+            // Panzoomの初期化
+            const panzoom = Panzoom(elem, {
+                maxScale: 8,
+                minScale: 1,
+                contain: 'outside'
+            });
+
+            elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+
+            // 実際の移動処理
+            const doMove = () => {
+                // ブラウザがレイアウト計算を終えるのを僅かに待つ
+                setTimeout(() => {
+                    const w = elem.offsetWidth;
+                    const h = elem.offsetHeight;
+
+                    // 指定座標が枠の真ん中に来るように計算
+                    const targetX = (xPct / 100) * w;
+                    const targetY = (yPct / 100) * h;
+
+                    const panX = (w / 2) - targetX;
+                    const panY = (h / 2) - targetY;
+
+                    // ズームを先に適用
+                    panzoom.zoom(scale, { animate: false });
+
+                    // 次のフレームで移動を適用（contain: 'outside' の判定を確実にするため）
+                    requestAnimationFrame(() => {
+                        panzoom.pan(panX * scale, panY * scale, { animate: false });
+                    });
+                }, 100);
+            };
+
+            // 画像が読み込み済みかチェック
+            if (img.complete) {
+                doMove();
+            } else {
+                img.onload = doMove;
+            }
+
+            return panzoom;
+        }
+
+        // --- Client-Side Floor Switching Logic ---
+
+        // Data passed via json_script to avoid formatter issues
+        const floorMapData = JSON.parse(document.getElementById('floor-map-data').textContent);
+        const minFloor = JSON.parse(document.getElementById('min-floor').textContent);
+        const maxFloor = JSON.parse(document.getElementById('max-floor').textContent);
+        const targetRoomFloor = JSON.parse(document.getElementById('target-room-floor').textContent);
+
+        let currentFloor = JSON.parse(document.getElementById('current-floor').textContent);
+
+        // Pin Coordinates
+        const dotX = JSON.parse(document.getElementById('dot-x').textContent);
+        const dotY = JSON.parse(document.getElementById('dot-y').textContent);
+
+        function switchFloor(newFloor) {
+            if (minFloor === null || maxFloor === null) return;
+            if (newFloor < minFloor || newFloor > maxFloor) return;
+
+            // Update state
+            currentFloor = newFloor;
+
+            // 1. Update Image
+            const imgUrl = floorMapData[currentFloor];
+            const floorImg = document.querySelector("#zoom-floor img");
+            if (floorImg) {
+                if (imgUrl) {
+                    floorImg.src = imgUrl;
+                    floorImg.alt = currentFloor + "階マップ";
+                } else {
+                    // Fallback
+                }
+            }
+
+            // 2. Update Label
+            const label = document.getElementById("floor-label");
+            if (label) label.textContent = currentFloor + "F";
+
+            // 3. Update Button State
+            const btnUp = document.getElementById("btn-up");
+            const btnDown = document.getElementById("btn-down");
+
+            if (btnUp) {
+                if (currentFloor >= maxFloor) {
+                    btnUp.classList.add("disabled");
+                    btnUp.setAttribute("disabled", "true");
+                } else {
+                    btnUp.classList.remove("disabled");
+                    btnUp.removeAttribute("disabled");
+                }
+            }
+            if (btnDown) {
+                if (currentFloor <= minFloor) {
+                    btnDown.classList.add("disabled");
+                    btnDown.setAttribute("disabled", "true");
+                } else {
+                    btnDown.classList.remove("disabled");
+                    btnDown.removeAttribute("disabled");
+                }
+            }
+
+            // 4. Update Pin Visibility
+            const dot = document.querySelector("#zoom-floor .cursor-dot");
+            if (dot) {
+                if (targetRoomFloor !== null && currentFloor === targetRoomFloor) {
+                    dot.style.display = "block";
+                } else {
+                    dot.style.display = "none";
+                }
+            }
+
+            // 5. Update URL
+            const url = new URL(window.location);
+            url.searchParams.set('floor', currentFloor);
+            window.history.replaceState({}, '', url);
+        }
+
+        // Help Overlay Toggle
+        function toggleHelp() {
+            const overlay = document.getElementById('help-overlay');
+            overlay.classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Apply Zoom to Campus Map
+            const buildingSelect = document.getElementById('building_id');
+            const selectedBuilding = buildingSelect.value;
+
+            if (selectedBuilding === "A" || selectedBuilding === "A1" || selectedBuilding === "A2") {
+                applySmartZoom('zoom-all', 57, 52, 3.6);
+            } else {
+                applySmartZoom('zoom-all', 55, 50, 1.7);
+            }
+
+            // Initialize Code
+            if (currentFloor !== null) {
+                switchFloor(currentFloor);
+            }
+
+            // Note: Floor map zooming is currently disabled/manual default
+            // applySmartZoom('zoom-floor', 50, 50, 1);
+        });
+    </script>
+
 </body>
+
 </html>

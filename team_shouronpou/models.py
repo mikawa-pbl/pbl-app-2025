@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
+from django.utils import timezone
 from django.core.validators import MinValueValidator
 
 class Member(models.Model):
@@ -10,65 +11,94 @@ class Member(models.Model):
     def __str__(self):
         return f"{self.last_name} {self.first_name}"
 
+class Account(models.Model):
+    username = models.CharField("ユーザー名", max_length=150, unique=True)
+    password = models.CharField("パスワード", max_length=128) 
+    created_at = models.DateTimeField("登録日時", default=timezone.now)
+    affiliation = models.CharField("所属（研究室など）", max_length=100, blank=True, null=True)
+    age = models.IntegerField("年齢", blank=True, null=True)
+    GENDER_CHOICES = [('male', '男性'), ('female', '女性'), ('other', 'その他')]
+    gender = models.CharField("性別", max_length=10, choices=GENDER_CHOICES, blank=False, null=False)
+    nationality = models.CharField("国籍", max_length=100, blank=True, null=True)
+    desired_max_time = models.IntegerField("希望最大時間", blank=True, null=True)
+    available_slots = models.JSONField("空き時間", default=list, blank=True, null=True)
 
-# --- 掲示板機能 ---
+    def __str__(self):
+        return self.username
 
-# 実験募集の投稿
 class Post(models.Model):
-    title = models.CharField(max_length=200, verbose_name="募集タイトル")
-    content = models.TextField(verbose_name="募集内容")
+    title = models.CharField("タイトル", max_length=200)
+    department = models.CharField("系・所属", max_length=100)
+    laboratory = models.CharField("研究室", max_length=100)
+    reward = models.CharField("報酬", max_length=200)
+    duration = models.IntegerField("所要時間(分)")
+    content = models.TextField("内容詳細")
+    recruitment_end_date = models.DateField("募集終了日")
+    created_at = models.DateTimeField(auto_now_add=True)
     
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
-
-    recruitment_start_date = models.DateField(
-        verbose_name="募集開始日", 
-        null=True,  # 入力なし(空)でもOK
-        blank=True  # フォームで空欄を許可
-    )
-    recruitment_end_date = models.DateField(
-        verbose_name="募集終了日",
+    created_by = models.ForeignKey(
+        Account, 
+        on_delete=models.CASCADE, 
+        related_name='posts',
         null=True,
         blank=True
     )
-    max_participants = models.IntegerField(
-        verbose_name="募集人数 (上限)",
-        null=True,
-        blank=True,
-        validators=[MinValueValidator(1)]
-    )
+
+    max_participants = models.IntegerField("最大募集人数", null=True, blank=True)
+    current_participants = models.IntegerField("現在の参加者数", default=0)
+    available_slots = models.JSONField("受け入れ可能時間", default=list, blank=True, null=True)
+
     condition_nationality = models.CharField(
-        max_length=100,
-        verbose_name="参加条件：国籍",
-        null=True, blank=True,
-        help_text="例: 日本国籍を有する方、不問 など"
+        "国籍条件", 
+        max_length=100, 
+        blank=True, null=True,
+        help_text="例: 日本国籍の方のみ、日本語が流暢な方、など"
     )
+
+    GENDER_CHOICES = [
+        ('unspecified', '指定なし'),
+        ('male', '男性'), 
+        ('female', '女性')
+    ]
     condition_gender = models.CharField(
-        max_length=100,
-        verbose_name="参加条件：性別",
-        null=True, blank=True,
-        help_text="例: 男性のみ、女性のみ、不問 など"
+        "性別条件", 
+        max_length=15, 
+        choices=GENDER_CHOICES, 
+        default='unspecified',
+        blank=False, null=False
     )
-    condition_has_disease = models.CharField(
-        max_length=200,
-        verbose_name="参加条件：持病の有無",
-        null=True, blank=True,
-        help_text="例: なし、呼吸器系の持病がないこと など"
-    )
-    current_participants = models.PositiveIntegerField(
-        default=0,
-        verbose_name="現在の参加者数"
-    )
+    target_age = models.CharField("対象年齢", max_length=100, blank=True, null=True)
+    health_notes = models.TextField("健康面で配慮すべき事項", blank=True, null=True)
+    free_notes = models.TextField("その他・自由記述", blank=True, null=True)
 
-    def __str__(self):
-        return self.title
-
-    def get_absolute_url(self):
-        # 詳細ページへのURLを返す
-        return reverse('team_shouronpou:post_detail', args=[str(self.id)])
+    # --- 今回追加 ---
+    message_for_applicants = models.TextField(
+        "応募者へのメッセージ", 
+        blank=True, 
+        null=True, 
+        help_text="応募ボタンが押された後に表示されます。連絡先などを記載してください。"
+    )
 
     @property
     def remaining_spots(self):
         if self.max_participants is None:
-            return None # 上限なし
-        diff = self.max_participants - self.current_participants
-        return max(0, diff)
+            return None
+        return max(0, self.max_participants - self.current_participants)
+
+    def __str__(self):
+        return self.title
+
+class Application(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='applications')
+    # ゲストでもOKにするため null=True, blank=True を追加
+    user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='my_applications', null=True, blank=True)
+    email = models.EmailField("連絡用メールアドレス")
+    applied_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # ログインユーザーは1回制限。ゲスト(user=None)は制限の対象外にするため
+        # Djangoのunique_togetherはNULLを無視するので、ゲストは複数回応募可能です。
+        unique_together = ('post', 'user')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.post.title}"

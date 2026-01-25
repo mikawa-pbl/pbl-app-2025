@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>プロフィール編集</title>
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/schedule.css' %}">
+</head>
+<body class="form-page">
+    <h2>プロフィールの編集</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label>{{ form.affiliation.label }}</label>
+            {{ form.affiliation }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.age.label }}</label>
+            {{ form.age }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.gender.label }}</label>
+            {{ form.gender }}
+        </div>
+        <div class="form-group">
+            <label>{{ form.nationality.label }}</label>
+            {{ form.nationality }}
+        </div>
+
+        <div class="form-group">
+            <label>{{ form.desired_max_time.label }}</label>
+            {{ form.desired_max_time }}
+        </div>
+
+        <div class="form-group">
+            <label>参加可能時間帯 (ドラッグで選択可能: 8:00〜21:00 / 30分刻み)</label>
+            <div class="schedule-container">
+                <div class="schedule-grid" id="scheduleGrid"></div>
+            </div>
+            {{ form.available_slots }}
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button type="submit">保存する</button>
+            <a href="{% url 'team_shouronpou:mypage' %}" class="btn-cancel">キャンセル</a>
+        </div>
+    </form>
+
+    <script src="{% static 'team_shouronpou/js/main.js' %}"></script>
+    <script src="{% static 'team_shouronpou/js/schedule_editor.js' %}"></script>
+</body>
+</html>

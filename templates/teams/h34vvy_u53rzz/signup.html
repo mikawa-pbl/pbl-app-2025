@@ -1,0 +1,93 @@
+{% extends 'teams/h34vvy_u53rzz/base.html' %}
+
+{% block content %}
+<div class="flex min-h-[80vh] flex-col justify-center px-4 py-6">
+  <div class="mx-auto w-full max-w-sm space-y-8">
+    <div class="text-center">
+      <p class="text-xs font-bold uppercase tracking-widest text-indigo-500">
+        Start Rescue
+      </p>
+      <h1 class="mt-2 text-3xl font-black text-slate-900 tracking-tight">
+        <span class="bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">Sign Up</span>
+      </h1>
+    </div>
+
+    <div class="rounded-3xl bg-white/80 p-8 shadow-2xl shadow-purple-100/50 backdrop-blur-xl ring-1 ring-white/60">
+      <form method="post" class="space-y-6">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}" />
+        {{ form.as_div }}
+        
+        <button type="submit"
+          class="flex w-full justify-center rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 px-3 py-3 text-sm font-bold text-white shadow-lg shadow-purple-200 transition-all hover:scale-[1.02] hover:shadow-purple-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600">
+          登録する
+        </button>
+      </form>
+    </div>
+    
+    <p class="text-center text-sm font-medium text-slate-500">
+        すでにアカウントをお持ちですか？
+        <a href="{% url 'h34vvy_u53rzz:login' %}" class="text-purple-600 hover:text-purple-500 hover:underline">ログイン</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block endofbody %}
+{{ labs_data|json_script:"labs-data" }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const departmentSelect = document.getElementById('id_department');
+    const laboratorySelect = document.getElementById('id_laboratory');
+    const labsData = JSON.parse(document.getElementById('labs-data').textContent);
+    
+    // ラップしているdiv要素を取得 (form.as_divなどが生成する構造に依存するが、ここでは親要素を辿る)
+    
+    // フィールドの親要素を探すヘルパー
+    function getFieldWrapper(element) {
+        // Djangoの標準的なレンダリングやTailwindのコンポーネント構造に合わせて調整
+        // 通常は <div class="..."> <label>...</label> <select>...</select> </div> のようになっている
+        return element.closest('div'); 
+    }
+
+    const labWrapper = getFieldWrapper(laboratorySelect);
+    
+    function updateLabs() {
+        const selectedDept = departmentSelect.value;
+        
+        // 既存の選択肢をクリア (先頭の"未所属"などは残すか、再生成するか)
+        // ここでは完全に再構築する戦略をとる
+        laboratorySelect.innerHTML = '';
+        
+        // デフォルト選択肢
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '未所属';
+        laboratorySelect.appendChild(defaultOption);
+
+        if (!selectedDept) {
+            // 系が選択されていない場合は研究室フィールドを隠す
+            if(labWrapper) labWrapper.style.display = 'none';
+        } else {
+            // 系が選択されている場合はフィルタリングして表示
+            if(labWrapper) labWrapper.style.display = '';
+            
+            const filteredLabs = labsData.filter(lab => lab.dept === selectedDept);
+            
+            filteredLabs.forEach(lab => {
+                const option = document.createElement('option');
+                option.value = lab.id;
+                option.textContent = lab.name;
+                laboratorySelect.appendChild(option);
+            });
+        }
+    }
+
+    // 初期状態の適用
+    updateLabs();
+
+    // イベントリスナー
+    departmentSelect.addEventListener('change', updateLabs);
+});
+</script>
+{% endblock %}

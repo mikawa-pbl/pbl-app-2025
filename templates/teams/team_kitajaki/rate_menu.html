@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>今日のメニュー評価（team_kitajaki）</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 16px 80px;
+      text-align: center;
+    }
+    h1 { margin-bottom: 24px; }
+    .today-date {
+      font-size: 1.1rem;
+      color: #444;
+      margin-bottom: 24px;
+    }
+    .menu-info-card {
+      display: inline-block;
+      padding: 20px 40px;
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 48px;
+    }
+    .menu-label {
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .menu-text {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .rating-section {
+      background: #ffffff;
+      padding: 30px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+      text-align: left;
+    }
+    .rating-group {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    .rating-group:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .rating-label {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .face-ratings {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .face-rating { text-align: center; cursor: pointer; }
+    .face-rating input[type="radio"] { display: none; }
+    .face-rating label {
+      display: block;
+      font-size: 2.5rem;
+      transition: transform 0.2s;
+      padding: 5px;
+      line-height: 1;
+      border-radius: 50%;
+    }
+    .face-rating label:hover { transform: scale(1.1); }
+    .face-rating input[type="radio"]:checked + label {
+      outline: 3px solid #6c5ce7;
+      outline-offset: 2px;
+      background: #e8e6fb;
+    }
+
+    /* ★コメント欄 */
+    .comment-label {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #333;
+      margin: 18px 0 10px;
+      display: block;
+    }
+    .comment-box {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 90px;
+      resize: vertical;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 12px 12px;
+      font-size: 1rem;
+      outline: none;
+      background: #fafafa;
+    }
+    .comment-box:focus {
+      border-color: #6c5ce7;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(108,92,231,0.15);
+    }
+    .comment-hint {
+      color: #777;
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+
+    .submit-button {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background-color 0.2s;
+    }
+    .submit-button:hover { background-color: #0056b3; }
+
+    .back-link { margin-top: 32px; }
+    .success-message {
+      color: green;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <h1>今日のメニュー評価</h1>
+
+    {% if error_message %}
+      <p style="color:red;">{{ error_message }}</p>
+    {% endif %}
+
+    {% if today_date %}
+      <p class="today-date">
+        {{ today_date|date:"n月j日" }}のメニュー
+      </p>
+    {% endif %}
+
+    {% if today_menu and today_menu != "メニュー不明" %}
+      <div class="menu-info-card">
+        <div class="menu-label">対象メニュー</div>
+        <div class="menu-text">{{ today_menu }}</div>
+      </div>
+    {% endif %}
+
+    {% if success_message %}
+      <div class="success-message">{{ success_message }}</div>
+      {% if submitted_taste or submitted_volume %}
+        <p>あなたの評価: 味: <b>{{ submitted_taste }}</b>/5, 量: <b>{{ submitted_volume }}</b>/5</p>
+      {% endif %}
+      {% if submitted_comment %}
+        <p style="color:#666; margin-top: 8px;">あなたのコメント: {{ submitted_comment }}</p>
+      {% endif %}
+    {% else %}
+
+      <div class="rating-section">
+        <form method="POST">
+          {% csrf_token %}
+
+          <div class="rating-group">
+            <label class="rating-label">味はどうでしたか？ (5段階)</label>
+            <div class="face-ratings">
+              <div class="face-rating">
+                <input type="radio" id="taste1" name="taste_rating" value="1" required>
+                <label for="taste1" title="最低（1）">😫</label>
+              </div>
+              <div class="face-rating">
+                <input type="radio" id="taste2" name="taste_rating" value="2">
+                <label for="taste2" title="不満（2）">🙁</label>
+              </div>
+              <div class="face-rating">
+                <input type="radio" id="taste3" name="taste_rating" value="3">
+                <label for="taste3" title="普通（3）">😐</label>
+              </div>
+              <div class="face-rating">
+                <input type="radio" id="taste4" name="taste_rating" value="4">
+                <label for="taste4" title="満足（4）">🙂</label>
+              </div>
+              <div class="face-rating">
+                <input type="radio" id="taste5" name="taste_rating" value="5">
+                <label for="taste5" title="最高（5）">🤩</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="rating-group">
+            <label class="rating-label">量は適切でしたか？ (5段階)</label>
+            <div class="face-ratings">
+              <div class="face-rating">
+                <input type="radio" id="volume1" name="volume_rating" value="1" required>
+                <label for="volume1" title="少なすぎる（1）">🐥</label>
+              </div>
+              <div class="face-rating">
+                <input type="radio" id="volume2" name="volume_rating" value="2">
+                <label for="volume2" title="少し少ない（2）">😟</label>
+              </div>
+              <div class="face-rating">
+                <input type="radio" id="volume3" name="volume_rating" value="3">
+                <label for="volume3" title="適切（3）">👌</label>
+              </div>
+              <div class="face-rating">
+                <input type="radio" id="volume4" name="volume_rating" value="4">
+                <label for="volume4" title="少し多い（4）">😋</label>
+              </div>
+              <div class="face-rating">
+                <input type="radio" id="volume5" name="volume_rating" value="5">
+                <label for="volume5" title="多すぎる（5）">🐷</label>
+              </div>
+            </div>
+
+            <!-- ★コメント欄（Amazonっぽい自由記述） -->
+            <label class="comment-label" for="comment">コメント（任意）</label>
+            <textarea id="comment" name="comment" class="comment-box" maxlength="300"
+              placeholder="例：クリーミーで美味しい。量もちょうど良かった。"></textarea>
+            <div class="comment-hint">※300文字まで。個人情報や誹謗中傷は書かないでください。</div>
+          </div>
+
+          <button type="submit" class="submit-button">評価を送信</button>
+        </form>
+      </div>
+
+    {% endif %}
+
+    <p class="back-link">
+      <a href="{% url 'team_kitajaki:today_menu' %}">今日の喫茶メニューへ戻る</a>
+    </p>
+  </div>
+</body>
+</html>

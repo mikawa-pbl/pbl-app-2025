@@ -191,8 +191,7 @@ class TransactionItemModelTest(TestCase):
     def setUp(self):
         """テストデータの準備"""
         self.member = Member.objects.using('team_tansaibou').create(
-            first_name='太郎',
-            last_name='山田'
+            name='山田 太郎'
         )
 
         self.product = Product.objects.using('team_tansaibou').create(
@@ -337,8 +336,7 @@ class RegisterSaleViewTest(TestCase):
         self.client = Client()
 
         self.member = Member.objects.using('team_tansaibou').create(
-            first_name='花子',
-            last_name='佐藤'
+            name='佐藤 花子'
         )
 
         self.product1 = Product.objects.using('team_tansaibou').create(
@@ -362,7 +360,7 @@ class RegisterSaleViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '商品1')
         self.assertContains(response, '商品2')
-        self.assertContains(response, self.member.last_name)
+        self.assertContains(response, self.member.name)
 
     def test_register_sale_post_single_product(self):
         """単一商品の販売登録テスト"""
@@ -631,8 +629,7 @@ class IntegrationTest(TestCase):
         self.client = Client()
 
         self.member = Member.objects.using('team_tansaibou').create(
-            first_name='次郎',
-            last_name='鈴木'
+            name='鈴木 次郎'
         )
 
         # 個別商品

@@ -1,26 +1,46 @@
-<nav
-  class="mb-6 flex flex-col gap-3 rounded-md bg-slate-900 px-4 py-3 text-white md:flex-row md:items-center md:justify-between"
->
-  <a
-    href="{% url 'h34vvy_u53rzz:index' %}"
-    class="font-semibold tracking-wider text-white no-underline"
-    >ドア開けてや</a
-  >
-  <div class="flex flex-wrap items-center gap-2 text-sm">
-    <a
-      href="{% url 'h34vvy_u53rzz:index' %}"
-      class="rounded px-3 py-1 text-slate-200 transition hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 {% if nav_active == 'index' %}bg-blue-600 text-white{% endif %}"
-      >ホーム</a
-    >
-    <a
-      href="{% url 'h34vvy_u53rzz:help' %}"
-      class="rounded px-3 py-1 text-slate-200 transition hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 {% if nav_active == 'help' %}bg-blue-600 text-white{% endif %}"
-      >助けを求める</a
-    >
-    <a
-      href="{% url 'h34vvy_u53rzz:timeline' %}"
-      class="rounded px-3 py-1 text-slate-200 transition hover:bg-white/20 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70 {% if nav_active == 'timeline' %}bg-blue-600 text-white{% endif %}"
-      >タイムライン</a
-    >
+{% load h34vvy_tags %}
+<nav class="mb-6 flex items-center justify-between rounded-2xl border border-white/40 bg-white/60 px-5 py-3 text-slate-800 shadow-sm backdrop-blur-md">
+  <div class="flex items-center gap-2">
+    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md">
+      <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
+        <path d="M420-120v-148q-71-6-120-43.5T237-438l69-24q8 41 37 77.5t77 47.5v217h-20Zm120 0v-218q45-12 75.5-48t36.5-77l69 24q-14 62-63 100.5T540-268v148h-20ZM480-500q-58 0-99-41t-41-99q0-58 41-99t99-41q58 0 99 41t41 99q0 58-41 99t-99 41ZM236-558l-68-26q12-63 46-107.5T302-763l52 46q-37 45-56 75.5T236-558Zm430 46 51-46q31 34 50 64t36 65l-68 25q-15-28-32-55.5T666-512Z"/>
+      </svg>
+    </div>
+    <div class="text-sm font-bold bg-gradient-to-r from-indigo-900 to-purple-900 bg-clip-text text-transparent">ドア開けてや</div>
+  </div>
+  <div class="flex items-center gap-3 text-sm">
+    {% if user.is_authenticated %}
+    {% user_points user as nav_user_points %}
+    <span class="flex items-center gap-2 rounded-full bg-white/50 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm ring-1 ring-slate-100">
+      <span class="h-2 w-2 rounded-full bg-green-400"></span>
+      {{ user.username }}
+      {% if nav_user_points is not None %}
+      <span class="ml-1 text-indigo-600">/ {{ nav_user_points }} pt</span>
+      {% endif %}
+    </span>
+    <a href="{% url 'h34vvy_u53rzz:logout' %}"
+      class="rounded-full bg-white px-4 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-indigo-600">ログアウト</a>
+    {% else %}
+    <a href="{% url 'h34vvy_u53rzz:signup' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}"
+      class="rounded-full bg-indigo-600 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 hover:shadow-indigo-300">新規登録</a>
+    <a href="{% url 'h34vvy_u53rzz:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}"
+      class="rounded-full bg-white px-4 py-1.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-indigo-600">ログイン</a>
+    {% endif %}
   </div>
 </nav>
+<!-- 
+<nav
+  class="sticky z-30 w-full border-t border-slate-800 bg-slate-900/95 text-white backdrop-blur supports-[backdrop-filter]:bg-slate-900/80 top-[calc(100vh-4rem)]">
+  <div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+    <div class="flex flex-1 flex-wrap items-center gap-2 text-xs md:text-sm">
+      <a href="{% url 'h34vvy_u53rzz:index' %}"
+        class="rounded px-3 py-2 transition hover:bg-white/10 {% if nav_active == 'index' %}bg-blue-600 text-white{% else %}text-slate-200{% endif %}">ホーム</a>
+      <a href="{% url 'h34vvy_u53rzz:help' %}"
+        class="rounded px-3 py-2 transition hover:bg-white/10 {% if nav_active == 'help' %}bg-blue-600 text-white{% else %}text-slate-200{% endif %}">助けを求める</a>
+      <a href="{% url 'h34vvy_u53rzz:timeline' %}"
+        class="rounded px-3 py-2 transition hover:bg-white/10 {% if nav_active == 'timeline' %}bg-blue-600 text-white{% else %}text-slate-200{% endif %}">タイムライン</a>
+      <a href="{% url 'h34vvy_u53rzz:ranking' %}"
+        class="rounded px-3 py-2 transition hover:bg-white/10 {% if nav_active == 'ranking' %}bg-blue-600 text-white{% else %}text-slate-200{% endif %}">ランキング</a>
+    </div>
+  </div>
+</nav> -->

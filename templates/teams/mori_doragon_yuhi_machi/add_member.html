@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>メンバー追加 - imadokoda!</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .error { color: red; font-weight: bold; }
+        input[type="text"] { padding: 5px; font-size: 1.1em; }
+        button { padding: 5px 10px; font-size: 1.1em; }
+        a { text-decoration: none; color: #007bff; }
+    </style>
+</head>
+<body>
+
+<h1>新しいメンバーを追加</h1>
+
+{% if error_message %}
+    <p class="error">{{ error_message }}</p>
+{% endif %}
+
+<form action="{% url 'mori_doragon_yuhi_machi:add_member' %}" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="member_name">名前：</label>
+    <input type="text" name="member_name" id="member_name" placeholder="例：山田 太郎" required>
+    
+    <br><br> <label for="member_photo">顔写真：</label>
+    <input type="file" name="member_photo" id="member_photo" accept="image/*">
+
+    <br><br>
+    <label>
+        学年:
+        <select name="grade">
+            <option value="Staff">Staff</option>
+            <option value="Dr">Dr</option>
+            <option value="M2">M2</option>
+            <option value="M1">M1</option>
+            <option value="B4">B4</option>
+            <option value="Other" selected>Other</option>
+        </select>
+    </label>
+    <br><br>
+    <button type="submit">追加する</button>
+</form>
+
+<hr>
+<p>
+    <a href="{% url 'mori_doragon_yuhi_machi:index' %}">← トップページに戻る</a>
+</p>
+
+<h3>現在のメンバー一覧</h3>
+
+<style>
+    .member-manage-list {
+        list-style: none;
+        padding: 0;
+        max-width: 400px;
+    }
+    .member-manage-list li {
+        border-bottom: 1px solid #ccc;
+        padding: 10px 0;
+        display: flex;
+        justify-content: space-between; /* 名前とボタンを左右に配置 */
+        align-items: center;
+    }
+    .delete-btn {
+        background-color: #ff4d4d;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .delete-btn:hover {
+        background-color: #cc0000;
+    }
+</style>
+
+<ul class="member-manage-list">
+    {% for member in all_members %}
+        <li>
+            <span>{{ member.name }}</span>
+
+            <form action="{% url 'mori_doragon_yuhi_machi:delete_member' %}" method="POST" onsubmit="return confirm('本当に「{{ member.name }}」を削除してもよろしいですか？');">
+                {% csrf_token %}
+                <input type="hidden" name="member_id" value="{{ member.id }}">
+                <button type="submit" class="delete-btn">削除</button>
+            </form>
+        </li>
+    {% empty %}
+        <li>まだメンバーがいません。</li>
+    {% endfor %}
+</ul>
+
+</body>
+</html>

@@ -15,6 +15,75 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            padding-left: 80px;
+            transition: padding-left 0.3s;
+        }
+        body.menu-open {
+            padding-left: 280px;
+        }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 60px;
+            background: #2c3e50;
+            z-index: 1000;
+            transition: width 0.3s;
+            overflow: hidden;
+        }
+        .sidebar.open {
+            width: 250px;
+        }
+        .hamburger {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 60px;
+            padding: 20px;
+            cursor: pointer;
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            background: #2c3e50;
+            z-index: 10;
+        }
+        .menu-items {
+            margin-top: 80px;
+        }
+        .menu-item {
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .menu-item:hover {
+            background: #34495e;
+        }
+        .menu-item.logout {
+            background: #dc3545;
+            margin-top: 20px;
+        }
+        .menu-item.logout:hover {
+            background: #c82333;
+        }
+        .menu-icon {
+            font-size: 20px;
+            min-width: 20px;
+            flex-shrink: 0;
+        }
+        .menu-text {
+            max-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: max-width 0.3s ease;
+        }
+        .sidebar.open .menu-text {
+            max-width: 200px;
         }
         .container {
             max-width: 1200px;
@@ -74,8 +143,21 @@
             color: #333;
             border-radius: 5px;
         }
+        .calendar-day-header:first-child {
+            color: #dc3545; /* 日曜日を赤色 */
+        }
+        .calendar-day-header:last-child {
+            color: #0d6efd; /* 土曜日を青色 */
+        }
+        .calendar-day.sunday .day-number {
+            color: #dc3545; /* 日曜日の数字を赤色 */
+        }
+        .calendar-day.saturday .day-number {
+            color: #0d6efd; /* 土曜日の数字を青色 */
+        }
         .calendar-day {
             min-height: 100px;
+            max-height: 120px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             padding: 10px;
@@ -83,6 +165,7 @@
             transition: all 0.3s;
             cursor: pointer;
             position: relative;
+            overflow: hidden;
         }
         .calendar-day:hover {
             background: #f8f9ff;
@@ -118,18 +201,23 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            max-width: 100%;
+            display: block;
         }
-        
-        /* メモインジケータ */
-        .memo-indicator {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
+
+        /* メモ表示スタイル */
+        .memo-item-display {
             background: #51cf66;
             color: white;
-            font-size: 0.7em;
-            padding: 2px 6px;
-            border-radius: 10px;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-top: 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+            max-width: 100%;
         }
         
         /* モーダルのスタイル */
@@ -224,13 +312,13 @@
             font-size: 0.75em;
             font-weight: 600;
         }
+        .memo-badge-job {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
         .memo-badge-interview {
             background: #e3f2fd;
             color: #1976d2;
-        }
-        .memo-badge-status {
-            background: #f3e5f5;
-            color: #7b1fa2;
         }
         .memo-badge-date {
             background: #fff3e0;
@@ -246,11 +334,16 @@
             font-size: 0.8em;
             color: #999;
         }
-        .memo-delete-btn {
+        .memo-actions {
             position: absolute;
             top: 10px;
             right: 10px;
-            background: #ff6b6b;
+            display: flex;
+            gap: 5px;
+        }
+        .memo-edit-btn,
+        .memo-delete-btn {
+            background: #667eea;
             color: white;
             border: none;
             padding: 5px 12px;
@@ -259,17 +352,43 @@
             font-size: 0.85em;
             transition: all 0.3s;
         }
+        .memo-edit-btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+        .memo-delete-btn {
+            background: #ff6b6b;
+        }
         .memo-delete-btn:hover {
             background: #ee5a52;
             transform: scale(1.05);
         }
+        .add-memo-btn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        .add-memo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
         .memo-form {
-            display: flex;
+            display: none;
             flex-direction: column;
             gap: 15px;
             padding: 20px;
             background: #f8f9ff;
             border-radius: 10px;
+        }
+        .memo-form.active {
+            display: flex;
         }
         .form-row {
             display: grid;
@@ -285,6 +404,24 @@
             font-weight: 600;
             color: #555;
             font-size: 0.9em;
+        }
+        /* 必須マーク(*)を赤色に */
+        .form-group label:has-text(*),
+        label {
+            position: relative;
+        }
+        label::after {
+            content: '';
+        }
+        /* 必須マーク(*)のスタイル */
+        .required-mark {
+            color: #ff4444;
+            font-weight: bold;
+        }
+        /* データ収集マーク(†)のスタイル */
+        .data-collection-mark {
+            color: #ffa500;
+            font-weight: bold;
         }
         .memo-form input,
         .memo-form select,
@@ -370,9 +507,75 @@
             background: #764ba2;
             transform: translateY(-2px);
         }
+        
+        /* 会社検索ドロップダウン */
+        .company-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 5px;
+        }
+        .company-dropdown.active {
+            display: block;
+        }
+        .company-dropdown-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .company-dropdown-item:hover {
+            background: #f8f9ff;
+        }
+        .company-dropdown-item:last-child {
+            border-bottom: none;
+        }
+        .company-dropdown-loading {
+            padding: 15px;
+            text-align: center;
+            color: #999;
+        }
+        .company-dropdown-empty {
+            padding: 15px;
+            text-align: center;
+            color: #999;
+        }
+        .form-group {
+            position: relative;
+        }
     </style>
 </head>
 <body>
+    <div class="sidebar" id="sidebar">
+        <div class="hamburger" onclick="toggleMenu()">☰</div>
+        <div class="menu-items">
+            <a href="{% url 'team_UD:calendar' %}" class="menu-item">
+                <span class="menu-icon">📅</span>
+                <span class="menu-text">カレンダー</span>
+            </a>
+            <a href="{% url 'team_UD:questions' %}" class="menu-item">
+                <span class="menu-icon">📝</span>
+                <span class="menu-text">質問対策</span>
+            </a>
+            <a href="{% url 'team_UD:statistics' %}" class="menu-item">
+                <span class="menu-icon">📊</span>
+                <span class="menu-text">面接質問統計</span>
+            </a>
+            <a href="{% url 'team_UD:logout' %}" class="menu-item logout">
+                <span class="menu-icon">🚪</span>
+                <span class="menu-text">ログアウト</span>
+            </a>
+        </div>
+    </div>
     <div class="container">
         <header>
             <h1>📅 カレンダー</h1>
@@ -394,40 +597,20 @@
             <div class="calendar-day-header">土</div>
 
             {% for day in calendar_days %}
-            <div class="calendar-day {% if day.is_other_month %}other-month{% endif %} {% if day.is_today %}today{% endif %}"
+            <div class="calendar-day {% if day.is_other_month %}other-month{% endif %} {% if day.is_today %}today{% endif %} {% if forloop.counter0|divisibleby:7 %}sunday{% elif forloop.counter|divisibleby:7 %}saturday{% endif %}"
                  data-year="{{ year }}" data-month="{{ month }}" data-day="{{ day.day }}"
                  onclick="openMemoModal(this)">
                 <div class="day-number">{{ day.day }}</div>
                 {% for event in day.events %}
-                <div class="event-item" title="{{ event.title }}">{{ event.title }}</div>
+                <div class="event-item" title="{{ event.title }}">{{ event.title|truncatechars:15 }}</div>
                 {% endfor %}
-                <div class="memo-indicator" style="display: none;">📝</div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <div class="events-list">
-            <h3>📋 今月のイベント一覧</h3>
-            {% if events %}
-                {% for event in events %}
-                <div class="event-card">
-                    <div class="event-title">{{ event.title }}</div>
-                    <div class="event-time">
-                        🕐 {{ event.start_time|date:"Y年m月d日 H:i" }} - {{ event.end_time|date:"Y年m月d日 H:i" }}
-                    </div>
-                    {% if event.description %}
-                    <div style="margin-top: 8px; color: #555;">{{ event.description }}</div>
-                    {% endif %}
+                {% for memo in day.memos %}
+                <div class="memo-item-display" title="{% if memo.title %}{{ memo.title }}{% else %}{{ memo.interview_stage }}{% endif %}">
+                    {% if memo.title %}{{ memo.title|truncatechars:15 }}{% else %}{{ memo.interview_stage|truncatechars:15 }}{% endif %}
                 </div>
                 {% endfor %}
-            {% else %}
-                <p style="color: #999; text-align: center;">今月のイベントはありません</p>
-            {% endif %}
-        </div>
-
-        <div class="nav-links">
-            <a href="{% url 'team_UD:index' %}">🏠 ホームに戻る</a>
-            <a href="{% url 'team_UD:memo' %}">📝 メモを見る</a>
+            </div>
+            {% endfor %}
         </div>
     </div>
 
@@ -439,83 +622,316 @@
                 <button class="close-btn" onclick="closeModal()">✕</button>
             </div>
             <div class="memo-list" id="modalMemoList"></div>
+            <button id="addMemoBtn" class="add-memo-btn" onclick="showMemoForm()">➕ メモを追加する</button>
             <div class="memo-form">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="modalCompanyName">会社名 *</label>
-                        <input type="text" id="modalCompanyName" placeholder="例: 株式会社〇〇" required>
+                        <label for="modalMemoTitle">メモタイトル (最大100文字)</label>
+                        <input type="text" id="modalMemoTitle" placeholder="メモのタイトル（任意）" maxlength="100">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modalCompanyName">会社名 <span class="required-mark">*</span><span class="data-collection-mark">†</span></label>
+                        <input type="text" id="modalCompanyName" placeholder="会社名を入力して検索..." required autocomplete="off">
+                        <input type="hidden" id="modalCompanyId">
+                        <div id="companyDropdown" class="company-dropdown"></div>
                     </div>
                     <div class="form-group">
-                        <label for="modalInterviewStage">面接段階 *</label>
-                        <select id="modalInterviewStage" required>
+                        <label for="modalJobCategory">職種カテゴリー</label>
+                        <select id="modalJobCategory">
                             <option value="">選択してください</option>
-                            <option value="説明会">説明会</option>
-                            <option value="ES提出">ES提出</option>
-                            <option value="適性検査">適性検査</option>
-                            <option value="一次面接">一次面接</option>
-                            <option value="二次面接">二次面接</option>
-                            <option value="三次面接">三次面接</option>
-                            <option value="最終面接">最終面接</option>
-                            <option value="内定">内定</option>
+                            <option value="営業職">営業職</option>
+                            <option value="技術職（エンジニア）">技術職（エンジニア）</option>
+                            <option value="事務職">事務職</option>
+                            <option value="企画・マーケティング職">企画・マーケティング職</option>
+                            <option value="研究開発職">研究開発職</option>
+                            <option value="製造・生産職">製造・生産職</option>
+                            <option value="専門職（金融・コンサル等）">専門職（金融・コンサル等）</option>
+                            <option value="クリエイティブ職">クリエイティブ職</option>
                             <option value="その他">その他</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="modalInterviewDate">面接日</label>
-                        <input type="date" id="modalInterviewDate">
+                        <label for="modalCategory">カテゴリ <span class="required-mark">*</span></label>
+                        <select id="modalCategory" required>
+                            <option value="">選択してください</option>
+                            <option value="選考前">選考前</option>
+                            <option value="応募・書類選考">応募・書類選考</option>
+                            <option value="試験・面接">試験・面接</option>
+                            <option value="内定関連">内定関連</option>
+                            <option value="その他">その他</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="modalStatus">選考状況 *</label>
-                        <select id="modalStatus" required>
-                            <option value="">選択してください</option>
-                            <option value="応募予定">応募予定</option>
-                            <option value="選考中">選考中</option>
-                            <option value="結果待ち">結果待ち</option>
-                            <option value="通過">通過</option>
-                            <option value="不合格">不合格</option>
-                            <option value="辞退">辞退</option>
+                        <label for="modalInterviewStage">詳細 <span class="required-mark">*</span><span class="data-collection-mark">†</span></label>
+                        <select id="modalInterviewStage" required disabled>
+                            <option value="">まずカテゴリを選択してください</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="modalMemoInput">メモ内容 *</label>
-                    <textarea id="modalMemoInput" placeholder="面接の内容、感じたこと、質問された内容などを記録しましょう" required></textarea>
+                    <label for="modalInterviewDate">実施日・〆切日</label>
+                    <input type="date" id="modalInterviewDate">
+                </div>
+                
+                <!-- 面接時の追加入力欄 -->
+                <div id="interviewFields" style="display: none;">
+                    <div class="form-group">
+                        <label>どんなことを聞かれたか？ <span class="data-collection-mark">†</span></label>
+                        <div id="questionsContainer">
+                            <div class="question-item" style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <input type="text" class="question-input" placeholder="質問内容を入力..." style="flex: 1;">
+                                <button type="button" class="remove-question-btn" onclick="removeQuestion(this)" style="display: none; padding: 8px 12px; background: #ff6b6b; color: white; border: none; border-radius: 5px; cursor: pointer;">✕</button>
+                            </div>
+                        </div>
+                        <button type="button" onclick="addQuestion()" style="margin-top: 8px; padding: 8px 15px; background: #51cf66; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9em;">➕ 質問を追加</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="modalMemoInput">メモ内容</label>
+                    <textarea id="modalMemoInput" placeholder="面接の内容、感じたこと、質問された内容などを記録しましょう"></textarea>
                 </div>
                 <button onclick="saveModalMemo()">💾 保存</button>
+                <div style="padding: 5px 0; font-size: 0.8em; color: #dc3545;">
+                    ※ †マークの項目は匿名で統計データとして収集されます
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            sidebar.classList.toggle('open');
+            body.classList.toggle('menu-open');
+        }
+
         let currentYear, currentMonth, currentDay;
+        let editingMemoId = null;  // 編集中のメモIDを保持
+        let originalMemoDate = null;  // 編集前のメモの日付を保持
+        let searchTimeout = null;  // 検索のデバウンス用
+
+        // カテゴリと詳細の対応マップ
+        const categoryDetailsMap = {
+            '選考前': ['企業研究', '説明会', 'カジュアル面談', 'OB/OG訪問'],
+            '応募・書類選考': ['ES作成中', 'ES提出', '書類選考'],
+            '試験・面接': ['適性検査', 'Webテスト', '一次面接', '二次面接', '三次面接', '最終面接', 'グループディスカッション'],
+            '内定関連': ['内定通知', 'オファー面談', '内定者懇親会', '内定後イベント', '承諾書〆切'],
+            'その他': ['インターン', 'その他']
+        };
 
         // ページ読み込み時に各日付のメモを確認してインジケータを表示
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.calendar-day:not(.other-month)').forEach(function(dayElement) {
-                const year = dayElement.dataset.year;
-                const month = dayElement.dataset.month;
-                const day = dayElement.dataset.day;
-                
-                if (day) {
-                    checkMemoExists(year, month, day, dayElement);
-                }
+            // 会社名検索機能の初期化
+            initCompanySearch();
+            
+            // カテゴリ選択時の処理
+            document.getElementById('modalCategory').addEventListener('change', function() {
+                updateInterviewStageOptions(this.value);
+                toggleInterviewFields();
+            });
+            
+            // 実施日変更時の処理
+            document.getElementById('modalInterviewDate').addEventListener('change', function() {
+                toggleInterviewFields();
             });
         });
 
-        function checkMemoExists(year, month, day, dayElement) {
-            fetch(`/team_UD/api/memo/${year}/${month}/${day}/`)
+        function toggleInterviewFields() {
+            const category = document.getElementById('modalCategory').value;
+            const interviewDate = document.getElementById('modalInterviewDate').value;
+            const interviewFields = document.getElementById('interviewFields');
+            
+            // カテゴリが「試験・面接」で、かつ実施日が過去または今日の日付の場合のみ表示
+            if (category === '試験・面接' && interviewDate) {
+                const today = new Date();
+                const todayStr = today.getFullYear() + '-' + 
+                                String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                                String(today.getDate()).padStart(2, '0');
+                
+                // 日付文字列で比較（YYYY-MM-DD形式）
+                if (interviewDate <= todayStr) {
+                    interviewFields.style.display = 'block';
+                } else {
+                    interviewFields.style.display = 'none';
+                }
+            } else {
+                interviewFields.style.display = 'none';
+            }
+        }
+
+        function updateInterviewStageOptions(category) {
+            const stageSelect = document.getElementById('modalInterviewStage');
+            stageSelect.innerHTML = '<option value="">選択してください</option>';
+            
+            if (category && categoryDetailsMap[category]) {
+                stageSelect.disabled = false;
+                categoryDetailsMap[category].forEach(detail => {
+                    const option = document.createElement('option');
+                    option.value = detail;
+                    option.textContent = detail;
+                    stageSelect.appendChild(option);
+                });
+            } else {
+                stageSelect.disabled = true;
+                stageSelect.innerHTML = '<option value="">まずカテゴリを選択してください</option>';
+            }
+        }
+        function addQuestion() {
+            const container = document.getElementById('questionsContainer');
+            const newItem = document.createElement('div');
+            newItem.className = 'question-item';
+            newItem.style.cssText = 'display: flex; gap: 8px; margin-bottom: 8px;';
+            newItem.innerHTML = `
+                <input type="text" class="question-input" placeholder="質問内容を入力..." style="flex: 1;">
+                <button type="button" class="remove-question-btn" onclick="removeQuestion(this)" style="padding: 8px 12px; background: #ff6b6b; color: white; border: none; border-radius: 5px; cursor: pointer;">✕</button>
+            `;
+            container.appendChild(newItem);
+            updateRemoveButtons();
+        }
+        
+        function removeQuestion(button) {
+            const item = button.parentElement;
+            item.remove();
+            updateRemoveButtons();
+        }
+        
+        function updateRemoveButtons() {
+            const items = document.querySelectorAll('.question-item');
+            items.forEach((item, index) => {
+                const removeBtn = item.querySelector('.remove-question-btn');
+                if (items.length > 1) {
+                    removeBtn.style.display = 'block';
+                } else {
+                    removeBtn.style.display = 'none';
+                }
+            });
+        }
+        
+        function getInterviewQuestions() {
+            const inputs = document.querySelectorAll('.question-input');
+            const questions = [];
+            inputs.forEach(input => {
+                const value = input.value.trim();
+                if (value) {
+                    questions.push(value);
+                }
+            });
+            return questions.join('\n');
+        }
+        
+        function setInterviewQuestions(questionsText) {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            
+            if (questionsText) {
+                const questions = questionsText.split('\n').filter(q => q.trim());
+                questions.forEach((question, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'question-item';
+                    item.style.cssText = 'display: flex; gap: 8px; margin-bottom: 8px;';
+                    item.innerHTML = `
+                        <input type="text" class="question-input" placeholder="質問内容を入力..." style="flex: 1;" value="${escapeHtml(question)}">
+                        <button type="button" class="remove-question-btn" onclick="removeQuestion(this)" style="${questions.length > 1 ? '' : 'display: none;'} padding: 8px 12px; background: #ff6b6b; color: white; border: none; border-radius: 5px; cursor: pointer;">✕</button>
+                    `;
+                    container.appendChild(item);
+                });
+            } else {
+                // デフォルトで1つの入力欄を作成
+                const item = document.createElement('div');
+                item.className = 'question-item';
+                item.style.cssText = 'display: flex; gap: 8px; margin-bottom: 8px;';
+                item.innerHTML = `
+                    <input type="text" class="question-input" placeholder="質問内容を入力..." style="flex: 1;">
+                    <button type="button" class="remove-question-btn" onclick="removeQuestion(this)" style="display: none; padding: 8px 12px; background: #ff6b6b; color: white; border: none; border-radius: 5px; cursor: pointer;">✕</button>
+                `;
+                container.appendChild(item);
+            }
+        }
+        
+        function clearInterviewQuestions() {
+            setInterviewQuestions('');
+        }
+        
+        function initCompanySearch() {
+            const companyInput = document.getElementById('modalCompanyName');
+            const companyDropdown = document.getElementById('companyDropdown');
+            
+            // 入力時の検索
+            companyInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                
+                // デバウンス処理
+                clearTimeout(searchTimeout);
+                
+                if (query.length === 0) {
+                    companyDropdown.classList.remove('active');
+                    return;
+                }
+                
+                searchTimeout = setTimeout(() => {
+                    searchCompanies(query);
+                }, 300);
+            });
+            
+            // フォーカス時に一覧を表示
+            companyInput.addEventListener('focus', function() {
+                const query = this.value.trim();
+                if (query.length > 0) {
+                    searchCompanies(query);
+                }
+            });
+            
+            // 外部クリックでドロップダウンを閉じる
+            document.addEventListener('click', function(e) {
+                if (!companyInput.contains(e.target) && !companyDropdown.contains(e.target)) {
+                    companyDropdown.classList.remove('active');
+                }
+            });
+        }
+        
+        function searchCompanies(query) {
+            const dropdown = document.getElementById('companyDropdown');
+            dropdown.innerHTML = '<div class="company-dropdown-loading">検索中...</div>';
+            dropdown.classList.add('active');
+            
+            fetch(`/team_UD/api/companies/?search=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.memos && data.memos.length > 0) {
-                        const indicator = dayElement.querySelector('.memo-indicator');
-                        if (indicator) {
-                            indicator.style.display = 'block';
-                        }
+                    dropdown.innerHTML = '';
+                    
+                    if (data.companies && data.companies.length > 0) {
+                        data.companies.forEach(company => {
+                            const item = document.createElement('div');
+                            item.className = 'company-dropdown-item';
+                            item.textContent = company.name;
+                            item.dataset.companyId = company.id;
+                            item.addEventListener('click', function() {
+                                selectCompany(company);
+                            });
+                            dropdown.appendChild(item);
+                        });
+                        dropdown.classList.add('active');
+                    } else {
+                        dropdown.innerHTML = '<div class="company-dropdown-empty">該当する会社が見つかりませんでした</div>';
+                        dropdown.classList.add('active');
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error:', error);
+                    dropdown.innerHTML = '<div class="company-dropdown-empty">検索エラーが発生しました</div>';
+                });
+        }
+        
+        function selectCompany(company) {
+            document.getElementById('modalCompanyName').value = company.name;
+            document.getElementById('modalCompanyId').value = company.id;
+            document.getElementById('companyDropdown').classList.remove('active');
         }
 
         function openMemoModal(element) {
@@ -533,11 +949,30 @@
             const selectedDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
             document.getElementById('modalInterviewDate').value = selectedDate;
 
+            // フォームを非表示にし、メモ一覧と追加ボタンを表示
+            hideMemoForm();
+
             // メモを読み込む
             loadModalMemos();
 
             // モーダルを表示
             document.getElementById('memoModal').classList.add('active');
+        }
+        
+        function showMemoForm() {
+            // フォームを表示
+            document.querySelector('.memo-form').classList.add('active');
+            // 追加ボタンを非表示
+            document.getElementById('addMemoBtn').style.display = 'none';
+        }
+        
+        function hideMemoForm() {
+            // フォームを非表示
+            document.querySelector('.memo-form').classList.remove('active');
+            // 追加ボタンを表示
+            document.getElementById('addMemoBtn').style.display = 'block';
+            // フォームをクリア
+            clearModalForm();
         }
 
         function closeModal(event) {
@@ -545,15 +980,28 @@
 
             document.getElementById('memoModal').classList.remove('active');
 
-            // フォームをクリア
-            document.getElementById('modalCompanyName').value = '';
-            document.getElementById('modalInterviewStage').value = '';
-            document.getElementById('modalInterviewDate').value = '';
-            document.getElementById('modalStatus').value = '';
-            document.getElementById('modalMemoInput').value = '';
+            // フォームを非表示にして追加ボタンを表示
+            hideMemoForm();
         }
 
-        function loadModalMemos() {
+        function clearModalForm() {
+            editingMemoId = null;  // 編集モードを解除
+            originalMemoDate = null;  // 元の日付情報をクリア
+            document.getElementById('modalMemoTitle').value = '';
+            document.getElementById('modalCompanyName').value = '';
+            document.getElementById('modalCompanyId').value = '';
+            document.getElementById('modalCategory').value = '';
+            document.getElementById('modalInterviewStage').value = '';
+            document.getElementById('modalInterviewStage').disabled = true;
+            document.getElementById('modalInterviewStage').innerHTML = '<option value="">まずカテゴリを選択してください</option>';
+            document.getElementById('modalInterviewDate').value = '';
+            document.getElementById('modalMemoInput').value = '';
+            clearInterviewQuestions();
+            document.getElementById('companyDropdown').classList.remove('active');
+            document.getElementById('interviewFields').style.display = 'none';
+        }
+
+        function loadModalMemos(callback) {
             const memoList = document.getElementById('modalMemoList');
 
             fetch(`/team_UD/api/memo/${currentYear}/${currentMonth}/${currentDay}/`)
@@ -571,90 +1019,180 @@
                             }
 
                             let badgeHtml = '<div class="memo-item-badges">';
+                            if (memo.job_category) {
+                                badgeHtml += `<span class="memo-badge memo-badge-job">${escapeHtml(memo.job_category)}</span>`;
+                            }
                             if (memo.interview_stage) {
                                 badgeHtml += `<span class="memo-badge memo-badge-interview">${escapeHtml(memo.interview_stage)}</span>`;
-                            }
-                            if (memo.status) {
-                                badgeHtml += `<span class="memo-badge memo-badge-status">${escapeHtml(memo.status)}</span>`;
                             }
                             if (memo.interview_date) {
                                 badgeHtml += `<span class="memo-badge memo-badge-date">${memo.interview_date}</span>`;
                             }
                             badgeHtml += '</div>';
+                            
+                            // 面接詳細があれば表示
+                            let interviewDetailsHtml = '';
+                            if (memo.interview_questions) {
+                                const questions = memo.interview_questions.split('\n').filter(q => q.trim());
+                                let questionsHtml = '<strong>💬 聞かれたこと:</strong><ol style="margin: 8px 0 0 20px; padding: 0;">';
+                                questions.forEach(q => {
+                                    questionsHtml += `<li style="margin-bottom: 5px;">${escapeHtml(q)}</li>`;
+                                });
+                                questionsHtml += '</ol>';
+                                
+                                interviewDetailsHtml += `
+                                    <div class="memo-item-content" style="background: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                                        ${questionsHtml}
+                                    </div>
+                                `;
+                            }
 
                             memoItem.innerHTML = `
                                 <div class="memo-item-header">
                                     <div>
+                                        ${memo.title ? `<div style="font-weight: bold; color: #667eea; margin-bottom: 8px;">📌 ${escapeHtml(memo.title)}</div>` : ''}
                                         ${badges}
                                         ${badgeHtml}
                                     </div>
                                 </div>
+                                ${interviewDetailsHtml}
                                 <div class="memo-item-content">${escapeHtml(memo.content)}</div>
                                 <div class="memo-item-time">作成: ${memo.created_at}</div>
-                                <button class="memo-delete-btn" onclick="deleteModalMemo(${memo.id})">削除</button>
+                                <div class="memo-actions">
+                                    <button class="memo-edit-btn" data-memo-id="${memo.id}">編集</button>
+                                    <button class="memo-delete-btn" onclick="deleteModalMemo(${memo.id})">削除</button>
+                                </div>
                             `;
+                            
+                            // 編集ボタンにイベントリスナーを追加
+                            const editBtn = memoItem.querySelector('.memo-edit-btn');
+                            editBtn.addEventListener('click', function() {
+                                editModalMemo(memo);
+                            });
+                            
                             memoList.appendChild(memoItem);
                         });
                     } else {
                         memoList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">まだメモがありません</p>';
                     }
+                    // コールバックがあれば実行
+                    if (callback) callback();
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     memoList.innerHTML = '<p style="color: #ff6b6b;">メモの読み込みに失敗しました</p>';
+                    if (callback) callback();
                 });
         }
 
         function saveModalMemo() {
+            const memoTitle = document.getElementById('modalMemoTitle').value.trim();
             const companyName = document.getElementById('modalCompanyName').value.trim();
+            const companyId = document.getElementById('modalCompanyId').value;
+            const jobCategory = document.getElementById('modalJobCategory').value;
             const interviewStage = document.getElementById('modalInterviewStage').value;
             const interviewDate = document.getElementById('modalInterviewDate').value;
-            const status = document.getElementById('modalStatus').value;
             const content = document.getElementById('modalMemoInput').value.trim();
+            const interviewQuestions = getInterviewQuestions();
 
-            // 必須フィールドのチェック
-            if (!companyName || !interviewStage || !status || !content) {
-                alert('必須項目(会社名、面接段階、選考状況、メモ内容)を入力してください');
+            // 必須フィールドのチェック（contentは任意）
+            if (!companyName || !interviewStage) {
+                alert('必須項目(会社名、イベント・工程)を入力してください');
+                return;
+            }
+            
+            if (!companyId) {
+                alert('会社リストから会社を選択してください');
                 return;
             }
 
-            const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
+            // 面接日が選択されている場合は、その日付を使用。なければモーダルの日付を使用
+            let dateStr;
+            if (interviewDate) {
+                dateStr = interviewDate;
+            } else {
+                dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
+            }
+
+            const requestBody = {
+                title: memoTitle,
+                date: dateStr,
+                company_id: parseInt(companyId),
+                job_category: jobCategory,
+                interview_stage: interviewStage,
+                interview_date: interviewDate || null,
+                content: content,
+                interview_questions: interviewQuestions
+            };
+
+            // 編集モードの場合はメモIDを含める
+            if (editingMemoId) {
+                requestBody.id = editingMemoId;
+            }
 
             fetch('/team_UD/api/memo/save/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    date: dateStr,
-                    company_name: companyName,
-                    interview_stage: interviewStage,
-                    interview_date: interviewDate || null,
-                    status: status,
-                    content: content
-                })
+                body: JSON.stringify(requestBody)
             })
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
                     alert('エラー: ' + data.error);
                 } else {
-                    // フォームをクリア
-                    document.getElementById('modalCompanyName').value = '';
-                    document.getElementById('modalInterviewStage').value = '';
-                    document.getElementById('modalInterviewDate').value = '';
-                    document.getElementById('modalStatus').value = '';
-                    document.getElementById('modalMemoInput').value = '';
-
-                    loadModalMemos();
-                    // インジケータを更新
-                    updateMemoIndicator();
+                    // 画面をリロード
+                    location.reload();
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 alert('メモの保存に失敗しました');
             });
+        }
+
+        function editModalMemo(memo) {
+            // 編集モードを設定
+            editingMemoId = memo.id;
+            // 元の日付を保存（日付変更時のインジケーター更新用）
+            originalMemoDate = memo.date;
+
+            // フォームに既存データを入力
+            document.getElementById('modalMemoTitle').value = memo.title || '';
+            document.getElementById('modalCompanyName').value = memo.company_name;
+            document.getElementById('modalCompanyId').value = memo.company_id || '';
+            document.getElementById('modalJobCategory').value = memo.job_category || '';
+            
+            // interview_stageからカテゴリを判別
+            const stage = memo.interview_stage;
+            let category = '';
+            for (const [cat, details] of Object.entries(categoryDetailsMap)) {
+                if (details.includes(stage)) {
+                    category = cat;
+                    break;
+                }
+            }
+            
+            // カテゴリを設定
+            if (category) {
+                document.getElementById('modalCategory').value = category;
+                updateInterviewStageOptions(category);
+                document.getElementById('modalInterviewStage').value = stage;
+            }
+            
+            document.getElementById('modalInterviewDate').value = memo.interview_date || '';
+            document.getElementById('modalMemoInput').value = memo.content;
+            setInterviewQuestions(memo.interview_questions || '');
+
+            // 面接フィールドの表示/非表示を更新
+            toggleInterviewFields();
+
+            // フォームを表示
+            showMemoForm();
+
+            // フォームエリアまでスクロール
+            document.getElementById('modalMemoInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         function deleteModalMemo(memoId) {
@@ -670,24 +1208,14 @@
                 if (data.error) {
                     alert('エラー: ' + data.error);
                 } else {
-                    loadModalMemos();
-                    // インジケータを更新
-                    updateMemoIndicator();
+                    // 画面をリロード
+                    location.reload();
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 alert('メモの削除に失敗しました');
             });
-        }
-
-        function updateMemoIndicator() {
-            const dayElement = document.querySelector(
-                `.calendar-day[data-year="${currentYear}"][data-month="${currentMonth}"][data-day="${currentDay}"]`
-            );
-            if (dayElement) {
-                checkMemoExists(currentYear, currentMonth, currentDay, dayElement);
-            }
         }
 
         function escapeHtml(text) {

@@ -1,63 +1,1277 @@
 ﻿{% extends "teams/shiokara/base.html" %}
+{% load static %}
 
 {% block content %}
-<h1>企業検索</h1>
+<div class="tut-page-wrapper">
+    <!-- 左側サイドバーナビゲーション -->
+    {% include "teams/shiokara/includes/sidebar.html" with active_page='company_search' %}
 
-<form method="get" action="{% url 'shiokara:company_search' %}">
-    <label>
-        キーワード：
-        <input type="text" name="q" value="{{ query }}" placeholder="企業名・キーワードなど">
-    </label>
+    <!-- メインコンテンツ -->
+    <div class="tut-main-content">
+        <header class="tut-page-header page-header">
+            <div class="tut-logo-box">
+                <img src="{% static 'image/mark_gikanavi.png' %}"
+                     alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
+            </div>
+            <div class="tut-page-title">
+                <h1>企業検索</h1>
+                <p class="tut-page-lead page-lead">
+                    キーワードや学科を指定して、インターン受け入れ企業や見学可能な企業を検索できます。
+                </p>
+            </div>
+        </header>
 
-    <label>
-        学科：
-        <select name="dept">
-            <option value="">（すべての学科）</option>
-            {% for dept in departments %}
-            <option value="{{ dept.short_name }}" {% if dept.short_name == dept_short %}selected{% endif %}>
-                {{ dept.name }}
-            </option>
-            {% endfor %}
-        </select>
-    </label>
+    <section class="search-section">
+        <form id="company-search-form" method="get" action="{% url 'shiokara:company_search' %}">
+            <div class="search-form-grid">
 
-    <button type="submit">検索</button>
-</form>
+                <div class="search-field">
+                    <label for="company-search-q">キーワード</label>
+                    <div class="search-input-group">
+                        <span class="search-icon">🔍</span>
+                        <input id="company-search-q"
+                               type="text"
+                               name="q"
+                               value="{{ query }}"
+                               placeholder="企業名・業種・キーワードなど">
+                    </div>
+                </div>
 
-<hr>
+                <div class="search-field">
+                    <label for="search-dept-select">学科</label>
+                    <div class="select-wrapper">
+                        <select id="search-dept-select" name="dept">
+                            <option value="">（すべての学科）</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.short_name }}"
+                                    {% if dept.short_name == dept_short %}selected{% endif %}>
+                                {{ dept.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
 
-{% if query or dept_short %}
-<p>
-    検索結果：
-    {% if query %}「{{ query }}」{% endif %}
-    {% if selected_department %}（{{ selected_department.name }}）{% elif dept_short %}（学科指定あり）{% endif %}
-</p>
-{% endif %}
+                <div class="search-field">
+                    <label for="course-select">分野・コース</label>
+                    <div class="select-wrapper">
+                        <select id="course-select" name="lab">
+                            <option value="">（分野・コース指定なし）</option>
+                            {# 実際の中身は JS で動的に差し込む #}
+                        </select>
+                    </div>
+                </div>
 
-<ul>
-    {% for company in companies %}
-    <li>
-        <strong>{{ company.name }}</strong>
-        {% if company.departments.all %}
-        <br>
-        <small>
-            対象学科：
-            {% for dept in company.departments.all %}
-            {{ dept.name }}{% if not forloop.last %} / {% endif %}
-            {% endfor %}
-        </small>
+
+                <div class="search-field">
+                    <label for="search-sort-select">並び替え</label>
+                    <div class="select-wrapper">
+                        <select id="search-sort-select" name="sort">
+                            <option value="name" {% if sort == "name" %}selected{% endif %}>
+                                名前順
+                            </option>
+                            <option value="employees" {% if sort == "employees" %}selected{% endif %}>
+                                従業員数が多い順
+                            </option>
+                            <option value="starting_salary" {% if sort == "starting_salary" %}selected{% endif %}>
+                                初任給が高い順
+                            </option>
+                            <option value="annual_holidays" {% if sort == "annual_holidays" %}selected{% endif %}>
+                                年間休日が多い順
+                            </option>
+                            <option value="review_count" {% if sort == "review_count" %}selected{% endif %}>
+                                レビュー件数が多い順
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <!-- 勤務地 -->
+                <div class="filter-group">
+                    <span class="filter-label">勤務地</span>
+                    <div class="select-wrapper select-small">
+                        <select name="area">
+                            <option value="">（指定なし）</option>
+                            <option value="tokai" {% if area_key == "tokai" %}selected{% endif %}>
+                                東海エリア
+                            </option>
+                            <option value="capital" {% if area_key == "capital" %}selected{% endif %}>
+                                首都圏
+                            </option>
+                            <option value="kansai" {% if area_key == "kansai" %}selected{% endif %}>
+                                関西
+                            </option>
+                            <option value="nationwide" {% if area_key == "nationwide" %}selected{% endif %}>
+                                全国勤務
+                            </option>
+                        </select>
+                    </div>
+                </div>
+    
+                <!-- 推薦 / 学内説明会 -->
+                <div class="filter-group">
+                    <span class="filter-label">企業フィルタ</span>
+                    <label class="filter-check">
+                        <input type="checkbox" name="recommend" value="1"
+                               {% if recommend == "1" %}checked{% endif %}>
+                        推薦あり
+                    </label>
+                    <label class="filter-check">
+                        <input type="checkbox" name="briefing" value="1"
+                               {% if briefing == "1" %}checked{% endif %}>
+                        学内説明会あり
+                    </label>
+                </div>
+    
+                <!-- AND / OR -->
+                <div class="filter-group">
+                    <span class="filter-label">条件の組み合わせ</span>
+                    <label class="filter-radio">
+                        <input type="radio" name="logic" value="and"
+                               {% if filter_logic == "and" or not filter_logic %}checked{% endif %}>
+                        AND（すべて満たす）
+                    </label>
+                    <label class="filter-radio">
+                        <input type="radio" name="logic" value="or"
+                               {% if filter_logic == "or" %}checked{% endif %}>
+                        OR（どれかを満たす）
+                    </label>
+                </div>
+            </div>
+
+            <div class="search-button-container">
+                <a href="{% url 'shiokara:company_search' %}" class="reset-link">
+                    条件をリセット
+                </a>
+                <button type="submit" class="search-button">
+                    検索
+                </button>
+            </div>
+        </form>
+
+
+    </section>
+
+    <section class="result-section" data-viewed-ids='{{ viewed_company_ids_json|safe }}' data-fav-ids='{{ favorite_company_ids_json|safe }}'>
+        {% if companies %}
+            <p class="result-summary">
+                {{ companies|length }} 件の企業が見つかりました
+                {% if query %}
+                    （キーワード：<strong>{{ query }}</strong>）
+                {% endif %}
+                {% if dept_short %}
+                    {% for dept in departments %}
+                        {% if dept.short_name == dept_short %}
+                            ／ 学科：<strong>{{ dept.name }}</strong>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </p>
+
+            <div class="company-list">
+                {% for company in companies %}
+                <article class="company-card" data-detail-url="{% url 'shiokara:company_detail' company.pk %}" tabindex="0" role="button">
+                    <header class="company-card-header">
+                                                <h2 class="company-name">
+                                                                <a class="detail-link" href="{% url 'shiokara:company_detail' company.pk %}">
+                                                                        {{ company.name }}
+                                                                </a>
+                                                                {% if person and company.pk not in viewed_company_ids %}
+                                                                        <span class="unviewed-lock" title="未閲覧">🔏</span>
+                                                                {% endif %}
+                                                                {% if person %}
+                                                                    <form method="post" action="{% url 'shiokara:company_favorite' company.pk %}" class="fav-form" style="display:inline-block; margin-left:8px;">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit" class="fav-btn" aria-pressed="{% if company.pk in favorite_company_ids %}true{% else %}false{% endif %}">
+                                                                            {% if company.pk in favorite_company_ids %}★{% else %}☆{% endif %}
+                                                                        </button>
+                                                                    </form>
+                                                                {% endif %}
+                                                        </h2>
+
+                        {% if company.departments.all %}
+                        <div class="company-depts">
+                            {% for dept in company.departments.all %}
+                                <span class="dept-chip">{{ dept.name }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </header>
+
+                    {% if company.description %}
+                    <p class="company-description">
+                        {{ company.description|linebreaksbr }}
+                    </p>
+                    {% endif %}
+
+                    <footer class="company-card-footer">
+                        <a class="detail-link"
+                           href="{% url 'shiokara:company_detail' company.pk %}">
+                            企業詳細を見る →
+                        </a>
+
+                        {% if company.url %}
+                        <a class="site-link"
+                           href="{{ company.url }}"
+                           target="_blank"
+                           rel="noopener">
+                            公式サイトを開く
+                        </a>
+                        {% endif %}
+                    </footer>
+                </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-result">
+                <p>該当する企業は見つかりませんでした。</p>
+                <ul>
+                    <li>キーワードを短くしてみる</li>
+                    <li>学科の条件を「すべての学科」に戻して検索する</li>
+                    <li>別のキーワードを試してみる</li>
+                </ul>
+            </div>
         {% endif %}
-        {% if company.url %}
-        <br><a href="{{ company.url }}" target="_blank" rel="noopener">企業サイト</a>
-        {% endif %}
-        {% if company.description %}
-        <br><small>{{ company.description|linebreaksbr }}</small>
-        {% endif %}
-    </li>
-    {% empty %}
-    <li>該当する企業は見つかりませんでした。</li>
-    {% endfor %}
-</ul>
+    </section>
 
-<p><a href="{% url 'shiokara:department_list' %}">← 学科一覧に戻る</a></p>
+    <p class="back-link">
+        <a href="{% url 'shiokara:department_list' %}">← 学科一覧に戻る</a>
+    </p>
+</div>
+
+{# ★ 企業検索ページ専用の簡易スタイル（TUT ロゴ色に合わせたヘッダー追加） #}
+<style>
+    :root {
+        /* ロゴの色に近い色 */
+        --tut-red:   #CC0000;
+        --tut-black: #000000;
+        --tut-gray:  #42413F;
+        --tut-light: #F5F5F5;
+        --white:     #FFFFFF;
+    }
+
+    .company-search-page {
+        background-color: var(--white);
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 24px 16px 40px;
+        color: var(--tut-gray);
+    }
+
+    .unviewed-lock {
+        margin-left: 8px;
+        font-size: 0.95rem;
+        color: #b33030;
+    }
+
+    /* TUT風ヘッダー */
+    .tut-page-header {
+        background-color: var(--white);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 12px;
+        border-bottom: 3px solid var(--tut-red);
+        margin-bottom: 18px;
+        padding: 16px 20px 18px;
+        border-radius: 12px;
+    }
+
+    .tut-logo-box {
+        flex: 0 0 auto;
+        order: 2;
+        margin-left: auto;
+    }
+
+    .tut-page-title {
+        order: 1;
+    }
+
+    .tut-logo-img {
+        max-height: 56px;
+        width: auto;
+        display: block;
+    }
+
+    .tut-page-title h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--tut-black);
+    }
+
+    .tut-page-lead {
+        margin: 4px 0 0;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #555;
+    }
+
+
+    .page-header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .page-lead {
+        margin: 0 0 1.5rem;
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .search-section {
+        background-color: var(--tut-light);
+        border-radius: 12px;
+        padding: 16px 20px 18px;
+        margin-bottom: 18px;
+    }
+
+    .search-form-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) minmax(0, 1.2fr) auto;
+    gap: 12px 16px;
+    align-items: flex-end;
+    }
+
+    .search-field label {
+        display: block;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+        font-weight: 600;
+        color: #444;
+    }
+
+    .search-input-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background-color: #fff;
+        border-radius: 999px;
+        border: 1px solid #ccc;
+        padding: 4px 10px;
+    }
+
+    .search-input-group input[type="text"] {
+        border: none;
+        outline: none;
+        flex: 1;
+        font-size: 0.95rem;
+        padding: 4px 0;
+    }
+
+    .search-icon {
+        font-size: 0.95rem;
+        opacity: 0.8;
+    }
+
+    .field-hint {
+        margin: 4px 0 0;
+        font-size: 0.78rem;
+        color: #777;
+    }
+
+    .hint-chip {
+        display: inline-block;
+        padding: 2px 8px;
+        margin-right: 4px;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid #ddd;
+        font-size: 0.75rem;
+    }
+
+    .select-wrapper select {
+        width: 100%;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid #ccc;
+        font-size: 0.9rem;
+        background-color: #fff;
+    }
+
+    .search-button-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .search-button {
+        border: none;
+        border-radius: 999px;
+        padding: 8px 22px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        background-color: #e53935;
+        color: #fff;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .search-button:hover {
+        background-color: #c62828;
+    }
+
+    .reset-link {
+        font-size: 0.78rem;
+        color: #666;
+        text-decoration: underline;
+    }
+
+    .tetris-section {
+        margin-bottom: 18px;
+    }
+
+    .tetris-card {
+        border-radius: 12px;
+        border: 1px dashed #ddd;
+        padding: 10px 14px 12px;
+        background: #fafafa;
+    }
+
+    .tetris-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+
+    .tetris-title {
+        font-size: 0.85rem;
+        color: #555;
+    }
+
+    .tetris-tag {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid #e0e0e0;
+        background: #fff;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    #tetris-root {
+        min-height: 120px; /* 実際のゲームがマウントされるまでのプレースホルダー */
+    }
+
+    .result-section {
+        margin-top: 8px;
+    }
+
+    .result-summary {
+        margin: 0 0 8px;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .company-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .company-card {
+        border-radius: 10px;
+        border: 1px solid #eee;
+        background-color: #fff;
+        padding: 12px 14px 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: box-shadow 0.15s ease, transform 0.15s ease;
+        cursor: pointer;
+    }
+
+    .company-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+    }
+
+    .company-card-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 6px;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+
+    .company-name {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .company-name a {
+        text-decoration: none;
+        color: #222;
+    }
+
+    .company-name a:hover {
+        text-decoration: underline;
+    }
+
+    /* お気に入りボタン */
+    .fav-btn {
+        border: none;
+        background: transparent;
+        font-size: 1.05rem;
+        cursor: pointer;
+        color: #f5a623;
+        line-height: 1;
+        padding: 2px 6px;
+    }
+    .fav-btn[aria-pressed="true"] { color: #ffb400; }
+
+    .company-depts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .dept-chip {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #e3f2fd;
+        border: 1px solid #bbdefb;
+        white-space: nowrap;
+    }
+
+    .company-description {
+        margin: 4px 0 8px;
+        font-size: 0.85rem;
+        color: #555;
+        line-height: 1.5;
+    }
+
+    .company-card-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-end;
+        font-size: 0.82rem;
+    }
+
+    .detail-link,
+    .site-link {
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .detail-link {
+        color: #e53935;
+    }
+
+    .detail-link:hover {
+        text-decoration: underline;
+    }
+
+    .site-link {
+        color: #1565c0;
+    }
+
+    .site-link:hover {
+        text-decoration: underline;
+    }
+
+    .no-result {
+        border-radius: 10px;
+        border: 1px solid #eee;
+        background: #fff8f8;
+        padding: 12px 14px;
+        font-size: 0.9rem;
+    }
+
+    .no-result ul {
+        margin: 6px 0 0 1.2em;
+        padding: 0;
+    }
+
+    .back-link {
+        margin-top: 20px;
+        font-size: 0.9rem;
+    }
+
+    .filter-row {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    font-size: 0.8rem;
+    align-items: center;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px 10px;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #444;
+        margin-right: 4px;
+    }
+
+    .filter-check,
+    .filter-radio {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+
+    .select-small select {
+        padding: 4px 10px;
+        font-size: 0.85rem;
+    }
+
+
+    @media (max-width: 720px) {
+        .company-search-page {
+            padding: 18px 12px 32px;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .search-form-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .search-button-container {
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .filter-row {
+        flex-direction: column;
+        align-items: flex-start;
+        }
+    }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    // AJAX トグル処理
+    document.querySelectorAll('.fav-form').forEach(function(form){
+        form.addEventListener('submit', function(ev){
+            ev.preventDefault();
+            var btn = form.querySelector('.fav-btn');
+            if(!btn) return;
+            var url = form.action;
+            var csrftoken = form.querySelector('input[name=csrfmiddlewaretoken]')?.value;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken,
+                },
+            }).then(function(resp){
+                return resp.json();
+            }).then(function(data){
+                if(data && data.ok){
+                    if(data.added){ btn.textContent = '★'; btn.setAttribute('aria-pressed','true'); }
+                    else { btn.textContent = '☆'; btn.setAttribute('aria-pressed','false'); }
+                }
+            }).catch(function(){
+                // フォールバック: フルポストで再送
+                form.submit();
+            });
+        });
+    });
+});
+</script>
+<script>
+    /**
+     * 学科 short_name → 系番号（1〜5）
+     * 例:
+     *   機械工学(1系)  short_name = "ms"  → "1"
+     *   電気電子(2系)  short_name = "ee"  → "2"
+     *   情報知能(3系)  short_name = "cs"  → "3"
+     *   応用化学(4系)  short_name = "chem"→ "4"
+     *   建築・都市(5系) short_name = "arch"→ "5"
+     */
+    const deptToSeries = {
+      me: "1",
+      ee: "2",
+      cs: "3",
+      chem: "4",
+      ace: "5",
+    };
+    
+    /**
+     * 系番号ごとのコース一覧
+     */
+    const seriesToCourses = {
+      "1": [
+        { value: "1.1", label: "1.1 材料・生産加工コース" },
+        { value: "1.2", label: "1.2 システム制御・ロボットコース" },
+        { value: "1.3", label: "1.3 環境・エネルギーコース" },
+        { value: "1.4", label: "1系 機械・システムデザインコース 全般" },
+      ],
+      "2": [
+        { value: "2.1", label: "2.1 材料エレクトロニクスコース" },
+        { value: "2.2", label: "2.2 機能電気システムコース" },
+        { value: "2.3", label: "2.3 集積電子システムコース" },
+        { value: "2.4", label: "2.4 情報通信システムコース" },
+      ],
+      "3": [
+        { value: "3.1", label: "3.1 計算機数理科学分野" },
+        { value: "3.2", label: "3.2 データ情報学分野" },
+        { value: "3.3", label: "3.3 ヒューマン・ブレイン情報学分野" },
+        { value: "3.4", label: "3.4 メディア・ロボット情報学分野" },
+      ],
+      "4": [
+        { value: "4.1", label: "4.1 分子制御化学分野" },
+        { value: "4.2", label: "4.2 分子生物化学分野" },
+        { value: "4.3", label: "4.3 分子機能化学分野" },
+      ],
+      "5": [
+        { value: "5.1", label: "5.1 建築・都市デザイン学分野" },
+        { value: "5.2", label: "5.2 都市・地域マネジメント学分野" },
+      ],
+    };
+    
+    // Django から渡された現在の選択値（再描画時に復元する）
+    const currentLab = "{{ lab_code|default_if_none:''|escapejs }}";
+    
+    function updateCourseOptions() {
+      const deptSelect = document.getElementById("search-dept-select");
+      const courseSelect = document.getElementById("course-select");
+      if (!deptSelect || !courseSelect) return;
+    
+      const deptShort = deptSelect.value;
+      const series = deptToSeries[deptShort];
+    
+      // いったん初期化
+      courseSelect.innerHTML = "";
+      const defaultOpt = document.createElement("option");
+      defaultOpt.value = "";
+      defaultOpt.textContent = "（分野・コース指定なし）";
+      courseSelect.appendChild(defaultOpt);
+    
+      if (!series || !seriesToCourses[series]) {
+        courseSelect.disabled = true;
+        return;
+      }
+    
+      seriesToCourses[series].forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c.value;
+        opt.textContent = c.label;
+        if (c.value === currentLab) {
+          opt.selected = true;
+        }
+        courseSelect.appendChild(opt);
+      });
+    
+      courseSelect.disabled = false;
+    }
+    
+    document.addEventListener("DOMContentLoaded", function () {
+      const deptSelect = document.getElementById("search-dept-select");
+      const courseSelect = document.getElementById("course-select");
+      if (!deptSelect || !courseSelect) return;
+    
+      // 初期表示（URLパラメータがあるときにも対応）
+      updateCourseOptions();
+    
+      // 学科選択が変わったら、分野プルダウンを更新＆選択リセット
+      deptSelect.addEventListener("change", function () {
+        // 学科を変えたら分野の選択も一度クリア
+        courseSelect.value = "";
+        // 現在値も空にしてから更新
+        window.currentLab = "";
+        updateCourseOptions();
+      });
+    });
+    </script>
+
+    <!-- ======================== -->
+    <!-- 企業検索チュートリアル -->
+    <!-- ======================== -->
+    <style>
+        #search-tut-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 9998;
+            display: none;
+        }
+
+        .search-tut-highlight {
+            position: relative;
+            z-index: 9999 !important;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 6px rgba(255,255,255,0.05) inset;
+            transform: translateZ(0) scale(1.02);
+            transition: box-shadow 180ms ease, transform 180ms ease;
+            outline: 3px solid rgba(203,0,0,0.95);
+            border-radius: 8px;
+        }
+
+        #search-tut-tooltip {
+            position: fixed;
+            z-index: 10000;
+            max-width: 320px;
+            background: #fff;
+            color: #222;
+            border-radius: 8px;
+            box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+            padding: 12px;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        #search-tut-tooltip #search-tut-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        #search-tut-tooltip button {
+            background: #f3f3f3;
+            border: 1px solid #ddd;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        #search-tut-start-btn {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 10001;
+            background: linear-gradient(180deg, #FF6B6B, #ee5a52);
+            color: #fff;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 999px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width:640px) {
+            #search-tut-tooltip { max-width: 260px; font-size: 0.9rem; }
+            #search-tut-start-btn { right: 12px; bottom: 12px; font-size: 0.85rem; }
+        }
+    </style>
+
+    <div id="search-tut-overlay" aria-hidden="true"></div>
+    <div id="search-tut-tooltip" aria-hidden="true" role="dialog" aria-label="企業検索チュートリアル">
+        <div id="search-tut-content"></div>
+        <div id="search-tut-controls">
+            <button id="search-tut-prev" type="button">戻る</button>
+            <button id="search-tut-next" type="button">次へ</button>
+            <button id="search-tut-close" type="button">閉じる</button>
+        </div>
+    </div>
+
+    <button id="search-tut-start-btn" aria-label="企業検索チュートリアルを開始">🔍 検索ガイド</button>
+
+    <script>
+        (function(){
+            const steps = [
+                {
+                    sel: '#company-search-q',
+                    title: 'キーワード検索',
+                    body: '企業名や業種、キーワードを入力して企業を検索できます。'
+                },
+                {
+                    sel: '#search-dept-select',
+                    title: '学科フィルタ',
+                    body: '学科を選択すると、その学科に関連する企業のみ表示されます。'
+                },
+                {
+                    sel: '#search-sort-select',
+                    title: '並び替え',
+                    body: '企業を名前、従業員数、給与など、様々な条件でソートできます。'
+                },
+                {
+                    sel: '.search-section',
+                    title: '検索結果',
+                    body: '条件を入力して、あなたにぴったりの企業を見つけましょう！'
+                }
+            ];
+
+            let idx = 0;
+            const overlay = document.getElementById('search-tut-overlay');
+            const tooltip = document.getElementById('search-tut-tooltip');
+            const content = document.getElementById('search-tut-content');
+            const btnPrev = document.getElementById('search-tut-prev');
+            const btnNext = document.getElementById('search-tut-next');
+            const btnClose = document.getElementById('search-tut-close');
+            const startBtn = document.getElementById('search-tut-start-btn');
+            const FIRST_VISIT = {{ first_visit_search|yesno:"true,false" }};
+            const AUTO_START_TUTORIAL = {{ auto_start_tutorial|yesno:"true,false" }};
+
+            function showStep(i){
+                document.querySelectorAll('.search-tut-highlight').forEach(el=>el.classList.remove('search-tut-highlight'));
+                tooltip.style.display = 'none';
+                overlay.style.display = 'block';
+
+                const step = steps[i];
+                if(!step) { endTutorial(); return; }
+                const target = document.querySelector(step.sel);
+                content.innerHTML = '<strong>'+step.title+'</strong><div style="margin-top:6px;">'+step.body+'</div>';
+
+                if(target){
+                    target.classList.add('search-tut-highlight');
+                    const r = target.getBoundingClientRect();
+                    const tt = tooltip;
+                    const margin = 100;
+                    let top = window.scrollY + r.bottom + margin;
+                    let left = window.scrollX + r.left;
+                    left = Math.min(Math.max(left, 8 + window.scrollX), window.scrollX + document.documentElement.clientWidth - tt.offsetWidth - 8);
+                    tt.style.top = top + 'px';
+                    tt.style.left = left + 'px';
+                    tt.style.display = 'block';
+                    btnNext.focus();
+                } else {
+                    const tt = tooltip;
+                    tt.style.top = (window.scrollY + window.innerHeight/2 - 80) + 'px';
+                    tt.style.left = (window.scrollX + (window.innerWidth - tt.offsetWidth)/2) + 'px';
+                    tt.style.display = 'block';
+                }
+
+                btnPrev.disabled = (i===0);
+                btnNext.textContent = (i === steps.length -1) ? '完了' : '次へ';
+                idx = i;
+            }
+
+            function nextStep(){
+                if(idx < steps.length -1) showStep(idx+1);
+                else endTutorial();
+            }
+            function prevStep(){ if(idx>0) showStep(idx-1); }
+
+            function startTutorial(){
+                showStep(0);
+                overlay.style.display = 'block';
+                document.body.classList.add('search-tut-in-progress');
+            }
+
+            function endTutorial(){
+                overlay.style.display = 'none';
+                tooltip.style.display = 'none';
+                document.querySelectorAll('.search-tut-highlight').forEach(el=>el.classList.remove('search-tut-highlight'));
+                document.body.classList.remove('search-tut-in-progress');
+                
+                // チュートリアルを表示済みにするAPIを呼び出し
+                if(AUTO_START_TUTORIAL){
+                    fetch('{% url "shiokara:tutorial_seen" %}?type=search', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({}),
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if(data.ok) {
+                            console.log('✅ チュートリアル表示済みフラグを更新しました (type:', data.type, ')');
+                        }
+                    })
+                    .catch(err => console.error('❌ チュートリアル更新エラー:', err));
+                }
+            }
+
+            btnNext.addEventListener('click', nextStep);
+            btnPrev.addEventListener('click', prevStep);
+            btnClose.addEventListener('click', endTutorial);
+            overlay.addEventListener('click', endTutorial);
+            startBtn.addEventListener('click', startTutorial);
+
+            document.addEventListener('keydown', (ev)=>{
+                if(!document.body.classList.contains('search-tut-in-progress')) return;
+                if(ev.key === 'Escape') endTutorial();
+                if(ev.key === 'ArrowRight' || ev.key === 'Enter') nextStep();
+                if(ev.key === 'ArrowLeft') prevStep();
+            });
+
+            // 初回訪問時は自動起動
+            if(AUTO_START_TUTORIAL){
+                setTimeout(()=>{ startTutorial(); }, 300);
+            }
+
+            window.__search_tut_start = startTutorial;
+        })();
+    </script>
+
+    <!-- ======================== -->
+    <!-- ポイント消費確認ポップアップ -->
+    <!-- ======================== -->
+    <style>
+        #point-confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 19998;
+            display: none;
+        }
+
+        #point-confirm-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 19999;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+            padding: 24px;
+            max-width: 380px;
+            width: 90vw;
+            display: none;
+            text-align: center;
+        }
+
+        #point-confirm-modal h2 {
+            margin: 0 0 12px;
+            font-size: 1.3rem;
+            color: #333;
+        }
+
+        #point-confirm-modal p {
+            margin: 8px 0;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .point-confirm-highlight {
+            font-weight: 700;
+            color: #FF6B6B;
+            font-size: 1.1em;
+        }
+
+        #point-confirm-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        #point-confirm-actions button {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #point-confirm-cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        #point-confirm-cancel:hover {
+            background: #e0e0e0;
+        }
+
+        #point-confirm-ok {
+            background: linear-gradient(180deg, #FF6B6B, #ee5a52);
+            color: #fff;
+        }
+
+        #point-confirm-ok:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(255,107,107,0.3);
+        }
+    </style>
+
+    <div id="point-confirm-overlay"></div>
+    <div id="point-confirm-modal" role="dialog" aria-labelledby="point-confirm-title" aria-modal="true">
+        <h2 id="point-confirm-title">⚠️ ポイント消費確認</h2>
+        <p id="point-confirm-company-name" style="font-size: 1.1rem; font-weight: 600; color: #333; margin: 12px 0;">
+            <!-- 企業名が JS で動的に挿入される -->
+        </p>
+        <p>この企業の詳細ページを見るには</p>
+        <p><span class="point-confirm-highlight">1ポイント</span> を消費します。</p>
+        {% if person %}
+        <div style="background: #f0f0f0; padding: 12px; border-radius: 6px; margin: 12px 0; font-size: 0.9rem;">
+            <p style="margin: 6px 0; color: #666;">
+                現在のポイント: <strong id="point-before" style="color: #ff6b6b;">{{ person.points }}</strong>
+            </p>
+            <p style="margin: 6px 0; color: #666;">
+                消費後のポイント: <strong id="point-after" style="color: #ff6b6b;">{{ person.points|add:'-1' }}</strong>
+            </p>
+        </div>
+        {% endif %}
+        <p style="font-size: 0.85rem; color: #999; margin-top: 12px;">
+            ※ 同じ企業は2回目以降、ポイント不要です。
+        </p>
+        <div id="point-confirm-actions">
+            <button id="point-confirm-cancel" type="button">キャンセル</button>
+            <button id="point-confirm-ok" type="button">確認して進む</button>
+        </div>
+    </div>
+
+    <script>
+        (function(){
+            const overlay = document.getElementById('point-confirm-overlay');
+            const modal = document.getElementById('point-confirm-modal');
+            const cancelBtn = document.getElementById('point-confirm-cancel');
+            const okBtn = document.getElementById('point-confirm-ok');
+            let pendingUrl = null;
+
+            // 閲覧済み企業 ID のリストを取得
+            const resultSection = document.querySelector('.result-section');
+            const viewedIdsStr = resultSection ? resultSection.getAttribute('data-viewed-ids') : '[]';
+            let viewedIds = [];
+            try {
+                viewedIds = JSON.parse(viewedIdsStr);
+                console.log('✅ viewedIds parsed successfully:', viewedIds);
+            } catch(e) {
+                console.warn('⚠️ Failed to parse viewedIds:', viewedIdsStr, e);
+                viewedIds = [];
+            }
+
+            // 企業詳細ページへのリンククリックを傍受
+            document.addEventListener('click', function(e){
+                const link = e.target.closest('a.detail-link');
+                if(!link) {
+                    console.log('📌 Clicked element is not a detail-link');
+                    return;
+                }
+
+                console.log('🔗 detail-link clicked:', link.href);
+
+                // すでに閲覧済み企業かどうかを判定
+                // URL が /shiokara/company/123/ のような形式なので、company/ の後の数字を抽出
+                const match = link.href.match(/\/company\/(\d+)/);
+                const companyId = match ? match[1] : null;
+                console.log('🆔 companyId:', companyId, 'viewedIds:', viewedIds);
+                
+                if(!companyId) {
+                    console.warn('⚠️ Could not extract companyId from URL:', link.href);
+                    return;
+                }
+
+                if(viewedIds.includes(parseInt(companyId))){
+                    // 閲覧済み企業なら確認ポップアップを表示しない
+                    console.log('✅ Already viewed company, no popup needed');
+                    return;
+                }
+
+                // 企業名を取得（article 要素内から取得）
+                const article = link.closest('article.company-card');
+                let companyName = '企業';
+                if(article) {
+                    const nameEl = article.querySelector('.company-name a');
+                    if(nameEl) {
+                        companyName = nameEl.textContent.trim();
+                    }
+                }
+
+                // 未閲覧企業なら確認ポップアップを表示
+                console.log('🎬 Showing modal for company:', companyId, companyName);
+                console.log('⏹️ preventDefault() を実行します');
+                e.preventDefault();  // ← ここでデフォルト動作を止める
+                pendingUrl = link.href;
+                showModal(companyName);
+            });
+
+            function showModal(companyName){
+                // 企業名を表示
+                document.getElementById('point-confirm-company-name').textContent = companyName;
+                
+                overlay.style.display = 'block';
+                modal.style.display = 'block';
+                okBtn.focus();
+                console.log('🎬 Modal displayed');
+            }
+
+            function hideModal(){
+                overlay.style.display = 'none';
+                modal.style.display = 'none';
+                pendingUrl = null;
+                console.log('❌ Modal hidden');
+            }
+
+            function proceed(){
+                if(pendingUrl){
+                    console.log('➡️ Proceeding to:', pendingUrl);
+                    
+                    // ポイント消費確認モーダルを初めて見た場合、チュートリアルフラグを更新
+                    fetch('{% url "shiokara:tutorial_seen" %}?type=points', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({}),
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if(data.ok) {
+                            console.log('✅ ポイントチュートリアルフラグを更新しました (type:', data.type, ')');
+                        }
+                    })
+                    .catch(err => console.error('❌ チュートリアル更新エラー:', err));
+                    
+                    console.log('🚀 ページ遷移を実行します...');
+                    window.location.href = pendingUrl;
+                } else {
+                    console.warn('⚠️ pendingUrl が設定されていません');
+                }
+            }
+
+            cancelBtn.addEventListener('click', hideModal);
+            okBtn.addEventListener('click', proceed);
+            overlay.addEventListener('click', hideModal);
+
+            // キーボード操作
+            document.addEventListener('keydown', (ev)=>{
+                if(modal.style.display !== 'block') return;
+                if(ev.key === 'Escape') hideModal();
+                if(ev.key === 'Enter') proceed();
+            });
+
+            console.log('✅ Point confirm script initialized');
+        })();
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('.company-card').forEach(function(card){
+            card.addEventListener('click', function(e){
+                // 既存の "公式サイトを開く" やフォーム、および非詳細リンクのクリックを妨げない
+                if(e.target.closest('a.site-link')) return;
+                if(e.target.closest('form')) return;
+                if(e.target.closest('button')) return;
+                var nearestAnchor = e.target.closest('a');
+                if(nearestAnchor && !nearestAnchor.classList.contains('detail-link')) return;
+
+                var detail = card.querySelector('a.detail-link');
+                if(detail){
+                    // detail の既存のクリックハンドラ（ポイント確認等）を利用する
+                    detail.click();
+                }
+            });
+
+            // キーボードでも Enter / Space で詳細へ遷移
+            card.addEventListener('keydown', function(e){
+                if(e.key === 'Enter' || e.key === ' '){
+                    var detail = card.querySelector('a.detail-link');
+                    if(detail){ detail.click(); e.preventDefault(); }
+                }
+            });
+        });
+    });
+    </script>
+    </div>
+</div>
+    
 {% endblock %}

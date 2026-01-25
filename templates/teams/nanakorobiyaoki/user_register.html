@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新規登録 - TUT Connect</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #0d47a1;
+            --bg-color: #f5f7fa;
+            --text-main: #333;
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .register-card {
+            background: #fff;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a237e;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        /* Django form rendering styles */
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="number"],
+        input[type="url"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+            margin-bottom: 5px;
+            /* for help text spacing */
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .helptext {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 4px;
+            display: block;
+        }
+
+        ul.errorlist {
+            list-style: none;
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .links {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .links a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="register-card">
+        <div class="card-header">
+            <h1 class="card-title">アカウント作成</h1>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <!-- Manually render or loop for better control if needed, but generic loop works for "Unified UI" request -->
+            {% for field in form %}
+            <div class="form-group">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                {% if field.name == 'password' %}
+                <div class="password-wrapper" style="position: relative;">
+                    {{ field }}
+                    <span class="password-toggle material-icons-round"
+                        onclick="togglePassword(this)">visibility_off</span>
+                </div>
+                {% else %}
+                {{ field }}
+                {% endif %}
+
+                {% if field.help_text %}
+                <span class="helptext">{{ field.help_text }}</span>
+                {% endif %}
+                {{ field.errors }}
+            </div>
+            {% endfor %}
+
+            <style>
+                .password-toggle {
+                    position: absolute;
+                    right: 15px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    cursor: pointer;
+                    color: #999;
+                    user-select: none;
+                }
+
+                .password-toggle:hover {
+                    color: var(--primary-color);
+                }
+            </style>
+
+            <script>
+                function togglePassword(icon) {
+                    const input = icon.previousElementSibling;
+                    if (input.type === "password") {
+                        input.type = "text";
+                        icon.textContent = "visibility";
+                    } else {
+                        input.type = "password";
+                        icon.textContent = "visibility_off";
+                    }
+                }
+            </script>
+
+            <button type="submit" class="btn-primary">登録する</button>
+        </form>
+
+        <div class="links">
+            <a href="{% url 'nanakorobiyaoki:index' %}">ログイン画面に戻る</a>
+        </div>
+    </div>
+</body>
+
+</html>

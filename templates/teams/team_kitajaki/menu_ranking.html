@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>人気メニューランキング</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        h1 { margin-bottom: 40px; }
+        h2 {
+            margin-top: 40px;
+            border-bottom: 2px solid #007bff;
+            display: inline-block;
+            padding-bottom: 5px;
+            color: #007bff;
+        }
+        .ranking-table {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .ranking-table th, .ranking-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .ranking-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .rank-col { width: 60px; text-align: center; font-weight: bold; }
+        .score-col { width: 160px; text-align: right; color: #666; } /* ★ 少し広げる */
+
+        .rank-1 { color: #d4af37; font-size: 1.2em; } /* 金 */
+        .rank-2 { color: #c0c0c0; font-size: 1.1em; } /* 銀 */
+        .rank-3 { color: #cd7f32; font-size: 1.1em; } /* 銅 */
+
+        .count-badge {
+            color: #888;
+            font-size: 0.9em;
+            margin-left: 6px;
+            white-space: nowrap;
+        }
+
+        .back-link { margin-top: 40px; }
+        .no-data { color: #888; margin: 20px 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🏆 喫茶メニューランキング</h1>
+
+    <h2>👑 総合ランキング (TOP 5)</h2>
+    {% if ranking_overall %}
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th class="rank-col">順位</th>
+                    <th>メニュー名</th>
+                    <th class="score-col">スコア</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in ranking_overall %}
+                <tr>
+                    <td class="rank-col rank-{{ forloop.counter }}">{{ forloop.counter }}位</td>
+                    <td>{{ item.menu_name }}</td>
+                    <td class="score-col">
+                        ★ {{ item.overall_score|floatformat:1 }}
+                        <span class="count-badge">（{{ item.rating_count }}件）</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="no-data">データが集計されていません</p>
+    {% endif %}
+
+    <h2>😋 味ランキング</h2>
+    {% if ranking_taste %}
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th class="rank-col">順位</th>
+                    <th>メニュー名</th>
+                    <th class="score-col">味スコア</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in ranking_taste %}
+                <tr>
+                    <td class="rank-col rank-{{ forloop.counter }}">{{ forloop.counter }}位</td>
+                    <td>{{ item.menu_name }}</td>
+                    <td class="score-col">
+                        {{ item.avg_taste|floatformat:1 }}
+                        <span class="count-badge">（{{ item.rating_count }}件）</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="no-data">データが集計されていません</p>
+    {% endif %}
+
+    <h2>🍚 量ランキング</h2>
+    {% if ranking_volume %}
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th class="rank-col">順位</th>
+                    <th>メニュー名</th>
+                    <th class="score-col">量スコア</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in ranking_volume %}
+                <tr>
+                    <td class="rank-col rank-{{ forloop.counter }}">{{ forloop.counter }}位</td>
+                    <td>{{ item.menu_name }}</td>
+                    <td class="score-col">
+                        {{ item.avg_volume|floatformat:1 }}
+                        <span class="count-badge">（{{ item.rating_count }}件）</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="no-data">データが集計されていません</p>
+    {% endif %}
+
+    <p class="back-link">
+        <a href="{% url 'team_kitajaki:today_menu' %}">今日の喫茶メニューへ戻る</a>
+    </p>
+</div>
+</body>
+</html>

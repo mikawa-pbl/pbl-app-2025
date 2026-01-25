@@ -1,0 +1,49 @@
+{% extends "teams/team_akb5/base.html" %}
+{% load tz %}
+
+{% block title %}ネットワーク状況一覧 - Admin{% endblock %}
+
+{% block content %}
+<h1>ネットワーク状況一覧</h1>
+<!-- <p>
+        <a href="{% url 'team_akb5:status_report_form' %}" role="button">＋ 新規投稿する</a>
+    </p> -->
+
+<hr>
+
+<table>
+    <thead>
+        <tr>
+            <th>発生時刻</th>
+            <th>階</th>
+            <th>症状</th>
+            <th>詳細</th>
+            <th>投稿日時</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for report in reports %}
+        <tr>
+            <td>{{ report.timestamp|timezone:"Asia/Tokyo"|date:"Y/m/d H:i" }}</td>
+            <td>{{ report.floor }}階</td>
+            <td>{{ report.get_symptom_display }}</td>
+            <td>{{ report.description|linebreaksbr }}</td>
+            <td>{{ report.created_at|timezone:"Asia/Tokyo"|date:"Y/m/d H:i" }}</td>
+            <td>
+                <form method="post" action="{% url 'team_akb5:admin' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="report_id" value="{{ report.id }}">
+                    <input type="hidden" name="admin_password" value="{{ admin_password }}">
+                    <button type="submit" class="secondary">削除</button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">現在、報告はありません。</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

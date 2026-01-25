@@ -3,8 +3,9 @@ from .models import Member, Product, ProductSet, ProductSetItem, PriceHistory, T
 
 @admin.register(Member)
 class MemberAdmin(admin.ModelAdmin):
-    list_display = ['last_name', 'first_name']
-    search_fields = ['last_name', 'first_name']
+    list_display = ['name', 'student_id', 'email', 'store']
+    search_fields = ['name', 'student_id', 'email']
+    list_filter = ['store']
 
 
 @admin.register(Product)

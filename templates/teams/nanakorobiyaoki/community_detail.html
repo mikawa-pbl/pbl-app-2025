@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ community.name }} - TUT Connect</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #0d47a1;
+            --bg-color: #f5f7fa;
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --border-radius: 12px;
+            --text-main: #333;
+            --text-sub: #666;
+            --accent-color: #e3f2fd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Reusing sidebar/header styles from home.html for consistency */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: #fff;
+            border-right: 1px solid #eee;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a237e;
+            margin-bottom: 40px;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            background: #b71c1c;
+            color: white;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 1.2rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: var(--text-sub);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s;
+            font-weight: 500;
+            gap: 12px;
+        }
+
+        .nav-link:hover {
+            background-color: #f5f5f5;
+            color: var(--text-main);
+        }
+
+        .nav-link.active {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .nav-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background-color: #1d9bf0;
+            /* Twitter Blue */
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid #fff;
+            line-height: 1;
+            min-width: 18px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            height: var(--header-height);
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .search-bar {
+            background: #f5f7fa;
+            border-radius: 20px;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            width: 400px;
+            gap: 10px;
+            color: #999;
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            outline: none;
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: #ccc;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        /* Community Specific Styles */
+        .content-body {
+            padding: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .community-header {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 24px;
+        }
+
+        .community-image-large {
+            width: 100px;
+            height: 100px;
+            background: #e3f2fd;
+            border-radius: 12px;
+            object-fit: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #1565c0;
+        }
+
+        .community-info {
+            flex: 1;
+        }
+
+        .community-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .community-desc {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .community-meta {
+            display: flex;
+            gap: 20px;
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .category-badge {
+            font-size: 0.85rem;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .category-授業 {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .category-サークル {
+            background: #f1f8e9;
+            color: #33691e;
+        }
+
+        .category-その他 {
+            background: #f5f5f5;
+            color: #616161;
+        }
+
+        .action-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Post Form */
+        .post-form-card {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .post-input-area {
+            width: 100%;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            margin-bottom: 10px;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-upload-label {
+            cursor: pointer;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Post Feed */
+        .post-card {
+            background: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 12px;
+        }
+
+        .post-author-avatar {
+            width: 40px;
+            height: 40px;
+            background: #ddd;
+            border-radius: 50%;
+        }
+
+        .post-author-name {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .post-date {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .post-content {
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .post-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid #eee;
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        .post-footer {
+            border-top: 1px solid #f5f5f5;
+            padding-top: 15px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .interaction-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .interaction-item:hover {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Sidebar Extra Styles */
+        .sidebar-section-title {
+            font-size: 0.8rem;
+            color: #999;
+            margin: 20px 0 10px 10px;
+            font-weight: 700;
+        }
+
+        .mini-community-list {
+            list-style: none;
+            overflow-y: auto;
+            max-height: calc(100vh - 400px);
+            margin-right: -10px;
+            padding-right: 10px;
+        }
+
+        .mini-community-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .mini-community-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .mini-community-list::-webkit-scrollbar-thumb {
+            background: #eee;
+            border-radius: 10px;
+        }
+
+        .mini-community-list::-webkit-scrollbar-thumb:hover {
+            background: #ddd;
+        }
+
+        .mini-community-item a {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            gap: 10px;
+        }
+
+        .mini-community-item a:hover {
+            background: #f5f5f5;
+        }
+
+        .mini-icon {
+            width: 24px;
+            height: 24px;
+            background: #ddd;
+            border-radius: 50%;
+            display: block;
+            object-fit: cover;
+        }
+
+        .member-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            color: #555;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .member-btn:hover {
+            background: #f8f9fa;
+            border-color: #bbb;
+            color: #333;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .member-btn .material-icons-round {
+            font-size: 18px;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">T</div>
+            TUT Connect
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:home' %}" class="nav-link">
+                    <span class="material-icons-round">home</span> ホーム
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:community_list' %}" class="nav-link active">
+                    <span class="material-icons-round">grid_view</span> コミュニティを探す
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:message_inbox' %}" class="nav-link">
+                    <div class="nav-icon-wrapper">
+                        <span class="material-icons-round">mail_outline</span>
+                        {% if unread_messages_count > 0 %}
+                        <span class="notification-badge">{{ unread_messages_count }}</span>
+                        {% endif %}
+                    </div>
+                    メッセージ
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'nanakorobiyaoki:user_profile' login_user.user_id %}" class="nav-link">
+                    <span class="material-icons-round">person</span> プロフィール
+                </a>
+            </li>
+
+            <div class="sidebar-section-title">参加中のコミュニティ</div>
+            <ul class="mini-community-list">
+                {% for community in joined_communities %}
+                <li class="mini-community-item">
+                    <a href="{% url 'nanakorobiyaoki:community_detail' community.id %}"
+                        style="justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            {% if community.image %}
+                            <img src="{{ community.image.url }}" class="mini-icon" alt="">
+                            {% else %}
+                            <span class="mini-icon" style="background: #e0e0e0;"></span>
+                            {% endif %}
+                            {{ community.name }}
+                        </div>
+                        {% if community.unread_posts_count > 0 %}
+                        <span class="notification-badge"
+                            style="position: static; font-size: 0.65rem; padding: 1px 4px; min-width: 14px;">
+                            {{community.unread_posts_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% empty %}
+                <li class="mini-community-item"><a href="#">なし</a></li>
+                {% endfor %}
+            </ul>
+        </ul>
+    </nav>
+
+    <!-- Main -->
+    <main class="main-content">
+        <header class="header">
+            <div></div>
+            <div class="header-actions">
+                <button class="icon-btn">
+                    <span class="material-icons-round">notifications_none</span>
+                </button>
+                <div class="user-avatar">
+                    <!-- ログインユーザーのアイコンがあれば表示 -->
+                    <img src="https://via.placeholder.com/32" alt="User">
+                </div>
+            </div>
+        </header>
+
+        <div class="content-body">
+            <!-- Community Info Header -->
+            <div class="community-header">
+                <div class="community-image-large">
+                    {% if community.image %}
+                    <img src="{{ community.image.url }}" alt=""
+                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">
+                    {% else %}
+                    <span class="material-icons-round" style="font-size: 48px;">groups</span>
+                    {% endif %}
+                </div>
+                <div class="community-info">
+                    <span class="category-badge category-{{ community.category }}">
+                        {{ community.category }}
+                    </span>
+                    <h1 class="community-title">{{ community.name }}</h1>
+                    <p class="community-desc">{{ community.description|default:"説明文がありません"|linebreaksbr }}</p>
+                    <div class="community-meta" style="align-items: center;">
+                        <a href="{% url 'nanakorobiyaoki:community_members' community.id %}" class="member-btn">
+                            <span class="material-icons-round">people</span>
+                            {{community.members.count }} メンバー
+                        </a>
+                        <span>作成日: {{ community.created_at|date:"Y/m/d" }}</span>
+                    </div>
+
+                    {% if not is_member %}
+                    <a href="{% url 'nanakorobiyaoki:community_join' community.id %}" class="action-btn"
+                        onclick="return confirm('本当に参加しますか？');">
+                        <span class="material-icons-round">add</span> 参加する
+                    </a>
+                    {% else %}
+                    <button class="action-btn" style="background: #e0e0e0; color: #666; cursor: default;">
+                        <span class="material-icons-round">check</span> 参加済み
+                    </button>
+                    <a href="{% url 'nanakorobiyaoki:community_leave' community.id %}" class="action-btn"
+                        style="background: #ef5350; margin-left: 10px;" onclick="return confirm('本当に退会しますか？');">
+                        <span class="material-icons-round">logout</span> 退会
+                    </a>
+                    <!-- Post Button -->
+                    <button id="openPostModal" class="action-btn"
+                        style="margin-left: 10px; background: var(--primary-color);">
+                        <span class="material-icons-round">edit</span> 投稿する
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if is_member %}
+
+            <!-- Post Modal -->
+            <div id="postModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h3>投稿を作成</h3>
+                    <form action="{% url 'nanakorobiyaoki:post_create' community.id %}" method="post"
+                        enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <textarea name="content" class="post-input-area" placeholder="何か共有したいことはありますか？"
+                            required></textarea>
+                        <div class="post-actions">
+                            <label for="id_image" class="file-upload-label">
+                                <span class="material-icons-round">image</span> 画像を追加
+                                <input type="file" name="image" id="id_image" style="display: none;">
+                            </label>
+                            <button type="submit" class="action-btn" style="padding: 8px 24px;">投稿</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <style>
+                /* Modal Styles */
+                .modal {
+                    display: none;
+                    position: fixed;
+                    z-index: 1000;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.5);
+                }
+
+                .modal-content {
+                    background-color: #fff;
+                    margin: 10% auto;
+                    padding: 30px;
+                    border-radius: 12px;
+                    width: 90%;
+                    max-width: 600px;
+                    position: relative;
+                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                }
+
+                .close-modal {
+                    position: absolute;
+                    top: 15px;
+                    right: 20px;
+                    color: #aaa;
+                    font-size: 28px;
+                    font-weight: bold;
+                    cursor: pointer;
+                }
+
+                .close-modal:hover,
+                .close-modal:focus {
+                    color: #000;
+                    text-decoration: none;
+                }
+            </style>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const modal = document.getElementById('postModal');
+                    const btn = document.getElementById('openPostModal');
+                    const span = document.getElementsByClassName('close-modal')[0];
+
+                    if (btn) {
+                        btn.onclick = function () {
+                            modal.style.display = "block";
+                        }
+                    }
+
+                    if (span) {
+                        span.onclick = function () {
+                            modal.style.display = "none";
+                        }
+                    }
+
+                    window.onclick = function (event) {
+                        if (event.target == modal) {
+                            modal.style.display = "none";
+                        }
+                    }
+                });
+            </script>
+
+            <!-- Feed -->
+            <h3 style="margin-bottom: 20px; color: #555;">投稿一覧</h3>
+
+            {% for post in posts %}
+            <div class="post-card">
+                <div class="post-header">
+                    <a href="{% url 'nanakorobiyaoki:user_profile' post.author.user_id %}"
+                        style="text-decoration: none; display: flex; align-items: center; gap: 12px; color: inherit;">
+                        <div class="post-author-avatar">
+                            {% if post.author.icon %}
+                            <img src="{{ post.author.icon.url }}"
+                                style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                            {% endif %}
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="post-author-name">{{ post.author.name }}</div>
+                            <div class="post-date">{{ post.created_at|date:"Y年n月j日 H:i" }}</div>
+                        </div>
+                    </a>
+                    {% if post.author.user_id == request.session.user_id %}
+                    <a href="{% url 'nanakorobiyaoki:post_delete' post.id %}" class="icon-btn"
+                        onclick="return confirm('本当に削除しますか？');" style="color: #ff5252;">
+                        <span class="material-icons-round">delete</span>
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="post-content">
+                    {{ post.content|linebreaksbr }}
+                </div>
+                {% if post.image %}
+                <img src="{{ post.image.url }}" class="post-image" alt="Post image">
+                {% endif %}
+
+                <div class="post-footer">
+                    <a href="{% url 'nanakorobiyaoki:post_detail' post.id %}" class="interaction-item">
+                        <span class="material-icons-round" style="font-size: 18px;">chat_bubble_outline</span>
+                        {{ post.comments.count }} コメント
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; color: #999; padding: 20px;">
+                まだ投稿はありません。最初の投稿をしてみましょう！
+            </div>
+            {% endfor %}
+
+            {% else %}
+            <div style="text-align: center; margin-top: 50px; color: #666;">
+                <span class="material-icons-round" style="font-size: 48px; color: #ccc;">lock</span><br>
+                <p>このコミュニティに参加すると投稿を閲覧できます。</p>
+            </div>
+            {% endif %}
+
+        </div>
+    </main>
+</body>
+
+</html>

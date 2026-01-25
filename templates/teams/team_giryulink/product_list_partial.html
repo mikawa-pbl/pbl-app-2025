@@ -1,0 +1,19 @@
+{% for p in products %}
+<article class="card">
+    <form method="post" action="{% url 'team_giryulink:delete_product' p.id %}" style="position:absolute; top:6px; right:6px; margin:0;">
+        {% csrf_token %}
+        <button class="delete-btn" type="submit" aria-label="削除 {{ p.title }}">削除</button>
+    </form>
+    <a class="card-link" href="{% url 'team_giryulink:product_detail' p.id %}" aria-label="{{ p.title }}">
+        {% if p.image %}
+        <img src="{{ p.image.url }}" alt="{{ p.title }}">
+        {% else %}
+        <img src="https://via.placeholder.com/600x400?text=No+Image" alt="{{ p.title }}">
+        {% endif %}
+        <div class="info">
+            <h2>{{ p.title }}</h2>
+            <div class="price">{{ p.formatted_price }}</div>
+        </div>
+    </a>
+</article>
+{% endfor %}

@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=100, verbose_name='名前')),
                 ('icon', models.ImageField(blank=True, null=True, upload_to='icons/', verbose_name='アイコン')),
                 ('user_id', models.CharField(max_length=100, unique=True, verbose_name='ユーザID')),
-                ('email', models.EmailField(max_length=100, verbose_name='メアド')),
+                ('email', models.EmailField(max_length=100, verbose_name='メールアドレス')),
                 ('password', models.CharField(max_length=100, verbose_name='パスワード')),
                 ('grade_department', models.CharField(max_length=100, verbose_name='学年学科')),
                 ('age', models.IntegerField(verbose_name='年齢')),

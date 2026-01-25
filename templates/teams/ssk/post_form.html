@@ -1,0 +1,292 @@
+{# teams/ssk/post_form.html #}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>{% if post %}編集{% else %}新規投稿{% endif %}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:system-ui, -apple-system, "Segoe UI", Roboto, Arial;background:#f6f8fa;margin:24px;}
+    .container{max-width:720px;margin:0 auto;}
+    .form-card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,0.06);} 
+    label{display:block;margin-bottom:6px;font-weight:600;}
+    input[type="text"], textarea, select {width:100%;padding:10px;border:1px solid #e6e9ee;border-radius:8px;font-size:1rem}
+    .row{display:flex;gap:12px;align-items:center}
+    .muted{color:#6b7280;font-size:0.9rem}
+    .btn{background:#2563eb;color:#fff;padding:10px 14px;border-radius:10px;border:none;cursor:pointer}
+    .secondary{background:#fff;border:1px solid #e6e9ee;color:#374151;padding:9px 12px;border-radius:10px}
+    .small{font-size:0.9rem;color:#6b7280}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-card">
+      <h1 style="margin-top:0;">{% if post %}投稿を編集{% else %}新規投稿{% endif %}</h1>
+
+      <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+          <div style="color:#b91c1c;margin-bottom:12px;">
+            {% for field in form %}
+              {% for error in field.errors %}
+                <div>{{ field.label }}: {{ error }}</div>
+              {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+              <div>{{ error }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <p>
+          {{ form.title.label_tag }}<br>
+          {{ form.title }}
+        </p>
+
+        <p>
+          {{ form.start_date.label_tag }}<br>
+          {{ form.start_date }} <span class="small">（任意）</span>
+        </p>
+
+        <p>
+          {{ form.start_time.label_tag }}<br>
+          {{ form.start_time }} <span class="small">（任意：時刻を指定すると時間付きイベントになります）</span>
+        </p>
+
+        <p>
+          {{ form.end_date.label_tag }}<br>
+          {{ form.end_date }} <span class="small">（任意：区間の終了日を指定する場合）</span>
+        </p>
+
+        <p>
+          {{ form.end_time.label_tag }}<br>
+          {{ form.end_time }} <span class="small">（任意：終了時刻を指定する場合）</span>
+        </p>
+
+        <div id="date-warning" style="color:#b91c1c; display:none; margin-top:6px;">
+          終了日は開始日より後の日付を指定してください。
+        </div>
+
+        {% if not post %}
+        <p>
+          {{ form.password.label_tag }}<br>
+          {{ form.password }}
+          <span class="small">（任意：作成時のみ設定）</span>
+        </p>
+        {% endif %}
+
+        <p>
+          {{ form.body.label_tag }}<br>
+          {{ form.body }}
+        </p>
+
+        <p>
+          {{ form.tags_text.label_tag }}<br>
+          {{ form.tags_text }}
+          <small>（スペース区切りで複数指定。例: 授業 休講）</small>
+        </p>
+
+        <!-- client-side warning (hidden by default) -->
+        <div id="tags-warning" style="color:#b91c1c; display:none; margin-top:6px;">
+          タグを1つ以上入力してください（例: #授業 #休講）
+        </div>
+
+        {# Tag suggestion area: prefix-search with checkbox candidates (max 5) #}
+        <div id="tag-suggest-wrap" style="position:relative;">
+          <div id="tag-suggest" style="position:absolute;left:0;right:0;z-index:50;display:none;margin-top:6px;background:#fff;border:1px solid #eee;border-radius:8px;box-shadow:0 6px 18px rgba(15,23,42,0.06);max-height:220px;overflow:auto;padding:8px;">
+            <div style="font-size:0.9rem;color:#6b7280;padding:6px 4px;">候補から選択（最大5件）</div>
+            <div id="tag-suggest-list" style="display:flex;flex-direction:column;gap:6px;padding-top:6px;"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn" type="submit">{% if post %}更新{% else %}投稿{% endif %}</button>
+          <button type="button" class="secondary" onclick="location.href='{% url 'ssk:post_list' %}'">一覧へ戻る</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {# Insert JS at end of template (uses all_tag_names provided by view) #}
+  <script>
+  (function(){
+    // client-side required-tag check
+    const formEl = document.querySelector('form');
+    const tagsInput = document.querySelector('[name="tags_text"]');
+    const tagsWarning = document.getElementById('tags-warning');
+    if(formEl && tagsInput && tagsWarning){
+      formEl.addEventListener('submit', function(e){
+        // normalize and split
+        const v = (tagsInput.value || "").replace(/\u3000/g,' ').trim();
+        const tokens = v.split(/\s+/).filter(Boolean).map(t => t.replace(/^#+/, ''));
+        if(tokens.length === 0){
+          e.preventDefault();
+          tagsWarning.style.display = 'block';
+          tagsInput.focus();
+          return false;
+        } else {
+          tagsWarning.style.display = 'none';
+        }
+      });
+      // hide warning when user types
+      tagsInput.addEventListener('input', function(){
+        const v = (tagsInput.value || "").replace(/\u3000/g,' ').trim();
+        const tokens = v.split(/\s+/).filter(Boolean).map(t => t.replace(/^#+/, ''));
+        if(tokens.length) tagsWarning.style.display = 'none';
+      });
+    }
+
+    // Build array of tag names from server-provided context
+    const allTags = [
+      {% if all_tag_names %}
+        {% for t in all_tag_names %}
+          "{{ t|escapejs }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      {% else %}
+        // no tags
+      {% endif %}
+    ];
+
+    // find the tags_text input (could be <input> or <textarea> rendered by form)
+    const tagInput = document.querySelector('[name="tags_text"]');
+    const suggestBox = document.getElementById('tag-suggest');
+    const suggestList = document.getElementById('tag-suggest-list');
+    const wrap = document.getElementById('tag-suggest-wrap');
+    if(!tagInput || !suggestBox || !suggestList) return;
+
+    function tokenize(value){
+      // split by whitespace, ignore empty
+      return value.split(/\s+/).filter(Boolean).map(t => t.replace(/^#+/, ''));
+    }
+
+    function normalize(s){ return (s||"").toLowerCase(); }
+
+    function renderCheckboxes(matches, existing){
+      suggestList.innerHTML = '';
+      if(!matches.length){ suggestBox.style.display = 'none'; return; }
+      // show up to 5
+      matches.slice(0,5).forEach(name => {
+        const lc = normalize(name);
+        const isChecked = existing.indexOf(lc) !== -1;
+        const row = document.createElement('label');
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.gap = '8px';
+        row.style.padding = '6px 8px';
+        row.style.borderRadius = '6px';
+        row.style.cursor = 'pointer';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = name;
+        cb.checked = isChecked;
+        cb.style.marginRight = '6px';
+
+        const txt = document.createElement('span');
+        txt.textContent = name;
+        txt.style.color = '#0f172a';
+
+        cb.addEventListener('change', function(){
+          const val = tagInput.value || '';
+          const cursor = tagInput.selectionStart || val.length;
+          const before = val.slice(0, cursor);
+          const after = val.slice(cursor);
+
+          // tokens before and after cursor
+          let tokensBefore = before.split(/\s+/).filter(Boolean);
+          let tokensAfter = after.split(/\s+/).filter(Boolean);
+
+          if(cb.checked){
+            // Replace the token currently being edited (last token before cursor) with the selected tag.
+            if(tokensBefore.length){
+              tokensBefore[tokensBefore.length-1] = name;
+            } else {
+              tokensBefore.push(name);
+            }
+          } else {
+            // Remove the tag (normalized) from both before/after tokens
+            tokensBefore = tokensBefore.filter(t => normalize(t.replace(/^#+/, '')) !== lc);
+            tokensAfter = tokensAfter.filter(t => normalize(t.replace(/^#+/, '')) !== lc);
+          }
+
+          const newTokens = tokensBefore.concat(tokensAfter);
+          tagInput.value = newTokens.map(t => t.replace(/^#+/, '')).join(' ') + (newTokens.length ? ' ' : '');
+          tagInput.focus();
+          // trigger input handlers to update suggestion box and warnings
+          tagInput.dispatchEvent(new Event('input'));
+        });
+
+        row.appendChild(cb);
+        row.appendChild(txt);
+        suggestList.appendChild(row);
+      });
+      suggestBox.style.display = '';
+    }
+
+    function updatePrefixSuggestions(){
+      const val = tagInput.value || '';
+      const cursor = tagInput.selectionStart || val.length;
+      const before = val.slice(0, cursor);
+      const tokens = before.split(/\s+/).filter(Boolean);
+      const current = tokens.length ? tokens[tokens.length-1].replace(/^#+/, '') : '';
+      const existing = tokenize(val).map(t => normalize(t));
+      if(!current){
+        // hide when nothing typed, but still show top-5 maybe; here we hide
+        suggestBox.style.display = 'none';
+        return;
+      }
+      const q = normalize(current);
+      // prefix match
+      const matches = allTags.filter(t => normalize(t).indexOf(q) === 0 && existing.indexOf(normalize(t)) === -1);
+      // if none found from prefix, fallback to contains (but continue to exclude existing)
+      const matchesFallback = allTags.filter(t => normalize(t).indexOf(q) !== -1 && existing.indexOf(normalize(t)) === -1);
+      renderCheckboxes(matches.length ? matches : matchesFallback, existing);
+    }
+
+    // update on input/keyup
+    tagInput.addEventListener('input', updatePrefixSuggestions);
+    tagInput.addEventListener('keyup', updatePrefixSuggestions);
+
+    // when clicking outside, hide suggestions
+    document.addEventListener('click', function(e){ if(!wrap.contains(e.target)) suggestBox.style.display = 'none'; });
+
+    // ensure initial suggestion state (reflect existing tags checked)
+    tagInput.dispatchEvent(new Event('input'));
+
+    // date validation
+    const dateWarning = document.getElementById('date-warning');
+    const startDateInput = document.querySelector('[name="start_date"]');
+    const endDateInput = document.querySelector('[name="end_date"]');
+    if(startDateInput && endDateInput && dateWarning){
+      formEl.addEventListener('submit', function(e){
+        const dateValue = startDateInput.value;
+        const endDateValue = endDateInput.value;
+        if(dateValue && endDateValue){
+          const date = new Date(dateValue);
+          const endDate = new Date(endDateValue);
+          if(endDate < date){
+            e.preventDefault();
+            dateWarning.style.display = 'block';
+            endDateInput.focus();
+            return false;
+          } else {
+            dateWarning.style.display = 'none';
+          }
+        }
+      });
+      // hide warning when user types
+      endDateInput.addEventListener('input', function(){
+        const dateValue = startDateInput.value;
+        const endDateValue = endDateInput.value;
+        if(dateValue && endDateValue){
+          const date = new Date(dateValue);
+          const endDate = new Date(endDateValue);
+          if(endDate >= date) dateWarning.style.display = 'none';
+        }
+      });
+    }
+
+  })();
+  </script>
+</body>
+</html>

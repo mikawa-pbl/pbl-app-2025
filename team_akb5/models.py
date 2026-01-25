@@ -1,6 +1,6 @@
 from django.db import models
-from datetime import datetime
-from zoneinfo import ZoneInfo
+from django.utils import timezone
+import pytz
 
 class Member(models.Model):
     first_name = models.CharField(max_length=100)
@@ -23,16 +23,21 @@ class StatusReport(models.Model):
         choices=STATUS_CHOICES
     )
 
-    LOCATION_CHOICES = [
-        ('A', 'A棟'),
-        ('B', 'B棟'),
-        ('C', 'C棟'),
-        ('D', 'D棟'),
+    FLOOR_CHOICES = [
+        (1, '1階'),
+        (2, '2階'),
+        (3, '3階'),
+        (4, '4階'),
+        (5, '5階'),
+        (6, '6階'),
+        (7, '7階'),
+        (8, '8階'),
+        (9, '9階'),
     ]
-    location = models.CharField(
-        verbose_name='場所',
-        max_length=1,
-        choices=LOCATION_CHOICES
+    floor = models.IntegerField(
+        verbose_name='階',
+        choices=FLOOR_CHOICES,
+        default=1
     )
 
     description = models.TextField(
@@ -43,14 +48,27 @@ class StatusReport(models.Model):
 
     timestamp = models.DateTimeField(
         verbose_name='発生時刻',
-        default=datetime.now
+        default=timezone.now
     )
 
     created_at = models.DateTimeField(
         verbose_name='投稿日時',
-        #auto_now_add=True
-        default=datetime.now
+        auto_now_add=True
+    )
+
+    latitude = models.FloatField(
+        verbose_name='緯度',
+        blank=True,
+        null=True
+    )
+
+    longitude = models.FloatField(
+        verbose_name='経度',
+        blank=True,
+        null=True
     )
 
     def __str__(self):
-        return f'[{self.get_location_display()}] {self.get_symptom_display()} ({self.timestamp.astimezone(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M")})'
+        # Explicitly define the Tokyo timezone
+        tokyo_tz = pytz.timezone('Asia/Tokyo')
+        return f'[{self.floor}階] {self.get_symptom_display()} ({self.timestamp.astimezone(tokyo_tz).strftime("%Y-%m-%d %H:%M")})'

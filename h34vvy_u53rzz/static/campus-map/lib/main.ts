@@ -87,11 +87,12 @@ export function createCampusMap(container: HTMLElement): MapLibre {
           },
         },
       ],
-      glyphs: 'https://glyphs.geolonia.com/{fontstack}/{range}.pbf',
+      // glyphs: 'https://glyphs.geolonia.com/{fontstack}/{range}.pbf',
     },
     bounds,
     maxBounds,
     attributionControl: false,
+    localIdeographFontFamily: 'sans-serif'
   });
 
   map.addControl(new ScaleControl(), 'bottom-left');

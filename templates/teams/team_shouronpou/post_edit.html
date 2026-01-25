@@ -1,67 +1,119 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>募集内容の編集</title>
+    <title>募集の編集</title>
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'team_shouronpou/css/schedule.css' %}">
 </head>
-<body>
-	<h2>新規募集の投稿</h2>
+<body class="form-page">
+    <h2>募集の編集</h2>
+    
+    <form method="post" id="postForm">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        <h3>基本情報（必須）</h3>
+        <div style="margin-bottom: 15px;">
+            <label>募集タイトル:</label>
+            {{ form.title }}
+        </div>
+        
+        <div class="form-row">
+            <div class="form-col">
+                <label>系・所属:</label>
+                {{ form.department }}
+            </div>
+            <div class="form-col">
+                <label>研究室:</label>
+                {{ form.laboratory }}
+            </div>
+        </div>
 
-  <form method="post">
-    {% csrf_token %}
+        <div class="form-row">
+            <div class="form-col">
+                <label>報酬の情報:</label>
+                {{ form.reward }}
+            </div>
+            <div class="form-col">
+                <label>実験所要時間 (分):</label>
+                {{ form.duration }}
+            </div>
+        </div>
 
-    {{ form.non_field_errors }}
+        <div style="margin-bottom: 15px;">
+            <label>募集内容の詳細:</label>
+            {{ form.content }}
+        </div>
 
-    <p>
-        <label for="{{ form.title.id_for_label }}">タイトル:</label>
-        {{ form.title }}
-    </p>
-    <p>
-        <label for="{{ form.content.id_for_label }}">内容:</label>
-        {{ form.content }}
-    </p>
+        <div style="margin-bottom: 15px;">
+            <label>募集終了日:</label>
+            {{ form.recruitment_end_date }}
+        </div>
 
-    <p>{{ form.recruitment_start_date.label_tag }} {{ form.recruitment_start_date }}</p>
-    <p>{{ form.recruitment_end_date.label_tag }} {{ form.recruitment_end_date }}</p>
+        <hr>
+        <h3>受け入れ可能時間（カレンダー）</h3>
+        <p>募集を行う時間帯をドラッグして選択してください。</p>
+        <div class="schedule-container">
+            <div class="schedule-grid" id="scheduleGrid"></div>
+        </div>
+        {{ form.available_slots }}
 
-    <hr>
-    <p>
-        <label for="id_participants_selector">募集人数:</label>
-        {{ form.participants_selector }}
-    </p>
-    <p id="custom_input_container">
-        {{ form.custom_participants }}
-    </p>
-    <hr>
+        <hr>
+        <h3>募集人数</h3>
+        <p>
+            <label>人数選択:</label>
+            {{ form.participants_selector }}
+        </p>
+        <p id="custom_input_container">
+            {{ form.custom_participants }}
+        </p>
+        
+        <hr>
+        <h3>参加条件・詳細（任意）</h3>
 
-    <p>{{ form.condition_nationality.label_tag }} {{ form.condition_nationality }}</p>
-    <p>{{ form.condition_gender.label_tag }} {{ form.condition_gender }}</p>
-    <p>{{ form.condition_has_disease.label_tag }} {{ form.condition_has_disease }}</p>
+        <div class="condition-group">
+            <label><strong>国籍の条件</strong></label>
+            {{ form.condition_nationality }}
+        </div>
 
-    <button type="submit">更新する</button>
-  </form>
+        <div class="condition-group">
+            <label><strong>性別の条件</strong></label>
+            {{ form.condition_gender }}
+        </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const selector = document.getElementById('id_participants_selector');
-        const customInput = document.getElementById('id_custom_participants');
+        <div style="margin-bottom: 15px;">
+            <label><strong>年齢制限・対象年齢</strong></label>
+            {{ form.target_age }}
+        </div>
 
-        function toggleCustomInput() {
-            if (selector.value === 'custom') {
-                customInput.style.display = 'inline-block';
-                customInput.required = true; // 入力を必須にする
-            } else {
-                customInput.style.display = 'none';
-                customInput.required = false;
-            }
-        }
+        <div style="margin-bottom: 15px;">
+            <label><strong>健康面で配慮すべき事項</strong></label>
+            {{ form.health_notes }}
+            <small style="color: #666;">※持病、通院、光過敏性発作のリスクなどがあれば記載してください。</small>
+        </div>
 
-        // 初期表示時の実行
-        toggleCustomInput();
+        <div style="margin-bottom: 15px;">
+            <label><strong>その他・自由記述</strong></label>
+            {{ form.free_notes }}
+        </div>
 
-        // 変更時の実行
-        selector.addEventListener('change', toggleCustomInput);
-    });
-  </script>
+        <div style="margin-bottom: 30px; background-color: #fff4e5; padding: 15px; border-radius: 8px; border: 1px solid #ffcc80;">
+            <label><strong>応募者へのメッセージ（応募確定時に表示）</strong></label>
+            {{ form.message_for_applicants }}
+            <small style="color: #666; display: block; margin-top: 5px;">
+                ※この内容は、応募ボタンを押したユーザーだけにポップアップで表示されます。連絡用メールアドレスや、応募後の流れを記載してください。
+            </small>
+        </div>
+
+        <div style="margin-top: 30px; margin-bottom: 50px;">
+            <button type="submit" class="btn-submit">変更を確定する</button>
+            <a href="{% url 'team_shouronpou:post_detail' post.pk %}" class="btn-cancel">キャンセル</a>
+        </div>
+    </form>
+
+    <script src="{% static 'team_shouronpou/js/schedule_editor.js' %}"></script>
+    <script src="{% static 'team_shouronpou/js/main.js' %}"></script>
 </body>
 </html>

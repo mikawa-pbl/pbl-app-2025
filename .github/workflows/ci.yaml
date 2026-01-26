@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --all-extras --dev
+
+      - name: Check migrations
+        if: "false"
+        run: uv run manage.py makemigrations --noinput --check
+        
+      - name: Migrate
+        run: uv run manage.py migrate --noinput
+
+      - name: Run tests
+        if: "false"
+        run: uv run manage.py test
+
+      - name: Start Server & Health Check
+        run: |
+          uv run manage.py runserver 0.0.0.0:8000 --noreload &
+          PID=$!
+          echo "Server started with PID $PID. Waiting for it to be ready..."
+          
+          # Wait loop
+          for i in {1..10}; do
+            if curl -s http://127.0.0.1:8000 > /dev/null; then
+              echo "Server is up!"
+              break
+            fi
+            if ! kill -0 $PID 2>/dev/null; then
+              echo "Server process died."
+              exit 1
+            fi
+            sleep 3
+          done
+          
+          # Check again
+          if ! curl -s http://127.0.0.1:8000 > /dev/null; then
+             echo "Server failed to respond."
+             kill $PID 2>/dev/null || true
+             exit 1
+          fi
+          
+          echo "Server health check passed."
+          kill $PID

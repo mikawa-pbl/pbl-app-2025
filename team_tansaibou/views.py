@@ -14,6 +14,8 @@ Team Tansaibou POS システムのビューモジュール
 - エラーハンドリング（ユーザーフレンドリーなメッセージ）
 """
 
+import json
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import transaction as db_transaction
@@ -64,6 +66,7 @@ def signup(request):
         password1 = request.POST.get('password1', '')
         password2 = request.POST.get('password2', '')
         store_name = request.POST.get('store_name', '').strip()
+        email = request.POST.get('email', '').strip()
         description = request.POST.get('description', '').strip()
 
         errors = []
@@ -91,6 +94,7 @@ def signup(request):
             store = Store(
                 username=username,
                 name=store_name,
+                email=email,
                 description=description
             )
             store.set_password(password1)
@@ -266,7 +270,6 @@ def register_sale(request):
                 messages.error(request, '必須項目を全て入力してください')
                 raise ValueError('必須項目が不足しています')
 
-            import json
             cart_data = json.loads(cart_items)
 
             with db_transaction.atomic():
@@ -416,6 +419,7 @@ def product_add(request):
         try:
             name = request.POST.get('name')
             current_price = request.POST.get('current_price')
+            cost_price = request.POST.get('cost_price', 0)
             stock = request.POST.get('stock', 0)
             description = request.POST.get('description', '')
             is_active = request.POST.get('is_active') == 'on'
@@ -423,6 +427,7 @@ def product_add(request):
             Product.objects.using(DB).create(
                 name=name,
                 current_price=current_price,
+                cost_price=cost_price,
                 stock=stock,
                 description=description,
                 is_active=is_active,
@@ -452,6 +457,7 @@ def product_edit(request, product_id):
         try:
             product.name = request.POST.get('name')
             product.current_price = request.POST.get('current_price')
+            product.cost_price = request.POST.get('cost_price', 0)
             product.stock = request.POST.get('stock')
             product.description = request.POST.get('description', '')
             product.is_active = request.POST.get('is_active') == 'on'

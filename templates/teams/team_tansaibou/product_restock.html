@@ -2,129 +2,47 @@
 
 {% block title %}在庫補充 - Team Tansaibou{% endblock %}
 
-{% block extra_style %}
-.content-box {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    max-width: 500px;
-    margin: 0 auto;
-}
-h1 {
-    color: #333;
-    margin-bottom: 30px;
-    text-align: center;
-}
-.product-info {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 4px;
-    margin-bottom: 30px;
-}
-.product-info h2 {
-    margin: 0 0 15px 0;
-    color: #555;
-    font-size: 18px;
-}
-.info-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #ddd;
-}
-.info-row:last-child {
-    border-bottom: none;
-}
-.info-label {
-    font-weight: bold;
-    color: #666;
-}
-.info-value {
-    color: #333;
-}
-.stock-current {
-    font-size: 24px;
-    font-weight: bold;
-    color: #4CAF50;
-}
-.form-group {
-    margin-bottom: 20px;
-}
-label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #555;
-}
-input[type="number"] {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-}
-.button-group {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-}
-button, .btn-secondary {
-    flex: 1;
-    padding: 14px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-}
-button {
-    background-color: #9C27B0;
-    color: white;
-}
-button:hover {
-    background-color: #7b1fa2;
-}
-.btn-secondary {
-    background-color: #999;
-    color: white;
-}
-.btn-secondary:hover {
-    background-color: #888;
-}
-{% endblock %}
-
 {% block content %}
-<div class="content-box">
-    <h1>📥 在庫補充</h1>
+<div class="max-w-lg mx-auto px-4">
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">在庫補充</h1>
 
-    <div class="product-info">
-        <h2>{{ product.name }}</h2>
-        <div class="info-row">
-            <span class="info-label">現在の在庫</span>
-            <span class="info-value stock-current">{{ product.stock }}個</span>
+        <!-- 商品情報 -->
+        <div class="p-4 mb-6 bg-gray-50 rounded-lg border border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ product.name }}</h2>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span class="text-gray-600">現在の在庫</span>
+                    <span class="text-2xl font-bold text-blue-600">{{ product.stock }}個</span>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                    <span class="text-gray-600">価格</span>
+                    <span class="font-medium text-gray-900">¥{{ product.current_price|floatformat:0 }}</span>
+                </div>
+            </div>
         </div>
-        <div class="info-row">
-            <span class="info-label">価格</span>
-            <span class="info-value">¥{{ product.current_price|floatformat:0 }}</span>
-        </div>
+
+        <!-- フォーム -->
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label for="add_quantity" class="block mb-2 text-sm font-medium text-gray-900">追加する数量</label>
+                <input type="number" id="add_quantity" name="add_quantity" value="10" min="1" required autofocus
+                       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="submit"
+                        class="text-white bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5">
+                    在庫を追加
+                </button>
+                <a href="{% url 'team_tansaibou:product_list' %}"
+                   class="text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5">
+                    キャンセル
+                </a>
+            </div>
+        </form>
     </div>
-
-    <form method="post">
-        {% csrf_token %}
-
-        <div class="form-group">
-            <label for="add_quantity">追加する数量</label>
-            <input type="number" id="add_quantity" name="add_quantity" value="10" min="1" required autofocus>
-        </div>
-
-        <div class="button-group">
-            <a href="{% url 'team_tansaibou:product_list' %}" class="btn-secondary">キャンセル</a>
-            <button type="submit">在庫を追加</button>
-        </div>
-    </form>
 </div>
 {% endblock %}

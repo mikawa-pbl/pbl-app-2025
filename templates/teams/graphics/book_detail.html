@@ -195,9 +195,9 @@
                 <div class="book-meta"><strong>ISBN:</strong> {{ book.isbn }}</div>
                 {% if avg_rating > 0 %}
                 <div class="rating" style="margin-top: 10px;">
-                    <strong>平均評価:</strong>
-                    <span class="star-rating" id="avgStarRating"></span>
-                    ({{ avg_rating|floatformat:"1" }}/5)
+                    <strong style="color:#000;">平均評価:</strong>
+                    <span class="star-rating" id="avgStarRating" style="margin-left:8px;"></span>
+                    <span style="color:#FFA500; margin-left:6px;">({{ avg_rating|floatformat:"1" }}/5)</span>
                 </div>
                 <script>
                     (function() {
@@ -226,6 +226,16 @@
 
         <div class="section">
             <h3>📝 レビュー ({{ reviews_count }}件)</h3>
+            <div style="margin-bottom:12px;">
+                <form method="get" style="display:inline-block;">
+                    <label for="bookSort" style="margin-right:8px; color:#475569; font-weight:600;">並び替え:</label>
+                    <select id="bookSort" name="sort" style="padding:6px 10px; border-radius:6px; border:1px solid #e2e8f0;">
+                        <option value="" {% if not book_selected_sort %}selected{% endif %}>新着順</option>
+                        <option value="rating_high" {% if book_selected_sort == 'rating_high' %}selected{% endif %}>評価の高い順</option>
+                        <option value="rating_low" {% if book_selected_sort == 'rating_low' %}selected{% endif %}>評価の低い順</option>
+                    </select>
+                </form>
+            </div>
             {% for review in reviews %}
             <div class="review-card">
                 <p style="color: #64748b; margin-bottom: 10px;"><strong>科目:</strong> {{ review.subject }}</p>
@@ -243,8 +253,8 @@
             {% if reviews.has_other_pages %}
             <div class="pagination">
                 {% if reviews.has_previous %}
-                    <a href="?page=1">≪ 最初</a>
-                    <a href="?page={{ reviews.previous_page_number }}">‹ 前へ</a>
+                    <a href="?page=1{% if book_selected_sort %}&sort={{ book_selected_sort }}{% endif %}">≪ 最初</a>
+                    <a href="?page={{ reviews.previous_page_number }}{% if book_selected_sort %}&sort={{ book_selected_sort }}{% endif %}">‹ 前へ</a>
                 {% else %}
                     <span class="disabled">≪ 最初</span>
                     <span class="disabled">‹ 前へ</span>
@@ -253,14 +263,14 @@
                 {% for num in reviews.paginator.page_range %}
                     {% if num == reviews.number %}
                         <span class="current">{{ num }}</span>
-                    {% elif num > reviews.number|add:'-3' and num < reviews.number|add:'3' %}
-                        <a href="?page={{ num }}">{{ num }}</a>
+                        {% elif num > reviews.number|add:'-3' and num < reviews.number|add:'3' %}
+                        <a href="?page={{ num }}{% if book_selected_sort %}&sort={{ book_selected_sort }}{% endif %}">{{ num }}</a>
                     {% endif %}
                 {% endfor %}
 
                 {% if reviews.has_next %}
-                    <a href="?page={{ reviews.next_page_number }}">次へ ›</a>
-                    <a href="?page={{ reviews.paginator.num_pages }}">最後 ≫</a>
+                    <a href="?page={{ reviews.next_page_number }}{% if book_selected_sort %}&sort={{ book_selected_sort }}{% endif %}">次へ ›</a>
+                    <a href="?page={{ reviews.paginator.num_pages }}{% if book_selected_sort %}&sort={{ book_selected_sort }}{% endif %}">最後 ≫</a>
                 {% else %}
                     <span class="disabled">次へ ›</span>
                     <span class="disabled">最後 ≫</span>
@@ -283,6 +293,38 @@
             navMenu.classList.toggle('active');
             overlay.classList.toggle('active');
         }
+
+        // スクロール位置を保持するためのフィルタリング処理
+        (function() {
+            // ページ読み込み時にスクロール位置を復元
+            const urlParams = new URLSearchParams(window.location.search);
+            const scrollY = urlParams.get('scrollY');
+            if (scrollY) {
+                window.scrollTo(0, parseInt(scrollY, 10));
+                // URLからscrollYパラメータを削除してURLをクリーンにする
+                urlParams.delete('scrollY');
+                const newUrl = urlParams.toString()
+                    ? window.location.pathname + '?' + urlParams.toString()
+                    : window.location.pathname;
+                history.replaceState(null, '', newUrl);
+            }
+
+            // フィルタリング用のselect要素にスクロール位置保持機能を追加
+            const filterSelects = document.querySelectorAll('#bookSort');
+            filterSelects.forEach(function(select) {
+                select.addEventListener('change', function(e) {
+                    e.preventDefault();
+                    const form = this.form;
+                    // 現在のスクロール位置を隠しフィールドとして追加
+                    const scrollInput = document.createElement('input');
+                    scrollInput.type = 'hidden';
+                    scrollInput.name = 'scrollY';
+                    scrollInput.value = window.scrollY;
+                    form.appendChild(scrollInput);
+                    form.submit();
+                });
+            });
+        })();
     </script>
 </body>
 </html>

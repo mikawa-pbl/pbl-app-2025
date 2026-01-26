@@ -37,6 +37,23 @@ class SignupForm(forms.Form):
             }
         ),
     )
+    department = forms.ChoiceField(
+        label="系",
+        choices=[
+            ("", "系を選択してください"),
+            ("1", "1系 (機械工学)"),
+            ("2", "2系 (電気・電子情報工学)"),
+            ("3", "3系 (情報・知能工学)"),
+            ("4", "4系 (応用化学・生命工学)"),
+            ("5", "5系 (建築・都市システム学)"),
+        ],
+        required=False,  # 任意
+        widget=forms.Select(
+            attrs={
+                "class": "w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40",
+            }
+        ),
+    )
     laboratory = forms.ChoiceField(
         label="研究室",
         choices=[("", "未所属")] + [(lab.id, lab.name) for lab in LABORATORIES],

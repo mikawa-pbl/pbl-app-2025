@@ -44,11 +44,18 @@
             font-weight: bold;
         }
         .rank-col { width: 60px; text-align: center; font-weight: bold; }
-        .score-col { width: 100px; text-align: right; color: #666; }
-        
+        .score-col { width: 160px; text-align: right; color: #666; } /* ★ 少し広げる */
+
         .rank-1 { color: #d4af37; font-size: 1.2em; } /* 金 */
         .rank-2 { color: #c0c0c0; font-size: 1.1em; } /* 銀 */
         .rank-3 { color: #cd7f32; font-size: 1.1em; } /* 銅 */
+
+        .count-badge {
+            color: #888;
+            font-size: 0.9em;
+            margin-left: 6px;
+            white-space: nowrap;
+        }
 
         .back-link { margin-top: 40px; }
         .no-data { color: #888; margin: 20px 0; }
@@ -73,7 +80,10 @@
                 <tr>
                     <td class="rank-col rank-{{ forloop.counter }}">{{ forloop.counter }}位</td>
                     <td>{{ item.menu_name }}</td>
-                    <td class="score-col">★ {{ item.overall_score|floatformat:1 }}</td>
+                    <td class="score-col">
+                        ★ {{ item.overall_score|floatformat:1 }}
+                        <span class="count-badge">（{{ item.rating_count }}件）</span>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -97,7 +107,10 @@
                 <tr>
                     <td class="rank-col rank-{{ forloop.counter }}">{{ forloop.counter }}位</td>
                     <td>{{ item.menu_name }}</td>
-                    <td class="score-col">{{ item.avg_taste|floatformat:1 }}</td>
+                    <td class="score-col">
+                        {{ item.avg_taste|floatformat:1 }}
+                        <span class="count-badge">（{{ item.rating_count }}件）</span>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -121,7 +134,10 @@
                 <tr>
                     <td class="rank-col rank-{{ forloop.counter }}">{{ forloop.counter }}位</td>
                     <td>{{ item.menu_name }}</td>
-                    <td class="score-col">{{ item.avg_volume|floatformat:1 }}</td>
+                    <td class="score-col">
+                        {{ item.avg_volume|floatformat:1 }}
+                        <span class="count-badge">（{{ item.rating_count }}件）</span>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

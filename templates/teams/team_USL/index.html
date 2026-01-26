@@ -1,16 +1,18 @@
-<!-- templates/team_a/members.html -->
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>部屋検索</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
 
     <style>
         body {
             margin: 0;
             font-family: system-ui, -apple-system, BlinkMacSystemFont,
-                         "Segoe UI", sans-serif;
+                "Segoe UI", sans-serif;
             background-color: #f5f5f5;
         }
 
@@ -35,6 +37,7 @@
         .search-form {
             display: flex;
             gap: 4px;
+            align-items: flex-end;
         }
 
         .search-field {
@@ -49,6 +52,7 @@
 
         .search-input {
             width: 100%;
+            height: 36px;
             padding: 6px 8px;
             box-sizing: border-box;
             border-radius: 4px;
@@ -57,7 +61,7 @@
         }
 
         .search-building {
-            flex: 0 0 62px; /* 棟の小さめボックス */
+            flex: 0 0 62px;
         }
 
         .search-button {
@@ -66,7 +70,7 @@
 
         .search-button button {
             width: 100%;
-            height: 100%;
+            height: 36px;
             padding: 0;
             border: none;
             border-radius: 4px;
@@ -82,6 +86,59 @@
             padding: 4px 12px 0;
         }
 
+        /* Container for Floor Map + Controls */
+        .floor-map-container {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        /* Floor Controls (Right Side) */
+        .floor-controls {
+            flex: 0 0 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+
+        .floor-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            /* Circle */
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.2s;
+        }
+
+        .floor-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .floor-btn.disabled {
+            background-color: #e0e0e0;
+            color: #aaa;
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+        .current-floor-label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
         /* マップ部分（下部） */
         .content {
             flex: 1;
@@ -89,12 +146,13 @@
             box-sizing: border-box;
         }
 
-        .map-card {
+        .map-card-all,
+        .map-card-floor {
             background-color: #ffffff;
             border-radius: 8px;
             padding: 10px;
             margin-bottom: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
         .map-title {
@@ -102,24 +160,40 @@
             margin: 0 0 6px;
         }
 
-        .map-wrapper {
+        .map-wrapper-all {
             position: relative;
             width: 100%;
+            height: 220px;
             background-color: #fafafa;
             border: 1px solid #ddd;
             border-radius: 4px;
             overflow: hidden;
+            touch-action: none;
+        }
+
+        .map-wrapper-floor {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            touch-action: none;
         }
 
         .map-wrapper-inner {
             position: relative;
             width: 100%;
+            height: 100%;
+            cursor: move;
         }
 
         .map-wrapper-inner img {
             display: block;
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: contain;
         }
 
         .cursor-dot {
@@ -127,123 +201,372 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background-color: blue;
+            background-color: red;
             transform: translate(-50%, -50%);
             pointer-events: none;
             box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+            z-index: 10;
         }
 
-        .hint-text {
-            margin-top: 6px;
-            font-size: 13px;
-            color: #777;
-        }
-
-        .result-info {
-            font-size: 13px;
-            margin-top: 6px;
-        }
-
-        /* 画面が広いときは少し余白を増やす */
         @media (min-width: 768px) {
-            .search-header {
-                padding: 16px 24px 10px;
-            }
             .content {
-                padding: 16px 24px 24px;
                 max-width: 480px;
                 margin: 0 auto;
             }
         }
+
+        /* Header Layout */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .search-title {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .help-btn {
+            background-color: transparent;
+            border: 1px solid #007bff;
+            color: #007bff;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .help-btn:hover {
+            background-color: #e7f1ff;
+        }
+
+        /* Modal Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .overlay-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        .overlay-title {
+            margin-top: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .overlay-body {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        .close-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
     </style>
 </head>
+
 <body>
-<div class="page">
+    <div class="page">
 
-    <!-- 上部：検索バー -->
-    <header class="search-header">
-        <h1 class="search-title">部屋検索</h1>
-        <!-- 棟のプルダウンバージョン -->
-        <form method="get" class="search-form">
-            <div class="search-field search-building">
-                <div class="search-label">棟</div>
-                <select id="building_id"
-                        name="building_id"
-                        class="search-input">
-                    <option value="">選択</option>
-                    <option value="A" {% if building_id == "A" %}selected{% endif %}>A</option>
-                    <option value="A1" {% if building_id == "A1" %}selected{% endif %}>A1</option>
-                    <option value="A2" {% if building_id == "A2" %}selected{% endif %}>A2</option>
-                    <option value="B" {% if building_id == "B" %}selected{% endif %}>B</option>
-                    <option value="C" {% if building_id == "C" %}selected{% endif %}>C</option>
-                    <option value="D" {% if building_id == "D" %}selected{% endif %}>D</option>
-                    <option value="E" {% if building_id == "E" %}selected{% endif %}>E</option>
-                    <option value="F" {% if building_id == "F" %}selected{% endif %}>F</option>
-                    <option value="G" {% if building_id == "G" %}selected{% endif %}>G</option>
-                </select>
+        <header class="search-header">
+            <div class="header-row">
+                <h1 class="search-title">部屋検索</h1>
+                <button type="button" class="help-btn" onclick="toggleHelp()">このページについて</button>
             </div>
-
-            <div class="search-field">
-                <div class="search-label">部屋番号</div>
-                <input type="text"
-                    id="room_number"
-                    name="room_number"
-                    class="search-input"
-                    value="{{ room_number }}">
-            </div>
-
-            <div class="search-button">
-                <button type="submit" aria-label="検索">🔍</button>
-            </div>
-        </form>
-
-
-        {% if error_message %}
-            <div class="error">{{ error_message }}</div>
-        {% endif %}
-    </header>
-
-    <!-- 下部：全体マップ & 詳細マップ -->
-    <main class="content">
-
-        <!-- 全体マップ -->
-        <section class="map-card">
-            <h2 class="map-title">全体マップ</h2>
-            <div class="map-wrapper">
-                <div class="map-wrapper-inner">
-                    <!-- とりあえず適当な全体図の画像パス -->
-                    <img src="images/campus_all.png" alt="全体マップ">
+            <form method="get" class="search-form">
+                <div class="search-field search-building">
+                    <div class="search-label">棟</div>
+                    <select id="building_id" name="building_id" class="search-input">
+                        {% for opt in building_options %}
+                        <option value="{{ opt.value }}" {% if opt.selected %}selected{% endif %}>{{ opt.label }}
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
-            </div>
-        </section>
 
-        <!-- 詳細マップ（フロアマップ） -->
-        <!-- 詳細マップ（フロアマップ） -->
-        <!-- 詳細マップ（フロアマップ） -->
-        <section class="map-card">
-        <h2 class="map-title">詳細マップ（フロアマップ）</h2>
-        <div class="map-wrapper">
-            <div class="map-wrapper-inner">
+                <div class="search-field">
+                    <div class="search-label">部屋番号</div>
+                    <input type="text" pattern="^[0-9]+$" id="room_number" name="room_number" class="search-input"
+                        value="{{ room_number }}">
+                </div>
 
-            {% if floor_image_url %}
-                <img src="{{ floor_image_url }}" alt="フロア画像">
-
-                {# x,y が取れたときだけ赤点を出す（不要ならこのifごと削除OK） #}
-                {% if x is not None and y is not None %}
-                <div class="cursor-dot" style="left: {{ x }}%; top: {{ y }}%;"></div>
-                {% endif %}
-
-            {% else %}
-                {# 初期表示 or DBで見つからなかった場合のデフォルト #}
-                <img src="images/A-3.png" alt="フロア画像">
+                <div class="search-button">
+                    <button type="submit" aria-label="検索">🔍</button>
+                </div>
+            </form>
+            {% if error_message %}
+            <div class="error">{{ error_message }}</div>
             {% endif %}
+        </header>
 
+        <main class="content">
+            <section class="map-card-all">
+                <h2 class="map-title">全体マップ (拡大できます)</h2>
+                <div class="map-wrapper-all">
+                    <div id="zoom-all" class="map-wrapper-inner">
+                        <img src="images/campus_all.png" alt="全体マップ">
+                    </div>
+                </div>
+            </section>
+
+            <section class="map-card-floor">
+                <h2 class="map-title">詳細マップ（フロアマップ）</h2>
+
+                <div class="floor-map-container">
+                    <div class="map-wrapper-floor">
+                        <div id="zoom-floor" class="map-wrapper-inner" data-dot-x="{{ x|default:'none' }}"
+                            data-dot-y="{{ y|default:'none' }}">
+
+                            {% if floor_image_url %}
+                            <img src="{{ floor_image_url }}" alt="フロア画像">
+                            {% if x is not None and y is not None %}
+                            <div class="cursor-dot" style="left: {{ x }}%; top: {{ y }}%;"></div>
+                            {% endif %}
+                            {% else %}
+                            {% if building_id == "init" or building_id == "" %} <!--検索できていない場合-->
+                            <img src="images/gikajika_input.png" alt="検索してね＾＾">
+                            {% else %}
+                            <img src="images/gikajika.png" alt="エラー＾＾"><!--作ってない-->
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Floor Switching Controls (JS Implementation) -->
+                    {% if current_floor is not None and min_floor is not None and max_floor is not None %}
+                    <div class="floor-controls">
+                        <!-- Up Button -->
+                        <button id="btn-up" class="floor-btn" aria-label="上の階へ"
+                            onclick="switchFloor(currentFloor + 1)">▲</button>
+
+                        <span id="floor-label" class="current-floor-label">{{ current_floor }}F</span>
+
+                        <!-- Down Button -->
+                        <button id="btn-down" class="floor-btn" aria-label="下の階へ"
+                            onclick="switchFloor(currentFloor - 1)">▼</button>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Help Overlay -->
+    <div id="help-overlay" class="overlay" onclick="toggleHelp()">
+        <div class="overlay-content" onclick="event.stopPropagation()">
+            <h2 class="overlay-title">このページについて</h2>
+            <div class="overlay-body">
+                <p>校内の部屋を検索して、場所を確認できるシステムです。</p>
+                <p>
+                    1. <b>棟</b>を選択してください。<br>
+                    2. <b>部屋番号</b>を入力して検索ボタンを押してください。(例:101)<br>
+                    3. マップが表示されます。🔴が検索した部屋の位置です。
+                </p>
+                <p>※フロアの切り替えは右側のボタンで行えます。</p>
+                <p>※棟のみを選択して検索することも可能です。</p>
             </div>
+            <button class="close-btn" onclick="toggleHelp()">閉じる</button>
         </div>
-        </section>
+    </div>
 
+    <!-- Data passing for JavaScript -->
+    {{ floor_map_data|json_script:"floor-map-data" }}
+    {{ min_floor|json_script:"min-floor" }}
+    {{ max_floor|json_script:"max-floor" }}
+    {{ target_room_floor|json_script:"target-room-floor" }}
+    {{ current_floor|json_script:"current-floor" }}
+    {{ x|json_script:"dot-x" }}
+    {{ y|json_script:"dot-y" }}
 
-    </main>
-</div>
+    <script>
+        function applySmartZoom(id, xPct, yPct, scale) {
+            const elem = document.getElementById(id);
+            if (!elem) return;
+
+            const img = elem.querySelector('img');
+
+            // Panzoomの初期化
+            const panzoom = Panzoom(elem, {
+                maxScale: 8,
+                minScale: 1,
+                contain: 'outside'
+            });
+
+            elem.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+
+            // 実際の移動処理
+            const doMove = () => {
+                // ブラウザがレイアウト計算を終えるのを僅かに待つ
+                setTimeout(() => {
+                    const w = elem.offsetWidth;
+                    const h = elem.offsetHeight;
+
+                    // 指定座標が枠の真ん中に来るように計算
+                    const targetX = (xPct / 100) * w;
+                    const targetY = (yPct / 100) * h;
+
+                    const panX = (w / 2) - targetX;
+                    const panY = (h / 2) - targetY;
+
+                    // ズームを先に適用
+                    panzoom.zoom(scale, { animate: false });
+
+                    // 次のフレームで移動を適用（contain: 'outside' の判定を確実にするため）
+                    requestAnimationFrame(() => {
+                        panzoom.pan(panX * scale, panY * scale, { animate: false });
+                    });
+                }, 100);
+            };
+
+            // 画像が読み込み済みかチェック
+            if (img.complete) {
+                doMove();
+            } else {
+                img.onload = doMove;
+            }
+
+            return panzoom;
+        }
+
+        // --- Client-Side Floor Switching Logic ---
+
+        // Data passed via json_script to avoid formatter issues
+        const floorMapData = JSON.parse(document.getElementById('floor-map-data').textContent);
+        const minFloor = JSON.parse(document.getElementById('min-floor').textContent);
+        const maxFloor = JSON.parse(document.getElementById('max-floor').textContent);
+        const targetRoomFloor = JSON.parse(document.getElementById('target-room-floor').textContent);
+
+        let currentFloor = JSON.parse(document.getElementById('current-floor').textContent);
+
+        // Pin Coordinates
+        const dotX = JSON.parse(document.getElementById('dot-x').textContent);
+        const dotY = JSON.parse(document.getElementById('dot-y').textContent);
+
+        function switchFloor(newFloor) {
+            if (minFloor === null || maxFloor === null) return;
+            if (newFloor < minFloor || newFloor > maxFloor) return;
+
+            // Update state
+            currentFloor = newFloor;
+
+            // 1. Update Image
+            const imgUrl = floorMapData[currentFloor];
+            const floorImg = document.querySelector("#zoom-floor img");
+            if (floorImg) {
+                if (imgUrl) {
+                    floorImg.src = imgUrl;
+                    floorImg.alt = currentFloor + "階マップ";
+                } else {
+                    // Fallback
+                }
+            }
+
+            // 2. Update Label
+            const label = document.getElementById("floor-label");
+            if (label) label.textContent = currentFloor + "F";
+
+            // 3. Update Button State
+            const btnUp = document.getElementById("btn-up");
+            const btnDown = document.getElementById("btn-down");
+
+            if (btnUp) {
+                if (currentFloor >= maxFloor) {
+                    btnUp.classList.add("disabled");
+                    btnUp.setAttribute("disabled", "true");
+                } else {
+                    btnUp.classList.remove("disabled");
+                    btnUp.removeAttribute("disabled");
+                }
+            }
+            if (btnDown) {
+                if (currentFloor <= minFloor) {
+                    btnDown.classList.add("disabled");
+                    btnDown.setAttribute("disabled", "true");
+                } else {
+                    btnDown.classList.remove("disabled");
+                    btnDown.removeAttribute("disabled");
+                }
+            }
+
+            // 4. Update Pin Visibility
+            const dot = document.querySelector("#zoom-floor .cursor-dot");
+            if (dot) {
+                if (targetRoomFloor !== null && currentFloor === targetRoomFloor) {
+                    dot.style.display = "block";
+                } else {
+                    dot.style.display = "none";
+                }
+            }
+
+            // 5. Update URL
+            const url = new URL(window.location);
+            url.searchParams.set('floor', currentFloor);
+            window.history.replaceState({}, '', url);
+        }
+
+        // Help Overlay Toggle
+        function toggleHelp() {
+            const overlay = document.getElementById('help-overlay');
+            overlay.classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Apply Zoom to Campus Map
+            const buildingSelect = document.getElementById('building_id');
+            const selectedBuilding = buildingSelect.value;
+
+            if (selectedBuilding === "A" || selectedBuilding === "A1" || selectedBuilding === "A2") {
+                applySmartZoom('zoom-all', 57, 52, 3.6);
+            } else {
+                applySmartZoom('zoom-all', 55, 50, 1.7);
+            }
+
+            // Initialize Code
+            if (currentFloor !== null) {
+                switchFloor(currentFloor);
+            }
+
+            // Note: Floor map zooming is currently disabled/manual default
+            // applySmartZoom('zoom-floor', 50, 50, 1);
+        });
+    </script>
+
 </body>
+
 </html>

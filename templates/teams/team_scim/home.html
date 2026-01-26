@@ -93,7 +93,7 @@
                                             お知らせ
                                         {% endif %}
                                     </span>
-                                    <span id="arrow-{{ notif.id }}">▼</span>
+                                    <span id="arrow-{{ notif.id }}">詳細 ▼</span>
                                 </div>
 
                                 <div id="notif-body-{{ notif.id }}" style="display:none; margin-top:10px; padding-left:10px; border-left:3px solid #eee;">
@@ -234,10 +234,10 @@
             const arrow = document.getElementById('arrow-' + id);
             if (body.style.display === 'none') {
                 body.style.display = 'block';
-                arrow.textContent = '▲';
+                arrow.textContent = '閉じる ▲';
             } else {
                 body.style.display = 'none';
-                arrow.textContent = '▼';
+                arrow.textContent = '詳細 ▼';
             }
         }
 

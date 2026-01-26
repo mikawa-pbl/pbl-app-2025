@@ -16,7 +16,27 @@
       "seen_dept_tutorial": true,
       "seen_search_tutorial": true,
       "seen_points_tutorial": true,
-      "points": 45
+      "points": 115
+    }
+  },
+  {
+    "model": "shiokara.person",
+    "pk": 4,
+    "fields": {
+      "student_id": "1212",
+      "course": "B",
+      "grade": 2,
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "",
+      "password": "1234",
+      "nickname": "",
+      "icon_picture": "",
+      "created_at": "2026-01-26T05:48:17.480165+00:00",
+      "seen_dept_tutorial": true,
+      "seen_search_tutorial": true,
+      "seen_points_tutorial": true,
+      "points": 10
     }
   }
 ]

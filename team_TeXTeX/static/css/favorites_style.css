@@ -1,0 +1,49 @@
+/* お気に入り用スタイル */
+/* サイドバーのリストアイテムをFlexboxにして配置を調整 */
+#sidebar-content li {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  /* 幅を親要素いっぱいに */
+  box-sizing: border-box;
+  /* パディングを含める */
+}
+
+.star-icon {
+  cursor: pointer;
+  margin-left: 10px;
+  /* 少し右に移動 */
+  margin-right: 2px;
+  /* テキストとの間隔を詰める */
+  color: #ccc;
+  /* 未選択時はグレー */
+  font-size: 1.2em;
+  flex-shrink: 0;
+  /* 星が潰れないように */
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  transition: color 0.3s, font-variation-settings 0.3s;
+  /* アニメーション */
+  position: relative;
+  /* 追加 */
+  z-index: 10;
+  /* 追加: クリックを確実に受け取る */
+}
+
+/* リンクのパディングを調整して星に近づける */
+#sidebar-content li a {
+  padding-left: 5px;
+  flex-grow: 1;
+  /* 余白を埋める */
+  display: block;
+  /* ブロック表示で高さを確保 */
+  text-decoration: none;
+  /* 下線なし */
+  color: inherit;
+  /* 色を継承 */
+}
+
+.star-icon.active {
+  color: #ffd700;
+  /* 選択時は黄色 */
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}

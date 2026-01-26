@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <!-- styles.cssとfunction_style.cssを参照 -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/function_style.css' %}" />
+    <title>TeXTeX Guide | {{ item.name }}</title>
+    <!-- MathJaxを読み込み、数式をレンダリング -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+
+    <header id="header" class="guide-header">
+        <h1>TeXTeX Guide</h1>
+        <!-- 編集画面に戻るためのリンク -->
+        <a href="{% url 'editer' %}" class="back-link">エディタに戻る</a>
+    </header>
+
+    <main id="guide-content-main">
+        <div id="guide-card">
+
+            <h1>{{ item.name }} の使い方</h1>
+
+            <!-- 1. 基本情報とコピーコード -->
+            <section class="code-info">
+                <h2>基本コード</h2>
+                <div class="code-box">
+                    <pre>{{ item.tex_code }}</pre>
+                    <button class="copy-guide-btn" data-tex-code="{{ item.tex_code }}">コードをコピー</button>
+                </div>
+            </section>
+
+            <!-- 2. MathJaxによるレンダリングプレビュー -->
+            <section class="preview-section">
+                <h2>プレビュー</h2>
+                <div class="preview-output">
+                    <!-- MathJaxでレンダリングする (ディスプレイモード) -->
+                    $$\{{ item.tex_code }}$$
+                </div>
+            </section>
+
+            <!-- 3. 詳細なガイドコンテンツ -->
+            <section class="detail-content">
+                <h2>詳細ガイド</h2>
+                <!-- guide_contentフィールドをそのまま表示 -->
+                {{ item.guide.guide_content|safe }}
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ガイドページ専用のJavaScript (コピー機能) -->
+    <script src="{% static 'scripts/copy_logic.js' %}"></script>
+</body>
+
+</html>

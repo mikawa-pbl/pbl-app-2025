@@ -63,8 +63,12 @@ def main(request):
         "query": query
     })
 
+@takenoko_login_required
 def purchased_items(request):
-    return render(request, 'teams/takenoko/purchased_items.html')
+    current_user = get_current_user(request)
+    # 自分が購入者で、取引中または取引成立のアイテムを取得
+    items = Item.objects.filter(buyer=current_user, status__in=['negotiation', 'sold']).order_by('-updated_at')
+    return render(request, 'teams/takenoko/purchased_items.html', {"items": items})
 
 @takenoko_login_required
 def listing_items(request):

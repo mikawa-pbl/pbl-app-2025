@@ -1,5 +1,5 @@
 {% load static %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -161,26 +161,18 @@
 
       <!-- 商品一覧 -->
       <div class="items-grid">
-        <!-- ✅ item_card を a で囲って href を指定 -->
-        <a class="card-link" href="{% url 'takenoko:start_trading' %}">
+        {% for item in items %}
+        <a
+          class="card-link"
+          href="{% url 'takenoko:product_details' %}?id={{ item.pk }}"
+        >
           {% include "teams/takenoko/Components/item_card.html" %}
         </a>
-
-        <a class="card-link" href="{% url 'takenoko:start_trading' %}">
-          {% include "teams/takenoko/Components/item_card.html" %}
-        </a>
-
-        <a class="card-link" href="{% url 'takenoko:start_trading' %}">
-          {% include "teams/takenoko/Components/item_card.html" %}
-        </a>
-
-        <a class="card-link" href="{% url 'takenoko:start_trading' %}">
-          {% include "teams/takenoko/Components/item_card.html" %}
-        </a>
-
-        <a class="card-link" href="{% url 'takenoko:start_trading' %}">
-          {% include "teams/takenoko/Components/item_card.html" %}
-        </a>
+        {% empty %}
+        <p class="font-jp text-gray-600">
+          表示できる取引中/成立済みの商品はありません。
+        </p>
+        {% endfor %}
       </div>
     </main>
   </body>

@@ -5,6 +5,19 @@
 
 {% block content %}
 <style>
+    /* サイドバーなしのレイアウト */
+    .tut-page-wrapper {
+        display: block !important;
+        margin: 0 auto;
+        max-width: 900px;
+        padding: 20px;
+    }
+
+    .tut-main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
     .tut-logo-box {
         flex: 0 0 auto;
         order: 2;
@@ -142,9 +155,6 @@
 </style>
 
 <div class="tut-page-wrapper">
-    <!-- 左側サイドバーナビゲーション -->
-    {% include "teams/shiokara/includes/sidebar.html" with active_page='register' %}
-
     <!-- メインコンテンツ -->
     <div class="tut-main-content">
         <header class="tut-page-header page-header">
@@ -168,17 +178,17 @@
             {% csrf_token %}
 
             <div class="form-field">
-                <label for="id_student_id">学籍番号:</label>
-                <input type="text" name="student_id" id="id_student_id" value="{{ student_id }}" required>
-            </div>
-
-            <div class="form-field">
                 <label>課程:</label>
                 <div class="radio-group">
                     <label><input type="radio" name="course" value="B" id="id_course_b" {% if course == "B" %}checked{% endif %}> 学部(B)</label>
                     <label><input type="radio" name="course" value="M" id="id_course_m" {% if course == "M" %}checked{% endif %}> 修士(M)</label>
                     <label><input type="radio" name="course" value="D" id="id_course_d" {% if course == "D" %}checked{% endif %}> 博士(D)</label>
                 </div>
+            </div>
+
+            <div class="form-field">
+                <label for="id_student_id">学籍番号:</label>
+                <input type="text" name="student_id" id="id_student_id" value="{{ student_id }}" placeholder="半角数字で入力してください" required>
             </div>
 
             <div class="form-field">

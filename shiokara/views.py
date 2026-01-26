@@ -8,6 +8,7 @@ from datetime import timedelta
 from django.views.decorators.cache import never_cache
 from django.conf import settings
 import json
+import random
 from pathlib import Path
 
 from .models import Department, Company, CompanyReview, Person, CompanyView, SiteFeedback
@@ -135,6 +136,27 @@ def update_person_in_fixture(person: Person) -> None:
                 "points": person.points,
             })
             break
+    
+    PERSON_FIXTURE_PATH.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+def delete_person_from_fixture(person_id: int) -> None:
+    """指定した Person を JSON フィクスチャから削除する"""
+    
+    if not PERSON_FIXTURE_PATH.exists():
+        return
+    
+    try:
+        text = PERSON_FIXTURE_PATH.read_text(encoding="utf-8")
+        data = json.loads(text) if text.strip() else []
+    except json.JSONDecodeError:
+        return
+    
+    # 該当する pk を持つ Person を削除
+    data = [obj for obj in data if not (obj.get("pk") == person_id and obj.get("model") == "shiokara.person")]
     
     PERSON_FIXTURE_PATH.write_text(
         json.dumps(data, ensure_ascii=False, indent=2),
@@ -307,6 +329,41 @@ def my_page(request):
         favorites = []
 
     return render_with_person(request, "teams/shiokara/my_page.html", {"person": refreshed, "favorites": favorites})
+
+
+def delete_account(request):
+    """
+    会員退会処理。
+    ログイン中の会員をDBとJSONフィクスチャから削除する。
+    """
+    person = get_current_person(request)
+    if not person:
+        return redirect("shiokara:login")
+    
+    if request.method == "POST":
+        # 確認用のパスワードをチェック
+        password = request.POST.get("password", "").strip()
+        
+        if password != person.password:
+            context = {"error": "パスワードが正しくありません。"}
+            return render_with_person(request, "teams/shiokara/delete_account.html", context)
+        
+        # 退会処理
+        person_id = person.id
+        
+        # DBから削除
+        Person.objects.using(DB_ALIAS).filter(pk=person_id).delete()
+        
+        # JSONフィクスチャから削除
+        delete_person_from_fixture(person_id)
+        
+        # セッションをクリア
+        request.session.flush()
+        
+        # ログインメニューにリダイレクト
+        return redirect("shiokara:login")
+    
+    return render_with_person(request, "teams/shiokara/delete_account.html")
 
 
 def site_feedback(request):
@@ -587,6 +644,53 @@ def company_detail(request, pk):
     # ポイント付与ポップアップ用フラグ（POST→redirect 後に表示するため session から取得）
     points_awarded = request.session.pop('points_awarded', None)
 
+    # oncampus_briefingの数字をコース名に変換
+    FIELD_OPTIONS = {
+        '1系': [
+            '機械・システムデザインコース',
+            '材料・生産加工コース',
+            'システム制御・ロボットコース',
+            '環境・エネルギーコース',
+        ],
+        '2系': [
+            '材料エレクトロニクスコース',
+            '機能電気システムコース',
+            '集積電子システムコース',
+            '情報通信システムコース',
+        ],
+        '3系': [
+            '計算機数理科学分野',
+            'データ情報学分野',
+            'ヒューマン・ブレイン情報学分野',
+            'メディア・ロボット情報学分野',
+        ],
+        '4系': [
+            '分子制御化学分野',
+            '分子生物化学分野',
+            '分子機能化学分野',
+        ],
+        '5系': [
+            '建築・都市デザイン学分野',
+            '都市・地域マネジメント学分野',
+        ],
+    }
+    
+    oncampus_briefing_names = []
+    if company.oncampus_briefing:
+        # "1.2,4.2,5.1" のような形式をパース
+        codes = [code.strip() for code in company.oncampus_briefing.split(',')]
+        for code in codes:
+            try:
+                if '.' in code:
+                    dept, idx = code.split('.')
+                    dept_key = f"{dept}系"
+                    idx_num = int(idx) - 1  # 1-indexedから0-indexedへ
+                    if dept_key in FIELD_OPTIONS and 0 <= idx_num < len(FIELD_OPTIONS[dept_key]):
+                        oncampus_briefing_names.append(FIELD_OPTIONS[dept_key][idx_num])
+            except (ValueError, IndexError):
+                # パースエラーは無視
+                pass
+
     if person.points < 1:
         # ポイント不足: 専用のロック画面を表示
         return render_with_person(request, "teams/shiokara/company_detail_locked.html", {"company": company})
@@ -626,9 +730,20 @@ def company_detail(request, pk):
 
     avg_rating = qs.aggregate(avg=Avg("rating"))["avg"]
 
+    # 各口コミに対して、ログインユーザーがいいねしているかの情報を追加
+    reviews_with_likes = []
+    for review in reviews:
+        review_dict = {
+            'review': review,
+            'like_count': review.liked_by.count(),
+            'user_liked': person and review.liked_by.filter(pk=person.pk).exists() if person else False,
+        }
+        reviews_with_likes.append(review_dict)
+
     context = {
         "company": company,
         "reviews": reviews,
+        "reviews_with_likes": reviews_with_likes,
         "avg_rating": avg_rating,
         "sort": sort,
         "points_awarded": points_awarded,
@@ -636,6 +751,7 @@ def company_detail(request, pk):
         "seen_points_tutorial": getattr(person, "seen_points_tutorial", False) if person else False,
         # このユーザーがこの企業をお気に入り登録しているか
         "is_favorite": bool(person and Person.objects.using(DB_ALIAS).filter(pk=person.pk, favorites__pk=company.pk).exists()),
+        "oncampus_briefing_names": oncampus_briefing_names,
     }
     return render_with_person(request, "teams/shiokara/company_detail.html", context)
 
@@ -720,10 +836,11 @@ def company_experience_post(request, pk):
 
                 append_review_to_fixture(review)
 
-                # 投稿者にポイント付与（+5）
-                Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(points=F('points') + 5)
+                # 投稿者にポイント付与（ガチャ：3〜10ポイント）
+                points_awarded = random.randint(3, 10)
+                Person.objects.using(DB_ALIAS).filter(pk=person.pk).update(points=F('points') + points_awarded)
                 # セッションに付与情報を入れてリダイレクト先でポップアップ表示する
-                request.session['points_awarded'] = 5
+                request.session['points_awarded'] = points_awarded
 
                 return redirect("shiokara:company_detail", pk=company.pk)
 
@@ -762,6 +879,43 @@ def toggle_favorite(request, pk):
         return JsonResponse({"ok": True, "added": added})
 
     return redirect("shiokara:company_detail", pk=company.pk)
+
+
+@csrf_exempt
+def toggle_review_like(request, review_id):
+    """
+    口コミのいいねを追加/削除する。POST を想定。
+    """
+    review = get_object_or_404(CompanyReview.objects.using(DB_ALIAS), pk=review_id)
+    person = get_current_person(request)
+    if not person:
+        return JsonResponse({"ok": False, "error": "ログインが必要です"}, status=401)
+
+    # リフレッシュ
+    person = Person.objects.using(DB_ALIAS).get(pk=person.pk)
+
+    # トグル
+    exists = review.liked_by.filter(pk=person.pk).exists()
+    try:
+        if exists:
+            review.liked_by.remove(person)
+            liked = False
+        else:
+            review.liked_by.add(person)
+            liked = True
+    except Exception:
+        liked = not exists
+
+    # いいね数を取得
+    like_count = review.liked_by.count()
+
+    # AJAX リクエストには JSON を返す
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({"ok": True, "liked": liked, "like_count": like_count})
+
+    # 非AJAX時は企業詳細に戻る
+    return redirect("shiokara:company_detail", pk=review.company.pk)
+
 
 def append_review_to_fixture(review: CompanyReview) -> None:
     """投稿されたレビューを JSON フィクスチャに 1 件追記する"""

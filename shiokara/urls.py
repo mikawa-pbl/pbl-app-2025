@@ -11,16 +11,19 @@ urlpatterns = [
     path("register/", views.register_view, name="register"),     # ← 新規登録画面
     path("logout/", views.logout_view, name="logout"),
     path("mypage/", views.my_page, name="my_page"),
+    path("delete-account/", views.delete_account, name="delete_account"),
     path("tutorial/seen/", views.tutorial_seen, name="tutorial_seen"),
     path("sitemap/", views.sitemap, name="sitemap"),
     path("feedback/", views.site_feedback, name="site_feedback"),
 
     # 既存
-    path("", views.department_list, name="department_list"),
+    path("", views.login_menu, name="index"),  # shiokaraのトップページをログイン・新規登録メニューに変更
+    path("departments/", views.department_list, name="department_list"),
     path("search/", views.company_search, name="company_search"),
     path("company/<int:pk>/", views.company_detail, name="company_detail"),
     path("company/<int:pk>/favorite/", views.toggle_favorite, name="company_favorite"),
     path("company/<int:pk>/post/",
          views.company_experience_post,
          name="company_experience_post"),
+    path("review/<int:review_id>/like/", views.toggle_review_like, name="review_like"),
 ]

@@ -3,133 +3,353 @@
 {% load static %}
 
 {% block content %}
+<style>
+    .tut-logo-box {
+        flex: 0 0 auto;
+        order: 2;
+        margin-left: auto;
+    }
+
+    .tut-page-title {
+        order: 1;
+    }
+
+    .tut-logo-img {
+        max-height: 56px;
+        width: auto;
+        display: block;
+    }
+
+    .tut-page-title h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #42413F;
+    }
+
+    .tut-page-lead {
+        margin: 4px 0 0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .post-form-container {
+        background: white;
+        padding: 32px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-top: 24px;
+        max-width: 800px;
+    }
+
+    .form-field {
+        margin-bottom: 24px;
+    }
+
+    .form-field label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95rem;
+    }
+
+    .form-field input[type="text"],
+    .form-field textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+
+    .form-field input[type="text"]:focus,
+    .form-field textarea:focus {
+        outline: none;
+        border-color: #cc0000;
+        box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.1);
+    }
+
+    .form-field small {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 8px;
+    }
+
+    .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: normal;
+        cursor: pointer;
+    }
+
+    .radio-group input[type="radio"] {
+        cursor: pointer;
+    }
+
+    .stars {
+        display: flex;
+        gap: 4px;
+        margin-top: 8px;
+    }
+
+    .star {
+        font-size: 2rem;
+        color: #ddd;
+        background: none;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .star:hover {
+        transform: scale(1.15);
+    }
+
+    .star.filled {
+        color: #ff9800;
+    }
+
+    .star:focus {
+        outline: 2px solid #cc0000;
+        border-radius: 4px;
+    }
+
+    .error-message {
+        background: #ffebee;
+        color: #c62828;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border-left: 4px solid #c62828;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .btn-primary {
+        flex: 1;
+        padding: 14px 24px;
+        background: #cc0000;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+        background: #aa0000;
+    }
+
+    .btn-secondary {
+        padding: 14px 24px;
+        background: #f5f5f5;
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s;
+        text-align: center;
+    }
+
+    .btn-secondary:hover {
+        background: #e8e8e8;
+    }
+
+    .info-box {
+        background: #f0f7ff;
+        border-left: 4px solid #0066cc;
+        padding: 16px;
+        border-radius: 6px;
+        margin-bottom: 24px;
+    }
+
+    .info-box p {
+        margin: 0;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 640px) {
+        .tut-page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .tut-logo-img {
+            max-height: 44px;
+        }
+        .tut-page-title h1 {
+            font-size: 1.5rem;
+        }
+        .post-form-container {
+            padding: 20px;
+        }
+        .form-actions {
+            flex-direction: column;
+        }
+        .star {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
 <div class="tut-page-wrapper">
     <!-- 左側サイドバーナビゲーション -->
     {% include "teams/shiokara/includes/sidebar.html" %}
 
     <!-- メインコンテンツ -->
     <div class="tut-main-content">
-<h1>{{ company.name }} の口コミを投稿</h1>
+        <header class="tut-page-header page-header">
+            <div class="tut-logo-box">
+                <img src="{% static 'image/mark_gikanavi.png' %}"
+                     alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
+            </div>
+            <div class="tut-page-title">
+                <h1>{{ company.name }} の口コミを投稿</h1>
+                <p class="tut-page-lead page-lead">
+                    後輩のために、あなたの体験をシェアしましょう
+                </p>
+            </div>
+        </header>
 
-<p>
-  このページでは、{{ company.name }} に関する就活・インターン・アルバイトなどの
-  体験を、後輩向けの口コミとして共有することを想定しています。
-</p>
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
 
-{% if error %}
-  <p style="color:red;">{{ error }}</p>
-{% endif %}
-
-<hr>
-
-<form method="post" action="">
-    {% csrf_token %}
-
-    <p>
-        <label for="id_grade">学年:</label><br>
-        <input id="id_grade" type="text" name="grade" style="width: 100%;"
-               value="{{ grade }}">
-        <small>例: B3, M1 など</small>
-    </p>
-
-    <p>
-        <label for="id_department_name">学科:</label><br>
-        <input id="id_department_name" type="text" name="department_name" style="width: 100%;"
-               value="{{ department_name }}">
-    </p>
-
-    <p>
-        <label for="id_lab_field">分野（研究室）:</label><br>
-        <input id="id_lab_field" type="text" name="lab_field" style="width: 100%;"
-               value="{{ lab_field }}">
-    </p>
-
-    <p>
-        <label>性別:</label><br>
-        <label>
-          <input type="radio" name="gender" value="male"
-                 {% if gender == "male" %}checked{% endif %}> 男性
-        </label>
-        <label>
-          <input type="radio" name="gender" value="female"
-                 {% if gender == "female" %}checked{% endif %}> 女性
-        </label>
-        <label>
-          <input type="radio" name="gender" value="other"
-                 {% if gender == "other" %}checked{% endif %}> その他
-        </label>
-        <label>
-          <input type="radio" name="gender" value="no_answer"
-                 {% if gender == "no_answer" or not gender %}checked{% endif %}> 回答しない
-        </label>
-    </p>
-
-    <!-- 高校名は不要のため削除しました -->
-
-    <p>
-        <label for="id_comment">自由記述欄:</label><br>
-        <textarea id="id_comment" name="comment" rows="8" style="width: 100%;">{{ comment }}</textarea>
-    </p>
-
-    <p>
-        <label>評価（★1〜5）:</label><br>
-        <input type="hidden" name="rating" id="id_rating" value="{{ rating }}">
-        <div id="star_rating" class="stars" role="radiogroup" aria-label="評価">
-          <button type="button" class="star" data-value="1" aria-label="1">★</button>
-          <button type="button" class="star" data-value="2" aria-label="2">★</button>
-          <button type="button" class="star" data-value="3" aria-label="3">★</button>
-          <button type="button" class="star" data-value="4" aria-label="4">★</button>
-          <button type="button" class="star" data-value="5" aria-label="5">★</button>
+        <div class="info-box">
+            <p>
+                💡 このページでは、{{ company.name }} に関する就活・インターン・アルバイトなどの体験を、
+                後輩向けの口コミとして共有できます。投稿すると<strong>5ポイント</strong>獲得できます！
+            </p>
         </div>
-        <style>
-          .stars { display: inline-block; }
-          .star { font-size: 28px; color: #ccc; background: none; border: none; padding: 0 4px; cursor: pointer; }
-          .star.filled { color: #f5b301; }
-          .star:focus { outline: 2px solid #99c; }
-        </style>
-        <script>
-          document.addEventListener('DOMContentLoaded', function () {
-            const stars = Array.from(document.querySelectorAll('#star_rating .star'));
-            const input = document.getElementById('id_rating');
-            let selected = parseInt(input.value) || 0;
 
-            function render(hover) {
-              stars.forEach((s, idx) => {
-                const v = idx + 1;
-                if (hover) {
-                  s.classList.toggle('filled', v <= hover);
-                } else {
-                  s.classList.toggle('filled', v <= selected);
-                }
-              });
-            }
+        <div class="post-form-container">
+            <form method="post" action="">
+                {% csrf_token %}
 
-            stars.forEach((s, idx) => {
-              const v = idx + 1;
-              s.addEventListener('mouseover', () => render(v));
-              s.addEventListener('focus', () => render(v));
-              s.addEventListener('mouseout', () => render(0));
-              s.addEventListener('blur', () => render(0));
-              s.addEventListener('click', () => { selected = v; input.value = v; render(0); });
-              s.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selected = v; input.value = v; render(0); }
-              });
-            });
+                <div class="form-field">
+                    <label for="id_grade">学年</label>
+                    <input id="id_grade" type="text" name="grade" value="{{ grade }}" placeholder="例: B3, M1 など">
+                    <small>現在の学年または体験時の学年を入力してください</small>
+                </div>
 
-            // 初期表示
-            render(0);
-          });
-        </script>
-    </p>
+                <div class="form-field">
+                    <label for="id_department_name">学科</label>
+                    <input id="id_department_name" type="text" name="department_name" value="{{ department_name }}" placeholder="例: 情報・知能工学(3系)">
+                </div>
 
-    <p>
-        <button type="submit">口コミを投稿する</button>
-    </p>
-</form>
+                <div class="form-field">
+                    <label for="id_lab_field">分野（研究室）</label>
+                    <input id="id_lab_field" type="text" name="lab_field" value="{{ lab_field }}" placeholder="例: データ情報学分野">
+                </div>
 
-<p>
-  <a href="{% url 'shiokara:company_detail' company.pk %}">← 企業詳細ページに戻る</a>
-</p>
+                <div class="form-field">
+                    <label>性別</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="gender" value="male" {% if gender == "male" %}checked{% endif %}>
+                            男性
+                        </label>
+                        <label>
+                            <input type="radio" name="gender" value="female" {% if gender == "female" %}checked{% endif %}>
+                            女性
+                        </label>
+                        <label>
+                            <input type="radio" name="gender" value="other" {% if gender == "other" %}checked{% endif %}>
+                            その他
+                        </label>
+                        <label>
+                            <input type="radio" name="gender" value="no_answer" {% if gender == "no_answer" or not gender %}checked{% endif %}>
+                            回答しない
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="id_comment">口コミ内容</label>
+                    <textarea id="id_comment" name="comment" rows="10" placeholder="企業の雰囲気、選考の流れ、インターンの内容、働きやすさなど、後輩が知りたい情報を自由に記入してください。">{{ comment }}</textarea>
+                    <small>できるだけ具体的に書いていただけると、後輩にとって参考になります</small>
+                </div>
+
+                <div class="form-field">
+                    <label>評価（★1〜5）</label>
+                    <input type="hidden" name="rating" id="id_rating" value="{{ rating }}">
+                    <div id="star_rating" class="stars" role="radiogroup" aria-label="評価">
+                        <button type="button" class="star" data-value="1" aria-label="1つ星">★</button>
+                        <button type="button" class="star" data-value="2" aria-label="2つ星">★</button>
+                        <button type="button" class="star" data-value="3" aria-label="3つ星">★</button>
+                        <button type="button" class="star" data-value="4" aria-label="4つ星">★</button>
+                        <button type="button" class="star" data-value="5" aria-label="5つ星">★</button>
+                    </div>
+                    <small>総合的な満足度を星で評価してください</small>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const stars = Array.from(document.querySelectorAll('#star_rating .star'));
+                        const input = document.getElementById('id_rating');
+                        let selected = parseInt(input.value) || 0;
+
+                        function render(hover) {
+                            stars.forEach((s, idx) => {
+                                const v = idx + 1;
+                                if (hover) {
+                                    s.classList.toggle('filled', v <= hover);
+                                } else {
+                                    s.classList.toggle('filled', v <= selected);
+                                }
+                            });
+                        }
+
+                        stars.forEach((s, idx) => {
+                            const v = idx + 1;
+                            s.addEventListener('mouseover', () => render(v));
+                            s.addEventListener('focus', () => render(v));
+                            s.addEventListener('mouseout', () => render(0));
+                            s.addEventListener('blur', () => render(0));
+                            s.addEventListener('click', () => { selected = v; input.value = v; render(0); });
+                            s.addEventListener('keydown', (e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    selected = v;
+                                    input.value = v;
+                                    render(0);
+                                }
+                            });
+                        });
+
+                        // 初期表示
+                        render(0);
+                    });
+                </script>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">口コミを投稿する</button>
+                    <a href="{% url 'shiokara:company_detail' company.pk %}" class="btn-secondary">キャンセル</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

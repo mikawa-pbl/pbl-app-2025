@@ -3,183 +3,529 @@
 {% load static %}
 
 {% block content %}
+<style>
+    .tut-logo-box {
+        flex: 0 0 auto;
+        order: 2;
+        margin-left: auto;
+    }
+
+    .tut-page-title {
+        order: 1;
+    }
+
+    .tut-logo-img {
+        max-height: 56px;
+        width: auto;
+        display: block;
+    }
+
+    .tut-page-title h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #42413F;
+    }
+
+    .tut-page-lead {
+        margin: 4px 0 0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .company-info-card {
+        background: white;
+        padding: 24px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-top: 24px;
+    }
+
+    .company-info-item {
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .company-info-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .company-info-label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+
+    .company-info-value {
+        color: #333;
+        font-size: 1rem;
+    }
+
+    .fav-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        background: #f5f5f5;
+        color: #666;
+    }
+
+    .fav-btn[aria-pressed="true"] {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .fav-btn:hover {
+        background: #e8e8e8;
+    }
+
+    .fav-btn[aria-pressed="true"]:hover {
+        background: #ffe69c;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .section-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #333;
+    }
+
+    .sort-form {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sort-form label {
+        font-size: 0.9rem;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .sort-form select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    .rating-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        background: linear-gradient(135deg, #fff8e1 0%, #ffffff 100%);
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .rating-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ff9800;
+    }
+
+    .rating-stars {
+        font-size: 1.5rem;
+        color: #ff9800;
+    }
+
+    .review-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .review-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-left: 4px solid #cc0000;
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .review-rating {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #ff9800;
+    }
+
+    .review-meta {
+        font-size: 0.85rem;
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .review-comment {
+        color: #333;
+        line-height: 1.7;
+        margin-top: 12px;
+    }
+
+    /* いいねボタンのスタイル */
+    .review-like-section {
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .like-form {
+        display: inline-block;
+    }
+
+    .like-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: #f5f5f5;
+        border: 2px solid #e0e0e0;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.95rem;
+    }
+
+    .like-btn:hover {
+        background: #ffe0e0;
+        border-color: #ffb0b0;
+        transform: scale(1.05);
+    }
+
+    .like-btn.liked {
+        background: #ffe0e0;
+        border-color: #ff6b6b;
+    }
+
+    .like-btn.liked:hover {
+        background: #ffcccc;
+    }
+
+    .like-icon {
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+
+    .like-count {
+        font-weight: 600;
+        color: #666;
+        min-width: 20px;
+        text-align: left;
+    }
+
+    .like-btn.liked .like-count {
+        color: #cc0000;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        color: #666;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary {
+        padding: 12px 24px;
+        background: #cc0000;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s;
+        font-weight: 600;
+    }
+
+    .btn-primary:hover {
+        background: #aa0000;
+    }
+
+    .btn-secondary {
+        padding: 12px 24px;
+        background: #f5f5f5;
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.2s;
+    }
+
+    .btn-secondary:hover {
+        background: #e8e8e8;
+    }
+
+    @media (max-width: 640px) {
+        .tut-page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .tut-logo-img {
+            max-height: 44px;
+        }
+        .tut-page-title h1 {
+            font-size: 1.5rem;
+        }
+        .company-info-card {
+            padding: 16px;
+        }
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+    }
+</style>
+
 <div class="tut-page-wrapper">
     <!-- 左側サイドバーナビゲーション -->
     {% include "teams/shiokara/includes/sidebar.html" %}
 
     <!-- メインコンテンツ -->
     <div class="tut-main-content">
-<h1>{{ company.name }}</h1>
+        <header class="tut-page-header page-header">
+            <div class="tut-logo-box">
+                <img src="{% static 'image/mark_gikanavi.png' %}"
+                     alt="豊橋技術科学大学 ロゴ" class="tut-logo-img">
+            </div>
+            <div class="tut-page-title">
+                <h1>{{ company.name }}</h1>
+                <p class="tut-page-lead page-lead">
+                    企業情報と学生の口コミを確認できます
+                </p>
+            </div>
+        </header>
 
-<form method="post" action="{% url 'shiokara:company_favorite' company.pk %}" class="fav-form" style="margin-top:8px; margin-bottom:12px; display:inline-block;">
-  {% csrf_token %}
-  <button type="submit" class="fav-btn" aria-pressed="{% if is_favorite %}true{% else %}false{% endif %}">
-    {% if is_favorite %}★ お気に入り解除{% else %}☆ お気に入りに追加{% endif %}
-  </button>
-</form>
+        <form method="post" action="{% url 'shiokara:company_favorite' company.pk %}" class="fav-form" style="margin-top: 20px;">
+            {% csrf_token %}
+            <button type="submit" class="fav-btn" aria-pressed="{% if is_favorite %}true{% else %}false{% endif %}">
+                {% if is_favorite %}★ お気に入り解除{% else %}☆ お気に入りに追加{% endif %}
+            </button>
+        </form>
 
-<p>ここは {{ company.name }} の体験談・インターン情報などを載せる予定のページです。</p>
+        <div class="company-info-card">
+            {% if company.description %}
+            <div class="company-info-item">
+                <div class="company-info-label">企業紹介</div>
+                <div class="company-info-value">{{ company.description|linebreaksbr }}</div>
+            </div>
+            {% endif %}
 
-<ul>
-    {% if company.url %}
-    <li>
-        公式サイト：
-        <a href="{{ company.url }}" target="_blank" rel="noopener">
-            {{ company.url }}
-        </a>
-    </li>
-    {% endif %}
+            {% if company.url %}
+            <div class="company-info-item">
+                <div class="company-info-label">公式サイト</div>
+                <div class="company-info-value">
+                    <a href="{{ company.url }}" target="_blank" rel="noopener" style="color: #0066cc; text-decoration: none;">
+                        {{ company.url }} 🔗
+                    </a>
+                </div>
+            </div>
+            {% endif %}
 
-    {% if company.description %}
-    <li>
-        紹介文：<br>
-        <small>{{ company.description|linebreaksbr }}</small>
-    </li>
-    {% endif %}
-</ul>
+            {% if company.area %}
+            <div class="company-info-item">
+                <div class="company-info-label">勤務地域</div>
+                <div class="company-info-value">{{ company.area }}</div>
+            </div>
+            {% endif %}
 
-<hr>
+            {% if company.avg_annual_income %}
+            <div class="company-info-item">
+                <div class="company-info-label">平均年収</div>
+                <div class="company-info-value" style="font-size: 1.3rem; font-weight: 700; color: #cc0000;">
+                    {{ company.avg_annual_income }}万円
+                </div>
+            </div>
+            {% endif %}
 
-<h2>口コミ</h2>
+            {% if company.starting_salary %}
+            <div class="company-info-item">
+                <div class="company-info-label">初任給</div>
+                <div class="company-info-value" style="font-weight: 600;">
+                    {{ company.starting_salary }}万円
+                </div>
+            </div>
+            {% endif %}
 
-{% if avg_rating %}
-  <p>平均評価：★{{ avg_rating|floatformat:1 }} / 5</p>
-{% endif %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px;">
+                {% if company.employees %}
+                <div class="company-info-item" style="border: none; padding: 12px; background: #f9f9f9; border-radius: 6px; margin: 0;">
+                    <div class="company-info-label">従業員数</div>
+                    <div class="company-info-value">{{ company.employees }}人</div>
+                </div>
+                {% endif %}
 
-{# ★ 並び替えフォーム #}
-<form method="get" style="margin-bottom: 8px;">
-  <label>
-    並び替え:
-    <select name="sort" onchange="this.form.submit()">
-      <option value="new" {% if sort == "new" %}selected{% endif %}>新着順</option>
-      <option value="rating" {% if sort == "rating" %}selected{% endif %}>評価が高い順</option>
-    </select>
-  </label>
-</form>
+                {% if company.annual_holidays %}
+                <div class="company-info-item" style="border: none; padding: 12px; background: #f9f9f9; border-radius: 6px; margin: 0;">
+                    <div class="company-info-label">年間休日数</div>
+                    <div class="company-info-value">{{ company.annual_holidays }}日</div>
+                </div>
+                {% endif %}
 
-{% if avg_rating %}
-  <p>平均評価：★{{ avg_rating|floatformat:1 }} / 5</p>
-{% endif %}
+                {% if company.hiring_quota %}
+                <div class="company-info-item" style="border: none; padding: 12px; background: #f9f9f9; border-radius: 6px; margin: 0;">
+                    <div class="company-info-label">採用目安</div>
+                    <div class="company-info-value">{{ company.hiring_quota }}</div>
+                </div>
+                {% endif %}
+            </div>
 
-{% if reviews %}
-  <ul>
-    {% for review in reviews %}
-      <li style="margin-bottom:1.2em;">
-        <strong>★{{ review.rating }}</strong><br>
-        <small>
-          {{ review.grade }} /
-          {{ review.department_name }} /
-          {{ review.lab_field }}<br>
-          性別: 
-          {% if review.gender == "male" %}男性{% elif review.gender == "female" %}女性
-          {% elif review.gender == "other" %}その他{% else %}回答しない{% endif %}
-          {% if review.high_school %}
-            / 高校: {{ review.high_school }}
-          {% endif %}
-          / {{ review.created_at|date:"Y-m-d" }}
-        </small><br>
-        {{ review.comment|linebreaksbr }}
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>まだ口コミは投稿されていません。</p>
-{% endif %}
+            {% if company.internship_acceptance %}
+            <div class="company-info-item">
+                <div class="company-info-label">インターン受け入れ</div>
+                <div class="company-info-value">{{ company.internship_acceptance }}</div>
+            </div>
+            {% endif %}
 
-<p>
-  <a href="{% url 'shiokara:company_experience_post' company.pk %}">
-    この企業の口コミを投稿する
-  </a>
-</p>
+            {% if company.accepts_jitsumu_kunren or company.tut_recommendation or oncampus_briefing_names %}
+            <div class="company-info-item">
+                <div class="company-info-label">技科大関連情報</div>
+                <div class="company-info-value">
+                    {% if company.accepts_jitsumu_kunren %}
+                    <span style="display: inline-block; padding: 4px 10px; background: #e3f2fd; color: #1565c0; border-radius: 4px; font-size: 0.85rem; margin-right: 6px; margin-bottom: 6px;">✓ 実務訓練受け入れ</span>
+                    {% endif %}
+                    {% if company.tut_recommendation %}
+                    <span style="display: inline-block; padding: 4px 10px; background: #fff3e0; color: #e65100; border-radius: 4px; font-size: 0.85rem; margin-right: 6px; margin-bottom: 6px;">✓ 技科大推薦あり</span>
+                    {% endif %}
+                    {% if oncampus_briefing_names %}
+                    <div style="margin-top: 8px;">
+                        <strong style="font-size: 0.9rem; color: #6a1b9a;">説明会対象分野:</strong>
+                        <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px;">
+                        {% for field_name in oncampus_briefing_names %}
+                            <span style="display: inline-block; padding: 4px 10px; background: #f3e5f5; color: #6a1b9a; border-radius: 4px; font-size: 0.85rem;">{{ field_name }}</span>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
 
-<p>
-    <a href="{% url 'shiokara:company_search' %}">← 企業検索に戻る</a>
-</p>
+            {% if company.selection_process %}
+            <div class="company-info-item">
+                <div class="company-info-label">選考プロセス</div>
+                <div class="company-info-value">{{ company.selection_process|linebreaksbr }}</div>
+            </div>
+            {% endif %}
 
-{% if points_awarded %}
-  <div id="points-popup-wrapper" aria-live="polite" role="status">
-    <div id="points-popup" class="points-popup" role="alert">
-      <div class="points-popup-title">ポイント獲得！</div>
-      <div class="points-popup-body">{{ points_awarded }}pt を獲得しました。</div>
-      <button id="points-popup-close" class="points-popup-close" aria-label="ポップアップを閉じる">✕</button>
-    </div>
-  </div>
+            {% if company.internship_start_date or company.internship_deadline or company.last_year_selection_start_date %}
+            <div class="company-info-item">
+                <div class="company-info-label">スケジュール情報</div>
+                <div class="company-info-value" style="font-size: 0.9rem;">
+                    {% if company.internship_start_date %}
+                    <div style="margin-bottom: 4px;">📅 インターン開始: {{ company.internship_start_date|date:"Y年m月d日" }}</div>
+                    {% endif %}
+                    {% if company.internship_deadline %}
+                    <div style="margin-bottom: 4px;">⏰ インターン締切: {{ company.internship_deadline|date:"Y年m月d日" }}</div>
+                    {% endif %}
+                    {% if company.last_year_selection_start_date %}
+                    <div>📝 前年度選考開始: {{ company.last_year_selection_start_date|date:"Y年m月d日" }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
 
-  <style>
-    /* ポップアップ: 上中央からひょっこりポップイン */
-    #points-popup-wrapper {
-      position: fixed;
-      top: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 12000;
-      pointer-events: none; /* wrapper はクリック透過、内部でボタンは有効 */
-    }
+        <div style="margin-top: 40px;">
+            <div class="section-header">
+                <h2>口コミ</h2>
+                <form method="get" class="sort-form">
+                    <label for="sort-select">並び替え:</label>
+                    <select name="sort" id="sort-select" onchange="this.form.submit()">
+                        <option value="new" {% if sort == "new" %}selected{% endif %}>新着順</option>
+                        <option value="rating" {% if sort == "rating" %}selected{% endif %}>評価が高い順</option>
+                    </select>
+                </form>
+            </div>
 
-    .points-popup {
-      pointer-events: auto;
-      min-width: 260px;
-      max-width: 90vw;
-      background: linear-gradient(180deg,#f0fff4,#ffffff);
-      color: #155724;
-      padding: 12px 16px;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
-      border: 1px solid rgba(34,139,34,0.12);
-      text-align: left;
-      transform-origin: 50% 0%;
-      transform: translateY(-22px) scale(0.92);
-      opacity: 0;
-      transition: transform 420ms cubic-bezier(.2,.9,.3,1), opacity 300ms ease;
-      position: relative;
-      overflow: hidden;
-    }
+            {% if avg_rating %}
+            <div class="rating-summary">
+                <div class="rating-number">{{ avg_rating|floatformat:1 }}</div>
+                <div>
+                    <div class="rating-stars">★★★★★</div>
+                    <div style="font-size: 0.85rem; color: #666;">平均評価 (5点満点)</div>
+                </div>
+            </div>
+            {% endif %}
 
-    /* 表示時クラス */
-    .points-popup.show {
-      transform: translateY(0) scale(1);
-      opacity: 1;
-    }
+            {% if reviews %}
+            <div class="review-list">
+                {% for item in reviews_with_likes %}
+                {% with review=item.review %}
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-rating">★{{ review.rating }}</div>
+                        <div class="review-meta">
+                            {{ review.grade }} / {{ review.department_name }} / {{ review.lab_field }}<br>
+                            性別: {% if review.gender == "male" %}男性{% elif review.gender == "female" %}女性{% elif review.gender == "other" %}その他{% else %}回答しない{% endif %}
+                            {% if review.high_school %} / 高校: {{ review.high_school }}{% endif %}<br>
+                            投稿日: {{ review.created_at|date:"Y年m月d日" }}
+                        </div>
+                    </div>
+                    <div class="review-comment">{{ review.comment|linebreaksbr }}</div>
+                    
+                    <!-- いいねボタン -->
+                    <div class="review-like-section">
+                        <form class="like-form" method="post" action="{% url 'shiokara:review_like' review.id %}" data-review-id="{{ review.id }}">
+                            {% csrf_token %}
+                            <button type="submit" class="like-btn {% if item.user_liked %}liked{% endif %}" aria-pressed="{{ item.user_liked|yesno:'true,false' }}">
+                                <span class="like-icon">{% if item.user_liked %}❤️{% else %}🤍{% endif %}</span>
+                                <span class="like-count">{{ item.like_count }}</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endwith %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>まだ口コミは投稿されていません。</p>
+                <p style="font-size: 0.9rem; margin-top: 8px;">最初の口コミを投稿してみませんか？</p>
+            </div>
+            {% endif %}
+        </div>
 
-    .points-popup-title{ font-weight:700; margin-bottom:6px; }
-    .points-popup-body{ font-size:0.98rem; }
-
-    .points-popup-close{
-      position:absolute; top:6px; right:8px; border:0; background:transparent; font-size:14px; cursor:pointer; color:#2f6f34;
-      padding:4px 6px; line-height:1; border-radius:6px;
-    }
-    .points-popup-close:focus{ outline:2px solid rgba(34,139,34,0.15); }
-  </style>
-
-  <script>
-    (function(){
-      var wrapper = document.getElementById('points-popup-wrapper');
-      if(!wrapper) return;
-      var popup = document.getElementById('points-popup');
-      var btn = document.getElementById('points-popup-close');
-      // 小さな遅延でアニメーションを発火させる（ブラウザの描画タイミングを待つ）
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){
-          popup.classList.add('show');
-        });
-      });
-
-      // 自動で数秒後にフェードアウトして DOM から削除
-      var hideDelay = 3500;
-      var hideTimer = setTimeout(function(){
-        popup.classList.remove('show');
-        setTimeout(function(){ if(wrapper) wrapper.remove(); }, 420);
-      }, hideDelay);
-
-      btn.addEventListener('click', function(e){
-        e.preventDefault();
-        clearTimeout(hideTimer);
-        popup.classList.remove('show');
-        setTimeout(function(){ if(wrapper) wrapper.remove(); }, 220);
-      });
-    })();
-  </script>
-{% endif %}
+        <div class="action-buttons">
+            <a href="{% url 'shiokara:company_experience_post' company.pk %}" class="btn-primary">
+                口コミを投稿する
+            </a>
+            <a href="{% url 'shiokara:company_search' %}" class="btn-secondary">
+                ← 企業検索に戻る
+            </a>
+        </div>
 
 <!-- ======================== -->
 <!-- ポイント機能チュートリアル -->
@@ -400,6 +746,516 @@
           });
         });
         </script>
+
+        {% comment %} Like toggle AJAX handler for reviews {% endcomment %}
+        <script>
+        document.addEventListener('DOMContentLoaded', function(){
+          var forms = document.querySelectorAll('.like-form');
+          forms.forEach(function(form){
+            form.addEventListener('submit', function(ev){
+              ev.preventDefault();
+              var btn = form.querySelector('.like-btn');
+              var icon = btn.querySelector('.like-icon');
+              var countSpan = btn.querySelector('.like-count');
+              var csrftoken = form.querySelector('input[name=csrfmiddlewaretoken]')?.value;
+              
+              fetch(form.action, { 
+                method: 'POST', 
+                headers: { 
+                  'X-Requested-With':'XMLHttpRequest', 
+                  'X-CSRFToken': csrftoken 
+                } 
+              })
+              .then(r=>r.json())
+              .then(function(data){
+                if(data && data.ok){
+                  // いいね状態を更新
+                  if(data.liked){
+                    btn.classList.add('liked');
+                    btn.setAttribute('aria-pressed','true');
+                    icon.textContent = '❤️';
+                  } else {
+                    btn.classList.remove('liked');
+                    btn.setAttribute('aria-pressed','false');
+                    icon.textContent = '🤍';
+                  }
+                  // いいね数を更新
+                  countSpan.textContent = data.like_count;
+                  
+                  // アニメーション効果
+                  btn.style.transform = 'scale(1.2)';
+                  setTimeout(function(){ btn.style.transform = 'scale(1)'; }, 200);
+                }
+              })
+              .catch(function(){ 
+                form.submit(); 
+              });
+            });
+          });
+        });
+        </script>
+
+<!-- 口コミ投稿成功のガチャ演出 -->
+{% if points_awarded %}
+<style>
+    /* ガチャ演出用オーバーレイ */
+    .gacha-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(138, 35, 135, 0.9), rgba(233, 64, 87, 0.9), rgba(242, 113, 33, 0.9));
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.5s;
+    }
+
+    /* ガチャマシン */
+    .gacha-machine {
+        position: relative;
+        width: 300px;
+        height: 400px;
+        animation: slideIn 0.8s;
+    }
+
+    /* ガチャの本体（ドーム） */
+    .gacha-dome {
+        position: relative;
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(200, 200, 255, 0.7));
+        border-radius: 50% 50% 45% 45%;
+        margin: 0 auto;
+        border: 8px solid #444;
+        box-shadow: 
+            0 10px 30px rgba(0,0,0,0.3),
+            inset -20px -20px 40px rgba(0,0,0,0.1),
+            inset 20px 20px 40px rgba(255,255,255,0.3);
+        overflow: hidden;
+    }
+
+    /* カプセルコンテナ */
+    .capsule-container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* カプセル */
+    .capsule {
+        width: 80px;
+        height: 80px;
+        position: relative;
+        transform-style: preserve-3d;
+        animation: capsuleSpin 2s ease-in-out;
+    }
+
+    .capsule-top, .capsule-bottom {
+        position: absolute;
+        width: 80px;
+        height: 40px;
+        border-radius: 40px 40px 0 0;
+    }
+
+    .capsule-top {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+        top: 0;
+        box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2);
+    }
+
+    .capsule-bottom {
+        background: linear-gradient(135deg, #ffd93d, #ffed4e);
+        bottom: 0;
+        border-radius: 0 0 40px 40px;
+        box-shadow: inset 5px 5px 10px rgba(0,0,0,0.2);
+    }
+
+    /* ガチャの台座 */
+    .gacha-base {
+        width: 280px;
+        height: 100px;
+        background: linear-gradient(180deg, #e74c3c, #c0392b);
+        margin: 0 auto;
+        border-radius: 10px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        position: relative;
+        border: 5px solid #444;
+    }
+
+    /* ハンドル */
+    .gacha-handle {
+        position: absolute;
+        right: -50px;
+        top: 20px;
+        width: 60px;
+        height: 60px;
+    }
+
+    .handle-base {
+        width: 30px;
+        height: 30px;
+        background: #555;
+        border-radius: 50%;
+        position: absolute;
+        left: 15px;
+        top: 15px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+    }
+
+    .handle-stick {
+        width: 8px;
+        height: 40px;
+        background: #666;
+        position: absolute;
+        left: 26px;
+        top: -25px;
+        border-radius: 4px;
+        transform-origin: bottom center;
+        animation: handleTurn 0.8s ease-in-out;
+    }
+
+    .handle-ball {
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        border-radius: 50%;
+        position: absolute;
+        left: 20px;
+        top: -30px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    }
+
+    /* 結果表示モーダル */
+    .gacha-result {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        opacity: 0;
+        animation: resultAppear 0.5s 2.5s forwards;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        min-width: 300px;
+    }
+
+    .gacha-result h2 {
+        font-size: 2.5rem;
+        color: #cc0000;
+        margin: 0 0 20px;
+        animation: textPulse 1s infinite 3s;
+    }
+
+    .points-display {
+        font-size: 4rem;
+        font-weight: bold;
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        margin: 20px 0;
+    }
+
+    .gacha-message {
+        font-size: 1.2rem;
+        color: #666;
+        margin: 15px 0;
+    }
+
+    .rarity-badge {
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin: 10px 0;
+        font-size: 0.9rem;
+    }
+
+    .rarity-normal { background: #95a5a6; color: white; }
+    .rarity-rare { background: #3498db; color: white; }
+    .rarity-super-rare { background: #9b59b6; color: white; }
+    .rarity-ultra-rare { background: #f39c12; color: white; }
+    .rarity-legend { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+
+    .close-gacha-btn {
+        background: #cc0000;
+        color: white;
+        border: none;
+        padding: 12px 40px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background 0.2s;
+    }
+
+    .close-gacha-btn:hover {
+        background: #aa0000;
+    }
+
+    /* アニメーション定義 */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+        from { transform: translateY(-100px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes handleTurn {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-90deg); }
+        50% { transform: rotate(-180deg); }
+        75% { transform: rotate(-270deg); }
+    }
+
+    @keyframes capsuleSpin {
+        0% { transform: translateY(0) rotate(0deg); }
+        30% { transform: translateY(0) rotate(360deg); }
+        50% { transform: translateY(50px) rotate(540deg); }
+        70% { transform: translateY(100px) rotate(720deg); }
+        100% { transform: translateY(150px) rotate(900deg); opacity: 0; }
+    }
+
+    @keyframes resultAppear {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        50% { transform: translate(-50%, -50%) scale(1.1); }
+        100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    @keyframes textPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* キラキラエフェクト */
+    .sparkle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: white;
+        border-radius: 50%;
+        animation: sparkleFloat 2s infinite;
+        opacity: 0;
+    }
+
+    @keyframes sparkleFloat {
+        0%, 100% { opacity: 0; transform: translateY(0) scale(0); }
+        50% { opacity: 1; transform: translateY(-50px) scale(1); }
+    }
+</style>
+
+<div class="gacha-overlay" id="gachaOverlay">
+    <div class="gacha-machine">
+        <!-- ガチャドーム -->
+        <div class="gacha-dome">
+            <div class="capsule-container">
+                <div class="capsule">
+                    <div class="capsule-top"></div>
+                    <div class="capsule-bottom"></div>
+                </div>
+            </div>
+            <!-- キラキラエフェクト -->
+            <div class="sparkle" style="left: 20%; top: 30%; animation-delay: 0s;"></div>
+            <div class="sparkle" style="left: 60%; top: 40%; animation-delay: 0.3s;"></div>
+            <div class="sparkle" style="left: 80%; top: 20%; animation-delay: 0.6s;"></div>
+            <div class="sparkle" style="left: 40%; top: 60%; animation-delay: 0.9s;"></div>
+        </div>
+
+        <!-- ガチャ台座 -->
+        <div class="gacha-base">
+            <!-- ハンドル -->
+            <div class="gacha-handle">
+                <div class="handle-stick"></div>
+                <div class="handle-ball"></div>
+                <div class="handle-base"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 結果表示 -->
+    <div class="gacha-result" id="gachaResult">
+        <h2>🎉 ガチャ成功！ 🎉</h2>
+        <div class="points-display">+<span id="pointsValue">{{ points_awarded }}</span></div>
+        <div class="rarity-badge" id="rarityBadge"></div>
+        <p class="gacha-message" id="gachaMessage"></p>
+        <p style="font-size: 0.95rem; color: #999;">口コミ投稿ありがとうございます！</p>
+        <button class="close-gacha-btn" onclick="closeGachaModal()">閉じる</button>
+    </div>
+</div>
+
+<script>
+(function() {
+    const points = {{ points_awarded }};
+    
+    // レア度判定
+    function getRarity(pts) {
+        if (pts === 10) return { name: 'LEGEND', class: 'rarity-legend', message: 'レジェンドレア！伝説級の引き！' };
+        if (pts === 9) return { name: 'ULTRA RARE', class: 'rarity-ultra-rare', message: 'ウルトラレア！超大当たり！' };
+        if (pts >= 7) return { name: 'SUPER RARE', class: 'rarity-super-rare', message: 'スーパーレア！大当たり！' };
+        if (pts >= 5) return { name: 'RARE', class: 'rarity-rare', message: 'レア！けっこういいね！' };
+        return { name: 'NORMAL', class: 'rarity-normal', message: 'ノーマル！' };
+    }
+    
+    // ガチャ効果音を生成
+    function playGachaSound() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // ハンドルを回す音（ガラガラ）
+            function createRattleSound(startTime) {
+                for (let i = 0; i < 8; i++) {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.frequency.value = 100 + Math.random() * 100;
+                    osc.type = 'square';
+                    
+                    gain.gain.setValueAtTime(0.1, startTime + i * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, startTime + i * 0.1 + 0.08);
+                    
+                    osc.start(startTime + i * 0.1);
+                    osc.stop(startTime + i * 0.1 + 0.08);
+                }
+            }
+            
+            // カプセルが出る音
+            function createPopSound(startTime) {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                osc.frequency.setValueAtTime(400, startTime);
+                osc.frequency.exponentialRampToValueAtTime(200, startTime + 0.1);
+                osc.type = 'sine';
+                
+                gain.gain.setValueAtTime(0.3, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15);
+                
+                osc.start(startTime);
+                osc.stop(startTime + 0.15);
+            }
+            
+            // ファンファーレ（結果表示時）
+            function createFanfare(startTime) {
+                const notes = [
+                    { freq: 523.25, start: 0, duration: 0.15 },    // C5
+                    { freq: 659.25, start: 0.15, duration: 0.15 }, // E5
+                    { freq: 783.99, start: 0.3, duration: 0.15 },  // G5
+                    { freq: 1046.50, start: 0.45, duration: 0.3 }  // C6
+                ];
+                
+                notes.forEach(note => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.frequency.value = note.freq;
+                    osc.type = 'triangle';
+                    
+                    gain.gain.setValueAtTime(0.3, startTime + note.start);
+                    gain.gain.exponentialRampToValueAtTime(0.01, startTime + note.start + note.duration);
+                    
+                    osc.start(startTime + note.start);
+                    osc.stop(startTime + note.start + note.duration);
+                });
+            }
+            
+            // サウンド再生
+            const now = audioContext.currentTime;
+            createRattleSound(now + 0.1);
+            createPopSound(now + 1.5);
+            createFanfare(now + 2.5);
+            
+        } catch (e) {
+            console.log('Audio playback not supported');
+        }
+    }
+    
+    // 紙吹雪エフェクト
+    function createConfetti() {
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#ffd93d', '#6bcf7f', '#c44569', '#f39c12'];
+        const confettiCount = 150;
+        
+        for (let i = 0; i < confettiCount; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-10px';
+                confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+                confetti.style.zIndex = '10002';
+                confetti.style.animation = `confetti-fall ${Math.random() * 2 + 2}s linear forwards`;
+                
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 4000);
+            }, 2500 + i * 10);
+        }
+    }
+    
+    // モーダルを閉じる
+    window.closeGachaModal = function() {
+        const overlay = document.getElementById('gachaOverlay');
+        if (overlay) {
+            overlay.style.animation = 'fadeOut 0.3s';
+            setTimeout(() => overlay.remove(), 300);
+        }
+    };
+    
+    // 初期化
+    window.addEventListener('DOMContentLoaded', function() {
+        const rarity = getRarity(points);
+        document.getElementById('rarityBadge').textContent = rarity.name;
+        document.getElementById('rarityBadge').className = 'rarity-badge ' + rarity.class;
+        document.getElementById('gachaMessage').textContent = rarity.message;
+        
+        playGachaSound();
+        createConfetti();
+        
+        // 8秒後に自動クローズ
+        setTimeout(closeGachaModal, 8000);
+    });
+    
+    // confetti-fall アニメーション追加
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+})();
+</script>
+{% endif %}
+
     </div>
 </div>
 

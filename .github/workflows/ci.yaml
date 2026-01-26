@@ -21,7 +21,7 @@ jobs:
 
       - name: Check migrations
         if: "false"
-        run: uv run manage.py makemigrations --check
+        run: uv run manage.py makemigrations --noinput --check
         
       - name: Migrate
         run: uv run manage.py migrate --noinput

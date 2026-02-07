@@ -20,6 +20,13 @@
             <span>Anony Chat</span>
         </a>
         <span class="room-title">{{ room.title }}</span>
+        <div class="sort-controls" aria-label="並び順切替">
+            <button id="sort-likes-update" class="sort-likes-button" type="button" title="いいね順のランキングを更新">更新</button>
+            <div class="sort-segment" role="group" aria-label="並び順">
+                <button id="sort-mode-time" class="sort-segment-btn" type="button">投稿順</button>
+                <button id="sort-mode-likes" class="sort-segment-btn" type="button"><span class="heart-red">♥</span>数順</button>
+            </div>
+        </div>
     </header>
 
     <!-- Chat Messages -->

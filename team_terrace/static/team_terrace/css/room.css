@@ -350,6 +350,8 @@ body {
 .message .message-content {
   color: var(--text-primary);
   display: inline;
+  /* Preserve newlines from textarea submissions */
+  white-space: pre-wrap;
 }
 
 .message .message-time {
@@ -588,17 +590,47 @@ body {
   padding: 14px 20px;
   background: #f8f7fa;
   border: 2px solid #7c5cff;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   font-family: var(--font-body);
   font-size: 0.95rem;
   color: var(--text-primary);
   outline: none;
   transition: var(--transition-smooth);
   box-shadow: 0 3px 12px rgba(124, 92, 255, 0.2);
+
+  /* textarea tweaks */
+  resize: none;
+  line-height: 1.4;
+  max-height: 160px; /* prevent the input area from growing too tall */
+  overflow-y: hidden; /* enable scroll only when needed (set by JS) */
+  box-sizing: border-box;
 }
 
 #message-input::placeholder {
   color: var(--text-muted);
+}
+
+/* Scrollbar styling (best-effort; varies by OS/browser) */
+#message-input {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(124, 92, 255, 0.45) transparent;
+}
+
+#message-input::-webkit-scrollbar {
+  width: 10px;
+}
+
+#message-input::-webkit-scrollbar-track {
+  background: transparent;
+  /* inset the track so the thumb stays within the rounded border visually */
+  margin: 10px 4px;
+}
+
+#message-input::-webkit-scrollbar-thumb {
+  background: rgba(124, 92, 255, 0.45);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
 }
 
 #message-input:hover {
@@ -610,6 +642,38 @@ body {
   background: #ffffff;
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 4px rgba(124, 92, 255, 0.15), 0 4px 12px rgba(124, 92, 255, 0.2);
+}
+
+/* Send mode segment (PC only) */
+.send-mode-segment {
+  display: none;
+  background: white;
+  border: 2px solid rgba(124, 92, 255, 0.2);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 8px rgba(45, 42, 62, 0.06);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.send-mode-segment-btn {
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.send-mode-segment-btn:hover {
+  color: var(--accent-primary);
+}
+
+.send-mode-segment-btn.active {
+  background: var(--accent-primary-soft);
+  color: var(--accent-primary);
 }
 
 /* Send Button */
@@ -871,6 +935,27 @@ body {
 }
 
 /* Responsive */
+
+/* Desktop: hide send button, show send-mode toggle */
+@media (min-width: 768px) {
+  #send-button {
+    display: none;
+  }
+  .send-mode-segment {
+    display: inline-flex;
+  }
+}
+
+/* Mobile: show send button, hide send-mode toggle */
+@media (max-width: 767px) {
+  #send-button {
+    display: flex;
+  }
+  .send-mode-segment {
+    display: none;
+  }
+}
+
 @media (max-width: 600px) {
   .app-header {
     padding: 12px 16px;

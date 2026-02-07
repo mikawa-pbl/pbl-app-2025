@@ -69,7 +69,11 @@
             <span class="toggle-icon">❓</span>
             <span class="toggle-text">質問</span>
         </label>
-        <input type="text" id="message-input" placeholder="メッセージを入力..." autocomplete="off">
+        <textarea id="message-input" placeholder="メッセージを入力..." autocomplete="off" rows="1"></textarea>
+        <div id="send-mode-toggle" class="send-mode-segment" role="group" aria-label="送信キー">
+            <button id="send-mode-enter" class="send-mode-segment-btn" type="button">Enter送信</button>
+            <button id="send-mode-ctrlenter" class="send-mode-segment-btn" type="button">Ctrl+Enter送信</button>
+        </div>
         <button id="send-button" type="button" aria-label="送信">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 2L11 13"></path>

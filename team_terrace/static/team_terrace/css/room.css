@@ -350,6 +350,8 @@ body {
 .message .message-content {
   color: var(--text-primary);
   display: inline;
+  /* Preserve newlines from textarea submissions */
+  white-space: pre-wrap;
 }
 
 .message .message-time {

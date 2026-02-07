@@ -697,6 +697,9 @@ body {
 
 #thread-messages {
   flex: 1;
+  /* Important for flexbox scrolling inside the modal: allow this area to shrink
+     so the reply input stays visible and the thread list scrolls. */
+  min-height: 0;
   overflow-y: auto;
   margin-bottom: 16px;
   padding-right: 8px;

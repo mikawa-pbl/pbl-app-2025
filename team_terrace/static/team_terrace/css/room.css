@@ -861,6 +861,8 @@ body {
   font-size: 0.9rem;
   line-height: 1.5;
   animation: replyAppear 0.3s ease-out backwards;
+  /* Preserve newlines in thread replies */
+  white-space: pre-wrap;
 }
 
 @keyframes replyAppear {
@@ -886,6 +888,15 @@ body {
   font-size: 0.9rem;
   outline: none;
   transition: var(--transition-smooth);
+
+  /* textarea tweaks */
+  resize: none;
+  line-height: 1.4;
+  min-height: 44px;
+  max-height: 140px;
+  overflow-y: hidden;
+  box-sizing: border-box;
+  white-space: pre-wrap;
 }
 
 #reply-input:focus {

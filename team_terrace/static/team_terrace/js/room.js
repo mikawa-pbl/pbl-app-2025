@@ -375,20 +375,22 @@ function isDesktopWidth() {
 
 let sendMode = 'ctrlEnter'; // 'ctrlEnter' (default) | 'enter'
 
-function applySendModeUI() {
-  if (sendModeEnterBtn) sendModeEnterBtn.classList.toggle('active', sendMode === 'enter');
-  if (sendModeCtrlEnterBtn) sendModeCtrlEnterBtn.classList.toggle('active', sendMode === 'ctrlEnter');
-}
+function initSendModeSegment() {
+  function applySendModeUI() {
+    if (sendModeEnterBtn) sendModeEnterBtn.classList.toggle('active', sendMode === 'enter');
+    if (sendModeCtrlEnterBtn) sendModeCtrlEnterBtn.classList.toggle('active', sendMode === 'ctrlEnter');
+  }
 
-function setSendMode(mode) {
-  sendMode = mode;
+  function setSendMode(mode) {
+    sendMode = mode;
+    applySendModeUI();
+  }
+
   applySendModeUI();
+
+  if (sendModeEnterBtn) sendModeEnterBtn.addEventListener('click', () => setSendMode('enter'));
+  if (sendModeCtrlEnterBtn) sendModeCtrlEnterBtn.addEventListener('click', () => setSendMode('ctrlEnter'));
 }
-
-applySendModeUI();
-
-if (sendModeEnterBtn) sendModeEnterBtn.addEventListener('click', () => setSendMode('enter'));
-if (sendModeCtrlEnterBtn) sendModeCtrlEnterBtn.addEventListener('click', () => setSendMode('ctrlEnter'));
 
 function autoResizeTextarea() {
   // Grow up to max-height. If content exceeds max-height, allow internal scrolling.
@@ -400,29 +402,34 @@ function autoResizeTextarea() {
   messageInput.style.overflowY = needsScroll ? 'auto' : 'hidden';
 }
 
-messageInput.addEventListener('input', autoResizeTextarea);
+function initMessageTextareaBehavior() {
+  messageInput.addEventListener('input', autoResizeTextarea);
 
-messageInput.addEventListener('keydown', (e) => {
-  // On mobile, keep current behavior (button send). Allow Enter to insert newline.
-  if (!isDesktopWidth()) return;
+  messageInput.addEventListener('keydown', (e) => {
+    // On mobile, keep current behavior (button send). Allow Enter to insert newline.
+    if (!isDesktopWidth()) return;
 
-  if (sendMode === 'enter') {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (sendMode === 'enter') {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+      return;
+    }
+
+    // ctrlEnter mode
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       sendMessage();
     }
-    return;
-  }
+  });
 
-  // ctrlEnter mode
-  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    sendMessage();
-  }
-});
+  // Init textarea size
+  autoResizeTextarea();
+}
 
-// Init textarea size
-autoResizeTextarea();
+initSendModeSegment();
+initMessageTextareaBehavior();
 
 // 初回ロード
 fetchMessages();

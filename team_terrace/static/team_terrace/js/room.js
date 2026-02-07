@@ -25,6 +25,7 @@ function appendMessage(msg) {
 
   const div = document.createElement('div');
   div.id = `msg-${msg.id}`;
+  div.dataset.messageId = String(msg.id);
   div.className = `message ${msg.is_question ? 'question' : ''}`;
 
   // メッセージコンテンツをspan要素で包む
@@ -159,33 +160,39 @@ async function toggleLike(messageId) {
   }
 }
 
+function applyLikesToDOM(likesMap) {
+  // Iterate all like-count elements in the DOM
+  const countSpans = document.querySelectorAll('.like-count');
+  countSpans.forEach(span => {
+    const idStr = span.id.replace('like-count-', '');
+    // If present in API response, use that count. Otherwise 0.
+    const count = likesMap[idStr] || 0;
+    span.textContent = count;
+  });
+
+  // Ensure my liked state styling is correct
+  const myLikes = getMyLikes();
+  myLikes.forEach(msgId => {
+    const el = document.getElementById(`like-count-${msgId}`);
+    if (el) {
+      el.parentElement.classList.add('liked');
+    }
+  });
+}
+
 async function fetchLikes() {
   try {
     const res = await fetch(`/team_terrace/api/room/${roomId}/likes/`);
-    if (res.ok) {
-      const data = await res.json();
-      const likesMap = data.likes; // { message_id: count }
+    if (!res.ok) return {};
 
-      // Iterate all like-count elements in the DOM
-      const countSpans = document.querySelectorAll('.like-count');
-      countSpans.forEach(span => {
-        const idStr = span.id.replace('like-count-', '');
-        // If present in API response, use that count. Otherwise 0.
-        const count = likesMap[idStr] || 0;
-        span.textContent = count;
-      });
+    const data = await res.json();
+    const likesMap = data.likes || {}; // { message_id: count }
 
-      // Ensure my liked state styling is correct
-      const myLikes = getMyLikes();
-      myLikes.forEach(msgId => {
-        const el = document.getElementById(`like-count-${msgId}`);
-        if (el) {
-          el.parentElement.classList.add('liked');
-        }
-      });
-    }
+    applyLikesToDOM(likesMap);
+    return likesMap;
   } catch (error) {
     console.error('Error fetching likes:', error);
+    return {};
   }
 }
 
@@ -364,6 +371,85 @@ messageInput.addEventListener('keypress', (e) => {
 fetchMessages();
 fetchReactions();
 fetchLikes();
+
+// いいね順に手動で並び替え（更新）する
+function sortMessagesByLikes(likesMap) {
+  // Only reorder existing message elements; do not change polling behavior.
+  const messages = Array.from(chatContainer.querySelectorAll('.message'));
+
+  const getLikeCount = (el) => {
+    const id = el.dataset.messageId;
+    if (!id) return 0;
+    const n = likesMap?.[id] ?? 0;
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  messages.sort((a, b) => {
+    const la = getLikeCount(a);
+    const lb = getLikeCount(b);
+    if (lb !== la) return lb - la; // desc
+
+    // tie-breaker: older first (smaller id) to keep stable ordering
+    const ida = parseInt(a.dataset.messageId || '0', 10);
+    const idb = parseInt(b.dataset.messageId || '0', 10);
+    return ida - idb;
+  });
+
+  // Re-append in sorted order
+  for (const el of messages) chatContainer.appendChild(el);
+}
+
+// Sort mode controls
+const sortModeTimeBtn = document.getElementById('sort-mode-time');
+const sortModeLikesBtn = document.getElementById('sort-mode-likes');
+const sortLikesUpdateBtn = document.getElementById('sort-likes-update');
+
+let sortMode = 'time'; // 'time' | 'likes'
+
+function applySortModeUI() {
+  const likesMode = sortMode === 'likes';
+  if (sortModeTimeBtn) sortModeTimeBtn.classList.toggle('active', !likesMode);
+  if (sortModeLikesBtn) sortModeLikesBtn.classList.toggle('active', likesMode);
+  if (sortLikesUpdateBtn) {
+    // Keep width reserved so the segment doesn't shift.
+    sortLikesUpdateBtn.classList.toggle('is-hidden', !likesMode);
+  }
+}
+
+function restoreTimeOrder() {
+  const messages = Array.from(chatContainer.querySelectorAll('.message'));
+  messages.sort((a, b) => {
+    const ida = parseInt(a.dataset.messageId || '0', 10);
+    const idb = parseInt(b.dataset.messageId || '0', 10);
+    return ida - idb;
+  });
+  for (const el of messages) chatContainer.appendChild(el);
+}
+
+function setSortMode(mode) {
+  sortMode = mode;
+  applySortModeUI();
+
+  if (sortMode === 'likes') {
+    // On entering likes mode: refresh counts then sort once.
+    fetchLikes().then((likesMap) => sortMessagesByLikes(likesMap));
+  } else {
+    restoreTimeOrder();
+  }
+}
+
+if (sortModeTimeBtn) sortModeTimeBtn.addEventListener('click', () => setSortMode('time'));
+if (sortModeLikesBtn) sortModeLikesBtn.addEventListener('click', () => setSortMode('likes'));
+
+if (sortLikesUpdateBtn) {
+  sortLikesUpdateBtn.addEventListener('click', async () => {
+    const likesMap = await fetchLikes();
+    sortMessagesByLikes(likesMap);
+  });
+}
+
+// Initial state: time mode
+setSortMode('time');
 
 // ポーリング開始 (2秒間隔)
 setInterval(() => {

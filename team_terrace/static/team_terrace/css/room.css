@@ -209,6 +209,81 @@ body {
   border-radius: var(--radius-lg);
 }
 
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+/* Keep layout stable: hide the update button without collapsing space in time mode */
+.sort-likes-button.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.sort-segment {
+  display: inline-flex;
+  background: white;
+  border: 2px solid rgba(124, 92, 255, 0.2);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 8px rgba(45, 42, 62, 0.06);
+  overflow: hidden;
+}
+
+.sort-segment-btn {
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.sort-segment-btn:hover {
+  color: var(--accent-primary);
+}
+
+.sort-segment-btn.active {
+  background: var(--accent-primary-soft);
+  color: var(--accent-primary);
+}
+
+/* Match the post like heart color */
+.heart-red {
+  color: #ff4757;
+}
+
+.sort-likes-button {
+  padding: 8px 12px;
+  background: white;
+  border: 2px solid rgba(124, 92, 255, 0.2);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  box-shadow: 0 2px 8px rgba(45, 42, 62, 0.06);
+}
+
+.sort-likes-button:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+.sort-likes-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Chat Container */
 #chat-container {
   flex: 1;

@@ -239,6 +239,7 @@ async function sendMessage() {
 
     if (res.ok) {
       messageInput.value = '';
+      autoResizeTextarea();
       isQuestionCheckbox.checked = false;
       const newMsg = await res.json();
       appendMessage(newMsg);
@@ -363,9 +364,65 @@ function getCookie(name) {
 
 // Event Listeners
 sendButton.addEventListener('click', sendMessage);
-messageInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') sendMessage();
+
+// PC only: allow switching send key behavior.
+const sendModeEnterBtn = document.getElementById('send-mode-enter');
+const sendModeCtrlEnterBtn = document.getElementById('send-mode-ctrlenter');
+
+function isDesktopWidth() {
+  return window.matchMedia('(min-width: 768px)').matches;
+}
+
+let sendMode = 'ctrlEnter'; // 'ctrlEnter' (default) | 'enter'
+
+function applySendModeUI() {
+  if (sendModeEnterBtn) sendModeEnterBtn.classList.toggle('active', sendMode === 'enter');
+  if (sendModeCtrlEnterBtn) sendModeCtrlEnterBtn.classList.toggle('active', sendMode === 'ctrlEnter');
+}
+
+function setSendMode(mode) {
+  sendMode = mode;
+  applySendModeUI();
+}
+
+applySendModeUI();
+
+if (sendModeEnterBtn) sendModeEnterBtn.addEventListener('click', () => setSendMode('enter'));
+if (sendModeCtrlEnterBtn) sendModeCtrlEnterBtn.addEventListener('click', () => setSendMode('ctrlEnter'));
+
+function autoResizeTextarea() {
+  // Grow up to max-height. If content exceeds max-height, allow internal scrolling.
+  messageInput.style.height = 'auto';
+  const maxH = 160;
+  const needsScroll = messageInput.scrollHeight > maxH;
+  const next = Math.min(messageInput.scrollHeight, maxH);
+  messageInput.style.height = `${next}px`;
+  messageInput.style.overflowY = needsScroll ? 'auto' : 'hidden';
+}
+
+messageInput.addEventListener('input', autoResizeTextarea);
+
+messageInput.addEventListener('keydown', (e) => {
+  // On mobile, keep current behavior (button send). Allow Enter to insert newline.
+  if (!isDesktopWidth()) return;
+
+  if (sendMode === 'enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+    return;
+  }
+
+  // ctrlEnter mode
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    sendMessage();
+  }
 });
+
+// Init textarea size
+autoResizeTextarea();
 
 // 初回ロード
 fetchMessages();

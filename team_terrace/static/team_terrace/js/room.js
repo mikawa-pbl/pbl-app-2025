@@ -293,7 +293,11 @@ async function openThread(messageId) {
   }
 
   // Focus reply input
-  setTimeout(() => replyInput.focus(), 100);
+  setTimeout(() => {
+    replyInput.focus();
+    // Modal open may change layout; re-run autoresize after visible
+    autoResizeReplyTextarea();
+  }, 100);
 }
 
 function closeModal() {
@@ -318,6 +322,7 @@ async function sendReply() {
 
     if (res.ok) {
       replyInput.value = '';
+      autoResizeReplyTextarea();
       openThread(currentThreadId); // Reload replies
     }
   } catch (error) {
@@ -339,10 +344,41 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Reply input Enter key
-replyInput?.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') sendReply();
-});
+function autoResizeReplyTextarea() {
+  replyInput.style.height = 'auto';
+  const maxH = 140;
+  const needsScroll = replyInput.scrollHeight > maxH;
+  const next = Math.min(replyInput.scrollHeight, maxH);
+  replyInput.style.height = `${next}px`;
+  replyInput.style.overflowY = needsScroll ? 'auto' : 'hidden';
+}
+
+function initReplyTextareaBehavior() {
+  // keep behavior same on mobile: use button send; Enter inserts newline.
+  replyInput.addEventListener('input', autoResizeReplyTextarea);
+
+  replyInput.addEventListener('keydown', (e) => {
+    if (!isDesktopWidth()) return;
+
+    if (sendMode === 'enter') {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendReply();
+      }
+      return;
+    }
+
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      sendReply();
+    }
+  });
+
+  // Do not call autoresize here because the modal is initially hidden; it can
+  // produce a 0px height in some browsers. We run autoresize when the modal opens.
+}
+
+initReplyTextareaBehavior();
 
 // --------------------------
 

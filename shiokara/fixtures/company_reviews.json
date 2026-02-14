@@ -810,5 +810,187 @@
       "rating": 4,
       "created_at": "2025-12-14T10:46:25.475193+00:00"
     }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 60,
+    "fields": {
+      "company": 11,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "良き",
+      "rating": 5,
+      "created_at": "2026-01-19T07:10:44.024226+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 61,
+    "fields": {
+      "company": 40,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "よきかな",
+      "rating": 5,
+      "created_at": "2026-01-19T07:15:20.947405+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 62,
+    "fields": {
+      "company": 76,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "柿木真紀",
+      "rating": 5,
+      "created_at": "2026-01-19T07:21:13.789376+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 63,
+    "fields": {
+      "company": 77,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "ああ",
+      "rating": 5,
+      "created_at": "2026-01-19T07:21:40.990241+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 64,
+    "fields": {
+      "company": 14,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "たこ",
+      "rating": 4,
+      "created_at": "2026-01-19T07:24:33.543508+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 65,
+    "fields": {
+      "company": 17,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "ｄしふぁｄｊふぁ；",
+      "rating": 3,
+      "created_at": "2026-01-19T07:27:25.449827+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 66,
+    "fields": {
+      "company": 3,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "ホワイトでした",
+      "rating": 5,
+      "created_at": "2026-01-19T07:29:18.719271+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 67,
+    "fields": {
+      "company": 42,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "ふぁえｓふぁｄｓｆ",
+      "rating": 2,
+      "created_at": "2026-01-19T07:31:00.054267+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 68,
+    "fields": {
+      "company": 48,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "ｗくぇｑ",
+      "rating": 4,
+      "created_at": "2026-01-19T07:34:36.363593+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 69,
+    "fields": {
+      "company": 42,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "1234",
+      "rating": 4,
+      "created_at": "2026-01-19T07:41:45.704245+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 70,
+    "fields": {
+      "company": 11,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "1234",
+      "rating": 4,
+      "created_at": "2026-01-19T07:43:58.657024+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 80,
+    "fields": {
+      "company": 63,
+      "grade": "B1",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "no_answer",
+      "comment": "gkj",
+      "rating": 4,
+      "created_at": "2026-01-19T08:24:34.768811+00:00"
+    }
+  },
+  {
+    "model": "shiokara.companyreview",
+    "pk": 81,
+    "fields": {
+      "company": 48,
+      "grade": "B2",
+      "department_name": "1系",
+      "lab_field": "材料・生産加工コース",
+      "gender": "female",
+      "comment": "dsfadsf",
+      "rating": 4,
+      "created_at": "2026-01-26T05:48:40.231312+00:00"
+    }
   }
 ]

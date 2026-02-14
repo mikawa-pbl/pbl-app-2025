@@ -1,0 +1,160 @@
+{% extends "teams/shiokara/base.html" %}
+{% load static %}
+
+{% block title %}会員退会 - 就活支援サービス{% endblock %}
+
+{% block content %}
+<style>
+    /* サイドバーなしのレイアウト */
+    .tut-page-wrapper {
+        display: block !important;
+        margin: 0 auto;
+        max-width: 700px;
+        padding: 20px;
+    }
+
+    .tut-main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    .warning-box {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+
+    .warning-box h3 {
+        margin-top: 0;
+        color: #856404;
+    }
+
+    .warning-box ul {
+        margin: 12px 0;
+        padding-left: 20px;
+    }
+
+    .warning-box li {
+        margin-bottom: 8px;
+        color: #856404;
+    }
+
+    .error-message {
+        background: #ffebee;
+        color: #c62828;
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border-left: 4px solid #c62828;
+    }
+
+    .form-field {
+        margin-bottom: 24px;
+    }
+
+    .form-field label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-field input[type="password"] {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+    }
+
+    .form-actions button {
+        flex: 1;
+        padding: 12px 24px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-danger {
+        background: #c62828;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #a02020;
+    }
+
+    .btn-cancel {
+        background: #f5f5f5;
+        color: #333;
+        border: 1px solid #ddd;
+    }
+
+    .btn-cancel:hover {
+        background: #e8e8e8;
+    }
+</style>
+
+<div class="tut-page-wrapper">
+    <div class="tut-main-content">
+        <h1 style="color: #c62828; margin-bottom: 20px;">⚠️ 会員退会</h1>
+
+        <div class="warning-box">
+            <h3>退会する前にご確認ください</h3>
+            <ul>
+                <li>退会すると、すべての登録情報が削除されます</li>
+                <li>お気に入り企業、閲覧履歴、ポイントなどもすべて削除されます</li>
+                <li>投稿した体験記は削除されません（匿名で残ります）</li>
+                <li>一度退会すると、同じ学籍番号で再登録することができます</li>
+                <li><strong>この操作は取り消せません</strong></li>
+            </ul>
+        </div>
+
+        {% if error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <section style="background: white; padding: 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <p style="margin-bottom: 20px; color: #666;">
+                退会するには、パスワードを入力して「退会する」ボタンをクリックしてください。
+            </p>
+
+            <form method="post" onsubmit="return confirmDelete();">
+                {% csrf_token %}
+                
+                <div class="form-field">
+                    <label for="id_password">パスワード:</label>
+                    <input type="password" name="password" id="id_password" required placeholder="パスワードを入力してください">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="location.href='{% url 'shiokara:my_page' %}'">
+                        キャンセル
+                    </button>
+                    <button type="submit" class="btn-danger">
+                        退会する
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+<script>
+function confirmDelete() {
+    return confirm('本当に退会しますか？\n\nこの操作は取り消せません。\nすべてのデータが削除されます。');
+}
+</script>
+
+{% endblock %}
